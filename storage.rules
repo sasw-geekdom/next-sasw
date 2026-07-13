@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// Firebase Storage holds video / heavier media, accessed via the Admin SDK on
+// the server (which bypasses these rules). Images live in Vercel Blob, not here.
+// Deny all direct client access as defense in depth.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
