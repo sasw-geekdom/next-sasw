@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
+/*
+  SASTW design tokens — light theme (locked decision #1).
+  Brand: Magenta #ff32a0 · Space Blue #00266f · Black #000 · White #fff.
+  Display = Oswald · Body = Geist Sans · Data = Geist Mono.
+*/
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
+
+  /* Brand */
+  --magenta: #ff32a0;
+  --space-blue: #00266f;
+  --black: #000000;
+  --white: #ffffff;
+
+  /* Semantic */
+  --accent: var(--magenta);
+  --accent-foreground: #ffffff;
+  --muted: #f4f4f5;
+  --muted-foreground: #52525b;
+  --border: #e4e4e7;
+  --ring: var(--magenta);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-magenta: var(--magenta);
+  --color-space-blue: var(--space-blue);
+  --color-brand-black: var(--black);
+  --color-brand-white: var(--white);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
+  --font-display: var(--font-oswald);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Type scale — from brand hierarchy (px) */
+  --text-title: 3.75rem; /* 60pt Title (Oswald Bold) */
+  --text-subtitle: 1.5rem; /* 24pt Subtitle */
+  --text-heading: 1.5rem; /* 24pt Heading (Oswald Bold) */
+  --text-subheading: 1.125rem; /* 18pt Subheading */
+  --text-section: 0.9375rem; /* 15pt Section Header (Bold) */
+  --text-body: 1rem; /* Body */
+  --text-caption: 0.75rem; /* Caption */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Display type defaults to Oswald. */
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
 }
