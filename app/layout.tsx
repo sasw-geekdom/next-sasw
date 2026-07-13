@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   description:
     "The current runs through SA. September 28 – October 2. Plug in.",
-  metadataBase: new URL("https://sastw.com"),
+  metadataBase: new URL("https://sasw.co"),
   openGraph: {
     title: "San Antonio Startup + Tech Week",
     description: "Sept 28 – Oct 2, downtown. Plug in.",

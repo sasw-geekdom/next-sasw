@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -19,10 +19,12 @@ export default function Home() {
         </p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button size="lg">Plug in</Button>
-          <Button size="lg" variant="outline">
-            See the schedule
-          </Button>
+          <ButtonLink href="/register" size="lg">
+            Plug in
+          </ButtonLink>
+          <ButtonLink href="/call-for-speakers" size="lg" variant="outline">
+            Take the stage
+          </ButtonLink>
         </div>
       </div>
     </main>
