@@ -45,3 +45,15 @@ export const TRACKS: Track[] = [
 export function trackByName(name: string | undefined | null): Track | undefined {
   return TRACKS.find((t) => t.name === name);
 }
+
+// Circuit accent colors for the bolt shader — a magenta-anchored spectrum
+// chosen to read well as flowing "current." A UI accent, not brand track data.
+export const CIRCUIT_COLORS: Record<TrackName, string> = {
+  Founder: "#ff32a0",
+  "Tech & Builders": "#4d7cff",
+  "AI & Applied Innovation": "#19c8c8",
+  "Small Business & Solopreneur": "#b45cff",
+  Capital: "#ff6b57",
+};
+
+export const DEFAULT_CIRCUIT_COLOR = "#ff32a0";

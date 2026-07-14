@@ -70,12 +70,36 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
  * Falls back to a static image when WebGL is unavailable or motion is reduced.
  * `className` controls sizing/aspect; `maskClassName` clips the canvas.
  */
+function lerpPalette(
+  pal: [number, number, number][],
+  t: number,
+): [number, number, number] {
+  if (pal.length === 1) return pal[0];
+  const x = t * (pal.length - 1);
+  const i = Math.min(pal.length - 2, Math.floor(x));
+  const f = x - i;
+  const a = pal[i];
+  const b = pal[i + 1];
+  return [
+    a[0] + (b[0] - a[0]) * f,
+    a[1] + (b[1] - a[1]) * f,
+    a[2] + (b[2] - a[2]) * f,
+  ];
+}
+
+/**
+ * Full-bleed WebGL "current" flow, clipped to a CSS mask (a brand shape SVG).
+ * Falls back to a static image when WebGL is unavailable or motion is reduced.
+ * `className` controls sizing/aspect; `maskClassName` clips the canvas.
+ * With `sweep`, the color eases across that palette as the cursor moves across.
+ */
 export function ShaderCanvas({
   color,
   maskClassName,
   fallbackSrc,
   className,
   base = [0.08, 0.0, 0.05],
+  sweep,
 }: {
   color: string;
   maskClassName: string;
@@ -83,6 +107,8 @@ export function ShaderCanvas({
   className?: string;
   /** Dark floor the flow mixes up from. Lift it to brighten the whole shape. */
   base?: [number, number, number];
+  /** Colors swept left→right as the cursor moves across the shape. */
+  sweep?: string[];
 }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const reduce = useReducedMotion();
@@ -90,6 +116,12 @@ export function ShaderCanvas({
 
   const mouse = React.useRef<[number, number]>([0.5, 0.55]);
   const target = React.useRef<[number, number, number]>(hexToRgb(color));
+  const sweepRef = React.useRef<[number, number, number][] | null>(
+    sweep ? sweep.map(hexToRgb) : null,
+  );
+  React.useEffect(() => {
+    sweepRef.current = sweep ? sweep.map(hexToRgb) : null;
+  }, [sweep]);
   const current = React.useRef<[number, number, number]>(hexToRgb(color));
   const baseRef = React.useRef<[number, number, number]>(base);
 
@@ -172,7 +204,14 @@ export function ShaderCanvas({
 
   function setFromPoint(el: Element, clientX: number, clientY: number) {
     const r = el.getBoundingClientRect();
-    mouse.current = [(clientX - r.left) / r.width, 1 - (clientY - r.top) / r.height];
+    const fx = (clientX - r.left) / r.width;
+    mouse.current = [fx, 1 - (clientY - r.top) / r.height];
+    const pal = sweepRef.current;
+    if (pal) target.current = lerpPalette(pal, Math.min(1, Math.max(0, fx)));
+  }
+
+  function resetSweep() {
+    if (sweepRef.current) target.current = hexToRgb(color);
   }
 
   function onMove(e: React.MouseEvent) {
@@ -198,8 +237,10 @@ export function ShaderCanvas({
         <canvas
           ref={canvasRef}
           onMouseMove={onMove}
+          onMouseLeave={resetSweep}
           onTouchStart={onTouch}
           onTouchMove={onTouch}
+          onTouchEnd={resetSweep}
           aria-hidden="true"
           className={cn("absolute inset-0 h-full w-full", maskClassName)}
         />

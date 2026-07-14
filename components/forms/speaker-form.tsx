@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { TRACKS } from "@/lib/tracks";
+import { TRACKS, CIRCUIT_COLORS, DEFAULT_CIRCUIT_COLOR } from "@/lib/tracks";
+import { useBoltColor } from "@/components/site/bolt-color";
 
 type FieldErrors = Record<string, string[] | undefined>;
 
@@ -16,6 +17,12 @@ export function SpeakerForm() {
   const [error, setError] = React.useState<string | null>(null);
   const [issues, setIssues] = React.useState<FieldErrors>({});
   const [track, setTrack] = React.useState("");
+  const { setColor } = useBoltColor();
+
+  function selectTrack(name: keyof typeof CIRCUIT_COLORS) {
+    setTrack(name);
+    setColor(CIRCUIT_COLORS[name] ?? DEFAULT_CIRCUIT_COLOR);
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -79,8 +86,11 @@ export function SpeakerForm() {
       </div>
 
       <fieldset>
-        <legend className="mb-1.5 block text-sm font-medium text-foreground">
-          Which track fits your session?
+        <p className="font-mono text-xs uppercase tracking-widest text-magenta">
+          Five circuits · one current
+        </p>
+        <legend className="mb-2 mt-1.5 block text-sm font-medium text-foreground">
+          Which circuit fits your session? Pick one to light the current.
         </legend>
         <div className="grid gap-2 sm:grid-cols-2">
           {TRACKS.map((t) => {
@@ -89,18 +99,27 @@ export function SpeakerForm() {
               <button
                 type="button"
                 key={t.name}
-                onClick={() => setTrack(t.name)}
+                onClick={() => selectTrack(t.name)}
                 aria-pressed={selected}
+                style={selected ? { borderColor: CIRCUIT_COLORS[t.name] } : undefined}
                 className={cn(
-                  "rounded-md border p-3 text-left transition-colors",
-                  selected
-                    ? "border-magenta bg-magenta/5"
-                    : "border-border hover:bg-muted/50",
+                  "flex items-start gap-2.5 rounded-md border p-3 text-left transition-colors",
+                  selected ? "bg-muted/40" : "border-border hover:bg-muted/50",
                 )}
               >
-                <span className="block text-sm font-medium">{t.name}</span>
-                <span className="mt-0.5 block text-xs text-muted-foreground">
-                  {t.description}
+                <span
+                  className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{
+                    backgroundColor: selected
+                      ? CIRCUIT_COLORS[t.name]
+                      : "var(--border)",
+                  }}
+                />
+                <span>
+                  <span className="block text-sm font-medium">{t.name}</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">
+                    {t.description}
+                  </span>
                 </span>
               </button>
             );

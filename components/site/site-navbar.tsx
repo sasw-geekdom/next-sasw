@@ -6,7 +6,10 @@ import { Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { ButtonLink } from "@/components/ui/button";
 
-const LINKS = [{ label: "Call for Speakers", href: "/call-for-speakers" }];
+const LINKS = [
+  { label: "Speakers", href: "/speakers" },
+  { label: "Sessions", href: "/sessions" },
+];
 const EASE = [0.32, 0.72, 0, 1] as const;
 
 export function SiteNavbar() {
