@@ -84,3 +84,14 @@ export const sessionSchema = z.object({
   participants: z.array(participant).default([]),
 });
 export type SessionInput = z.infer<typeof sessionSchema>;
+
+// ─── Automated email copy (admin-editable) ──────────────────────────────────
+
+export const emailCopySchema = z.object({
+  subject: z.string().trim().min(1, "Subject is required.").max(160),
+  heading: z.string().trim().min(1, "Heading is required.").max(120),
+  body: z.string().trim().min(1, "Body is required.").max(4000),
+  ctaIntro: z.string().trim().max(200),
+  signoff: z.string().trim().max(120),
+});
+export type EmailCopyInput = z.infer<typeof emailCopySchema>;

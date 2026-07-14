@@ -8,6 +8,7 @@ import { COLLECTIONS } from "@/lib/firebase/collections";
 import { speakerSubmissionSchema } from "@/lib/validation/schemas";
 import { resend, EMAIL_FROM, EMAIL_REPLY_TO } from "@/lib/email/resend";
 import { speakerSubmissionEmail } from "@/lib/email/templates";
+import { getEmailCopy } from "@/lib/email/copy-store";
 
 const MAX_HEADSHOT_BYTES = 5 * 1024 * 1024; // 5 MB
 const HEADSHOT_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -85,10 +86,11 @@ export async function POST(request: Request) {
 
   // 5) Branded confirmation — best-effort, never blocks the submission.
   try {
-    const email = speakerSubmissionEmail({
-      name: data.name,
-      sessionTitle: data.sessionTitle,
-    });
+    const copy = await getEmailCopy("speaker");
+    const email = speakerSubmissionEmail(
+      { name: data.name, sessionTitle: data.sessionTitle },
+      copy,
+    );
     await resend.emails.send({
       from: EMAIL_FROM,
       to: data.email,

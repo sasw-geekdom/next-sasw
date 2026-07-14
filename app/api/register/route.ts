@@ -6,6 +6,7 @@ import { COLLECTIONS } from "@/lib/firebase/collections";
 import { registrationSchema } from "@/lib/validation/schemas";
 import { resend, EMAIL_FROM, EMAIL_REPLY_TO } from "@/lib/email/resend";
 import { registrationEmail } from "@/lib/email/templates";
+import { getEmailCopy } from "@/lib/email/copy-store";
 
 export async function POST(request: Request) {
   // 1) BotID gate.
@@ -54,7 +55,8 @@ export async function POST(request: Request) {
   // 4) Branded confirmation (best-effort). Send even on re-register so the
   // attendee always gets their "you're in" — but never block on it.
   try {
-    const email = registrationEmail({ name: data.name });
+    const copy = await getEmailCopy("registration");
+    const email = registrationEmail({ name: data.name }, copy);
     await resend.emails.send({
       from: EMAIL_FROM,
       to: data.email,

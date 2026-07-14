@@ -1,10 +1,131 @@
 // Branded transactional emails in SASTW voice. Terse, active, one metaphor.
 // Inline styles only — email clients don't load external CSS or web fonts.
+//
+// The COPY (subject, heading, body, CTA intro, sign-off) is editable by admins
+// in the portal and stored in Firestore; the brand chrome (logo header,
+// calendar block, footer) is locked here. This module is PURE — no server-only
+// deps — so the same render functions drive the live preview in the browser.
 
 const MAGENTA = "#ff32a0";
 const BLACK = "#000000";
 const INK = "#111111";
 const MUTED = "#52525b";
+
+// White horizontal combo logo, rasterized to PNG (email clients don't render
+// SVG) and hosted on Vercel Blob. 4:1 aspect ratio; displayed at 240×60.
+const LOGO_URL =
+  "https://t4605hkishzuvveg.public.blob.vercel-storage.com/email/sastw-logo-white.png?v=2";
+
+// ─── Editable copy model ────────────────────────────────────────────────────
+
+export interface EmailCopy {
+  subject: string;
+  heading: string;
+  /** Blank-line-separated paragraphs. Supports {firstName} and {sessionTitle}. */
+  body: string;
+  /** Line shown just above the add-to-calendar block. Blank to omit. */
+  ctaIntro: string;
+  /** Closing line. Blank to omit. */
+  signoff: string;
+}
+
+export type EmailTemplateKey = "registration" | "speaker";
+
+export interface TemplateVars {
+  firstName: string;
+  sessionTitle?: string;
+}
+
+export const DEFAULT_REGISTRATION_COPY: EmailCopy = {
+  subject: "You're on the list. Plug in.",
+  heading: "You're in.",
+  body: [
+    "See you downtown, {firstName}.",
+    "San Antonio Startup + Tech Week runs Sept 28 – Oct 2, anchored at Texas Public Radio.",
+    "Schedule drops soon. We'll send the sessions, the Bash, and where to be.",
+  ].join("\n\n"),
+  ctaIntro: "Lock the dates now:",
+  signoff: "Plug in.",
+};
+
+export const DEFAULT_SPEAKER_COPY: EmailCopy = {
+  subject: "Got your session. We'll be in touch.",
+  heading: "You pitched. We got it.",
+  body: [
+    "Thanks, {firstName}.",
+    "Your session — {sessionTitle} — is in the review queue for San Antonio Startup + Tech Week, Sept 28 – Oct 2 (Year 11).",
+    "We read every one. You'll hear back once the Circuit lineup takes shape.",
+  ].join("\n\n"),
+  ctaIntro: "Block the week so it's on your radar either way:",
+  signoff: "Plug in.",
+};
+
+export interface EmailTemplateMeta {
+  key: EmailTemplateKey;
+  label: string;
+  description: string;
+  tokens: string[];
+  defaults: EmailCopy;
+  /** Sample values used for previews and test sends. */
+  sample: TemplateVars;
+}
+
+export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
+  {
+    key: "registration",
+    label: "Registration confirmation",
+    description: "Sent automatically when someone registers to attend.",
+    tokens: ["{firstName}"],
+    defaults: DEFAULT_REGISTRATION_COPY,
+    sample: { firstName: "Alex" },
+  },
+  {
+    key: "speaker",
+    label: "Call for Speakers confirmation",
+    description: "Sent automatically when someone submits a session.",
+    tokens: ["{firstName}", "{sessionTitle}"],
+    defaults: DEFAULT_SPEAKER_COPY,
+    sample: { firstName: "Alex", sessionTitle: "Scaling AI at the edge" },
+  },
+];
+
+export function templateMeta(key: EmailTemplateKey): EmailTemplateMeta {
+  const meta = EMAIL_TEMPLATES.find((t) => t.key === key);
+  if (!meta) throw new Error(`Unknown email template: ${key}`);
+  return meta;
+}
+
+/** Fill any missing/blank field from the defaults so a partial doc still renders. */
+export function mergeCopy(
+  defaults: EmailCopy,
+  stored: Partial<EmailCopy> | undefined | null,
+): EmailCopy {
+  return {
+    subject: pick(stored?.subject, defaults.subject),
+    heading: pick(stored?.heading, defaults.heading),
+    body: pick(stored?.body, defaults.body),
+    // CTA intro + sign-off may be intentionally blanked, so only fall back when undefined.
+    ctaIntro: stored?.ctaIntro ?? defaults.ctaIntro,
+    signoff: stored?.signoff ?? defaults.signoff,
+  };
+}
+
+function pick(value: string | undefined | null, fallback: string): string {
+  return value && value.trim() ? value : fallback;
+}
+
+// ─── Rendering (pure) ───────────────────────────────────────────────────────
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/** Plain-text token substitution (for the subject line). */
+function applyTokens(s: string, vars: TemplateVars): string {
+  return s
+    .replace(/\{firstName\}/g, vars.firstName)
+    .replace(/\{sessionTitle\}/g, vars.sessionTitle ?? "");
+}
 
 function shell(bodyInner: string): string {
   return `<!doctype html>
@@ -15,13 +136,8 @@ function shell(bodyInner: string): string {
         <td align="center">
           <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;overflow:hidden;max-width:480px;width:100%;">
             <tr>
-              <td style="background:${BLACK};padding:24px 28px;">
-                <div style="color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.5px;text-transform:uppercase;">
-                  SASTW<span style="color:${MAGENTA};"> </span>
-                </div>
-                <div style="color:${MAGENTA};font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-top:4px;">
-                  Sept 28 – Oct 2 · Year 11
-                </div>
+              <td style="background:${BLACK};padding:26px 28px;">
+                <img src="${LOGO_URL}" width="240" height="60" alt="San Antonio Startup + Tech Week" style="display:block;border:0;outline:none;text-decoration:none;width:240px;height:60px;" />
               </td>
             </tr>
             <tr>
@@ -51,8 +167,29 @@ function paragraph(text: string): string {
   return `<p style="font-size:15px;line-height:22px;color:${INK};margin:0 0 14px 0;">${text}</p>`;
 }
 
-// Add-to-calendar block. All-day, multi-day (end date exclusive → Oct 3).
-// Google is a self-contained link; Apple/Outlook use the hosted .ics file.
+/** Turn admin-authored body text into safe paragraph HTML with tokens applied. */
+function renderBody(body: string, vars: TemplateVars): string {
+  const first = escapeHtml(vars.firstName);
+  const title = vars.sessionTitle
+    ? `<strong>${escapeHtml(vars.sessionTitle)}</strong>`
+    : "";
+  return body
+    .split(/\n{2,}/)
+    .map((para) => para.trim())
+    .filter(Boolean)
+    .map((para) => {
+      const safe = escapeHtml(para)
+        .replace(/\{firstName\}/g, first)
+        .replace(/\{sessionTitle\}/g, title)
+        .replace(/\n/g, "<br/>");
+      return paragraph(safe);
+    })
+    .join("");
+}
+
+// ─── Add-to-calendar block (locked) ─────────────────────────────────────────
+// All-day, multi-day event (end date exclusive → Oct 3). Google is a
+// self-contained link; Apple/Outlook use the hosted .ics file.
 const CAL = {
   title: "San Antonio Startup + Tech Week",
   details:
@@ -99,48 +236,56 @@ function calendarBlock(): string {
 </p>`;
 }
 
-export function speakerSubmissionEmail(input: {
-  name: string;
-  sessionTitle: string;
-}): { subject: string; html: string } {
-  const first = input.name.split(" ")[0];
+// ─── Public render API ──────────────────────────────────────────────────────
+
+/** Render any template from its copy + variables. Used by sends and previews. */
+export function renderEmail(
+  copy: EmailCopy,
+  vars: TemplateVars,
+): { subject: string; html: string } {
+  const ctaIntro = copy.ctaIntro.trim()
+    ? paragraph(escapeHtml(applyTokens(copy.ctaIntro, vars)))
+    : "";
+  const signoff = copy.signoff.trim()
+    ? paragraph(escapeHtml(applyTokens(copy.signoff, vars)))
+    : "";
   return {
-    subject: "Got your session. We'll be in touch.",
+    subject: applyTokens(copy.subject, vars).trim(),
     html: shell(
-      heading("You pitched. We got it.") +
-        paragraph(`Thanks, ${first}.`) +
-        paragraph(
-          `Your session — <strong>${input.sessionTitle}</strong> — is in the review queue for San Antonio Startup + Tech Week.`,
-        ) +
-        paragraph(
-          "We read every one. You'll hear back once the Circuit lineup takes shape.",
-        ) +
-        paragraph("Block the week so it's on your radar either way:") +
+      heading(escapeHtml(applyTokens(copy.heading, vars))) +
+        renderBody(copy.body, vars) +
+        ctaIntro +
         calendarBlock() +
-        paragraph("Plug in."),
+        signoff,
     ),
   };
 }
 
-export function registrationEmail(input: { name: string }): {
-  subject: string;
-  html: string;
-} {
-  const first = input.name.split(" ")[0];
-  return {
-    subject: "You're on the list. Plug in.",
-    html: shell(
-      heading("You're in.") +
-        paragraph(`See you downtown, ${first}.`) +
-        paragraph(
-          "San Antonio Startup + Tech Week runs Sept 28 – Oct 2, anchored at Texas Public Radio.",
-        ) +
-        paragraph(
-          "Schedule drops soon. We'll send the sessions, the Bash, and where to be.",
-        ) +
-        paragraph("Lock the dates now:") +
-        calendarBlock() +
-        paragraph("Plug in."),
-    ),
-  };
+/** Render a template by key using its sample vars (preview / test send). */
+export function renderSample(
+  key: EmailTemplateKey,
+  copy: EmailCopy,
+): { subject: string; html: string } {
+  return renderEmail(copy, templateMeta(key).sample);
+}
+
+const firstNameOf = (name: string) => name.split(" ")[0] || name;
+
+// Backward-compatible entry points. The API routes pass the admin-edited copy
+// loaded from Firestore; callers without copy get the in-code defaults.
+export function registrationEmail(
+  input: { name: string },
+  copy: EmailCopy = DEFAULT_REGISTRATION_COPY,
+): { subject: string; html: string } {
+  return renderEmail(copy, { firstName: firstNameOf(input.name) });
+}
+
+export function speakerSubmissionEmail(
+  input: { name: string; sessionTitle: string },
+  copy: EmailCopy = DEFAULT_SPEAKER_COPY,
+): { subject: string; html: string } {
+  return renderEmail(copy, {
+    firstName: firstNameOf(input.name),
+    sessionTitle: input.sessionTitle,
+  });
 }

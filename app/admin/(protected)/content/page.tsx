@@ -7,6 +7,7 @@ import {
   listSpeakers,
   listSessions,
 } from "@/lib/admin/cms-queries";
+import { EMAIL_TEMPLATES } from "@/lib/email/templates";
 import { PageHeader } from "@/components/admin/page-header";
 
 export const metadata: Metadata = { title: "Content" };
@@ -17,6 +18,7 @@ const SECTIONS = [
   { href: "/admin/content/sponsors", label: "Sponsors", blurb: "Who's powering it." },
   { href: "/admin/content/speakers", label: "Speakers", blurb: "The people on stage." },
   { href: "/admin/content/sessions", label: "Sessions", blurb: "The schedule." },
+  { href: "/admin/content/emails", label: "Emails", blurb: "Automated confirmations." },
 ] as const;
 
 export default async function ContentHub() {
@@ -32,6 +34,7 @@ export default async function ContentHub() {
     "/admin/content/sponsors": sponsors.length,
     "/admin/content/speakers": speakers.length,
     "/admin/content/sessions": sessions.length,
+    "/admin/content/emails": EMAIL_TEMPLATES.length,
   };
 
   return (

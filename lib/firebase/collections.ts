@@ -17,7 +17,11 @@ export const COLLECTIONS = {
   sponsors: "sponsors",
   partners: "partners",
   staff: "staff",
+  settings: "settings",
 } as const;
+
+// Doc id within the `settings` collection holding admin-edited email copy.
+export const EMAIL_SETTINGS_DOC = "emails";
 
 export interface SpeakerSubmissionDoc {
   name: string;
