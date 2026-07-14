@@ -74,12 +74,19 @@ export function RegistrationForm() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <Label htmlFor="company">Company / project (optional)</Label>
-          <Input id="company" name="company" />
+          <Label htmlFor="company">Company / project</Label>
+          <Input id="company" name="company" required />
+          {err("company") && <FieldError>{err("company")}</FieldError>}
         </div>
         <div>
-          <Label htmlFor="role">Role (optional)</Label>
-          <Input id="role" name="role" placeholder="Founder, builder, investor…" />
+          <Label htmlFor="role">Role</Label>
+          <Input
+            id="role"
+            name="role"
+            placeholder="Founder, builder, investor…"
+            required
+          />
+          {err("role") && <FieldError>{err("role")}</FieldError>}
         </div>
       </div>
 

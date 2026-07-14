@@ -16,7 +16,7 @@ const optionalUrl = z
 export const speakerSubmissionSchema = z.object({
   name,
   email,
-  company: z.string().trim().max(160).optional().or(z.literal("")),
+  company: z.string().trim().min(2, "Company or project is required.").max(160),
   track: z.enum(TRACK_NAMES, { message: "Pick a track." }),
   sessionTitle: z.string().trim().min(4, "Give your session a title.").max(160),
   abstract: z
@@ -25,9 +25,13 @@ export const speakerSubmissionSchema = z.object({
     .min(40, "Tell us a little more — 40 characters minimum.")
     .max(2000),
   bio: z.string().trim().min(20, "Add a short bio.").max(1500),
+  linkedin: z.string().trim().url("Enter a valid LinkedIn URL.").max(300),
+  availability: z
+    .string()
+    .trim()
+    .min(2, "Let us know your availability.")
+    .max(500),
   website: optionalUrl,
-  linkedin: optionalUrl,
-  availability: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
 export type SpeakerSubmissionInput = z.infer<typeof speakerSubmissionSchema>;
@@ -36,8 +40,8 @@ export type SpeakerSubmissionInput = z.infer<typeof speakerSubmissionSchema>;
 export const registrationSchema = z.object({
   name,
   email,
-  company: z.string().trim().max(160).optional().or(z.literal("")),
-  role: z.string().trim().max(120).optional().or(z.literal("")),
+  company: z.string().trim().min(2, "Company or project is required.").max(160),
+  role: z.string().trim().min(2, "What's your role?").max(120),
   interest: z.string().trim().max(500).optional().or(z.literal("")),
 });
 

@@ -73,8 +73,9 @@ export function SpeakerForm() {
       </div>
 
       <div>
-        <Label htmlFor="company">Company / project (optional)</Label>
-        <Input id="company" name="company" />
+        <Label htmlFor="company">Company / project</Label>
+        <Input id="company" name="company" required />
+        {err("company") && <FieldError>{err("company")}</FieldError>}
       </div>
 
       <fieldset>
@@ -133,19 +134,27 @@ export function SpeakerForm() {
           {err("website") && <FieldError>{err("website")}</FieldError>}
         </div>
         <div>
-          <Label htmlFor="linkedin">LinkedIn (optional)</Label>
-          <Input id="linkedin" name="linkedin" type="url" placeholder="https://" />
+          <Label htmlFor="linkedin">LinkedIn</Label>
+          <Input
+            id="linkedin"
+            name="linkedin"
+            type="url"
+            placeholder="https://linkedin.com/in/…"
+            required
+          />
           {err("linkedin") && <FieldError>{err("linkedin")}</FieldError>}
         </div>
       </div>
 
       <div>
-        <Label htmlFor="availability">Availability (optional)</Label>
+        <Label htmlFor="availability">Availability</Label>
         <Input
           id="availability"
           name="availability"
           placeholder="e.g. any day except Tuesday morning"
+          required
         />
+        {err("availability") && <FieldError>{err("availability")}</FieldError>}
       </div>
 
       <div>
