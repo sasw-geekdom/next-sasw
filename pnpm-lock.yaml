@@ -60,6 +60,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@fontsource/oswald':
+        specifier: ^5.2.8
+        version: 5.2.8
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.3.2
@@ -420,6 +423,9 @@ packages:
 
   '@firebase/webchannel-wrapper@1.0.6':
     resolution: {integrity: sha512-Vr/Mqu79dMwGRAyGbJ4uN4+BtXB3/mRTdzetD1daWNeG8QaWuzhhbG77GltO5c0yYmYls8i250iX73624GJd7Q==}
+
+  '@fontsource/oswald@5.2.8':
+    resolution: {integrity: sha512-DFoPK1BqsFIQhVjs2xgO/oL9veF9oUJgFojEWIU+nazUrfqsBDtAMI4n9L9CZFX3kQNDLcCyzKx1xoEDvQT4WQ==}
 
   '@google-analytics/data@6.1.0':
     resolution: {integrity: sha512-72sICGmThvOuy1yVlaVRvWgUZ+4VvAlmkIlDgzo1SSSRl2MvbNJavnMTG7uGhNnlgwuHNwReKrm6R/7gAKo4hw==}
@@ -3498,6 +3504,8 @@ snapshots:
       tslib: 2.8.1
 
   '@firebase/webchannel-wrapper@1.0.6': {}
+
+  '@fontsource/oswald@5.2.8': {}
 
   '@google-analytics/data@6.1.0':
     dependencies:

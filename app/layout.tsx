@@ -24,18 +24,47 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://sasw.co"),
   title: {
     default: "San Antonio Startup + Tech Week",
     template: "%s · SASTW",
   },
   description:
-    "The current runs through SA. September 28 – October 2. Plug in.",
-  metadataBase: new URL("https://sasw.co"),
+    "San Antonio Startup + Tech Week — Sept 28 – Oct 2, 2026. Five circuits, one current. Founders, builders, and the community that backs them. Plug in.",
+  applicationName: "SASTW",
+  keywords: [
+    "San Antonio Startup Week",
+    "San Antonio Tech Week",
+    "SASTW",
+    "startup week",
+    "tech week",
+    "San Antonio startups",
+    "San Antonio founders",
+    "Geekdom",
+    "DEVSA",
+    "2026",
+  ],
+  authors: [{ name: "Geekdom" }],
+  creator: "Geekdom",
+  category: "event",
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "San Antonio Startup + Tech Week",
-    description: "Sept 28 – Oct 2, downtown. Plug in.",
-    siteName: "SASTW",
     type: "website",
+    url: "https://sasw.co",
+    siteName: "San Antonio Startup + Tech Week",
+    title: "San Antonio Startup + Tech Week",
+    description: "Sept 28 – Oct 2, 2026. Five circuits, one current. Plug in.",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "San Antonio Startup + Tech Week",
+    description: "Sept 28 – Oct 2, 2026. Five circuits, one current. Plug in.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
   },
 };
 

@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { requireAdmin } from "@/lib/auth/session";
 import { AdminShell } from "@/components/admin/shell/admin-shell";
+
+export const metadata: Metadata = {
+  title: { default: "Admin", template: "%s · Admin" },
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminLayout({
   children,

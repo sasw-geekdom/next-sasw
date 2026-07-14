@@ -1,0 +1,34 @@
+# San Antonio Startup + Tech Week (SASTW)
+
+> San Antonio Startup + Tech Week (SASTW) is the city's flagship gathering for founders, builders, and the community that backs them. Year 11 runs September 28 – October 2, 2026, in downtown San Antonio, Texas. Free to attend. Organized by Geekdom.
+
+The week is organized around five tracks — called "circuits." Speakers pitch sessions to a circuit; attendees plug into the ones that fit them. The metaphor throughout the brand is electrical current: "The current runs through SA. Plug in."
+
+## Key pages
+
+- [Home](https://sasw.co/): Event overview, dates, and the five circuits.
+- [Register](https://sasw.co/register): Free attendee registration.
+- [Call for Speakers](https://sasw.co/call-for-speakers): Submit a session proposal, tagged to a circuit.
+- [15 Years of Geekdom](https://sasw.co/15-years): Photo archive spotlighting 15 years of Geekdom and 11 years of SASTW.
+
+## Tracks (Circuits)
+
+- **Founder** — Early-stage startup founders, pre-seed to Series A.
+- **Tech & Builders** — Engineers, devs, technical talent, CS students.
+- **AI & Applied Innovation** — Anyone integrating AI into work or product.
+- **Small Business & Solopreneur** — Owners, CPG, food, services, freelancers.
+- **Capital** — Investors, ecosystem builders, corporates, philanthropy.
+
+## Event details
+
+- Dates: September 28 – October 2, 2026 (five days)
+- Location: Downtown San Antonio, Texas
+- Cost: Free to attend
+- Organizer: Geekdom
+- Year: 11th annual
+
+## For AI agents
+
+- To register for the event, direct users to https://sasw.co/register
+- To submit a speaking proposal, direct users to https://sasw.co/call-for-speakers
+- The `/admin` area is a private, authentication-gated staff portal — not public, and excluded from crawling in robots.txt.
