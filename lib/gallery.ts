@@ -14,6 +14,17 @@ export interface GalleryImage {
   url: string;
 }
 
+// Deterministic pseudo-random key (FNV-1a) so the wall looks shuffled but
+// stays in a consistent order across reloads — no matter how photos are named.
+function shuffleKey(name: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < name.length; i++) {
+    h ^= name.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
 export async function getGalleryImages(): Promise<GalleryImage[]> {
   try {
     const [files] = await adminStorage.bucket().getFiles({ prefix: PREFIX });
@@ -29,7 +40,9 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
       }),
     );
 
-    return signed.sort((a, b) => a.name.localeCompare(b.name));
+    // Shuffled, not alphabetical — a random memory-lane scatter that ignores
+    // whatever naming scheme the photos came in with.
+    return signed.sort((a, b) => shuffleKey(a.name) - shuffleKey(b.name));
   } catch (err) {
     console.error("Gallery listing failed:", err);
     return [];

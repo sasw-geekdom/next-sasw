@@ -74,3 +74,9 @@ h3,
   -webkit-mask: url("/brand/sastw-bolt.svg") center / contain no-repeat;
   mask: url("/brand/sastw-bolt.svg") center / contain no-repeat;
 }
+
+/* ─── 15 Years: flow the same current through the Geekdom wordmark ─── */
+.geekdom-mask {
+  -webkit-mask: url("/brand/og-geekdom.svg") center / contain no-repeat;
+  mask: url("/brand/og-geekdom.svg") center / contain no-repeat;
+}

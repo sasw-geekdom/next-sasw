@@ -1,10 +1,18 @@
 rules_version = '2';
 
 // Firebase Storage holds video / heavier media, accessed via the Admin SDK on
-// the server (which bypasses these rules). Images live in Vercel Blob, not here.
-// Deny all direct client access as defense in depth.
+// the server (which bypasses these rules). Most images live in Vercel Blob.
 service firebase.storage {
   match /b/{bucket}/o {
+    // Public brand assets (logos, site imagery). Safe to read directly — e.g.
+    // by next/image or an email <img> — via the ?alt=media download URL, no
+    // token needed. Writes still go through the Admin SDK only.
+    match /sasw-assets/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Everything else: deny all direct client access as defense in depth.
     match /{allPaths=**} {
       allow read, write: if false;
     }
