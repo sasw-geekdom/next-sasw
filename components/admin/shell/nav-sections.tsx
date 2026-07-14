@@ -58,7 +58,7 @@ export function NavSections({
       <div className="mt-5">
         {!collapsed && (
           <div className="px-3 pb-1.5 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-            Content
+            Content Management
           </div>
         )}
         <ul className="flex flex-col gap-0.5">
@@ -85,7 +85,7 @@ export function NavSections({
             collapsed && "justify-center px-0",
           )}
         >
-          <ArrowUpRight className="h-[18px] w-[18px] shrink-0" strokeWidth={1.5} />
+          <ArrowUpRight className="h-4.5 w-4.5 shrink-0" strokeWidth={1.5} />
           {!collapsed && <span className="truncate">View site</span>}
         </Link>
       </div>
@@ -120,7 +120,7 @@ function NavLink({
         )}
       >
         <Icon
-          className={cn("h-[18px] w-[18px] shrink-0", active && "text-magenta")}
+          className={cn("h-4.5 w-4.5 shrink-0", active && "text-magenta")}
           strokeWidth={1.5}
         />
         {!collapsed && <span className="truncate">{item.label}</span>}

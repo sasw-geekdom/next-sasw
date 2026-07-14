@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { checkIn, undoCheckIn } from "@/lib/admin/actions";
 import { formatDateTime } from "@/lib/format";
+import { EVENT_DAYS, localDayKey } from "@/lib/event";
+import { cn } from "@/lib/utils";
 import type { RegistrationRow } from "@/lib/admin/types";
 
 export function CheckinPortal({
@@ -28,6 +30,17 @@ export function CheckinPortal({
     () => items.filter((r) => r.checkedIn).length,
     [items],
   );
+
+  // Arrivals per event day — each checked-in person falls on the day they checked in.
+  const byDay = React.useMemo(() => {
+    const counts = new Map(EVENT_DAYS.map((d) => [d.iso, 0]));
+    for (const r of items) {
+      if (!r.checkedIn || !r.checkedInAt) continue;
+      const key = localDayKey(r.checkedInAt);
+      if (counts.has(key)) counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return EVENT_DAYS.map((d) => ({ ...d, count: counts.get(d.iso) ?? 0 }));
+  }, [items]);
 
   const results = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -91,6 +104,33 @@ export function CheckinPortal({
       <div className="grid gap-4 sm:grid-cols-2">
         <Stat label="Registered" value={items.length} />
         <Stat label="Checked in" value={checkedInCount} accent />
+      </div>
+
+      <div>
+        <div className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">
+          Check-ins by day
+        </div>
+        <div className="grid grid-cols-5 gap-2">
+          {byDay.map((d) => {
+            const isToday = d.iso === localDayKey(Date.now());
+            return (
+              <div
+                key={d.iso}
+                className={cn(
+                  "rounded-lg border bg-white p-3 text-center",
+                  isToday ? "border-magenta" : "border-border",
+                )}
+              >
+                <div className="font-display text-xl font-bold tabular-nums">
+                  {d.count}
+                </div>
+                <div className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                  {d.label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <div>
