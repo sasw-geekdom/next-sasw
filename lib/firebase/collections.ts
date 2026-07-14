@@ -3,6 +3,7 @@ import "server-only";
 import type { Timestamp } from "firebase-admin/firestore";
 import type { Role } from "@/lib/auth/roles";
 import type { SubmissionStatus } from "@/lib/admin/types";
+import type { SessionParticipant } from "@/lib/admin/cms-types";
 
 export type { SubmissionStatus };
 
@@ -47,5 +48,31 @@ export interface RegistrationDoc {
 export interface StaffDoc {
   email: string;
   role: Role;
+  createdAt: Timestamp;
+}
+
+// Partners + sponsors share this shape.
+export interface LogoEntityDoc {
+  name: string;
+  imageUrl: string;
+  link: string;
+  createdAt: Timestamp;
+}
+
+export interface SpeakerDoc {
+  name: string;
+  imageUrl: string;
+  bio: string;
+  linkedin: string;
+  createdAt: Timestamp;
+}
+
+export interface SessionDoc {
+  title: string;
+  description: string;
+  startsAt: Timestamp;
+  endsAt: Timestamp | null;
+  location: string;
+  participants: SessionParticipant[];
   createdAt: Timestamp;
 }

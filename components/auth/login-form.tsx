@@ -58,12 +58,22 @@ export function LoginForm() {
     e.preventDefault();
     setError(null);
     setPending("password");
+
+    // Step 1: Firebase credential check — a failure here is a real bad password.
+    let cred: UserCredential;
     try {
-      await establishSession(
-        await signInWithEmailAndPassword(auth, email, password),
-      );
+      cred = await signInWithEmailAndPassword(auth, email, password);
     } catch {
       setError("Wrong email or password.");
+      setPending(null);
+      return;
+    }
+
+    // Step 2: server session — a failure here is a server/config issue, not the password.
+    try {
+      await establishSession(cred);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't start your session.");
       setPending(null);
     }
   }

@@ -40,3 +40,36 @@ export const registrationSchema = z.object({
 });
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;
+
+// ─── CMS ────────────────────────────────────────────────────────────────────
+const url = z.string().trim().url("Enter a valid URL.").max(500);
+
+// Partners + sponsors.
+export const logoEntitySchema = z.object({
+  name: z.string().trim().min(2, "Name is required.").max(160),
+  link: url,
+});
+export type LogoEntityInput = z.infer<typeof logoEntitySchema>;
+
+export const speakerSchema = z.object({
+  name: z.string().trim().min(2, "Name is required.").max(160),
+  bio: z.string().trim().min(10, "Add a short bio.").max(2000),
+  linkedin: url,
+});
+export type SpeakerInput = z.infer<typeof speakerSchema>;
+
+const participant = z.object({
+  speakerId: z.string().trim().min(1),
+  role: z.enum(["speaker", "moderator"]),
+});
+
+export const sessionSchema = z.object({
+  title: z.string().trim().min(3, "Give the session a title.").max(200),
+  description: z.string().trim().min(10, "Add a description.").max(3000),
+  // ISO strings from <input type="datetime-local">, converted to Date.
+  startsAt: z.coerce.date({ message: "Pick a start date and time." }),
+  endsAt: z.coerce.date().optional().nullable(),
+  location: z.string().trim().min(2, "Where's it happening?").max(200),
+  participants: z.array(participant).default([]),
+});
+export type SessionInput = z.infer<typeof sessionSchema>;
