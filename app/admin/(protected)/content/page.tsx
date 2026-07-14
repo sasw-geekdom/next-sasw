@@ -8,6 +8,7 @@ import {
   listSessions,
 } from "@/lib/admin/cms-queries";
 import { EMAIL_TEMPLATES } from "@/lib/email/templates";
+import { getGalleryManifest } from "@/lib/gallery";
 import { PageHeader } from "@/components/admin/page-header";
 
 export const metadata: Metadata = { title: "Content" };
@@ -19,15 +20,17 @@ const SECTIONS = [
   { href: "/admin/content/speakers", label: "Speakers", blurb: "The people on stage." },
   { href: "/admin/content/sessions", label: "Sessions", blurb: "The schedule." },
   { href: "/admin/content/emails", label: "Emails", blurb: "Automated confirmations." },
+  { href: "/admin/content/gallery", label: "Gallery", blurb: "15-years photo wall." },
 ] as const;
 
 export default async function ContentHub() {
   await requireAdmin();
-  const [partners, sponsors, speakers, sessions] = await Promise.all([
+  const [partners, sponsors, speakers, sessions, gallery] = await Promise.all([
     listPartners(),
     listSponsors(),
     listSpeakers(),
     listSessions(),
+    getGalleryManifest(),
   ]);
   const counts: Record<string, number> = {
     "/admin/content/partners": partners.length,
@@ -35,6 +38,7 @@ export default async function ContentHub() {
     "/admin/content/speakers": speakers.length,
     "/admin/content/sessions": sessions.length,
     "/admin/content/emails": EMAIL_TEMPLATES.length,
+    "/admin/content/gallery": gallery.length,
   };
 
   return (

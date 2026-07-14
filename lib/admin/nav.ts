@@ -10,6 +10,7 @@ import {
   Calendar,
   Layers,
   Mail,
+  Images,
   type LucideIcon,
 } from "lucide-react";
 
@@ -34,6 +35,7 @@ export const CONTENT_NAV: NavItem[] = [
   { href: "/admin/content/speakers", label: "Speakers", icon: Mic },
   { href: "/admin/content/sessions", label: "Sessions", icon: Calendar },
   { href: "/admin/content/emails", label: "Emails", icon: Mail },
+  { href: "/admin/content/gallery", label: "Gallery", icon: Images },
 ];
 
 export const ALL_NAV: NavItem[] = [

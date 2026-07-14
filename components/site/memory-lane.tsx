@@ -1,12 +1,13 @@
 "use client";
 
-import * as React from "react";
+import Image from "next/image";
 import {
   motion,
   useScroll,
   useTransform,
   useReducedMotion,
 } from "motion/react";
+import * as React from "react";
 import type { GalleryImage } from "@/lib/gallery";
 
 // Deterministic per-photo values (stable across SSR/client — no hydration drift).
@@ -18,7 +19,12 @@ function hash(name: string): number {
 const tiltOf = (name: string) => (hash(name) % 500) / 100 - 2.5; // -2.5..2.5deg
 const depthOf = (name: string) => 24 + (hash(name) % 44); // 24..68px parallax
 
-function Photo({ img }: { img: GalleryImage }) {
+// Columns are ~25vw (4-up) on desktop, 33vw on tablet, 50vw on phones.
+const SIZES = "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw";
+// Prioritize the first screenful so the top paints immediately.
+const PRIORITY_COUNT = 8;
+
+function Photo({ img, priority }: { img: GalleryImage; priority: boolean }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({
@@ -42,12 +48,16 @@ function Photo({ img }: { img: GalleryImage }) {
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="overflow-hidden rounded-xl border border-white/10 bg-white/5 shadow-lg shadow-black/20"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={img.url}
           alt=""
-          loading="lazy"
-          className="w-full"
+          width={img.width}
+          height={img.height}
+          sizes={SIZES}
+          placeholder={img.blurDataURL ? "blur" : "empty"}
+          blurDataURL={img.blurDataURL || undefined}
+          priority={priority}
+          className="h-auto w-full"
         />
       </motion.figure>
     </motion.div>
@@ -63,14 +73,11 @@ export function MemoryLane({ images }: { images: GalleryImage[] }) {
           <p className="font-mono text-xs uppercase tracking-widest text-magenta">
             Down memory lane
           </p>
-          <p className="mt-2 font-display text-2xl font-bold uppercase sm:text-3xl">
-            {images.length} moments, 15 years
-          </p>
         </div>
 
         <div className="columns-2 gap-4 sm:columns-3 sm:gap-5 lg:columns-4">
-          {images.map((img) => (
-            <Photo key={img.name} img={img} />
+          {images.map((img, i) => (
+            <Photo key={img.name} img={img} priority={i < PRIORITY_COUNT} />
           ))}
         </div>
       </div>

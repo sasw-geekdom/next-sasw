@@ -23,6 +23,9 @@ export const COLLECTIONS = {
 // Doc id within the `settings` collection holding admin-edited email copy.
 export const EMAIL_SETTINGS_DOC = "emails";
 
+// Doc id within `settings` holding the 15-years gallery thumbnail manifest.
+export const GALLERY_SETTINGS_DOC = "gallery";
+
 export interface SpeakerSubmissionDoc {
   name: string;
   email: string;

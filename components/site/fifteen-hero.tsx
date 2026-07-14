@@ -32,9 +32,8 @@ export function FifteenHero() {
         </div>
 
         <p className="mx-auto mt-10 max-w-xl text-pretty text-white/60">
-          Eleven years of San Antonio Startup + Tech Week. The people, the
-          pitches, the late nights, and the community that plugged in. Scroll
-          back through it.
+          The people, the pitches, the late nights, and the community that plugged in. 
+          Scroll back through it.
         </p>
       </div>
     </section>
