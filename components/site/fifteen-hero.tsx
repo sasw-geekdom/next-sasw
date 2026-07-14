@@ -25,6 +25,7 @@ export function FifteenHero() {
         <div aria-hidden="true" className="mt-6 w-full max-w-3xl sm:mt-8">
           <ShaderCanvas
             color="#ff32a0"
+            base={[0.32, 0.03, 0.19]}
             maskClassName="geekdom-mask"
             fallbackSrc="/brand/og-geekdom.svg"
             className="aspect-708/192 w-full"

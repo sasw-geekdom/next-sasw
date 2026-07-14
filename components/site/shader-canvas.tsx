@@ -75,11 +75,14 @@ export function ShaderCanvas({
   maskClassName,
   fallbackSrc,
   className,
+  base = [0.08, 0.0, 0.05],
 }: {
   color: string;
   maskClassName: string;
   fallbackSrc: string;
   className?: string;
+  /** Dark floor the flow mixes up from. Lift it to brighten the whole shape. */
+  base?: [number, number, number];
 }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const reduce = useReducedMotion();
@@ -88,6 +91,7 @@ export function ShaderCanvas({
   const mouse = React.useRef<[number, number]>([0.5, 0.55]);
   const target = React.useRef<[number, number, number]>(hexToRgb(color));
   const current = React.useRef<[number, number, number]>(hexToRgb(color));
+  const baseRef = React.useRef<[number, number, number]>(base);
 
   React.useEffect(() => {
     target.current = hexToRgb(color);
@@ -129,7 +133,7 @@ export function ShaderCanvas({
       const uMouse = gl.getUniformLocation(prog, "u_mouse");
       const uColor = gl.getUniformLocation(prog, "u_color");
       const uBase = gl.getUniformLocation(prog, "u_base");
-      gl.uniform3f(uBase, 0.08, 0.0, 0.05);
+      gl.uniform3f(uBase, baseRef.current[0], baseRef.current[1], baseRef.current[2]);
 
       const start = performance.now();
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
