@@ -89,11 +89,7 @@ export function LoginForm() {
         {pending === "google" ? "Connecting…" : "Continue with Google"}
       </Button>
 
-      <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-muted-foreground">
-        <span className="h-px flex-1 bg-border" />
-        Superadmin
-        <span className="h-px flex-1 bg-border" />
-      </div>
+      <div className="h-px bg-border" />
 
       <form onSubmit={onPassword} className="flex flex-col gap-3">
         <Input
