@@ -30,6 +30,9 @@ export function CheckinPortal({
     () => items.filter((r) => r.checkedIn).length,
     [items],
   );
+  const pct = items.length
+    ? Math.round((checkedInCount / items.length) * 100)
+    : 0;
 
   // Arrivals per event day — each checked-in person falls on the day they checked in.
   const byDay = React.useMemo(() => {
@@ -100,47 +103,36 @@ export function CheckinPortal({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Stat label="Registered" value={items.length} />
-        <Stat label="Checked in" value={checkedInCount} accent />
-      </div>
+    <div className="flex flex-col gap-5">
+      {/* Search — the action, front and center */}
+      <Input
+        autoFocus
+        placeholder="Search a name or email…"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        className="h-14 text-lg"
+      />
 
-      <div>
-        <div className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">
-          Check-ins by day
+      {/* Running count — one glanceable line */}
+      <div className="flex items-center gap-3">
+        <span className="whitespace-nowrap text-sm">
+          <span className="font-display text-lg font-bold tabular-nums text-magenta">
+            {checkedInCount}
+          </span>
+          <span className="text-muted-foreground">
+            {" "}
+            of {items.length} checked in
+          </span>
+        </span>
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-magenta transition-all"
+            style={{ width: `${pct}%` }}
+          />
         </div>
-        <div className="grid grid-cols-5 gap-2">
-          {byDay.map((d) => {
-            const isToday = d.iso === localDayKey(Date.now());
-            return (
-              <div
-                key={d.iso}
-                className={cn(
-                  "rounded-lg border bg-white p-3 text-center",
-                  isToday ? "border-magenta" : "border-border",
-                )}
-              >
-                <div className="font-display text-xl font-bold tabular-nums">
-                  {d.count}
-                </div>
-                <div className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-                  {d.label}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div>
-        <Input
-          autoFocus
-          placeholder="Search a name or email…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="h-14 text-lg"
-        />
+        <span className="whitespace-nowrap font-mono text-xs text-muted-foreground">
+          {pct}%
+        </span>
       </div>
 
       {query.trim() ? (
@@ -185,6 +177,34 @@ export function CheckinPortal({
           )}
         </div>
       )}
+
+      {/* Check-ins by day — secondary reference, out of the way */}
+      <div className="mt-2 border-t border-border pt-5">
+        <div className="mb-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          Check-ins by day
+        </div>
+        <div className="grid grid-cols-5 gap-2">
+          {byDay.map((d) => {
+            const isToday = d.iso === localDayKey(Date.now());
+            return (
+              <div
+                key={d.iso}
+                className={cn(
+                  "rounded-lg border bg-white p-2.5 text-center",
+                  isToday ? "border-magenta" : "border-border",
+                )}
+              >
+                <div className="font-display text-lg font-bold tabular-nums">
+                  {d.count}
+                </div>
+                <div className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                  {d.label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -239,27 +259,3 @@ function Row({
   );
 }
 
-function Stat({
-  label,
-  value,
-  accent,
-}: {
-  label: string;
-  value: number;
-  accent?: boolean;
-}) {
-  return (
-    <div className="rounded-lg border border-border bg-white p-5">
-      <div
-        className={
-          "font-display text-4xl font-bold " + (accent ? "text-magenta" : "")
-        }
-      >
-        {value}
-      </div>
-      <div className="text-xs uppercase tracking-wide text-muted-foreground">
-        {label}
-      </div>
-    </div>
-  );
-}

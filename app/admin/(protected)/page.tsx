@@ -1,25 +1,29 @@
 import { requireAdmin } from "@/lib/auth/session";
 import { listRegistrations } from "@/lib/admin/queries";
-import { getWebAnalytics } from "@/lib/analytics/ga4";
-import { registrationsByDay } from "@/lib/admin/metrics";
+import { getWebAnalytics, RANGE_OPTIONS, type RangeDays } from "@/lib/analytics/ga4";
 import { PageHeader } from "@/components/admin/page-header";
 import { WebAnalytics } from "@/components/admin/dashboard/web-analytics";
-import { RegistrationsChart } from "@/components/admin/dashboard/registrations-chart";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminDashboard() {
+export default async function AdminDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
   const user = await requireAdmin();
+  const { range } = await searchParams;
+  const rangeDays: RangeDays = RANGE_OPTIONS.includes(Number(range) as RangeDays)
+    ? (Number(range) as RangeDays)
+    : 30;
 
   const [analytics, registrations] = await Promise.all([
-    getWebAnalytics(),
+    getWebAnalytics(rangeDays),
     listRegistrations(),
   ]);
 
-  const byDay = registrationsByDay(
-    registrations.map((r) => r.createdAt),
-    14,
-  );
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const newThisWeek = registrations.filter((r) => r.createdAt >= weekAgo).length;
   const firstName = (user.name ?? user.email.split("@")[0]).split(" ")[0];
 
   return (
@@ -29,18 +33,30 @@ export default async function AdminDashboard() {
         description="Sept 28 – Oct 2 · Year 11. The current's live."
       />
 
-      <WebAnalytics data={analytics} />
+      <WebAnalytics data={analytics} range={rangeDays} />
 
       <section>
-        <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="font-display text-sm font-bold uppercase tracking-wide">
-            Registrations
-          </h2>
-          <span className="font-mono text-xs text-muted-foreground">
-            {registrations.length} total
-          </span>
+        <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-wide">
+          Registrations
+        </h2>
+        <div className="grid max-w-md grid-cols-2 gap-4">
+          <div className="rounded-lg border border-border bg-white p-5">
+            <div className="font-display text-4xl font-bold tabular-nums">
+              {registrations.length}
+            </div>
+            <div className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
+              Total registered
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-white p-5">
+            <div className="font-display text-4xl font-bold tabular-nums">
+              {newThisWeek}
+            </div>
+            <div className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
+              New this week
+            </div>
+          </div>
         </div>
-        <RegistrationsChart data={byDay} />
       </section>
     </div>
   );

@@ -2,16 +2,25 @@ import "server-only";
 
 import { BetaAnalyticsDataClient } from "@google-analytics/data";
 
-const WINDOW_DAYS = 28;
+export const RANGE_OPTIONS = [7, 30, 90] as const;
+export type RangeDays = (typeof RANGE_OPTIONS)[number];
+
+export interface Metric {
+  value: number;
+  /** Percent change vs the prior equal-length period, or null if no prior data. */
+  delta: number | null;
+}
 
 export interface WebAnalytics {
-  sessions: number;
-  users: number;
-  pageViews: number;
-  engagementRate: number; // 0–1
+  rangeDays: number;
+  sessions: Metric;
+  users: Metric;
+  pageViews: Metric;
+  engagementRate: Metric; // value is 0–1
   avgSessionDuration: number; // seconds
   byDay: { iso: string; label: string; sessions: number }[];
-  windowDays: number;
+  channels: { name: string; sessions: number; share: number }[];
+  topPages: { path: string; views: number }[];
 }
 
 function serviceAccount(): { client_email: string; private_key: string } | null {
@@ -48,58 +57,113 @@ function parseGaDate(yyyymmdd: string): { iso: string; label: string } {
   };
 }
 
+function pctDelta(current: number, prior: number): number | null {
+  if (prior <= 0) return null;
+  return ((current - prior) / prior) * 100;
+}
+
 /**
- * Web analytics summary + a sessions-by-day trend over the last 28 days.
- * Returns null when GA4 isn't configured or the API call fails — the dashboard
- * renders a setup state instead of erroring.
+ * Web-analytics snapshot for the given window: topline metrics with prior-period
+ * comparison, a sessions-by-day trend, and top channels + pages. Returns null
+ * when GA4 isn't configured or the API call fails.
  */
-export async function getWebAnalytics(): Promise<WebAnalytics | null> {
+export async function getWebAnalytics(
+  rangeDays: RangeDays = 30,
+): Promise<WebAnalytics | null> {
   const propertyId = process.env.GA4_PROPERTY_ID?.trim();
   if (!propertyId) return null;
   const analytics = getClient();
   if (!analytics) return null;
 
   const property = `properties/${propertyId}`;
-  const dateRanges = [{ startDate: `${WINDOW_DAYS - 1}daysAgo`, endDate: "today" }];
+  const current = { startDate: `${rangeDays - 1}daysAgo`, endDate: "today" };
+  const prior = {
+    startDate: `${rangeDays * 2 - 1}daysAgo`,
+    endDate: `${rangeDays}daysAgo`,
+  };
+  const metricNames = [
+    { name: "sessions" },
+    { name: "totalUsers" },
+    { name: "screenPageViews" },
+    { name: "engagementRate" },
+    { name: "averageSessionDuration" },
+  ];
 
   try {
-    const [[summary], [series]] = await Promise.all([
+    const [[summary], [series], [channelRes], [pageRes]] = await Promise.all([
       analytics.runReport({
         property,
-        dateRanges,
-        metrics: [
-          { name: "sessions" },
-          { name: "totalUsers" },
-          { name: "screenPageViews" },
-          { name: "engagementRate" },
-          { name: "averageSessionDuration" },
-        ],
+        dateRanges: [current, prior],
+        metrics: metricNames,
       }),
       analytics.runReport({
         property,
-        dateRanges,
+        dateRanges: [current],
         dimensions: [{ name: "date" }],
         metrics: [{ name: "sessions" }],
         orderBys: [{ dimension: { dimensionName: "date" } }],
       }),
+      analytics.runReport({
+        property,
+        dateRanges: [current],
+        dimensions: [{ name: "sessionDefaultChannelGroup" }],
+        metrics: [{ name: "sessions" }],
+        orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+        limit: 6,
+      }),
+      analytics.runReport({
+        property,
+        dateRanges: [current],
+        dimensions: [{ name: "pagePath" }],
+        metrics: [{ name: "screenPageViews" }],
+        orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
+        limit: 6,
+      }),
     ]);
 
-    const m = summary.rows?.[0]?.metricValues ?? [];
-    const num = (i: number) => Number(m[i]?.value ?? 0);
+    // Two date ranges → GA4 tags each row with date_range_0 / date_range_1.
+    const rows = summary.rows ?? [];
+    const rangeRow = (i: number) =>
+      rows.find((r) => r.dimensionValues?.[0]?.value === `date_range_${i}`) ??
+      rows[i];
+    const cur = rangeRow(0)?.metricValues ?? [];
+    const prev = rangeRow(1)?.metricValues ?? [];
+    const n = (m: typeof cur, i: number) => Number(m[i]?.value ?? 0);
+    const metric = (i: number): Metric => ({
+      value: n(cur, i),
+      delta: pctDelta(n(cur, i), n(prev, i)),
+    });
 
     const byDay = (series.rows ?? []).map((row) => {
       const { iso, label } = parseGaDate(row.dimensionValues?.[0]?.value ?? "");
       return { iso, label, sessions: Number(row.metricValues?.[0]?.value ?? 0) };
     });
 
+    const channelRows = (channelRes.rows ?? []).map((row) => ({
+      name: row.dimensionValues?.[0]?.value || "Unassigned",
+      sessions: Number(row.metricValues?.[0]?.value ?? 0),
+    }));
+    const channelTotal = channelRows.reduce((a, c) => a + c.sessions, 0) || 1;
+    const channels = channelRows.map((c) => ({
+      ...c,
+      share: c.sessions / channelTotal,
+    }));
+
+    const topPages = (pageRes.rows ?? []).map((row) => ({
+      path: row.dimensionValues?.[0]?.value ?? "",
+      views: Number(row.metricValues?.[0]?.value ?? 0),
+    }));
+
     return {
-      sessions: num(0),
-      users: num(1),
-      pageViews: num(2),
-      engagementRate: num(3),
-      avgSessionDuration: num(4),
+      rangeDays,
+      sessions: metric(0),
+      users: metric(1),
+      pageViews: metric(2),
+      engagementRate: metric(3),
+      avgSessionDuration: n(cur, 4),
       byDay,
-      windowDays: WINDOW_DAYS,
+      channels,
+      topPages,
     };
   } catch (err) {
     console.error("GA4 report failed:", err);
