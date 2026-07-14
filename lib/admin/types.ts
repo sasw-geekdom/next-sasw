@@ -16,6 +16,7 @@ export interface SpeakerSubmissionRow {
   name: string;
   email: string;
   company?: string;
+  track: string;
   sessionTitle: string;
   abstract: string;
   bio: string;

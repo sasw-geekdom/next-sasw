@@ -25,6 +25,7 @@ export async function listSpeakerSubmissions(): Promise<SpeakerSubmissionRow[]> 
       name: d.name ?? "",
       email: d.email ?? "",
       company: d.company ?? undefined,
+      track: d.track ?? "",
       sessionTitle: d.sessionTitle ?? "",
       abstract: d.abstract ?? "",
       bio: d.bio ?? "",

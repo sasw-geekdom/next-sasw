@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { TRACKS } from "@/lib/tracks";
 
 type FieldErrors = Record<string, string[] | undefined>;
 
@@ -13,6 +15,7 @@ export function SpeakerForm() {
   const [done, setDone] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [issues, setIssues] = React.useState<FieldErrors>({});
+  const [track, setTrack] = React.useState("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -21,6 +24,7 @@ export function SpeakerForm() {
     setIssues({});
 
     const form = new FormData(e.currentTarget);
+    form.set("track", track);
     try {
       const res = await fetch("/api/speakers", { method: "POST", body: form });
       const body = await res.json().catch(() => ({}));
@@ -72,6 +76,37 @@ export function SpeakerForm() {
         <Label htmlFor="company">Company / project (optional)</Label>
         <Input id="company" name="company" />
       </div>
+
+      <fieldset>
+        <legend className="mb-1.5 block text-sm font-medium text-foreground">
+          Which track fits your session?
+        </legend>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {TRACKS.map((t) => {
+            const selected = track === t.name;
+            return (
+              <button
+                type="button"
+                key={t.name}
+                onClick={() => setTrack(t.name)}
+                aria-pressed={selected}
+                className={cn(
+                  "rounded-md border p-3 text-left transition-colors",
+                  selected
+                    ? "border-magenta bg-magenta/5"
+                    : "border-border hover:bg-muted/50",
+                )}
+              >
+                <span className="block text-sm font-medium">{t.name}</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  {t.description}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {issues.track?.[0] && <FieldError>{issues.track[0]}</FieldError>}
+      </fieldset>
 
       <div>
         <Label htmlFor="sessionTitle">Session title</Label>

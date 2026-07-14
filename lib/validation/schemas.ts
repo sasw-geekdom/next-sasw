@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRACK_NAMES } from "@/lib/tracks";
 
 // Shared field pieces.
 const email = z.string().trim().toLowerCase().email("Enter a valid email.");
@@ -16,6 +17,7 @@ export const speakerSubmissionSchema = z.object({
   name,
   email,
   company: z.string().trim().max(160).optional().or(z.literal("")),
+  track: z.enum(TRACK_NAMES, { message: "Pick a track." }),
   sessionTitle: z.string().trim().min(4, "Give your session a title.").max(160),
   abstract: z
     .string()
@@ -70,6 +72,11 @@ export const sessionSchema = z.object({
   startsAt: z.coerce.date({ message: "Pick a start date and time." }),
   endsAt: z.coerce.date().optional().nullable(),
   location: z.string().trim().min(2, "Where's it happening?").max(200),
+  track: z
+    .enum(TRACK_NAMES)
+    .nullable()
+    .optional()
+    .or(z.literal("").transform(() => null)),
   participants: z.array(participant).default([]),
 });
 export type SessionInput = z.infer<typeof sessionSchema>;

@@ -84,6 +84,7 @@ export async function listSessions(): Promise<SessionRow[]> {
       startsAt: toMillis(d.startsAt) ?? 0,
       endsAt: toMillis(d.endsAt),
       location: d.location ?? "",
+      track: d.track ?? null,
       participants,
       createdAt: toMillis(d.createdAt) ?? 0,
     };

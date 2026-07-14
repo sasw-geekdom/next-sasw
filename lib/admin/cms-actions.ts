@@ -189,6 +189,7 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
     startsAt: form.get("startsAt"),
     endsAt: form.get("endsAt") || null,
     location: form.get("location"),
+    track: form.get("track") ?? "",
     participants,
   });
   if (!parsed.success) {
@@ -202,6 +203,7 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
     startsAt: data.startsAt,
     endsAt: data.endsAt ?? null,
     location: data.location,
+    track: data.track ?? null,
     participants: data.participants,
   };
 

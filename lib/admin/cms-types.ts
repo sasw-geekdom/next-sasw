@@ -38,6 +38,7 @@ export interface SessionRow {
   startsAt: number;
   endsAt: number | null;
   location: string;
+  track: string | null;
   participants: ResolvedParticipant[];
   createdAt: number;
 }

@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Combobox } from "@/components/ui/combobox";
 import { saveSession, deleteSession } from "@/lib/admin/cms-actions";
 import { formatDateTime } from "@/lib/format";
+import { TRACKS } from "@/lib/tracks";
 import type {
   SessionRow,
   SpeakerRow,
@@ -39,6 +40,7 @@ export function SessionManager({
   const [participants, setParticipants] = React.useState<SessionParticipant[]>(
     [],
   );
+  const [track, setTrack] = React.useState("");
   const [pickerValue, setPickerValue] = React.useState("");
   const [pending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
@@ -59,6 +61,7 @@ export function SessionManager({
         ? []
         : row.participants.map((p) => ({ speakerId: p.speakerId, role: p.role })),
     );
+    setTrack(row === "new" ? "" : (row.track ?? ""));
     setPickerValue("");
     setEditing(row);
   }
@@ -141,7 +144,16 @@ export function SessionManager({
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="font-display text-lg font-bold">{row.title}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-display text-lg font-bold">
+                      {row.title}
+                    </span>
+                    {row.track && (
+                      <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                        {row.track}
+                      </span>
+                    )}
+                  </div>
                   <div className="text-sm text-muted-foreground">
                     {formatDateTime(row.startsAt)}
                     {row.endsAt ? ` – ${formatDateTime(row.endsAt)}` : ""} ·{" "}
@@ -244,6 +256,24 @@ export function SessionManager({
               {issues.location?.[0] && (
                 <FieldError>{issues.location[0]}</FieldError>
               )}
+            </div>
+
+            <div>
+              <Label htmlFor="track">Track</Label>
+              <select
+                id="track"
+                name="track"
+                value={track}
+                onChange={(e) => setTrack(e.target.value)}
+                className="h-11 w-full rounded-md border border-border bg-white px-3 text-sm"
+              >
+                <option value="">— No track —</option>
+                {TRACKS.map((t) => (
+                  <option key={t.name} value={t.name}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

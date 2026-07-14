@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     name: form.get("name"),
     email: form.get("email"),
     company: form.get("company") ?? "",
+    track: form.get("track"),
     sessionTitle: form.get("sessionTitle"),
     abstract: form.get("abstract"),
     bio: form.get("bio"),

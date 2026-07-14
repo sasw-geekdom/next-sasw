@@ -4,6 +4,7 @@ import type { Timestamp } from "firebase-admin/firestore";
 import type { Role } from "@/lib/auth/roles";
 import type { SubmissionStatus } from "@/lib/admin/types";
 import type { SessionParticipant } from "@/lib/admin/cms-types";
+import type { TrackName } from "@/lib/tracks";
 
 export type { SubmissionStatus };
 
@@ -22,6 +23,7 @@ export interface SpeakerSubmissionDoc {
   name: string;
   email: string;
   company?: string;
+  track: TrackName;
   sessionTitle: string;
   abstract: string;
   bio: string;
@@ -73,6 +75,7 @@ export interface SessionDoc {
   startsAt: Timestamp;
   endsAt: Timestamp | null;
   location: string;
+  track: TrackName | null;
   participants: SessionParticipant[];
   createdAt: Timestamp;
 }

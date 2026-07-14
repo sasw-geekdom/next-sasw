@@ -119,7 +119,10 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
                     <div className="font-medium">{r.name}</div>
                     <div className="text-xs text-muted-foreground">{r.email}</div>
                   </td>
-                  <td className="px-4 py-3">{r.sessionTitle}</td>
+                  <td className="px-4 py-3">
+                    <div>{r.sessionTitle}</div>
+                    {r.track && <TrackChip name={r.track} />}
+                  </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={r.status} />
                   </td>
@@ -176,6 +179,16 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
               </div>
             </div>
 
+            {selected.track && (
+              <div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Track
+                </div>
+                <div className="mt-1">
+                  <TrackChip name={selected.track} />
+                </div>
+              </div>
+            )}
             <Detail label="Session title" value={selected.sessionTitle} />
             <Detail label="Abstract" value={selected.abstract} multiline />
             <Detail label="Bio" value={selected.bio} multiline />
@@ -212,6 +225,14 @@ function Detail({
         {value}
       </div>
     </div>
+  );
+}
+
+export function TrackChip({ name }: { name: string }) {
+  return (
+    <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+      {name}
+    </span>
   );
 }
 
