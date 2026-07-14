@@ -34,6 +34,7 @@ export async function listSpeakerSubmissions(): Promise<SpeakerSubmissionRow[]> 
       availability: d.availability ?? undefined,
       headshotUrl: d.headshotUrl ?? undefined,
       status: d.status ?? "new",
+      promotedSpeakerId: d.promotedSpeakerId ?? null,
       createdAt: toMillis(d.createdAt) ?? 0,
     };
   });

@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Input } from "@/components/ui/input";
-import { ButtonLink } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import type { RegistrationRow } from "@/lib/admin/types";
 
@@ -21,26 +20,12 @@ export function RegistrationsTable({ rows }: { rows: RegistrationRow[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <Input
-          placeholder="Search name, email, company…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="max-w-xs"
-        />
-        <span className="text-sm text-muted-foreground">
-          {filtered.length} of {rows.length}
-        </span>
-        <ButtonLink
-          href="/api/admin/registrations/export"
-          prefetch={false}
-          variant="outline"
-          size="sm"
-          className="ml-auto"
-        >
-          Export CSV
-        </ButtonLink>
-      </div>
+      <Input
+        placeholder="Search name, email, company…"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        className="max-w-xs"
+      />
 
       <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-sm">

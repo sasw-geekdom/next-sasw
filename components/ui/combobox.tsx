@@ -19,6 +19,7 @@ export interface ComboboxProps {
   disabled?: boolean;
   className?: string;
   id?: string;
+  size?: "sm" | "md";
 }
 
 /**
@@ -36,6 +37,7 @@ export function Combobox({
   disabled,
   className,
   id,
+  size = "md",
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -46,6 +48,8 @@ export function Combobox({
   const listId = React.useId();
 
   const selected = options.find((o) => o.value === value);
+  // Only surface the search box for longer lists; short lists read as a clean select.
+  const showSearch = options.length > 7;
 
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -120,7 +124,8 @@ export function Combobox({
         onClick={() => setOpen((o) => !o)}
         onKeyDown={onKeyDown}
         className={cn(
-          "flex h-11 w-full items-center justify-between rounded-md border border-border bg-white px-3 text-left text-base",
+          "flex w-full items-center justify-between rounded-md border border-border bg-white px-3 text-left",
+          size === "sm" ? "h-9 text-sm" : "h-11 text-base",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-1",
           "disabled:cursor-not-allowed disabled:opacity-50",
         )}
@@ -136,16 +141,18 @@ export function Combobox({
 
       {open && (
         <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-border bg-white shadow-md">
-          <div className="border-b border-border p-2">
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder={searchPlaceholder}
-              className="h-9 w-full rounded-sm bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground"
-            />
-          </div>
+          {showSearch && (
+            <div className="border-b border-border p-2">
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder={searchPlaceholder}
+                className="h-9 w-full rounded-sm bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+          )}
           <ul
             id={listId}
             role="listbox"

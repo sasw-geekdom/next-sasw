@@ -92,6 +92,7 @@ export function SessionManager({
     setIssues({});
     const form = new FormData(e.currentTarget);
     form.set("participants", JSON.stringify(participants));
+    form.set("track", track);
     startTransition(async () => {
       const res = await saveSession(form);
       if (!res.ok) {
@@ -259,21 +260,16 @@ export function SessionManager({
             </div>
 
             <div>
-              <Label htmlFor="track">Track</Label>
-              <select
-                id="track"
-                name="track"
+              <Label>Track</Label>
+              <Combobox
                 value={track}
-                onChange={(e) => setTrack(e.target.value)}
-                className="h-11 w-full rounded-md border border-border bg-white px-3 text-sm"
-              >
-                <option value="">— No track —</option>
-                {TRACKS.map((t) => (
-                  <option key={t.name} value={t.name}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
+                onChange={setTrack}
+                placeholder="No track"
+                options={[
+                  { value: "", label: "No track" },
+                  ...TRACKS.map((t) => ({ value: t.name, label: t.name })),
+                ]}
+              />
             </div>
 
             <div>
@@ -300,16 +296,18 @@ export function SessionManager({
                         {speakerName(p.speakerId)}
                       </span>
                       <div className="flex items-center gap-2">
-                        <select
+                        <Combobox
                           value={p.role}
-                          onChange={(e) =>
-                            setRole(p.speakerId, e.target.value as ParticipantRole)
+                          onChange={(v) =>
+                            setRole(p.speakerId, v as ParticipantRole)
                           }
-                          className="h-8 rounded-md border border-border bg-white px-2 text-xs capitalize"
-                        >
-                          <option value="speaker">Speaker</option>
-                          <option value="moderator">Moderator</option>
-                        </select>
+                          options={[
+                            { value: "speaker", label: "Speaker" },
+                            { value: "moderator", label: "Moderator" },
+                          ]}
+                          size="sm"
+                          className="w-32"
+                        />
                         <button
                           type="button"
                           onClick={() => removeParticipant(p.speakerId)}

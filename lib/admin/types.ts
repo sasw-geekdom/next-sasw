@@ -25,6 +25,7 @@ export interface SpeakerSubmissionRow {
   availability?: string;
   headshotUrl?: string;
   status: SubmissionStatus;
+  promotedSpeakerId?: string | null;
   createdAt: number;
 }
 

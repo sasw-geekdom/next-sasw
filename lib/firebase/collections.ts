@@ -32,6 +32,7 @@ export interface SpeakerSubmissionDoc {
   availability?: string;
   headshotUrl?: string;
   status: SubmissionStatus;
+  promotedSpeakerId?: string | null;
   createdAt: Timestamp;
 }
 

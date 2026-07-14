@@ -72,22 +72,34 @@ export function SpeakerManager({ rows }: { rows: SpeakerRow[] }) {
               className="flex flex-col gap-3 rounded-lg border border-border bg-white p-4"
             >
               <div className="flex items-center gap-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={row.imageUrl}
-                  alt={row.name}
-                  className="h-14 w-14 rounded-full object-cover"
-                />
+                {row.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={row.imageUrl}
+                    alt={row.name}
+                    className="h-14 w-14 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-muted text-lg font-medium uppercase text-muted-foreground">
+                    {row.name[0]}
+                  </span>
+                )}
                 <div className="min-w-0">
                   <div className="truncate font-medium">{row.name}</div>
-                  <a
-                    href={row.linkedin}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-magenta hover:underline"
-                  >
-                    LinkedIn
-                  </a>
+                  {row.linkedin ? (
+                    <a
+                      href={row.linkedin}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-magenta hover:underline"
+                    >
+                      LinkedIn
+                    </a>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      Needs details
+                    </span>
+                  )}
                 </div>
               </div>
               <p className="line-clamp-3 text-xs text-muted-foreground">{row.bio}</p>

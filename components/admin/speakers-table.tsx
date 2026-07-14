@@ -2,13 +2,17 @@
 
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { ButtonLink } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 import { Drawer } from "@/components/ui/drawer";
 import { StatusBadge } from "@/components/admin/status-badge";
-import { updateSubmissionStatus } from "@/lib/admin/actions";
+import { updateSubmissionStatus, promoteToSpeaker } from "@/lib/admin/actions";
 import { formatDate, formatDateTime } from "@/lib/format";
+import { toCsv } from "@/lib/admin/csv";
+import { TRACK_NAMES } from "@/lib/tracks";
 import {
   SUBMISSION_STATUSES,
   type SpeakerSubmissionRow,
@@ -19,9 +23,7 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
   const router = useRouter();
   const [items, setItems] = React.useState(rows);
   const [query, setQuery] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<"all" | SubmissionStatus>(
-    "all",
-  );
+  const [trackFilter, setTrackFilter] = React.useState("all");
   const [selected, setSelected] = React.useState<SpeakerSubmissionRow | null>(
     null,
   );
@@ -32,13 +34,55 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase();
     return items.filter((r) => {
-      if (statusFilter !== "all" && r.status !== statusFilter) return false;
+      if (trackFilter !== "all" && r.track !== trackFilter) return false;
       if (!q) return true;
       return [r.name, r.email, r.sessionTitle, r.company]
         .filter(Boolean)
         .some((v) => v!.toLowerCase().includes(q));
     });
-  }, [items, query, statusFilter]);
+  }, [items, query, trackFilter]);
+
+  // Export exactly what's shown — respects search + track filter.
+  function exportCsv() {
+    const csv = toCsv(
+      [
+        "Name",
+        "Email",
+        "Company",
+        "Track",
+        "Session title",
+        "Abstract",
+        "Bio",
+        "Website",
+        "LinkedIn",
+        "Availability",
+        "Status",
+        "Submitted",
+      ],
+      filtered.map((r) => [
+        r.name,
+        r.email,
+        r.company ?? "",
+        r.track,
+        r.sessionTitle,
+        r.abstract,
+        r.bio,
+        r.website ?? "",
+        r.linkedin ?? "",
+        r.availability ?? "",
+        r.status,
+        formatDateTime(r.createdAt),
+      ]),
+    );
+    const url = URL.createObjectURL(
+      new Blob([csv], { type: "text/csv;charset=utf-8" }),
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sastw-speaker-submissions.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   function changeStatus(id: string, status: SubmissionStatus) {
     const previous = items;
@@ -54,6 +98,20 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
     });
   }
 
+  function promote(id: string) {
+    startTransition(async () => {
+      const res = await promoteToSpeaker(id);
+      if (res.ok) {
+        const patch = { promotedSpeakerId: res.speakerId };
+        setItems((prev) =>
+          prev.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+        );
+        setSelected((s) => (s && s.id === id ? { ...s, ...patch } : s));
+      }
+      router.refresh();
+    });
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
@@ -63,32 +121,23 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
           onChange={(e) => setQuery(e.target.value)}
           className="max-w-xs"
         />
-        <select
-          value={statusFilter}
-          onChange={(e) =>
-            setStatusFilter(e.target.value as "all" | SubmissionStatus)
-          }
-          className="h-11 rounded-md border border-border bg-white px-3 text-sm capitalize"
-        >
-          <option value="all">All statuses</option>
-          {SUBMISSION_STATUSES.map((s) => (
-            <option key={s} value={s} className="capitalize">
-              {s}
-            </option>
-          ))}
-        </select>
-        <span className="text-sm text-muted-foreground">
-          {filtered.length} of {items.length}
-        </span>
-        <ButtonLink
-          href="/api/admin/speakers/export"
-          prefetch={false}
+        <Combobox
+          value={trackFilter}
+          onChange={setTrackFilter}
+          options={[
+            { value: "all", label: "All tracks" },
+            ...TRACK_NAMES.map((t) => ({ value: t, label: t })),
+          ]}
+          className="w-52"
+        />
+        <Button
           variant="outline"
-          size="sm"
+          onClick={exportCsv}
+          disabled={filtered.length === 0}
           className="ml-auto"
         >
-          Export CSV
-        </ButtonLink>
+          Export {filtered.length}
+        </Button>
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-border">
@@ -158,25 +207,53 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
                 Status
               </label>
               <div className="mt-1 flex items-center gap-3">
-                <select
+                <Combobox
                   value={selected.status}
                   disabled={pending}
-                  onChange={(e) =>
-                    changeStatus(
-                      selected.id,
-                      e.target.value as SubmissionStatus,
-                    )
+                  onChange={(v) =>
+                    changeStatus(selected.id, v as SubmissionStatus)
                   }
-                  className="h-10 rounded-md border border-border bg-white px-3 text-sm capitalize"
-                >
-                  {SUBMISSION_STATUSES.map((s) => (
-                    <option key={s} value={s} className="capitalize">
-                      {s}
-                    </option>
-                  ))}
-                </select>
+                  options={SUBMISSION_STATUSES.map((s) => ({
+                    value: s,
+                    label: s[0].toUpperCase() + s.slice(1),
+                  }))}
+                  className="w-44"
+                />
                 <StatusBadge status={selected.status} />
               </div>
+            </div>
+
+            <div className="rounded-md border border-border p-3">
+              {selected.promotedSpeakerId ? (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-medium text-green-700">
+                    ✓ Added to Speakers
+                  </span>
+                  <Link
+                    href="/admin/content/speakers"
+                    className="text-sm text-magenta hover:underline"
+                  >
+                    View
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium">Add to Speakers</div>
+                    <div className="text-xs text-muted-foreground">
+                      Create a public speaker profile from this submission.
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    disabled={pending}
+                    onClick={() => promote(selected.id)}
+                    className="shrink-0"
+                  >
+                    {pending ? "…" : "Add"}
+                  </Button>
+                </div>
+              )}
             </div>
 
             {selected.track && (

@@ -29,7 +29,7 @@ export function buttonClass(
   className?: string,
 ) {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-md font-medium uppercase tracking-wide",
+    "inline-flex items-center justify-center gap-2 rounded-md font-medium",
     "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
     "disabled:pointer-events-none disabled:opacity-50",
     variants[variant],
@@ -44,7 +44,7 @@ export interface ButtonProps
   size?: Size;
 }
 
-/** Verb-first CTA. Uppercase, tracked — reads like brand signage. */
+/** Verb-first CTA. Sentence case — matches the brand copy ("Plug in."). */
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", ...props }, ref) => (
     <button

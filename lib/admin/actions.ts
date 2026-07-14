@@ -29,6 +29,53 @@ export async function updateSubmissionStatus(
   return { ok: true };
 }
 
+/** Promote an accepted submission into the Speakers CMS. Idempotent — a second
+ *  call reuses the speaker already created (tracked via promotedSpeakerId), so it
+ *  can't create duplicates. Carries over name, bio, LinkedIn, and the headshot
+ *  (the Blob URL is reused — no re-upload). */
+export async function promoteToSpeaker(
+  id: string,
+): Promise<{ ok: true; speakerId: string } | { ok: false; error: string }> {
+  await requireAdmin();
+  if (!id) return { ok: false, error: "Missing submission." };
+
+  const subRef = adminDb.collection(COLLECTIONS.speakerSubmissions).doc(id);
+  const speakerRef = adminDb.collection(COLLECTIONS.speakers).doc();
+
+  try {
+    const speakerId = await adminDb.runTransaction(async (tx) => {
+      const snap = await tx.get(subRef);
+      if (!snap.exists) throw new Error("not-found");
+
+      const existing = snap.get("promotedSpeakerId");
+      if (existing) return existing as string; // already promoted
+
+      const d = snap.data() ?? {};
+      tx.set(speakerRef, {
+        name: d.name ?? "",
+        imageUrl: d.headshotUrl ?? "",
+        bio: d.bio ?? "",
+        linkedin: d.linkedin ?? d.website ?? "",
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      tx.update(subRef, { promotedSpeakerId: speakerRef.id });
+      return speakerRef.id;
+    });
+
+    revalidatePath("/admin/speakers");
+    revalidatePath("/admin/content/speakers");
+    return { ok: true, speakerId };
+  } catch (e) {
+    return {
+      ok: false,
+      error:
+        e instanceof Error && e.message === "not-found"
+          ? "Submission not found."
+          : "Promotion failed.",
+    };
+  }
+}
+
 /** Check an attendee in. Idempotent — a second call on an already-checked-in
  *  registration is a no-op, and a transaction prevents double-writes at the door. */
 export async function checkIn(id: string): Promise<ActionResult> {
