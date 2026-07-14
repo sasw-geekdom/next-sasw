@@ -68,3 +68,9 @@ h3,
 .font-display {
   font-family: var(--font-display), var(--font-sans), sans-serif;
 }
+
+/* ─── Hero bolt: confine the WebGL flow canvas to the bolt silhouette ─── */
+.bolt-mask {
+  -webkit-mask: url("/brand/sastw-bolt.svg") center / contain no-repeat;
+  mask: url("/brand/sastw-bolt.svg") center / contain no-repeat;
+}
