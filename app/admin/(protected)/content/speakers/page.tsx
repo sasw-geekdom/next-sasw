@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth/session";
 import { listSpeakers } from "@/lib/admin/cms-queries";
 import { SpeakerManager } from "@/components/admin/cms/speaker-manager";
-import { SectionHeader } from "@/components/admin/cms/section-header";
+import { PageHeader } from "@/components/admin/page-header";
 
 export const metadata: Metadata = { title: "Speakers" };
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ export default async function SpeakersContentPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionHeader title="Speakers" subtitle="The people on stage." />
+      <PageHeader title="Speakers" description="The people on stage." />
       <SpeakerManager rows={rows} />
     </div>
   );

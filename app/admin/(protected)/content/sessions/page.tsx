@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth/session";
 import { listSessions, listSpeakers } from "@/lib/admin/cms-queries";
 import { SessionManager } from "@/components/admin/cms/session-manager";
-import { SectionHeader } from "@/components/admin/cms/section-header";
+import { PageHeader } from "@/components/admin/page-header";
 
 export const metadata: Metadata = { title: "Sessions" };
 export const dynamic = "force-dynamic";
@@ -13,9 +13,9 @@ export default async function SessionsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SectionHeader
+      <PageHeader
         title="Sessions"
-        subtitle="The schedule. Assign speakers and moderators to each."
+        description="The schedule. Assign speakers and moderators to each."
       />
       <SessionManager rows={rows} speakers={speakers} />
     </div>

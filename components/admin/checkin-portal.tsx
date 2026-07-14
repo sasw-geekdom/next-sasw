@@ -9,10 +9,16 @@ import { checkIn, undoCheckIn } from "@/lib/admin/actions";
 import { formatDateTime } from "@/lib/format";
 import type { RegistrationRow } from "@/lib/admin/types";
 
-export function CheckinPortal({ rows }: { rows: RegistrationRow[] }) {
+export function CheckinPortal({
+  rows,
+  initialQuery = "",
+}: {
+  rows: RegistrationRow[];
+  initialQuery?: string;
+}) {
   const router = useRouter();
   const [items, setItems] = React.useState(rows);
-  const [query, setQuery] = React.useState("");
+  const [query, setQuery] = React.useState(initialQuery);
   const [busy, setBusy] = React.useState<string | null>(null);
   const [pending, startTransition] = React.useTransition();
 

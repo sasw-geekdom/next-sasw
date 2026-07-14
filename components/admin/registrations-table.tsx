@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { ButtonLink } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
 import type { RegistrationRow } from "@/lib/admin/types";
 
@@ -20,22 +19,8 @@ export function RegistrationsTable({ rows }: { rows: RegistrationRow[] }) {
     );
   }, [rows, query]);
 
-  const checkedIn = React.useMemo(
-    () => rows.filter((r) => r.checkedIn).length,
-    [rows],
-  );
-
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Registered" value={rows.length} />
-        <Stat label="Checked in" value={checkedIn} />
-        <Stat
-          label="Yet to arrive"
-          value={rows.length - checkedIn}
-        />
-      </div>
-
       <div className="flex flex-wrap items-center gap-3">
         <Input
           placeholder="Search name, email, company…"
@@ -65,13 +50,12 @@ export function RegistrationsTable({ rows }: { rows: RegistrationRow[] }) {
               <th className="px-4 py-3 font-medium">Company</th>
               <th className="px-4 py-3 font-medium">Role</th>
               <th className="px-4 py-3 font-medium">Registered</th>
-              <th className="px-4 py-3 font-medium">Checked in</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={4} className="px-4 py-10 text-center text-muted-foreground">
                   No registrations yet.
                 </td>
               </tr>
@@ -90,29 +74,11 @@ export function RegistrationsTable({ rows }: { rows: RegistrationRow[] }) {
                   <td className="px-4 py-3 text-muted-foreground">
                     {formatDate(r.createdAt)}
                   </td>
-                  <td className="px-4 py-3">
-                    {r.checkedIn ? (
-                      <Badge tone="success">In</Badge>
-                    ) : (
-                      <Badge tone="neutral">—</Badge>
-                    )}
-                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
-      </div>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-lg border border-border bg-white p-4">
-      <div className="font-display text-3xl font-bold">{value}</div>
-      <div className="text-xs uppercase tracking-wide text-muted-foreground">
-        {label}
       </div>
     </div>
   );

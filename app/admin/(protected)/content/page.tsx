@@ -7,6 +7,7 @@ import {
   listSpeakers,
   listSessions,
 } from "@/lib/admin/cms-queries";
+import { PageHeader } from "@/components/admin/page-header";
 
 export const metadata: Metadata = { title: "Content" };
 export const dynamic = "force-dynamic";
@@ -35,12 +36,10 @@ export default async function ContentHub() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-heading font-bold">Content</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Everything that powers the public site.
-        </p>
-      </div>
+      <PageHeader
+        title="Content"
+        description="Everything that powers the public site."
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {SECTIONS.map((s) => (

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface ComboboxOption {
@@ -127,20 +128,10 @@ export function Combobox({
         <span className={cn(!selected && "text-muted-foreground")}>
           {selected ? selected.label : placeholder}
         </span>
-        <svg
+        <ChevronsUpDown
           className="ml-2 h-4 w-4 shrink-0 text-muted-foreground"
-          viewBox="0 0 20 20"
-          fill="none"
-          aria-hidden="true"
-        >
-          <path
-            d="M6 8l4 4 4-4"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+          strokeWidth={1.5}
+        />
       </button>
 
       {open && (
@@ -182,22 +173,7 @@ export function Combobox({
                     )}
                   >
                     <span>{option.label}</span>
-                    {isSelected && (
-                      <svg
-                        className="h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M5 10l3 3 7-7"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    )}
+                    {isSelected && <Check className="h-4 w-4" strokeWidth={1.5} />}
                   </li>
                 );
               })

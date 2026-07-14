@@ -3,21 +3,26 @@
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {
+  Brand,
+  NavSections,
+  AccountBadge,
+} from "@/components/admin/shell/nav-sections";
+import { SignOutButton } from "@/components/auth/sign-out-button";
+import type { AdminUser } from "@/lib/auth/roles";
 
-interface DrawerProps {
-  open: boolean;
-  onClose: () => void;
-  title?: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-}
-
-// Smooth, minimal easing.
 const EASE = [0.32, 0.72, 0, 1] as const;
 
-/** Right-side slide-in panel. Escape or backdrop click to close. */
-export function Drawer({ open, onClose, title, children, className }: DrawerProps) {
+/** Off-canvas nav for < lg. Opens from a hamburger in the top bar. */
+export function MobileNav({
+  open,
+  onClose,
+  user,
+}: {
+  open: boolean;
+  onClose: () => void;
+  user: AdminUser;
+}) {
   React.useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
@@ -34,38 +39,43 @@ export function Drawer({ open, onClose, title, children, className }: DrawerProp
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           <motion.div
             className="absolute inset-0 bg-black/40"
             onClick={onClose}
-            aria-hidden="true"
+            aria-hidden
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
           />
-          <motion.div
-            className={cn(
-              "absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-white shadow-xl",
-              className,
-            )}
-            initial={{ x: "100%" }}
+          <motion.aside
+            className="absolute left-0 top-0 flex h-full w-72 max-w-[82%] flex-col bg-white shadow-xl"
+            initial={{ x: "-100%" }}
             animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ duration: 0.32, ease: EASE }}
+            exit={{ x: "-100%" }}
+            transition={{ duration: 0.3, ease: EASE }}
           >
-            <div className="flex items-center justify-between border-b border-border px-6 py-4">
-              <div className="font-display text-lg font-bold">{title}</div>
+            <div className="flex h-14 items-center justify-between border-b border-border px-4">
+              <Brand />
               <button
                 onClick={onClose}
-                aria-label="Close"
+                aria-label="Close menu"
                 className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 <X className="h-5 w-5" strokeWidth={1.6} />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
-          </motion.div>
+
+            <NavSections onNavigate={onClose} />
+
+            <div className="border-t border-border p-2">
+              <AccountBadge user={user} />
+              <div className="px-1 pt-1">
+                <SignOutButton />
+              </div>
+            </div>
+          </motion.aside>
         </div>
       )}
     </AnimatePresence>
