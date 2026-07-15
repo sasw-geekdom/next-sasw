@@ -16,8 +16,8 @@ export default async function SpeakersPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Call for Speakers"
-        description="Review submissions. Move them through the queue."
+        title="Speaker pitches"
+        description="Session pitches from Plug In. Move them through the queue."
       />
       <SpeakersTable rows={rows} />
     </div>

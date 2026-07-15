@@ -15,10 +15,10 @@ export default async function EmailsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Emails"
-        description="The automated confirmations Resend sends on registration and Call for Speakers submissions. Edit the copy — the logo, calendar block, and footer stay locked."
+        description="The automated confirmations Resend sends on registration, speaker, volunteer, and sponsor submissions. Edit the copy — the logo, calendar block, and footer stay locked."
       />
       <EmailManager
-        initial={{ registration: config.registration, speaker: config.speaker }}
+        initial={config.copies}
         updatedAt={config.updatedAt}
         updatedBy={config.updatedBy}
         adminEmail={user.email}

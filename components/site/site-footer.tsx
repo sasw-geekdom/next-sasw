@@ -29,8 +29,8 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/call-for-speakers" className="hover:text-magenta">
-                    Call for Speakers
+                  <Link href="/plug-in" className="hover:text-magenta">
+                    Plug in
                   </Link>
                 </li>
               </ul>

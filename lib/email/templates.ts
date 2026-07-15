@@ -29,7 +29,11 @@ export interface EmailCopy {
   signoff: string;
 }
 
-export type EmailTemplateKey = "registration" | "speaker";
+export type EmailTemplateKey =
+  | "registration"
+  | "speaker"
+  | "volunteer"
+  | "sponsor";
 
 export interface TemplateVars {
   firstName: string;
@@ -60,6 +64,30 @@ export const DEFAULT_SPEAKER_COPY: EmailCopy = {
   signoff: "Plug in.",
 };
 
+export const DEFAULT_VOLUNTEER_COPY: EmailCopy = {
+  subject: "You're on the crew. Thank you.",
+  heading: "You're on the crew.",
+  body: [
+    "Thanks for stepping up, {firstName}.",
+    "We've got your details for San Antonio Startup + Tech Week, Sept 28 – Oct 2. The volunteer lead will reach out with shifts and where to be as the week firms up.",
+    "It takes a crew to keep the current running. Glad you're on it.",
+  ].join("\n\n"),
+  ctaIntro: "Mark the week so you're ready:",
+  signoff: "Plug in.",
+};
+
+export const DEFAULT_SPONSOR_COPY: EmailCopy = {
+  subject: "Let's power the week together.",
+  heading: "Let's talk.",
+  body: [
+    "Thanks for your interest, {firstName}.",
+    "We got your note about powering San Antonio Startup + Tech Week, Sept 28 – Oct 2. Someone from the team will follow up shortly to walk through the options and find the right fit.",
+    "Sponsors are the grid the current runs on. Let's build it.",
+  ].join("\n\n"),
+  ctaIntro: "Hold the dates while we connect:",
+  signoff: "Plug in.",
+};
+
 export interface EmailTemplateMeta {
   key: EmailTemplateKey;
   label: string;
@@ -86,6 +114,22 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
     tokens: ["{firstName}", "{sessionTitle}"],
     defaults: DEFAULT_SPEAKER_COPY,
     sample: { firstName: "Alex", sessionTitle: "Scaling AI at the edge" },
+  },
+  {
+    key: "volunteer",
+    label: "Volunteer confirmation",
+    description: "Sent automatically when someone signs up to volunteer.",
+    tokens: ["{firstName}"],
+    defaults: DEFAULT_VOLUNTEER_COPY,
+    sample: { firstName: "Alex" },
+  },
+  {
+    key: "sponsor",
+    label: "Sponsor confirmation",
+    description: "Sent automatically when someone submits a sponsor inquiry.",
+    tokens: ["{firstName}"],
+    defaults: DEFAULT_SPONSOR_COPY,
+    sample: { firstName: "Alex" },
   },
 ];
 
@@ -288,4 +332,18 @@ export function speakerSubmissionEmail(
     firstName: firstNameOf(input.name),
     sessionTitle: input.sessionTitle,
   });
+}
+
+export function volunteerEmail(
+  input: { name: string },
+  copy: EmailCopy = DEFAULT_VOLUNTEER_COPY,
+): { subject: string; html: string } {
+  return renderEmail(copy, { firstName: firstNameOf(input.name) });
+}
+
+export function sponsorEmail(
+  input: { name: string },
+  copy: EmailCopy = DEFAULT_SPONSOR_COPY,
+): { subject: string; html: string } {
+  return renderEmail(copy, { firstName: firstNameOf(input.name) });
 }

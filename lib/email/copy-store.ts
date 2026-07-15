@@ -4,8 +4,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/admin";
 import { COLLECTIONS, EMAIL_SETTINGS_DOC } from "@/lib/firebase/collections";
 import {
-  DEFAULT_REGISTRATION_COPY,
-  DEFAULT_SPEAKER_COPY,
+  EMAIL_TEMPLATES,
   mergeCopy,
   type EmailCopy,
   type EmailTemplateKey,
@@ -18,8 +17,7 @@ const emailSettingsDoc = () =>
   adminDb.collection(COLLECTIONS.settings).doc(EMAIL_SETTINGS_DOC);
 
 export interface EmailCopyConfig {
-  registration: EmailCopy;
-  speaker: EmailCopy;
+  copies: Record<EmailTemplateKey, EmailCopy>;
   updatedAt: number | null;
   updatedBy: string | null;
 }
@@ -27,11 +25,13 @@ export interface EmailCopyConfig {
 export async function getEmailCopyConfig(): Promise<EmailCopyConfig> {
   const snap = await emailSettingsDoc().get();
   const d = snap.exists ? (snap.data() ?? {}) : {};
-  const updatedAt = d.updatedAt instanceof Timestamp ? d.updatedAt.toMillis() : null;
+  const copies = {} as Record<EmailTemplateKey, EmailCopy>;
+  for (const t of EMAIL_TEMPLATES) {
+    copies[t.key] = mergeCopy(t.defaults, d[t.key]);
+  }
   return {
-    registration: mergeCopy(DEFAULT_REGISTRATION_COPY, d.registration),
-    speaker: mergeCopy(DEFAULT_SPEAKER_COPY, d.speaker),
-    updatedAt,
+    copies,
+    updatedAt: d.updatedAt instanceof Timestamp ? d.updatedAt.toMillis() : null,
     updatedBy: typeof d.updatedBy === "string" ? d.updatedBy : null,
   };
 }
@@ -39,5 +39,5 @@ export async function getEmailCopyConfig(): Promise<EmailCopyConfig> {
 /** The merged copy for one template — used by the send routes. */
 export async function getEmailCopy(key: EmailTemplateKey): Promise<EmailCopy> {
   const config = await getEmailCopyConfig();
-  return config[key];
+  return config.copies[key];
 }

@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "firebasestorage.googleapis.com" },
     ],
   },
+  async redirects() {
+    // The Call for Speakers page became the Plug In hub — keep old links alive.
+    return [
+      { source: "/call-for-speakers", destination: "/plug-in", permanent: true },
+    ];
+  },
 };
 
 export default withBotId(nextConfig);
