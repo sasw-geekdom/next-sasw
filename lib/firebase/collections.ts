@@ -12,8 +12,6 @@ export type { SubmissionStatus };
 export const COLLECTIONS = {
   speakerSubmissions: "speakerSubmissions",
   registrations: "registrations",
-  volunteers: "volunteers",
-  sponsorLeads: "sponsorLeads",
   getInvolved: "getInvolved",
   speakers: "speakers",
   sessions: "sessions",
@@ -70,29 +68,6 @@ export interface RegistrationDoc {
   checkedIn: boolean;
   checkedInAt: Timestamp | null;
   checkedInBy: string | null;
-  createdAt: Timestamp;
-}
-
-export interface VolunteerDoc {
-  name: string;
-  email: string;
-  phone?: string;
-  availability: string;
-  interests: string[];
-  notes?: string;
-  status: SubmissionStatus;
-  createdAt: Timestamp;
-}
-
-export interface SponsorLeadDoc {
-  name: string;
-  email: string;
-  company: string;
-  role: string;
-  website?: string;
-  level: string;
-  message?: string;
-  status: SubmissionStatus;
   createdAt: Timestamp;
 }
 

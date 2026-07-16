@@ -37,8 +37,8 @@ export function SiteNavbar() {
               {l.label}
             </Link>
           ))}
-          <ButtonLink href="/register" size="sm">
-            Register
+          <ButtonLink href="/get-involved" size="sm">
+            Get involved
           </ButtonLink>
         </nav>
 
@@ -92,11 +92,11 @@ export function SiteNavbar() {
                 transition={{ delay: 0.08 + LINKS.length * 0.05, duration: 0.2 }}
               >
                 <ButtonLink
-                  href="/register"
+                  href="/get-involved"
                   onClick={() => setOpen(false)}
                   className="mt-2 w-full"
                 >
-                  Register
+                  Get involved
                 </ButtonLink>
               </motion.div>
             </div>

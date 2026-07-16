@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { FormPage } from "@/components/site/form-page";
 import { GetInvolvedForm } from "@/components/forms/get-involved-form";
 
@@ -20,6 +21,15 @@ export default function GetInvolvedPage() {
       subtitle="Sponsor, host an event, or just ask — every connection feeds the grid. Sept 28 – Oct 2, downtown San Antonio."
     >
       <GetInvolvedForm />
+      <p className="mt-8 text-sm text-muted-foreground">
+        Have a session to pitch?{" "}
+        <Link
+          href="/plug-in"
+          className="font-medium text-magenta hover:underline"
+        >
+          Plug in &nearr;
+        </Link>
+      </p>
     </FormPage>
   );
 }

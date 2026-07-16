@@ -50,17 +50,22 @@ export function SiteFooter() {
             </div>
             <div>
               <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/40">
-                Plug in
+                Get involved
               </div>
               <ul className="space-y-2 text-white/70">
                 <li>
-                  <Link href="/plug-in" className="hover:text-magenta">
+                  <Link href="/get-involved" className="hover:text-magenta">
                     Sponsor
                   </Link>
                 </li>
                 <li>
-                  <Link href="/plug-in" className="hover:text-magenta">
-                    Volunteer
+                  <Link href="/get-involved" className="hover:text-magenta">
+                    Host an event
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/get-involved" className="hover:text-magenta">
+                    Ask a question
                   </Link>
                 </li>
                 <li>

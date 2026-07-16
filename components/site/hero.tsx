@@ -29,8 +29,8 @@ export function Hero() {
         </p>
 
         <div className="mt-8 flex justify-center lg:justify-start">
-          <ButtonLink href="/plug-in" size="lg">
-            Plug in.
+          <ButtonLink href="/register" size="lg">
+            Get on the list.
           </ButtonLink>
         </div>
       </div>

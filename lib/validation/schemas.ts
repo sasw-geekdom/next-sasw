@@ -136,36 +136,6 @@ export const getInvolvedSchema = z.discriminatedUnion("path", [
 ]);
 export type GetInvolvedInput = z.infer<typeof getInvolvedSchema>;
 
-// ─── Plug In · Volunteer ────────────────────────────────────────────────────
-export const volunteerSchema = z.object({
-  name,
-  email,
-  phone: z.string().trim().max(40).optional().or(z.literal("")),
-  availability: z
-    .string()
-    .trim()
-    .min(2, "Let us know when you can help.")
-    .max(500),
-  interests: z
-    .array(z.string().trim().min(1).max(80))
-    .min(1, "Pick at least one area.")
-    .max(12),
-  notes: z.string().trim().max(1000).optional().or(z.literal("")),
-});
-export type VolunteerInput = z.infer<typeof volunteerSchema>;
-
-// ─── Plug In · Sponsor ──────────────────────────────────────────────────────
-export const sponsorSchema = z.object({
-  name,
-  email,
-  company: z.string().trim().min(2, "Company is required.").max(160),
-  role: z.string().trim().min(2, "What's your role?").max(120),
-  website: optionalUrl,
-  level: z.string().trim().min(2, "Pick a sponsorship level.").max(80),
-  message: z.string().trim().max(2000).optional().or(z.literal("")),
-});
-export type SponsorInput = z.infer<typeof sponsorSchema>;
-
 // ─── CMS ────────────────────────────────────────────────────────────────────
 const url = z.string().trim().url("Enter a valid URL.").max(500);
 

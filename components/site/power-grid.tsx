@@ -156,10 +156,10 @@ export function PowerGrid({
           </div>
         )}
 
-        {/* The door — sponsorship inquiries run through Plug In. */}
+        {/* The door — sponsorship inquiries run through Get Involved. */}
         <div className="mt-16 lg:mt-20">
           <Link
-            href="/plug-in"
+            href="/get-involved"
             className="group inline-flex items-baseline gap-2 font-display text-xl font-bold uppercase tracking-tight text-white transition-colors hover:text-magenta sm:text-2xl"
           >
             Power the week
@@ -171,7 +171,7 @@ export function PowerGrid({
             </span>
           </Link>
           <p className="mt-2 font-mono text-[11px] uppercase tracking-widest text-white/40">
-            Sponsorships are open — plug in.
+            Sponsorships are open — get involved.
           </p>
         </div>
       </div>

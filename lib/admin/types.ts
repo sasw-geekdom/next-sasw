@@ -75,27 +75,3 @@ export interface GetInvolvedRow {
   createdAt: number;
 }
 
-export interface VolunteerRow {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  availability: string;
-  interests: string[];
-  notes?: string;
-  status: SubmissionStatus;
-  createdAt: number;
-}
-
-export interface SponsorLeadRow {
-  id: string;
-  name: string;
-  email: string;
-  company: string;
-  role: string;
-  website?: string;
-  level: string;
-  message?: string;
-  status: SubmissionStatus;
-  createdAt: number;
-}
