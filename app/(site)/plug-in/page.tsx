@@ -27,7 +27,7 @@ export default function PlugInPage() {
           href="/get-involved"
           className="font-medium text-magenta hover:underline"
         >
-          Get involved &nearr;
+          Get involved {"↗"}
         </Link>
       </p>
     </FormPage>

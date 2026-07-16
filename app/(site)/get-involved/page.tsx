@@ -27,7 +27,7 @@ export default function GetInvolvedPage() {
           href="/plug-in"
           className="font-medium text-magenta hover:underline"
         >
-          Plug in &nearr;
+          Plug in {"↗"}
         </Link>
       </p>
     </FormPage>
