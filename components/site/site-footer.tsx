@@ -55,7 +55,7 @@ export function SiteFooter() {
               <ul className="space-y-2 text-white/70">
                 <li>
                   <Link href="/plug-in" className="hover:text-magenta">
-                    Speak
+                    Sponsor
                   </Link>
                 </li>
                 <li>
@@ -65,7 +65,7 @@ export function SiteFooter() {
                 </li>
                 <li>
                   <Link href="/plug-in" className="hover:text-magenta">
-                    Sponsor
+                    Speak
                   </Link>
                 </li>
               </ul>
