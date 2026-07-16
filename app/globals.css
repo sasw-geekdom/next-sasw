@@ -81,52 +81,13 @@ h3,
   mask: url("/brand/og-geekdom.svg") center / contain no-repeat;
 }
 
-/* ─── Homepage "four rooms" current flow (node graph) ─── */
-@keyframes rf-flow {
-  to {
-    stroke-dashoffset: -19;
-  }
+/* ─── Four rooms: the card border warms to its circuit colour on hover,
+       while the WebGL current flows behind the text (see room-flow). ─── */
+.node-glow {
+  transition: border-color 0.4s ease;
 }
-@keyframes rf-spine {
-  to {
-    background-position-y: 18px;
-  }
+.node-glow:hover,
+.node-glow:focus-within {
+  border-color: color-mix(in srgb, var(--c) 50%, transparent);
 }
-.rf-wire {
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 7 12;
-  filter: drop-shadow(0 0 4px currentColor);
-  animation: rf-flow 0.9s linear infinite;
-}
-.rf-dot {
-  position: absolute;
-  width: 13px;
-  height: 13px;
-  border-radius: 9999px;
-  background: var(--c);
-  box-shadow:
-    0 0 0 3px var(--background),
-    0 0 10px color-mix(in srgb, var(--c) 60%, transparent);
-}
-.rf-spine {
-  position: absolute;
-  left: 6px;
-  top: 6px;
-  bottom: 6px;
-  width: 2px;
-  background: repeating-linear-gradient(
-    180deg,
-    var(--magenta) 0 8px,
-    transparent 8px 18px
-  );
-  background-size: 100% 18px;
-  animation: rf-spine 0.85s linear infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .rf-wire,
-  .rf-spine {
-    animation: none;
-  }
-}
+

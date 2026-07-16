@@ -2,243 +2,200 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { ROOMS, PORT_TOP, type Room } from "@/lib/locations";
+import Link from "next/link";
+import { motion, useReducedMotion } from "motion/react";
+import { ShaderCanvas } from "@/components/site/shader-canvas";
+import { ROOMS, type Room } from "@/lib/locations";
+import { TRACK_NAMES, CIRCUIT_COLORS } from "@/lib/tracks";
+import { cn } from "@/lib/utils";
 
-// Faint warped-grid mesh — the "canvas" texture behind the graph.
-function drawMesh(canvas: HTMLCanvasElement) {
-  const rect = canvas.getBoundingClientRect();
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-  canvas.width = Math.max(1, rect.width * dpr);
-  canvas.height = Math.max(1, rect.height * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const w = rect.width;
-  const h = rect.height;
-  ctx.clearRect(0, 0, w, h);
-  ctx.strokeStyle = "rgba(15,15,20,0.05)";
-  ctx.lineWidth = 1;
-  for (let gy = -20; gy < h + 20; gy += 32) {
-    ctx.beginPath();
-    for (let x = 0; x <= w; x += 8) {
-      const y = gy + Math.sin(x * 0.014 + gy * 0.05) * 7 + Math.sin(x * 0.05) * 2;
-      if (x === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
+// The five circuits — shown as pips on the main stage's card.
+const CIRCUITS = TRACK_NAMES.map((n) => CIRCUIT_COLORS[n]);
+
+// 1×1 transparent GIF — shown only if WebGL is unavailable (never for us).
+const BLANK =
+  "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+
+function Portrait({ room }: { room: Room }) {
+  if (!room.image) {
+    return (
+      <pre
+        aria-hidden="true"
+        className="overflow-x-auto p-4 font-mono text-[11px] leading-tight text-magenta"
+      >
+        {room.ascii}
+      </pre>
+    );
   }
-  for (let gx = -20; gx < w + 20; gx += 32) {
-    ctx.beginPath();
-    for (let y = 0; y <= h; y += 8) {
-      const x = gx + Math.sin(y * 0.014 + gx * 0.05) * 7;
-      if (y === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-  }
+  return (
+    <Image
+      src={room.image}
+      alt={room.name}
+      width={room.imageWidth ?? 1280}
+      height={room.imageHeight ?? 720}
+      sizes="(min-width: 1024px) 58vw, 100vw"
+      className="h-auto w-full"
+    />
+  );
 }
 
-function RoomCard({ room }: { room: Room }) {
+function Activation({ room, flip }: { room: Room; flip: boolean }) {
+  const reduce = useReducedMotion();
+  const featured = Boolean(room.featured);
+  const [hovered, setHovered] = React.useState(false);
+
   return (
-    <article
-      data-port={room.port}
-      style={{ ["--c" as string]: room.color }}
-      className="relative grid grid-cols-1 items-center gap-4 rounded-2xl border border-border bg-white p-4 shadow-sm transition-colors hover:border-[var(--c)] sm:grid-cols-[150px_1fr] sm:gap-5"
+    <motion.article
+      initial={reduce ? undefined : { opacity: 0, y: 40 }}
+      whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className={cn(
+        "grid items-center gap-8 lg:gap-16",
+        // the featured main stage gets a wider portrait than the rest
+        featured
+          ? flip
+            ? "lg:grid-cols-[8fr_4fr]"
+            : "lg:grid-cols-[4fr_8fr]"
+          : flip
+            ? "lg:grid-cols-[7fr_5fr]"
+            : "lg:grid-cols-[5fr_7fr]",
+      )}
     >
-      {/* input node — on the spine (mobile) / card edge (desktop) */}
-      <span
-        aria-hidden="true"
-        className="rf-dot left-[-22px] top-6 lg:left-[-6.5px] lg:top-1/2 lg:-translate-y-1/2"
-      />
-
-      {/* ASCII "screen" — black frame, magenta art. Real portrait drops in here. */}
-      <div className="overflow-hidden rounded-xl border border-black/10 bg-[#0a0a0a] p-2.5">
-        {room.image ? (
-          <Image
-            src={room.image}
-            alt=""
-            width={300}
-            height={200}
-            className="h-auto w-full"
-          />
-        ) : (
-          <pre
-            aria-hidden="true"
-            className="overflow-x-auto font-mono text-[9px] leading-[1.15] text-magenta [text-shadow:0_0_6px_rgba(255,50,160,0.5)]"
-          >
-            {room.ascii}
-          </pre>
-        )}
-      </div>
-
-      <div>
-        <h3 className="font-display text-lg font-bold uppercase leading-none text-foreground">
-          {room.name}
-        </h3>
-        <p className="mt-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          {room.host}
-        </p>
-        <span
-          className="mt-2.5 inline-block rounded-full border px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest"
-          style={{
-            color: room.color,
-            borderColor: `color-mix(in srgb, ${room.color} 40%, transparent)`,
-            backgroundColor: `color-mix(in srgb, ${room.color} 10%, transparent)`,
-          }}
+      {/* Portrait — the star. */}
+      <div className={cn("relative", flip ? "lg:order-1" : "lg:order-2")}>
+        <div
+          className={cn(
+            "overflow-hidden rounded-lg bg-[#0a0a0a]",
+            featured && "ring-1 ring-white/10",
+          )}
+          style={
+            featured
+              ? {
+                  boxShadow: `0 40px 110px -34px color-mix(in srgb, ${room.color} 55%, transparent)`,
+                }
+              : undefined
+          }
         >
-          {room.tag}
-        </span>
-        <ul className="mt-3 flex flex-col gap-1.5">
-          {room.sessions.map((s) => (
-            <li key={s.title} className="flex items-baseline gap-2 text-sm text-foreground">
-              <span style={{ color: room.color }}>▸</span>
-              {s.title}
-              <span className="ml-auto font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
-                {s.kind}
-              </span>
-            </li>
-          ))}
-        </ul>
+          <Portrait room={room} />
+        </div>
       </div>
-    </article>
+
+      {/* The breakdown — the current flows through the card on hover. */}
+      <div className={cn("relative", flip ? "lg:order-2" : "lg:order-1")}>
+        <div
+          tabIndex={0}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          onFocus={() => setHovered(true)}
+          onBlur={() => setHovered(false)}
+          className="node-glow relative overflow-hidden rounded-lg border border-white/10 bg-white/3 outline-none"
+          style={{ ["--c" as string]: room.color } as React.CSSProperties}
+        >
+          {!reduce && (
+            <div
+              aria-hidden="true"
+              className={cn(
+                "absolute inset-0 z-0 transition-opacity duration-500",
+                hovered ? "opacity-60" : "opacity-0",
+              )}
+            >
+              <ShaderCanvas
+                color={room.color}
+                maskClassName=""
+                fallbackSrc={BLANK}
+                className="h-full w-full"
+                base={[0.05, 0.0, 0.035]}
+                active={hovered}
+              />
+            </div>
+          )}
+
+          {/* pointer-events-none lets the cursor reach the shader beneath */}
+          <div className="pointer-events-none relative z-10 p-5">
+            <div className="mb-3.5 flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-white/50">
+                <span style={{ color: room.color }}>◆</span> {room.host}
+              </span>
+              {featured && (
+                <span
+                  role="img"
+                  aria-label="All five circuits run here"
+                  className="flex items-center gap-1.5"
+                >
+                  {CIRCUITS.map((c) => (
+                    <span
+                      key={c}
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{ background: c, boxShadow: `0 0 6px ${c}` }}
+                    />
+                  ))}
+                </span>
+              )}
+            </div>
+            <h3 className="font-display text-2xl font-bold uppercase leading-none text-white sm:text-3xl">
+              {room.name}
+            </h3>
+            <p className="mt-2.5 text-sm text-white/60">{room.desc}</p>
+            <ul className="mt-4 flex flex-col gap-2 border-t border-white/10 pt-4">
+              {room.sessions.map((s) => (
+                <li key={s.title} className="flex items-baseline gap-2.5 text-sm">
+                  <span style={{ color: room.color }}>▸</span>
+                  <span className="text-white">{s.title}</span>
+                  <span className="ml-auto shrink-0 font-mono text-[9px] uppercase tracking-widest text-white/40">
+                    {s.kind}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </motion.article>
   );
 }
 
 export function RoomFlow() {
-  const meshRef = React.useRef<HTMLCanvasElement>(null);
-  const graphRef = React.useRef<HTMLDivElement>(null);
-  const sourceRef = React.useRef<HTMLDivElement>(null);
-  const wiresRef = React.useRef<SVGSVGElement>(null);
-
-  React.useEffect(() => {
-    const mesh = meshRef.current;
-    const graph = graphRef.current;
-    const source = sourceRef.current;
-    const svg = wiresRef.current;
-    if (!graph || !source || !svg) return;
-
-    const isDesktop = () => window.matchMedia("(min-width: 1024px)").matches;
-
-    const drawWires = () => {
-      if (!isDesktop()) {
-        svg.innerHTML = "";
-        return;
-      }
-      const base = graph.getBoundingClientRect();
-      svg.setAttribute("width", String(base.width));
-      svg.setAttribute("height", String(base.height));
-      const center = (el: Element) => {
-        const r = el.getBoundingClientRect();
-        return {
-          x: r.left - base.left + r.width / 2,
-          y: r.top - base.top + r.height / 2,
-        };
-      };
-      let out = "";
-      graph.querySelectorAll<HTMLElement>("[data-port]").forEach((card) => {
-        const pid = card.getAttribute("data-port");
-        const sp = source.querySelector(`[data-src="${pid}"]`);
-        const ip = card.querySelector(".rf-dot");
-        if (!sp || !ip) return;
-        const a = center(sp);
-        const b = center(ip);
-        const dx = (b.x - a.x) * 0.5;
-        const d = `M${a.x} ${a.y} C${a.x + dx} ${a.y} ${b.x - dx} ${b.y} ${b.x} ${b.y}`;
-        const color =
-          (card.style.getPropertyValue("--c") || "#ff32a0").trim();
-        out += `<path class="rf-wire" d="${d}" style="color:${color};stroke:${color}"/>`;
-      });
-      svg.innerHTML = out;
-    };
-
-    const redraw = () => {
-      if (mesh) drawMesh(mesh);
-      requestAnimationFrame(drawWires);
-    };
-
-    redraw();
-    const t = window.setTimeout(redraw, 200);
-    window.addEventListener("resize", redraw);
-    const ro = new ResizeObserver(() => requestAnimationFrame(drawWires));
-    ro.observe(graph);
-    if (document.fonts?.ready) document.fonts.ready.then(redraw).catch(() => {});
-
-    return () => {
-      window.clearTimeout(t);
-      window.removeEventListener("resize", redraw);
-      ro.disconnect();
-    };
-  }, []);
-
   return (
-    <section className="relative overflow-hidden bg-background">
-      <canvas
-        ref={meshRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-      />
-      <div className="relative mx-auto w-full max-w-7xl px-6 py-20 lg:py-28">
+    <section className="bg-black">
+      <div className="mx-auto w-full max-w-7xl px-6 py-24 lg:py-32">
         <div className="max-w-2xl">
           <p className="font-mono text-xs uppercase tracking-widest text-magenta">
-            Four activations · downtown
+            Downtown West San Antonio
           </p>
-          <h2 className="mt-3 font-display text-4xl font-bold uppercase leading-[0.95] tracking-tight text-foreground sm:text-5xl">
-            One week. Four rooms.
+          <h2 className="mt-3 font-display text-4xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-5xl">
+            Where the current lands.
           </h2>
-          <p className="mt-4 max-w-xl text-pretty text-muted-foreground">
-            Sept 28 – Oct 2. Every session runs through one of four downtown
-            venues — trace the current to find your room.
+          <p className="mt-4 max-w-xl text-pretty text-white/60">
+            Sept 28 – Oct 2, four downtown venues come online: the main stage,
+            the community floor, the small-business house, and the park where it
+            all unwinds.
           </p>
         </div>
 
-        <div
-          ref={graphRef}
-          className="relative mt-14 lg:grid lg:grid-cols-[300px_1fr] lg:items-center lg:gap-24"
-        >
-          <svg
-            ref={wiresRef}
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 hidden overflow-visible lg:block"
-          />
+        <div className="mt-16 flex flex-col gap-24 lg:mt-24 lg:gap-32">
+          {ROOMS.map((room, i) => (
+            <Activation key={room.slug} room={room} flip={i % 2 === 1} />
+          ))}
+        </div>
 
-          {/* source node — the current's origin */}
-          <div
-            ref={sourceRef}
-            className="relative mb-10 rounded-2xl border border-border bg-white p-6 shadow-sm lg:mb-0"
+        {/* The door — /sessions 404s into the Bolt Runner until the lineup ships. */}
+        <div className="mt-20 lg:mt-28">
+          <Link
+            href="/sessions"
+            className="group inline-flex items-baseline gap-2 font-display text-xl font-bold uppercase tracking-tight text-white transition-colors hover:text-magenta sm:text-2xl"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/brand/sastw-bolt.svg"
-              alt=""
+            Trace the schedule
+            <span
               aria-hidden="true"
-              className="h-14 w-14"
-            />
-            <p className="mt-4 font-display text-xl font-bold uppercase leading-none text-foreground">
-              Downtown SA
-            </p>
-            <p className="mt-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              Sept 28 – Oct 2 · the source
-            </p>
-            {/* output ports */}
-            <div className="absolute right-0 top-0 hidden h-full lg:block" aria-hidden="true">
-              {ROOMS.map((r) => (
-                <span
-                  key={r.port}
-                  data-src={r.port}
-                  className="rf-dot right-[-7px]"
-                  style={{ ["--c" as string]: r.color, top: PORT_TOP[r.port] }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* room nodes */}
-          <div className="relative flex flex-col gap-5 pl-7 lg:pl-0">
-            <span aria-hidden="true" className="rf-spine lg:hidden" />
-            {ROOMS.map((room) => (
-              <RoomCard key={room.slug} room={room} />
-            ))}
-          </div>
+              className="transition-transform duration-200 group-hover:translate-x-1"
+            >
+              &rarr;
+            </span>
+          </Link>
+          <p className="mt-2 font-mono text-[11px] uppercase tracking-widest text-white/40">
+            The full lineup comes online soon — mind the loose current.
+          </p>
         </div>
       </div>
     </section>

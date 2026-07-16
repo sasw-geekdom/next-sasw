@@ -12,22 +12,34 @@ export interface Room {
   slug: string;
   name: string;
   host: string;
+  desc: string;
   tag: string;
   color: string; // circuit accent
   port: string; // wiring id: p1..p4
-  image?: string; // ASCII portrait when ready
-  ascii: string; // placeholder art
+  featured?: boolean; // the main stage — the five circuits converge here
+  image?: string; // ASCII portrait (magenta-on-black)
+  imageWidth?: number;
+  imageHeight?: number;
+  ascii: string; // placeholder art when no image
   sessions: RoomSession[];
 }
+
+const ASSET = (file: string) =>
+  `https://firebasestorage.googleapis.com/v0/b/sasw2026-783a5.firebasestorage.app/o/sasw-assets%2F${file}?alt=media`;
 
 export const ROOMS: Room[] = [
   {
     slug: "tpr",
     name: "Texas Public Radio",
-    host: "SASTW · the anchor",
+    host: "San Antonio Startup + Tech Week",
+    desc: "The anchor. Five circuits, the keynotes, and the biggest rooms of the week.",
     tag: "5 circuits · main stage",
     color: "#ff32a0",
     port: "p1",
+    featured: true,
+    image: ASSET("sastw-tpr-magenta.png"),
+    imageWidth: 1536,
+    imageHeight: 1024,
     ascii: `      .:|:.
      :|▓▓▓|:   ) )
      |▓ ⚡▓|  ( ·
@@ -35,35 +47,43 @@ export const ROOMS: Room[] = [
    __|▓▓▓▓▓|__
   |___________|`,
     sessions: [
-      { title: "Founder keynote", kind: "Founder" },
-      { title: "AI & Applied panel", kind: "AI" },
-      { title: "Capital fireside", kind: "Capital" },
+      { title: "Defense in Depth For Founders", kind: "Tech & Builders" },
+      { title: "Humans + Tech", kind: "AI & Applied Innovation" },
+      { title: "Capital Fireside ", kind: "Capital" },
     ],
   },
   {
     slug: "the-rand",
     name: "The Rand",
-    host: "Geekdom · community-led",
+    host: "Geekdom · DEVSA Community",
+    desc: "Find your people. Build your future. Community-driven activations — run by the orgs and partners that build here.",
     tag: "Tech & Builders",
     color: "#4d7cff",
     port: "p2",
+    image: ASSET("sastw-rand.jpg"),
+    imageWidth: 1280,
+    imageHeight: 720,
     ascii: `  ____________
  /▒ ▒ ▒ ▒ ▒/|
 |▒ ⚡▒ ▒ ▒| |
 |▒ ▒ ▒ ▒ ▒| |
 |▒_▒_▒_▒_▒|/`,
     sessions: [
-      { title: "Python Conference", kind: "Community" },
-      { title: "Game Design Summit", kind: "Community" },
+      { title: "PySanAntonio II", kind: "Alamo Python x PyTexas Foundation" },
+      { title: "Game Design Summit", kind: "Greater Gaming Society" },
     ],
   },
   {
     slug: "central-library",
     name: "Central Library",
-    host: "LaunchSA · small business",
+    host: "LaunchSA · Small Business",
+    desc: "LaunchSA's house — programming built for small business and solopreneurs.",
     tag: "Small Business & Solopreneur",
     color: "#b45cff",
     port: "p3",
+    image: ASSET("sastw-launchsa.jpg"),
+    imageWidth: 1280,
+    imageHeight: 720,
     ascii: `    ________
    / ______ \\
   ||‖ ‖ ‖ ‖||
@@ -71,33 +91,29 @@ export const ROOMS: Room[] = [
   ||‖_‖_‖_‖||
   ===========`,
     sessions: [
-      { title: "Solopreneur masterclass", kind: "LaunchSA" },
-      { title: "Main Street mixer", kind: "LaunchSA" },
+      { title: "UX in the development process", kind: "AI & Applied Innovation" },
+      { title: "Solopreneur Fireside Chat", kind: "Small Business & Solopreneur" },
     ],
   },
   {
     slug: "legacy-park",
     name: "Legacy Park",
-    host: "SASTW · social",
+    host: "Startup + Tech Week · Social",
+    desc: "Where the week unwinds — mixers, coffee, and open-air socials.",
     tag: "Where the circuits converge",
     color: "#ff6b57",
     port: "p4",
+    image: ASSET("sastw-legacypark.jpg"),
+    imageWidth: 1280,
+    imageHeight: 720,
     ascii: `   ♣   ♣  ⚡♣
   ♣♣♣ ♣♣♣ ♣♣♣
    |   |   |
   ____________
  [__  STAGE __]`,
     sessions: [
-      { title: "The Bash", kind: "After-hours" },
+      { title: "UTSA RowdyHacks Coffee Social", kind: "ACM UTSA" },
       { title: "Founders social", kind: "Mixer" },
     ],
   },
 ];
-
-// Port vertical positions on the source node's right edge (fan-out order).
-export const PORT_TOP: Record<string, string> = {
-  p1: "24%",
-  p2: "43%",
-  p3: "62%",
-  p4: "81%",
-};

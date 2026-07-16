@@ -100,6 +100,7 @@ export function ShaderCanvas({
   className,
   base = [0.08, 0.0, 0.05],
   sweep,
+  active = true,
 }: {
   color: string;
   maskClassName: string;
@@ -109,10 +110,16 @@ export function ShaderCanvas({
   base?: [number, number, number];
   /** Colors swept left→right as the cursor moves across the shape. */
   sweep?: string[];
+  /** When false, keep the context warm but skip GPU work (paused). */
+  active?: boolean;
 }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const reduce = useReducedMotion();
   const [failed, setFailed] = React.useState(false);
+  const activeRef = React.useRef(active);
+  React.useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
 
   const mouse = React.useRef<[number, number]>([0.5, 0.55]);
   const target = React.useRef<[number, number, number]>(hexToRgb(color));
@@ -171,6 +178,10 @@ export function ShaderCanvas({
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
       const draw = (now: number) => {
+        if (!activeRef.current) {
+          raf = requestAnimationFrame(draw);
+          return; // paused — no GPU work while idle
+        }
         const w = canvas.clientWidth;
         const h = canvas.clientHeight;
         const bw = Math.max(1, Math.floor(w * dpr));
