@@ -22,3 +22,12 @@ export const TEAM_NOTIFY_TO = (
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
+
+// Weekly registration digest list — the routing table adds justin@ here.
+export const DIGEST_TO = (
+  process.env.DIGEST_EMAILS ??
+  "programs@geekdom.com,lesliechasnoff@geekdom.com,brooke@geekdom.com,justin@geekdom.com"
+)
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
