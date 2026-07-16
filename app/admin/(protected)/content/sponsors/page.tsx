@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth/session";
 import { listSponsors } from "@/lib/admin/cms-queries";
-import { saveSponsor, deleteSponsor } from "@/lib/admin/cms-actions";
+import {
+  saveSponsor,
+  deleteSponsor,
+  reorderSponsors,
+} from "@/lib/admin/cms-actions";
 import { LogoEntityManager } from "@/components/admin/cms/logo-entity-manager";
 import { PageHeader } from "@/components/admin/page-header";
 
@@ -20,6 +24,7 @@ export default async function SponsorsPage() {
         rows={rows}
         saveAction={saveSponsor}
         deleteAction={deleteSponsor}
+        reorderAction={reorderSponsors}
       />
     </div>
   );

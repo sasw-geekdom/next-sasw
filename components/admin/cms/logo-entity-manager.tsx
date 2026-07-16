@@ -3,10 +3,13 @@
 import * as React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Drawer } from "@/components/ui/drawer";
+import { useDragReorder } from "@/lib/admin/use-drag-reorder";
+import { cn } from "@/lib/utils";
 import type { SaveResult } from "@/lib/admin/cms-actions";
 import type { LogoEntityRow } from "@/lib/admin/cms-types";
 
@@ -15,9 +18,16 @@ interface Props {
   rows: LogoEntityRow[];
   saveAction: (form: FormData) => Promise<SaveResult>;
   deleteAction: (id: string) => Promise<SaveResult>;
+  reorderAction: (ids: string[]) => Promise<SaveResult>;
 }
 
-export function LogoEntityManager({ noun, rows, saveAction, deleteAction }: Props) {
+export function LogoEntityManager({
+  noun,
+  rows,
+  saveAction,
+  deleteAction,
+  reorderAction,
+}: Props) {
   const router = useRouter();
   const [editing, setEditing] = React.useState<LogoEntityRow | "new" | null>(
     null,
@@ -27,6 +37,13 @@ export function LogoEntityManager({ noun, rows, saveAction, deleteAction }: Prop
   const [issues, setIssues] = React.useState<Record<string, string[] | undefined>>(
     {},
   );
+
+  const { items, draggingId, dragProps } = useDragReorder(rows, (ids) => {
+    startTransition(async () => {
+      await reorderAction(ids);
+      router.refresh();
+    });
+  });
 
   function open(row: LogoEntityRow | "new") {
     setError(null);
@@ -64,24 +81,38 @@ export function LogoEntityManager({ noun, rows, saveAction, deleteAction }: Prop
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-4">
+        <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
+          Drag cards to set the display order — the public site follows it.
+        </p>
         <Button onClick={() => open("new")}>Add {noun}</Button>
       </div>
 
-      {rows.length === 0 ? (
+      {items.length === 0 ? (
         <Empty noun={noun} />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {rows.map((row) => (
+          {items.map((row, i) => (
             <div
               key={row.id}
-              className="flex flex-col gap-3 rounded-lg border border-border bg-white p-4"
+              {...dragProps(i)}
+              className={cn(
+                "flex cursor-grab flex-col gap-3 rounded-lg border border-border bg-white p-4 active:cursor-grabbing",
+                draggingId === row.id && "border-magenta opacity-60",
+              )}
             >
+              <div className="flex items-center justify-between text-muted-foreground/60">
+                <GripVertical className="h-4 w-4" aria-hidden="true" />
+                <span className="font-mono text-[10px] tabular-nums">
+                  {i + 1}
+                </span>
+              </div>
               <div className="flex h-24 items-center justify-center rounded-md bg-muted/50">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={row.imageUrl}
                   alt={row.name}
+                  draggable={false}
                   className="max-h-20 max-w-full object-contain"
                 />
               </div>
@@ -90,6 +121,7 @@ export function LogoEntityManager({ noun, rows, saveAction, deleteAction }: Prop
                 href={row.link}
                 target="_blank"
                 rel="noreferrer"
+                draggable={false}
                 className="truncate text-xs text-magenta hover:underline"
               >
                 {row.link}

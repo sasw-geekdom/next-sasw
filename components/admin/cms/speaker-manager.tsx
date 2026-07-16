@@ -3,12 +3,19 @@
 import * as React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Drawer } from "@/components/ui/drawer";
-import { saveSpeaker, deleteSpeaker } from "@/lib/admin/cms-actions";
+import {
+  saveSpeaker,
+  deleteSpeaker,
+  reorderSpeakers,
+} from "@/lib/admin/cms-actions";
+import { useDragReorder } from "@/lib/admin/use-drag-reorder";
+import { cn } from "@/lib/utils";
 import type { SpeakerRow } from "@/lib/admin/cms-types";
 
 export function SpeakerManager({ rows }: { rows: SpeakerRow[] }) {
@@ -19,6 +26,13 @@ export function SpeakerManager({ rows }: { rows: SpeakerRow[] }) {
   const [issues, setIssues] = React.useState<Record<string, string[] | undefined>>(
     {},
   );
+
+  const { items, draggingId, dragProps } = useDragReorder(rows, (ids) => {
+    startTransition(async () => {
+      await reorderSpeakers(ids);
+      router.refresh();
+    });
+  });
 
   function open(row: SpeakerRow | "new") {
     setError(null);
@@ -56,27 +70,41 @@ export function SpeakerManager({ rows }: { rows: SpeakerRow[] }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-4">
+        <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
+          Drag cards to set the display order — the public site follows it.
+        </p>
         <Button onClick={() => open("new")}>Add speaker</Button>
       </div>
 
-      {rows.length === 0 ? (
+      {items.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-10 text-center text-muted-foreground">
           No speakers yet. Add the first one.
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {rows.map((row) => (
+          {items.map((row, i) => (
             <div
               key={row.id}
-              className="flex flex-col gap-3 rounded-lg border border-border bg-white p-4"
+              {...dragProps(i)}
+              className={cn(
+                "flex cursor-grab flex-col gap-3 rounded-lg border border-border bg-white p-4 active:cursor-grabbing",
+                draggingId === row.id && "border-magenta opacity-60",
+              )}
             >
+              <div className="flex items-center justify-between text-muted-foreground/60">
+                <GripVertical className="h-4 w-4" aria-hidden="true" />
+                <span className="font-mono text-[10px] tabular-nums">
+                  {i + 1}
+                </span>
+              </div>
               <div className="flex items-center gap-3">
                 {row.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={row.imageUrl}
                     alt={row.name}
+                    draggable={false}
                     className="h-14 w-14 rounded-full object-cover"
                   />
                 ) : (
@@ -91,6 +119,7 @@ export function SpeakerManager({ rows }: { rows: SpeakerRow[] }) {
                       href={row.linkedin}
                       target="_blank"
                       rel="noreferrer"
+                      draggable={false}
                       className="text-xs text-magenta hover:underline"
                     >
                       LinkedIn

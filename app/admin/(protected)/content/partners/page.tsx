@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth/session";
 import { listPartners } from "@/lib/admin/cms-queries";
-import { savePartner, deletePartner } from "@/lib/admin/cms-actions";
+import {
+  savePartner,
+  deletePartner,
+  reorderPartners,
+} from "@/lib/admin/cms-actions";
 import { LogoEntityManager } from "@/components/admin/cms/logo-entity-manager";
 import { PageHeader } from "@/components/admin/page-header";
 
@@ -20,6 +24,7 @@ export default async function PartnersPage() {
         rows={rows}
         saveAction={savePartner}
         deleteAction={deletePartner}
+        reorderAction={reorderPartners}
       />
     </div>
   );

@@ -15,20 +15,31 @@ function toMillis(v: unknown): number | null {
   return v instanceof Timestamp ? v.toMillis() : null;
 }
 
+// Admin drag order; docs from before ordering existed sort last, by name.
+function orderOf(d: FirebaseFirestore.DocumentData): number {
+  return typeof d.order === "number" ? d.order : Number.MAX_SAFE_INTEGER;
+}
+
 async function listLogoEntities(
   collection: string,
 ): Promise<LogoEntityRow[]> {
-  const snap = await adminDb.collection(collection).orderBy("name").get();
-  return snap.docs.map((doc) => {
-    const d = doc.data();
-    return {
-      id: doc.id,
-      name: d.name ?? "",
-      imageUrl: d.imageUrl ?? "",
-      link: d.link ?? "",
-      createdAt: toMillis(d.createdAt) ?? 0,
-    };
-  });
+  const snap = await adminDb.collection(collection).get();
+  return snap.docs
+    .sort(
+      (a, b) =>
+        orderOf(a.data()) - orderOf(b.data()) ||
+        (a.get("name") ?? "").localeCompare(b.get("name") ?? ""),
+    )
+    .map((doc) => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        name: d.name ?? "",
+        imageUrl: d.imageUrl ?? "",
+        link: d.link ?? "",
+        createdAt: toMillis(d.createdAt) ?? 0,
+      };
+    });
 }
 
 export function listPartners() {
@@ -40,18 +51,24 @@ export function listSponsors() {
 }
 
 export async function listSpeakers(): Promise<SpeakerRow[]> {
-  const snap = await adminDb.collection(COLLECTIONS.speakers).orderBy("name").get();
-  return snap.docs.map((doc) => {
-    const d = doc.data();
-    return {
-      id: doc.id,
-      name: d.name ?? "",
-      imageUrl: d.imageUrl ?? "",
-      bio: d.bio ?? "",
-      linkedin: d.linkedin ?? "",
-      createdAt: toMillis(d.createdAt) ?? 0,
-    };
-  });
+  const snap = await adminDb.collection(COLLECTIONS.speakers).get();
+  return snap.docs
+    .sort(
+      (a, b) =>
+        orderOf(a.data()) - orderOf(b.data()) ||
+        (a.get("name") ?? "").localeCompare(b.get("name") ?? ""),
+    )
+    .map((doc) => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        name: d.name ?? "",
+        imageUrl: d.imageUrl ?? "",
+        bio: d.bio ?? "",
+        linkedin: d.linkedin ?? "",
+        createdAt: toMillis(d.createdAt) ?? 0,
+      };
+    });
 }
 
 export async function listSessions(): Promise<SessionRow[]> {

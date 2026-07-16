@@ -55,7 +55,7 @@ export const ROOMS: Room[] = [
   {
     slug: "the-rand",
     name: "The Rand",
-    host: "Geekdom · DEVSA Community",
+    host: "Geekdom · Tech Bloc · DEVSA Community",
     desc: "Find your people. Build your future. Community-driven activations — run by the orgs and partners that build here.",
     tag: "Tech & Builders",
     color: "#4d7cff",

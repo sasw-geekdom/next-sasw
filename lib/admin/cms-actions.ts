@@ -76,12 +76,57 @@ async function saveLogoEntity(
     await ref.set({
       ...parsed.data,
       imageUrl,
+      order: Date.now(), // new entries sort after any drag-ordered ones
       createdAt: FieldValue.serverTimestamp(),
     });
   }
 
   revalidate(entity);
   return okResult(ref.id);
+}
+
+// ─── Display order (drag-and-drop in the admin) ─────────────────────────────
+const REORDERABLE = ["partners", "sponsors", "speakers"] as const;
+type Reorderable = (typeof REORDERABLE)[number];
+
+async function reorderEntities(
+  entity: Reorderable,
+  ids: string[],
+): Promise<SaveResult> {
+  await requireAdmin();
+  if (
+    !REORDERABLE.includes(entity) ||
+    !Array.isArray(ids) ||
+    ids.length === 0 ||
+    ids.length > 500 ||
+    ids.some((id) => typeof id !== "string" || !id)
+  ) {
+    return { ok: false, error: "Bad order." };
+  }
+  try {
+    const batch = adminDb.batch();
+    ids.forEach((id, i) => {
+      batch.update(adminDb.collection(COLLECTIONS[entity]).doc(id), {
+        order: i,
+      });
+    });
+    await batch.commit();
+  } catch {
+    return { ok: false, error: "Reorder failed — refresh and try again." };
+  }
+  revalidate(entity);
+  revalidatePath("/"); // the homepage wall follows this order
+  return okResult("");
+}
+
+export async function reorderPartners(ids: string[]) {
+  return reorderEntities("partners", ids);
+}
+export async function reorderSponsors(ids: string[]) {
+  return reorderEntities("sponsors", ids);
+}
+export async function reorderSpeakers(ids: string[]) {
+  return reorderEntities("speakers", ids);
 }
 
 export async function savePartner(form: FormData) {
@@ -148,6 +193,7 @@ export async function saveSpeaker(form: FormData): Promise<SaveResult> {
     await ref.set({
       ...parsed.data,
       imageUrl,
+      order: Date.now(), // new entries sort after any drag-ordered ones
       createdAt: FieldValue.serverTimestamp(),
     });
   }

@@ -91,6 +91,7 @@ export interface LogoEntityDoc {
   name: string;
   imageUrl: string;
   link: string;
+  order?: number; // admin drag order; new docs get Date.now() → sort last
   createdAt: Timestamp;
 }
 
@@ -99,6 +100,7 @@ export interface SpeakerDoc {
   imageUrl: string;
   bio: string;
   linkedin: string;
+  order?: number; // admin drag order; new docs get Date.now() → sort last
   createdAt: Timestamp;
 }
 
