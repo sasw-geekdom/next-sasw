@@ -71,13 +71,14 @@ export const ROOMS: Room[] = [
     sessions: [
       { title: "PySanAntonio II", kind: "Alamo Python x PyTexas Foundation" },
       { title: "Game Design Summit", kind: "Greater Gaming Society" },
+      { title: "Founder Speed Date", kind: "Tech Bloc" },
     ],
   },
   {
     slug: "central-library",
     name: "Central Library",
     host: "LaunchSA · Small Business",
-    desc: "LaunchSA's house — programming built for small business and solopreneurs.",
+    desc: "LaunchSA HQ — Programming built for small business and solopreneurs.",
     tag: "Small Business & Solopreneur",
     color: "#b45cff",
     port: "p3",
@@ -92,7 +93,7 @@ export const ROOMS: Room[] = [
   ===========`,
     sessions: [
       { title: "UX in the development process", kind: "AI & Applied Innovation" },
-      { title: "Solopreneur Fireside Chat", kind: "Small Business & Solopreneur" },
+      { title: "Your AI cofounder and dev team", kind: "Small Business & Solopreneur" },
     ],
   },
   {

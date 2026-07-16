@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 const SOCIALS = [
-  { label: "Instagram", href: "https://www.instagram.com/geekdomsa/" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/company/geekdom/" },
+  { label: "Instagram", href: "https://www.instagram.com/sastartup/" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/san-antonio-startup-week/" },
   { label: "YouTube", href: "https://www.youtube.com/@Geekdomsa" },
   { label: "X", href: "https://x.com/Geekdom" },
 ];
