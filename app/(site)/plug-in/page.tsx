@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { FormPage } from "@/components/site/form-page";
 import { SpeakerForm } from "@/components/forms/speaker-form";
 
@@ -25,9 +26,10 @@ export default function PlugInPage() {
         Want to sponsor or host an event?{" "}
         <Link
           href="/get-involved"
-          className="font-medium text-magenta hover:underline"
+          className="inline-flex items-center gap-0.5 font-medium text-magenta hover:underline"
         >
-          Get involved {"↗"}
+          Get involved
+          <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
         </Link>
       </p>
     </FormPage>
