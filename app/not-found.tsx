@@ -28,19 +28,19 @@ export default function NotFound() {
           Signal lost.
         </h1>
         <p className="mx-auto mt-3 max-w-md text-pretty text-white/60">
-          This page isn&apos;t on the grid. Ride the current back — or run the
-          bolt while you&apos;re here.
+          This page isn&apos;t on the grid yet — the lineup&apos;s still being
+          wired. Run the bolt while you wait, or ride the current back.
         </p>
       </div>
 
       <NotFoundGame />
 
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
-        <Link href="/" className="font-medium text-magenta hover:underline">
-          Plug back in &rarr;
-        </Link>
-        <Link href="/register" className="text-white/60 hover:text-white">
+        <Link href="/register" className="font-medium text-magenta hover:underline">
           Register &rarr;
+        </Link>
+        <Link href="/" className="text-white/60 hover:text-white">
+          Plug back in &rarr;
         </Link>
       </div>
     </main>
