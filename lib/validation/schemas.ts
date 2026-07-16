@@ -1,5 +1,11 @@
 import { z } from "zod";
 import { TRACK_NAMES } from "@/lib/tracks";
+import {
+  DESCRIBES_YOU,
+  INDUSTRIES,
+  SA_TENURE,
+  VOLUNTEER_DAYS,
+} from "@/lib/registration";
 
 // Shared field pieces.
 const email = z.string().trim().toLowerCase().email("Enter a valid email.");
@@ -37,12 +43,40 @@ export const speakerSubmissionSchema = z.object({
 export type SpeakerSubmissionInput = z.infer<typeof speakerSubmissionSchema>;
 
 // ─── Registration ───────────────────────────────────────────────────────────
+// Optional single-selects arrive as "" when untouched — normalize to undefined.
+const optionalChoice = <T extends readonly [string, ...string[]]>(values: T) =>
+  z
+    .enum(values)
+    .optional()
+    .or(z.literal("").transform(() => undefined));
+
 export const registrationSchema = z.object({
+  // Required
   name,
   email,
-  company: z.string().trim().min(2, "Company or project is required.").max(160),
-  role: z.string().trim().min(2, "What's your role?").max(120),
-  interest: z.string().trim().max(500).optional().or(z.literal("")),
+  zip: z
+    .string()
+    .trim()
+    .regex(/^\d{5}$/, "Enter a 5-digit ZIP code."),
+
+  // Optional — About you
+  describesYou: optionalChoice(DESCRIBES_YOU),
+  company: z.string().trim().max(160).optional().or(z.literal("")),
+  role: z.string().trim().max(120).optional().or(z.literal("")),
+  industry: optionalChoice(INDUSTRIES),
+  saTenure: optionalChoice(SA_TENURE),
+
+  // Optional — Your week
+  circuits: z.array(z.enum(TRACK_NAMES)).max(TRACK_NAMES.length).default([]),
+  firstTime: z.boolean().optional(),
+
+  // Optional — Volunteering
+  volunteerInterested: z.boolean().optional(),
+  volunteerDays: z.array(z.enum(VOLUNTEER_DAYS)).max(5).default([]),
+  volunteerNotes: z.string().trim().max(500).optional().or(z.literal("")),
+
+  // Sponsor consent (default unchecked)
+  sponsorConsent: z.boolean().default(false),
 });
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;

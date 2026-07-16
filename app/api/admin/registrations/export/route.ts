@@ -10,14 +10,26 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
+  const yn = (v: boolean | undefined) =>
+    v === undefined ? "" : v ? "yes" : "no";
+
   const rows = await listRegistrations();
   const csv = toCsv(
     [
       "Name",
       "Email",
+      "ZIP",
+      "Describes you",
       "Company",
       "Role",
-      "Interest",
+      "Industry",
+      "Time in SA",
+      "Circuits",
+      "First time",
+      "Volunteer",
+      "Volunteer days",
+      "Volunteer preferences",
+      "Sponsor consent",
       "Registered",
       "Checked in",
       "Checked in at",
@@ -26,9 +38,18 @@ export async function GET() {
     rows.map((r) => [
       r.name,
       r.email,
+      r.zip ?? "",
+      r.describesYou ?? "",
       r.company ?? "",
       r.role ?? "",
-      r.interest ?? "",
+      r.industry ?? "",
+      r.saTenure ?? "",
+      r.circuits.join("; "),
+      yn(r.firstTime),
+      yn(r.volunteerInterested),
+      r.volunteerDays.join("; "),
+      r.volunteerNotes ?? "",
+      r.sponsorConsent ? "yes" : "no",
       formatDateTime(r.createdAt),
       r.checkedIn ? "yes" : "no",
       formatDateTime(r.checkedInAt),

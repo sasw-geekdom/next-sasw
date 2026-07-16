@@ -46,11 +46,26 @@ export interface SpeakerSubmissionDoc {
 }
 
 export interface RegistrationDoc {
+  // Required
   name: string;
   email: string;
+  zip: string;
+  // Optional — About you
+  describesYou?: string;
   company?: string;
   role?: string;
-  interest?: string;
+  industry?: string;
+  saTenure?: string;
+  // Optional — Your week
+  circuits: TrackName[];
+  firstTime?: boolean;
+  // Optional — Volunteering (filtered view/tag in admin)
+  volunteerInterested?: boolean;
+  volunteerDays: string[];
+  volunteerNotes?: string;
+  // Sponsor consent (filtered view/tag in admin)
+  sponsorConsent: boolean;
+  // Check-in
   checkedIn: boolean;
   checkedInAt: Timestamp | null;
   checkedInBy: string | null;

@@ -16,7 +16,7 @@ export default function RegisterPage() {
           Get on the <span className="text-magenta">list.</span>
         </>
       }
-      subtitle="The current runs through SA, Sept 28 – Oct 2. Register free — we'll send you the schedule and where to be."
+      subtitle="The current runs through SA, Sept 28 – Oct 2. Register free, pick your circuits, and we'll send you the schedule and where to be."
     >
       <RegistrationForm />
     </FormPage>

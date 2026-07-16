@@ -99,9 +99,21 @@ export async function listRegistrations(): Promise<RegistrationRow[]> {
       id: doc.id,
       name: d.name ?? "",
       email: d.email ?? "",
+      zip: d.zip ?? undefined,
+      describesYou: d.describesYou ?? undefined,
       company: d.company ?? undefined,
       role: d.role ?? undefined,
-      interest: d.interest ?? undefined,
+      industry: d.industry ?? undefined,
+      saTenure: d.saTenure ?? undefined,
+      circuits: Array.isArray(d.circuits) ? d.circuits : [],
+      firstTime: typeof d.firstTime === "boolean" ? d.firstTime : undefined,
+      volunteerInterested:
+        typeof d.volunteerInterested === "boolean"
+          ? d.volunteerInterested
+          : undefined,
+      volunteerDays: Array.isArray(d.volunteerDays) ? d.volunteerDays : [],
+      volunteerNotes: d.volunteerNotes ?? undefined,
+      sponsorConsent: Boolean(d.sponsorConsent),
       checkedIn: Boolean(d.checkedIn),
       checkedInAt: toMillis(d.checkedInAt),
       checkedInBy: d.checkedInBy ?? null,

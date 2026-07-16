@@ -40,16 +40,33 @@ export async function POST(request: Request) {
     .get();
 
   if (existing.empty) {
-    await adminDb.collection(COLLECTIONS.registrations).add({
-      ...data,
-      company: data.company || undefined,
-      role: data.role || undefined,
-      interest: data.interest || undefined,
+    // Build the doc explicitly, skipping blank optionals — Firestore rejects
+    // `undefined` values and empty strings just pollute the export.
+    const doc: Record<string, unknown> = {
+      name: data.name,
+      email: data.email,
+      zip: data.zip,
+      circuits: data.circuits,
+      volunteerDays: data.volunteerInterested ? data.volunteerDays : [],
+      sponsorConsent: data.sponsorConsent,
       checkedIn: false,
       checkedInAt: null,
       checkedInBy: null,
       createdAt: FieldValue.serverTimestamp(),
-    });
+    };
+    if (data.describesYou) doc.describesYou = data.describesYou;
+    if (data.company) doc.company = data.company;
+    if (data.role) doc.role = data.role;
+    if (data.industry) doc.industry = data.industry;
+    if (data.saTenure) doc.saTenure = data.saTenure;
+    if (typeof data.firstTime === "boolean") doc.firstTime = data.firstTime;
+    if (typeof data.volunteerInterested === "boolean") {
+      doc.volunteerInterested = data.volunteerInterested;
+    }
+    if (data.volunteerInterested && data.volunteerNotes) {
+      doc.volunteerNotes = data.volunteerNotes;
+    }
+    await adminDb.collection(COLLECTIONS.registrations).add(doc);
   }
 
   // 4) Branded confirmation (best-effort). Send even on re-register so the
