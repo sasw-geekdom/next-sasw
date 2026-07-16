@@ -7,5 +7,6 @@ initBotId({
   protect: [
     { path: "/api/speakers", method: "POST" },
     { path: "/api/register", method: "POST" },
+    { path: "/api/get-involved", method: "POST" },
   ],
 });

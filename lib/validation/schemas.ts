@@ -6,6 +6,7 @@ import {
   SA_TENURE,
   VOLUNTEER_DAYS,
 } from "@/lib/registration";
+import { BUDGET_RANGES, VENUE_STATUS, HEARD_ABOUT } from "@/lib/get-involved";
 
 // Shared field pieces.
 const email = z.string().trim().toLowerCase().email("Enter a valid email.");
@@ -80,6 +81,60 @@ export const registrationSchema = z.object({
 });
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;
+
+// ─── Get Involved ───────────────────────────────────────────────────────────
+// One form, three routed paths (sponsor / host / general). Section 1 contact
+// fields are required for every path; Section 3 varies by path; Section 4
+// wrap-up is shared and optional.
+const getInvolvedBase = {
+  name,
+  email,
+  phone: z.string().trim().min(7, "Phone is required.").max(40),
+  company: z
+    .string()
+    .trim()
+    .min(2, "Company or organization is required.")
+    .max(160),
+  role: z.string().trim().min(2, "What's your role?").max(120),
+  heardAbout: z
+    .enum(HEARD_ABOUT)
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  notes: z.string().trim().max(2000).optional().or(z.literal("")),
+};
+
+export const getInvolvedSchema = z.discriminatedUnion("path", [
+  z.object({
+    path: z.literal("sponsor"),
+    ...getInvolvedBase,
+    anchorEvent: z.string().trim().max(200).optional().or(z.literal("")),
+    goals: z.string().trim().max(2000).optional().or(z.literal("")),
+    budget: z.enum(BUDGET_RANGES, { message: "Pick a ballpark range." }),
+  }),
+  z.object({
+    path: z.literal("host"),
+    ...getInvolvedBase,
+    eventConcept: z
+      .string()
+      .trim()
+      .min(20, "Tell us about the event — working title, format, concept.")
+      .max(3000),
+    audience: z
+      .array(z.enum(TRACK_NAMES))
+      .min(1, "Pick at least one circuit.")
+      .max(TRACK_NAMES.length),
+    attendance: z.string().trim().max(80).optional().or(z.literal("")),
+    preferredTime: z.string().trim().max(200).optional().or(z.literal("")),
+    venue: z.enum(VENUE_STATUS, { message: "Let us know about the venue." }),
+    coSponsors: z.string().trim().max(2000).optional().or(z.literal("")),
+  }),
+  z.object({
+    path: z.literal("general"),
+    ...getInvolvedBase,
+    question: z.string().trim().min(5, "What's your question?").max(3000),
+  }),
+]);
+export type GetInvolvedInput = z.infer<typeof getInvolvedSchema>;
 
 // ─── Plug In · Volunteer ────────────────────────────────────────────────────
 export const volunteerSchema = z.object({

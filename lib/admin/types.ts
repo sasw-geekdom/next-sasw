@@ -51,6 +51,30 @@ export interface RegistrationRow {
   createdAt: number;
 }
 
+export interface GetInvolvedRow {
+  id: string;
+  path: "sponsor" | "host" | "general";
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  role: string;
+  anchorEvent?: string;
+  goals?: string;
+  budget?: string;
+  eventConcept?: string;
+  audience: string[];
+  attendance?: string;
+  preferredTime?: string;
+  venue?: string;
+  coSponsors?: string;
+  question?: string;
+  heardAbout?: string;
+  notes?: string;
+  status: SubmissionStatus;
+  createdAt: number;
+}
+
 export interface VolunteerRow {
   id: string;
   name: string;

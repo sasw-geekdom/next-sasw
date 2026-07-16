@@ -12,3 +12,13 @@ export const EMAIL_FROM =
 
 // Optional monitored reply-to inbox.
 export const EMAIL_REPLY_TO = process.env.RESEND_REPLY_TO?.trim() || undefined;
+
+// Team inboxes notified when a Get Involved submission lands (per the 2026
+// form requirements routing table). Override with a comma-separated env var.
+export const TEAM_NOTIFY_TO = (
+  process.env.TEAM_NOTIFY_EMAILS ??
+  "programs@geekdom.com,lesliechasnoff@geekdom.com,brooke@geekdom.com"
+)
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);

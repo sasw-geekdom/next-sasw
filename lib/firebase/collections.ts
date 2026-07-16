@@ -14,6 +14,7 @@ export const COLLECTIONS = {
   registrations: "registrations",
   volunteers: "volunteers",
   sponsorLeads: "sponsorLeads",
+  getInvolved: "getInvolved",
   speakers: "speakers",
   sessions: "sessions",
   sponsors: "sponsors",
@@ -91,6 +92,36 @@ export interface SponsorLeadDoc {
   website?: string;
   level: string;
   message?: string;
+  status: SubmissionStatus;
+  createdAt: Timestamp;
+}
+
+// Get Involved — one collection, three routed paths. Stored flat; only the
+// fields for the submitted path are present.
+export interface GetInvolvedDoc {
+  path: "sponsor" | "host" | "general";
+  // Section 1 — contact (always present)
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  role: string;
+  // Section 3A — sponsor
+  anchorEvent?: string;
+  goals?: string;
+  budget?: string;
+  // Section 3B — host
+  eventConcept?: string;
+  audience?: TrackName[];
+  attendance?: string;
+  preferredTime?: string;
+  venue?: string;
+  coSponsors?: string;
+  // Section 3C — general
+  question?: string;
+  // Section 4 — wrap-up
+  heardAbout?: string;
+  notes?: string;
   status: SubmissionStatus;
   createdAt: Timestamp;
 }

@@ -8,6 +8,7 @@ import type {
   SpeakerSubmissionRow,
   VolunteerRow,
   SponsorLeadRow,
+  GetInvolvedRow,
 } from "@/lib/admin/types";
 
 function toMillis(value: unknown): number | null {
@@ -81,6 +82,40 @@ export async function listSponsorLeads(): Promise<SponsorLeadRow[]> {
       website: d.website ?? undefined,
       level: d.level ?? "",
       message: d.message ?? undefined,
+      status: d.status ?? "new",
+      createdAt: toMillis(d.createdAt) ?? 0,
+    };
+  });
+}
+
+export async function listGetInvolved(): Promise<GetInvolvedRow[]> {
+  const snap = await adminDb
+    .collection(COLLECTIONS.getInvolved)
+    .orderBy("createdAt", "desc")
+    .get();
+
+  return snap.docs.map((doc) => {
+    const d = doc.data();
+    return {
+      id: doc.id,
+      path: d.path ?? "general",
+      name: d.name ?? "",
+      email: d.email ?? "",
+      phone: d.phone ?? "",
+      company: d.company ?? "",
+      role: d.role ?? "",
+      anchorEvent: d.anchorEvent ?? undefined,
+      goals: d.goals ?? undefined,
+      budget: d.budget ?? undefined,
+      eventConcept: d.eventConcept ?? undefined,
+      audience: Array.isArray(d.audience) ? d.audience : [],
+      attendance: d.attendance ?? undefined,
+      preferredTime: d.preferredTime ?? undefined,
+      venue: d.venue ?? undefined,
+      coSponsors: d.coSponsors ?? undefined,
+      question: d.question ?? undefined,
+      heardAbout: d.heardAbout ?? undefined,
+      notes: d.notes ?? undefined,
       status: d.status ?? "new",
       createdAt: toMillis(d.createdAt) ?? 0,
     };

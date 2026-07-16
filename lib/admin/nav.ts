@@ -8,6 +8,7 @@ import {
   Heart,
   HandCoins,
   Handshake,
+  Inbox,
   Star,
   Calendar,
   Layers,
@@ -29,6 +30,7 @@ export const PRIMARY_NAV: NavItem[] = [
   { href: "/admin/registrations", label: "Registrations", icon: Users },
   { href: "/admin/volunteers", label: "Volunteers", icon: Heart },
   { href: "/admin/sponsors", label: "Sponsors", icon: HandCoins },
+  { href: "/admin/get-involved", label: "Get Involved", icon: Inbox },
   { href: "/admin/checkin", label: "Check-in", icon: UserCheck },
 ];
 

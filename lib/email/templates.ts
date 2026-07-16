@@ -33,7 +33,10 @@ export type EmailTemplateKey =
   | "registration"
   | "speaker"
   | "volunteer"
-  | "sponsor";
+  | "sponsor"
+  | "getInvolvedSponsor"
+  | "getInvolvedHost"
+  | "getInvolvedGeneral";
 
 export interface TemplateVars {
   firstName: string;
@@ -88,6 +91,43 @@ export const DEFAULT_SPONSOR_COPY: EmailCopy = {
   signoff: "Plug in.",
 };
 
+// Get Involved confirmations — response-time promises come from the 2026 form
+// requirements (sponsor: 2 business days, host: 5, general: 3).
+export const DEFAULT_GET_INVOLVED_SPONSOR_COPY: EmailCopy = {
+  subject: "Got it — let's power the week.",
+  heading: "Got it.",
+  body: [
+    "Thanks, {firstName}.",
+    "Your sponsorship inquiry for San Antonio Startup + Tech Week (Sept 28 – Oct 2) is in. Someone from our sponsor team will be in touch within 2 business days.",
+    "Sponsors are the grid the current runs on. Let's build it.",
+  ].join("\n\n"),
+  ctaIntro: "Hold the dates while we connect:",
+  signoff: "Plug in.",
+};
+
+export const DEFAULT_GET_INVOLVED_HOST_COPY: EmailCopy = {
+  subject: "Got your event. We're on it.",
+  heading: "Got it.",
+  body: [
+    "Thanks, {firstName}.",
+    "We'll review your submission and get back to you within 5 business days. Some anchor events and key session dates/times are locked, so if we need to shift your time, we'll work it out with you.",
+    "Every room on the grid makes the current stronger.",
+  ].join("\n\n"),
+  ctaIntro: "Block the week while we review:",
+  signoff: "Plug in.",
+};
+
+export const DEFAULT_GET_INVOLVED_GENERAL_COPY: EmailCopy = {
+  subject: "Got your question.",
+  heading: "Got it.",
+  body: [
+    "Thanks, {firstName}.",
+    "We'll get back to you as soon as we can, typically within 3 business days.",
+  ].join("\n\n"),
+  ctaIntro: "In the meantime, lock the dates:",
+  signoff: "Plug in.",
+};
+
 export interface EmailTemplateMeta {
   key: EmailTemplateKey;
   label: string;
@@ -129,6 +169,33 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
     description: "Sent automatically when someone submits a sponsor inquiry.",
     tokens: ["{firstName}"],
     defaults: DEFAULT_SPONSOR_COPY,
+    sample: { firstName: "Alex" },
+  },
+  {
+    key: "getInvolvedSponsor",
+    label: "Get Involved · Sponsor confirmation",
+    description:
+      "Sent automatically when someone submits the Get Involved form on the sponsor path.",
+    tokens: ["{firstName}"],
+    defaults: DEFAULT_GET_INVOLVED_SPONSOR_COPY,
+    sample: { firstName: "Alex" },
+  },
+  {
+    key: "getInvolvedHost",
+    label: "Get Involved · Host confirmation",
+    description:
+      "Sent automatically when someone proposes hosting an event during the week.",
+    tokens: ["{firstName}"],
+    defaults: DEFAULT_GET_INVOLVED_HOST_COPY,
+    sample: { firstName: "Alex" },
+  },
+  {
+    key: "getInvolvedGeneral",
+    label: "Get Involved · General confirmation",
+    description:
+      "Sent automatically when someone submits a general question via Get Involved.",
+    tokens: ["{firstName}"],
+    defaults: DEFAULT_GET_INVOLVED_GENERAL_COPY,
     sample: { firstName: "Alex" },
   },
 ];
@@ -346,4 +413,31 @@ export function sponsorEmail(
   copy: EmailCopy = DEFAULT_SPONSOR_COPY,
 ): { subject: string; html: string } {
   return renderEmail(copy, { firstName: firstNameOf(input.name) });
+}
+
+// ─── Internal team notification (not admin-editable) ───────────────────────
+// A plain field rundown sent to the SASTW team when a Get Involved submission
+// lands. Reuses the brand shell; content is just label/value rows.
+
+export function internalNotificationEmail(input: {
+  title: string;
+  fields: { label: string; value: string | undefined }[];
+}): { subject: string; html: string } {
+  const rows = input.fields
+    .filter((f) => f.value && f.value.trim())
+    .map(
+      (f) => `
+<tr>
+  <td style="padding:6px 12px 6px 0;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:${MUTED};vertical-align:top;white-space:nowrap;">${escapeHtml(f.label)}</td>
+  <td style="padding:6px 0;font-size:14px;line-height:20px;color:${INK};vertical-align:top;">${escapeHtml(f.value!).replace(/\n/g, "<br/>")}</td>
+</tr>`,
+    )
+    .join("");
+  return {
+    subject: input.title,
+    html: shell(
+      heading(escapeHtml(input.title)) +
+        `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">${rows}</table>`,
+    ),
+  };
 }
