@@ -1,10 +1,17 @@
 import Link from "next/link";
 
+const SOCIALS = [
+  { label: "Instagram", href: "https://www.instagram.com/geekdomsa/" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/geekdom/" },
+  { label: "YouTube", href: "https://www.youtube.com/@Geekdomsa" },
+  { label: "X", href: "https://x.com/Geekdom" },
+];
+
 export function SiteFooter() {
   return (
     <footer className="bg-black text-white">
       <div className="mx-auto w-full max-w-7xl px-6 py-14">
-        <div className="flex flex-col gap-10 md:flex-row md:justify-between">
+        <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -13,11 +20,12 @@ export function SiteFooter() {
               className="h-28 w-auto"
             />
             <p className="mt-5 max-w-xs text-sm text-white/60">
-              The current runs through SA. Sept 28 – Oct 2. Plug in.
+              Five circuits, four rooms, one current — Sept 28 – Oct 2,
+              downtown San Antonio.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-10 text-sm sm:gap-16">
+          <div className="grid grid-cols-2 gap-10 text-sm sm:grid-cols-4 sm:gap-12">
             <div>
               <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/40">
                 Event
@@ -29,8 +37,35 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/speakers" className="hover:text-magenta">
+                    Speakers
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/sessions" className="hover:text-magenta">
+                    Sessions
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/40">
+                Plug in
+              </div>
+              <ul className="space-y-2 text-white/70">
+                <li>
                   <Link href="/plug-in" className="hover:text-magenta">
-                    Plug in
+                    Speak
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/plug-in" className="hover:text-magenta">
+                    Volunteer
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/plug-in" className="hover:text-magenta">
+                    Sponsor
                   </Link>
                 </li>
               </ul>
@@ -40,8 +75,30 @@ export function SiteFooter() {
                 Where
               </div>
               <ul className="space-y-2 text-white/70">
-                <li>Downtown at TPR</li>
-                <li>San Antonio, TX</li>
+                <li>Texas Public Radio</li>
+                <li>The Rand</li>
+                <li>LaunchSA</li>
+                <li>Legacy Park</li>
+              </ul>
+            </div>
+            <div>
+              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/40">
+                Follow
+              </div>
+              <ul className="space-y-2 text-white/70">
+                {SOCIALS.map(({ label, href }) => (
+                  <li key={href}>
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Geekdom on ${label}`}
+                      className="hover:text-magenta"
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -54,7 +111,7 @@ export function SiteFooter() {
             aria-label="15 years of Geekdom"
             className="group inline-flex items-center gap-2 text-white/40 transition-colors hover:text-white/70"
           >
-            <span>Powered by</span>
+            <span>15 years of</span>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/og-geekdom.svg"
