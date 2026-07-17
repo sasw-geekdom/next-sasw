@@ -108,6 +108,29 @@ export async function checkIn(id: string): Promise<ActionResult> {
   return { ok: true };
 }
 
+/** Permanently delete a registration (test-data cleanup). */
+export async function deleteRegistration(id: string): Promise<ActionResult> {
+  await requireAdmin();
+  if (!id) return { ok: false, error: "Missing registration." };
+
+  await adminDb.collection(COLLECTIONS.registrations).doc(id).delete();
+
+  revalidatePath("/admin/registrations");
+  revalidatePath("/admin/checkin");
+  return { ok: true };
+}
+
+/** Permanently delete a Get Involved submission (test-data cleanup). */
+export async function deleteGetInvolved(id: string): Promise<ActionResult> {
+  await requireAdmin();
+  if (!id) return { ok: false, error: "Missing submission." };
+
+  await adminDb.collection(COLLECTIONS.getInvolved).doc(id).delete();
+
+  revalidatePath("/admin/get-involved");
+  return { ok: true };
+}
+
 /** Reverse a check-in (fix a mistake at the door). */
 export async function undoCheckIn(id: string): Promise<ActionResult> {
   await requireAdmin();

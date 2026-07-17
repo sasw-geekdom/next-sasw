@@ -1,9 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
+import { deleteRegistration } from "@/lib/admin/actions";
 import type { RegistrationRow } from "@/lib/admin/types";
 
 // The two "tag" views from the form requirements: volunteer interest and
@@ -17,11 +20,34 @@ const VIEWS: { key: View; label: string }[] = [
 ];
 
 export function RegistrationsTable({ rows }: { rows: RegistrationRow[] }) {
+  const router = useRouter();
+  const [items, setItems] = React.useState(rows);
   const [query, setQuery] = React.useState("");
   const [view, setView] = React.useState<View>("all");
+  const [confirmId, setConfirmId] = React.useState<string | null>(null);
+  const [pending, startTransition] = React.useTransition();
+
+  // Sync when the server sends fresh rows (after revalidate) — render-phase
+  // derived state, not an effect (avoids the setState-in-effect lint).
+  const [prevRows, setPrevRows] = React.useState(rows);
+  if (prevRows !== rows) {
+    setPrevRows(rows);
+    setItems(rows);
+  }
+
+  function remove(id: string) {
+    const previous = items;
+    setItems((prev) => prev.filter((r) => r.id !== id)); // optimistic
+    setConfirmId(null);
+    startTransition(async () => {
+      const res = await deleteRegistration(id);
+      if (!res.ok) setItems(previous); // revert on failure
+      router.refresh();
+    });
+  }
 
   const filtered = React.useMemo(() => {
-    let list = rows;
+    let list = items;
     if (view === "volunteers") list = list.filter((r) => r.volunteerInterested);
     if (view === "consent") list = list.filter((r) => r.sponsorConsent);
     const q = query.trim().toLowerCase();
@@ -31,15 +57,15 @@ export function RegistrationsTable({ rows }: { rows: RegistrationRow[] }) {
         .filter(Boolean)
         .some((v) => v!.toLowerCase().includes(q)),
     );
-  }, [rows, query, view]);
+  }, [items, query, view]);
 
   const counts = React.useMemo(
     () => ({
-      all: rows.length,
-      volunteers: rows.filter((r) => r.volunteerInterested).length,
-      consent: rows.filter((r) => r.sponsorConsent).length,
+      all: items.length,
+      volunteers: items.filter((r) => r.volunteerInterested).length,
+      consent: items.filter((r) => r.sponsorConsent).length,
     }),
-    [rows],
+    [items],
   );
 
   return (
@@ -88,13 +114,16 @@ export function RegistrationsTable({ rows }: { rows: RegistrationRow[] }) {
               <th className="px-4 py-3 font-medium">Volunteer</th>
               <th className="px-4 py-3 font-medium">Consent</th>
               <th className="px-4 py-3 font-medium">Registered</th>
+              <th className="px-4 py-3 font-medium">
+                <span className="sr-only">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-4 py-10 text-center text-muted-foreground"
                 >
                   {view === "all"
@@ -149,6 +178,33 @@ export function RegistrationsTable({ rows }: { rows: RegistrationRow[] }) {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {formatDate(r.createdAt)}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {confirmId === r.id ? (
+                      <span className="inline-flex items-center gap-2 whitespace-nowrap text-xs">
+                        <button
+                          onClick={() => remove(r.id)}
+                          disabled={pending}
+                          className="font-medium text-red-600 hover:underline disabled:opacity-50"
+                        >
+                          Delete
+                        </button>
+                        <button
+                          onClick={() => setConfirmId(null)}
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          Cancel
+                        </button>
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmId(r.id)}
+                        aria-label={`Delete ${r.name}`}
+                        className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={1.6} />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))
