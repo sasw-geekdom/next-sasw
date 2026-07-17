@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { NotFoundGame } from "@/components/site/not-found-game";
 
 export default function NotFound() {
@@ -36,11 +37,19 @@ export default function NotFound() {
       <NotFoundGame />
 
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
-        <Link href="/register" className="font-medium text-magenta hover:underline">
-          Register &rarr;
+        <Link
+          href="/register"
+          className="inline-flex items-center gap-0.5 font-medium text-magenta hover:underline"
+        >
+          Register
+          <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
         </Link>
-        <Link href="/" className="text-white/60 hover:text-white">
-          Plug back in &rarr;
+        <Link
+          href="/"
+          className="inline-flex items-center gap-0.5 text-white/60 hover:text-white"
+        >
+          Plug back in
+          <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
         </Link>
       </div>
     </main>

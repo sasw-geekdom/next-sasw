@@ -65,6 +65,10 @@ interface Particle {
 
 interface GameState {
   phase: Phase;
+  /** Visible world width — narrower on phones so the panel renders taller. */
+  viewW: number;
+  /** Coarse-pointer device — switches prompt copy to touch wording. */
+  touch: boolean;
   y: number; // bolt feet (bottom); rests on GROUND_Y
   vy: number;
   onGround: boolean;
@@ -180,6 +184,8 @@ class Sfx {
 function newState(): GameState {
   return {
     phase: "idle",
+    viewW: W,
+    touch: false,
     y: GROUND_Y,
     vy: 0,
     onGround: true,
@@ -295,7 +301,7 @@ function pickType(volts: number): OType {
 
 function spawnObstacle(s: GameState, volts: number) {
   const type = pickType(volts);
-  s.obstacles.push({ x: W + 24, ...geometry(type), type });
+  s.obstacles.push({ x: s.viewW + 24, ...geometry(type), type });
 }
 
 function spawnPickup(s: GameState) {
@@ -306,7 +312,7 @@ function spawnPickup(s: GameState) {
     ? open[Math.floor(Math.random() * open.length)]
     : Math.floor(Math.random() * CIRCUITS);
   s.pickups.push({
-    x: W + 24,
+    x: s.viewW + 24,
     y: GROUND_Y - (78 + Math.random() * 34),
     circuit,
   });
@@ -452,17 +458,21 @@ function boltPath(ctx: CanvasRenderingContext2D, h: number) {
   ctx.closePath();
 }
 
-function drawSkyline(ctx: CanvasRenderingContext2D, distance: number) {
+function drawSkyline(
+  ctx: CanvasRenderingContext2D,
+  distance: number,
+  vw: number,
+) {
   // Far layer.
   ctx.fillStyle = SKY_FAR;
   let off = (distance * 0.12) % TILE;
-  for (let base = -off - TILE; base < W + TILE; base += TILE) {
+  for (let base = -off - TILE; base < vw + TILE; base += TILE) {
     for (const b of SKY_FAR_B) ctx.fillRect(base + b[0], GROUND_Y - b[1], b[2], b[1]);
   }
   // Near layer + the tower.
   ctx.fillStyle = SKY_NEAR;
   off = (distance * 0.28) % TILE;
-  for (let base = -off - TILE; base < W + TILE; base += TILE) {
+  for (let base = -off - TILE; base < vw + TILE; base += TILE) {
     for (const b of SKY_NEAR_B) ctx.fillRect(base + b[0], GROUND_Y - b[1], b[2], b[1]);
     const tx = base + 300;
     ctx.fillRect(tx - 4, GROUND_Y - 150, 8, 150); // shaft
@@ -512,23 +522,24 @@ function drawPickup(ctx: CanvasRenderingContext2D, p: Pickup, t: number) {
 }
 
 function draw(ctx: CanvasRenderingContext2D, s: GameState) {
+  const vw = s.viewW;
   ctx.fillStyle = "#0a0a0a";
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillRect(0, 0, vw, H);
 
-  drawSkyline(ctx, s.distance);
+  drawSkyline(ctx, s.distance, vw);
 
   // Ground wire + moving "current" ticks.
   ctx.strokeStyle = "rgba(255,255,255,0.18)";
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(0, GROUND_Y + 1);
-  ctx.lineTo(W, GROUND_Y + 1);
+  ctx.lineTo(vw, GROUND_Y + 1);
   ctx.stroke();
   ctx.strokeStyle = "rgba(255,50,160,0.5)";
   const spacing = 30;
   const off = s.distance % spacing;
   ctx.beginPath();
-  for (let x = -off; x < W; x += spacing) {
+  for (let x = -off; x < vw; x += spacing) {
     ctx.moveTo(x, GROUND_Y + 6);
     ctx.lineTo(x + 12, GROUND_Y + 6);
   }
@@ -563,11 +574,11 @@ function draw(ctx: CanvasRenderingContext2D, s: GameState) {
   ctx.textAlign = "right";
   ctx.font = "600 16px ui-monospace, SFMono-Regular, Menlo, monospace";
   ctx.fillStyle = s.surgeT > 0 ? MAGENTA : "#ffffff";
-  ctx.fillText(`${volts.toLocaleString()} volts`, W - 16, 30);
+  ctx.fillText(`${volts.toLocaleString()} volts`, vw - 16, 30);
   if (s.best > 0) {
     ctx.fillStyle = "rgba(255,255,255,0.4)";
     ctx.font = "13px ui-monospace, SFMono-Regular, Menlo, monospace";
-    ctx.fillText(`best · ${s.best.toLocaleString()}`, W - 16, 50);
+    ctx.fillText(`best · ${s.best.toLocaleString()}`, vw - 16, 50);
   }
 
   // HUD — circuit pips (offset clear of the mute button).
@@ -583,14 +594,18 @@ function draw(ctx: CanvasRenderingContext2D, s: GameState) {
     ctx.textAlign = "center";
     ctx.fillStyle = "rgba(255,255,255,0.7)";
     ctx.font = "600 15px ui-monospace, SFMono-Regular, Menlo, monospace";
-    ctx.fillText("press space to plug in", W / 2, 108);
+    ctx.fillText(
+      s.touch ? "tap to plug in" : "press space to plug in",
+      vw / 2,
+      108,
+    );
   }
 
   // Flash (milestone / fully-charged).
   const since = s.t - s.flashT;
   if (s.flashT >= 0 && since < 0.28) {
     ctx.fillStyle = `rgba(255,50,160,${0.3 * (1 - since / 0.28)})`;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, vw, H);
   }
 }
 
@@ -615,6 +630,16 @@ export function NotFoundGame() {
   const [started, setStarted] = React.useState(false);
   const [over, setOver] = React.useState(false);
   const [result, setResult] = React.useState({ volts: 0, best: 0 });
+  // Narrower view window on phones → the panel renders taller (same world
+  // height, less horizontal lookahead). Decided once on mount.
+  const [viewW] = React.useState(() =>
+    typeof window !== "undefined" && window.innerWidth < 640 ? 400 : W,
+  );
+  const [touch] = React.useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches,
+  );
   const [muted, setMuted] = React.useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     try {
@@ -663,6 +688,11 @@ export function NotFoundGame() {
       if (died) {
         g.current.phase = "over";
         sfxRef.current?.crash();
+        try {
+          navigator.vibrate?.(40); // Android haptic on zap; iOS ignores it
+        } catch {
+          /* ignore */
+        }
         setResult({ volts: Math.floor(g.current.volts), best: g.current.best });
         setOver(true);
       }
@@ -733,7 +763,9 @@ export function NotFoundGame() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = W * dpr;
+    g.current.viewW = viewW;
+    g.current.touch = touch;
+    canvas.width = viewW * dpr;
     canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.imageSmoothingEnabled = false;
@@ -761,7 +793,7 @@ export function NotFoundGame() {
       cancelAnimationFrame(rafRef.current);
       loopingRef.current = false;
     };
-  }, [reduced, startLoop, muted]);
+  }, [reduced, startLoop, muted, viewW, touch]);
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -795,8 +827,9 @@ export function NotFoundGame() {
           onPointerCancel={releaseDuck}
           tabIndex={0}
           aria-hidden="true"
+          suppressHydrationWarning
           className="block h-auto w-full touch-none bg-[#0a0a0a] [image-rendering:pixelated] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
-          style={{ aspectRatio: `${W} / ${H}` }}
+          style={{ aspectRatio: `${viewW} / ${H}` }}
         />
         {/* CRT scanlines */}
         <div
@@ -818,8 +851,8 @@ export function NotFoundGame() {
 
         {/* Game over — the bolt blooms into the WebGL shader. */}
         {over && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/55 backdrop-blur-[1px]">
-            <div className="w-20 sm:w-24">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-black/55 backdrop-blur-[1px] sm:gap-1">
+            <div className="w-12 sm:w-24">
               <ShaderCanvas
                 color={MAGENTA}
                 base={[0.3, 0.02, 0.18]}
@@ -828,10 +861,10 @@ export function NotFoundGame() {
                 className="aspect-square w-full"
               />
             </div>
-            <p className="font-display text-xl font-bold uppercase text-magenta">
+            <p className="font-display text-base font-bold uppercase text-magenta sm:text-xl">
               Current broke.
             </p>
-            <p className="font-mono text-xs uppercase tracking-widest text-white/70">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-white/70 sm:text-xs">
               {result.volts.toLocaleString()} volts
               {result.best > 0 && (
                 <span className="text-white/40">
@@ -842,7 +875,7 @@ export function NotFoundGame() {
             </p>
             <button
               onClick={jump}
-              className="mt-2 rounded-md bg-magenta px-5 py-2 font-display text-sm font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-90"
+              className="mt-1 rounded-md bg-magenta px-4 py-1.5 font-display text-sm font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-90 sm:mt-2 sm:px-5 sm:py-2"
             >
               Reconnect
             </button>
@@ -860,8 +893,13 @@ export function NotFoundGame() {
           </div>
         )}
       </div>
-      <p className="mt-2 text-center font-mono text-[11px] uppercase tracking-widest text-white/40">
-        Space / tap to jump · &darr; duck · grab the circuits
+      <p
+        suppressHydrationWarning
+        className="mt-2 text-center font-mono text-[11px] uppercase tracking-widest text-white/40"
+      >
+        {touch
+          ? "Tap to jump · hold low to duck · grab the circuits"
+          : "Space / tap to jump · ↓ duck · grab the circuits"}
       </p>
     </div>
   );
