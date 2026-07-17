@@ -104,7 +104,10 @@ export const DEFAULT_GET_INVOLVED_GENERAL_COPY: EmailCopy = {
 
 export interface EmailTemplateMeta {
   key: EmailTemplateKey;
+  /** Short name — the tab label in the admin editor. */
   label: string;
+  /** The public form this confirmation belongs to — the tab's second line. */
+  flow: string;
   description: string;
   tokens: string[];
   defaults: EmailCopy;
@@ -115,7 +118,8 @@ export interface EmailTemplateMeta {
 export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
   {
     key: "registration",
-    label: "Registration confirmation",
+    label: "Registration",
+    flow: "Register form",
     description: "Sent automatically when someone registers to attend.",
     tokens: ["{firstName}"],
     defaults: DEFAULT_REGISTRATION_COPY,
@@ -123,15 +127,17 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
   },
   {
     key: "speaker",
-    label: "Call for Speakers confirmation",
-    description: "Sent automatically when someone submits a session.",
+    label: "Speaker",
+    flow: "Plug In",
+    description: "Sent automatically when someone pitches a session via Plug In.",
     tokens: ["{firstName}", "{sessionTitle}"],
     defaults: DEFAULT_SPEAKER_COPY,
     sample: { firstName: "Alex", sessionTitle: "Scaling AI at the edge" },
   },
   {
     key: "getInvolvedSponsor",
-    label: "Get Involved · Sponsor confirmation",
+    label: "Sponsor",
+    flow: "Get Involved",
     description:
       "Sent automatically when someone submits the Get Involved form on the sponsor path.",
     tokens: ["{firstName}"],
@@ -140,7 +146,8 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
   },
   {
     key: "getInvolvedHost",
-    label: "Get Involved · Host confirmation",
+    label: "Host an event",
+    flow: "Get Involved",
     description:
       "Sent automatically when someone proposes hosting an event during the week.",
     tokens: ["{firstName}"],
@@ -149,7 +156,8 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
   },
   {
     key: "getInvolvedGeneral",
-    label: "Get Involved · General confirmation",
+    label: "General",
+    flow: "Get Involved",
     description:
       "Sent automatically when someone submits a general question via Get Involved.",
     tokens: ["{firstName}"],

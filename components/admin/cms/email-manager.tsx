@@ -112,22 +112,65 @@ export function EmailManager({ initial, updatedAt, updatedBy, adminEmail }: Prop
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Template tabs */}
-      <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-muted/40 p-1">
-        {EMAIL_TEMPLATES.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => switchTo(t.key)}
-            className={cn(
-              "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              active === t.key
-                ? "bg-white text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {t.label}
-          </button>
-        ))}
+      {/* Template tabs — short name over source flow, matching the public
+          segmented controls. Dots: magenta = unsaved edits here, muted =
+          customized copy (differs from the in-code default). */}
+      <div
+        role="tablist"
+        aria-label="Email template"
+        className="grid grid-cols-2 gap-1.5 rounded-lg border border-border bg-muted/40 p-1.5 sm:grid-cols-3 lg:grid-cols-5"
+      >
+        {EMAIL_TEMPLATES.map((t) => {
+          const on = active === t.key;
+          const unsaved =
+            JSON.stringify(drafts[t.key]) !== JSON.stringify(baseline[t.key]);
+          const customized =
+            JSON.stringify(baseline[t.key]) !== JSON.stringify(t.defaults);
+          return (
+            <button
+              key={t.key}
+              role="tab"
+              aria-selected={on}
+              onClick={() => switchTo(t.key)}
+              className={cn(
+                "rounded-md px-3 py-2.5 text-left transition-all",
+                on
+                  ? "bg-foreground text-white shadow-sm"
+                  : "text-muted-foreground hover:bg-white hover:text-foreground",
+              )}
+            >
+              <span className="flex items-center gap-1.5 text-sm font-medium">
+                {t.label}
+                {unsaved ? (
+                  <span
+                    title="Unsaved changes"
+                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-magenta"
+                  >
+                    <span className="sr-only">(unsaved changes)</span>
+                  </span>
+                ) : customized ? (
+                  <span
+                    title="Customized — differs from the default copy"
+                    className={cn(
+                      "h-1.5 w-1.5 shrink-0 rounded-full",
+                      on ? "bg-white/50" : "bg-foreground/25",
+                    )}
+                  >
+                    <span className="sr-only">(customized)</span>
+                  </span>
+                ) : null}
+              </span>
+              <span
+                className={cn(
+                  "block text-[11px]",
+                  on ? "text-magenta" : "text-muted-foreground/70",
+                )}
+              >
+                {t.flow}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -232,7 +275,7 @@ export function EmailManager({ initial, updatedAt, updatedBy, adminEmail }: Prop
               title="Email preview"
               srcDoc={preview.html}
               sandbox=""
-              className="h-[560px] w-full bg-[#f4f4f5]"
+              className="h-140 w-full bg-[#f4f4f5]"
             />
           </div>
         </div>
