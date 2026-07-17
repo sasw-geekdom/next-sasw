@@ -2,9 +2,19 @@ import type { Metadata } from "next";
 import { FormPage } from "@/components/site/form-page";
 import { RegistrationForm } from "@/components/forms/registration-form";
 
+const DESCRIPTION =
+  "Get on the list for San Antonio Startup + Tech Week — free, Sept 28 – Oct 2, downtown San Antonio.";
+
 export const metadata: Metadata = {
   title: "Register",
-  description: "Get on the list for San Antonio Startup + Tech Week.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/register" },
+  openGraph: {
+    title: "Register · SASTW 2026",
+    description: DESCRIPTION,
+    url: "/register",
+  },
+  twitter: { title: "Register · SASTW 2026", description: DESCRIPTION },
 };
 
 export default function RegisterPage() {

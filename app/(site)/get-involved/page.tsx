@@ -4,10 +4,19 @@ import { ArrowUpRight } from "lucide-react";
 import { FormPage } from "@/components/site/form-page";
 import { GetInvolvedForm } from "@/components/forms/get-involved-form";
 
+const DESCRIPTION =
+  "Sponsor, host an event, or ask a question — get involved with San Antonio Startup + Tech Week. Sept 28 – Oct 2.";
+
 export const metadata: Metadata = {
   title: "Get Involved",
-  description:
-    "Sponsor, host an event, or ask a question — get involved with San Antonio Startup + Tech Week.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/get-involved" },
+  openGraph: {
+    title: "Get Involved · SASTW 2026",
+    description: DESCRIPTION,
+    url: "/get-involved",
+  },
+  twitter: { title: "Get Involved · SASTW 2026", description: DESCRIPTION },
 };
 
 export default function GetInvolvedPage() {

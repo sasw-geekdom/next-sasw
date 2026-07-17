@@ -4,10 +4,19 @@ import { ArrowUpRight } from "lucide-react";
 import { FormPage } from "@/components/site/form-page";
 import { SpeakerForm } from "@/components/forms/speaker-form";
 
+const DESCRIPTION =
+  "Pitch a session for San Antonio Startup + Tech Week — five circuits, one current. Sept 28 – Oct 2.";
+
 export const metadata: Metadata = {
   title: "Plug In",
-  description:
-    "Pitch a session for San Antonio Startup + Tech Week — five circuits, one current.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/plug-in" },
+  openGraph: {
+    title: "Plug In · SASTW 2026",
+    description: DESCRIPTION,
+    url: "/plug-in",
+  },
+  twitter: { title: "Plug In · SASTW 2026", description: DESCRIPTION },
 };
 
 export default function PlugInPage() {
