@@ -13,6 +13,7 @@ const JUMP_V = -760;
 const SPEED_START = 260;
 const SPEED_RAMP = 8;
 const SPEED_MAX = 600;
+const SPEED_MAX_NARROW = 470; // phones see less lookahead — cap the ramp lower
 const GAP_MIN = 250;
 const GAP_MAX = 520;
 const MIN_REACTION = 0.42; // s — gaps never tighter than this at current speed
@@ -330,7 +331,8 @@ function simulate(s: GameState, dt: number): boolean {
   if (s.phase !== "running") return false;
 
   s.elapsed += dt;
-  s.speed = Math.min(SPEED_MAX, SPEED_START + SPEED_RAMP * s.elapsed);
+  const vmax = s.viewW < W ? SPEED_MAX_NARROW : SPEED_MAX;
+  s.speed = Math.min(vmax, SPEED_START + SPEED_RAMP * s.elapsed);
   s.distance += s.speed * dt;
   s.surgeT = Math.max(0, s.surgeT - dt);
 
@@ -633,7 +635,7 @@ export function NotFoundGame() {
   // Narrower view window on phones → the panel renders taller (same world
   // height, less horizontal lookahead). Decided once on mount.
   const [viewW] = React.useState(() =>
-    typeof window !== "undefined" && window.innerWidth < 640 ? 400 : W,
+    typeof window !== "undefined" && window.innerWidth < 640 ? 340 : W,
   );
   const [touch] = React.useState(
     () =>
