@@ -6,8 +6,16 @@ import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/admin";
 import { COLLECTIONS } from "@/lib/firebase/collections";
 import { speakerSubmissionSchema } from "@/lib/validation/schemas";
-import { resend, EMAIL_FROM, EMAIL_REPLY_TO } from "@/lib/email/resend";
-import { speakerSubmissionEmail } from "@/lib/email/templates";
+import {
+  resend,
+  EMAIL_FROM,
+  EMAIL_REPLY_TO,
+  TEAM_NOTIFY_TO,
+} from "@/lib/email/resend";
+import {
+  speakerSubmissionEmail,
+  internalNotificationEmail,
+} from "@/lib/email/templates";
 import { getEmailCopy } from "@/lib/email/copy-store";
 
 const MAX_HEADSHOT_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -100,6 +108,35 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     console.error("Speaker confirmation email failed:", err);
+  }
+
+  // 6) Internal notification to the team (best-effort) — a pitch shouldn't
+  // land silently in the admin queue.
+  try {
+    const email = internalNotificationEmail({
+      title: `Plug In · Session pitch — ${data.sessionTitle}`,
+      fields: [
+        { label: "Name", value: data.name },
+        { label: "Email", value: data.email },
+        { label: "Company", value: data.company },
+        { label: "Circuit", value: data.track },
+        { label: "Session title", value: data.sessionTitle },
+        { label: "Abstract", value: data.abstract },
+        { label: "Bio", value: data.bio },
+        { label: "LinkedIn", value: data.linkedin },
+        { label: "Website", value: data.website },
+        { label: "Availability", value: data.availability },
+      ],
+    });
+    await resend.emails.send({
+      from: EMAIL_FROM,
+      to: TEAM_NOTIFY_TO,
+      replyTo: data.email, // reply straight to the speaker
+      subject: email.subject,
+      html: email.html,
+    });
+  } catch (err) {
+    console.error("Speaker team notification failed:", err);
   }
 
   return NextResponse.json({ ok: true });
