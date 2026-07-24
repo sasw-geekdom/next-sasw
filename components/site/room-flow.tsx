@@ -92,7 +92,7 @@ function Activation({ room, flip }: { room: Room; flip: boolean }) {
       <div className={cn("relative", flip ? "lg:order-1" : "lg:order-2")}>
         <div
           className={cn(
-            "overflow-hidden rounded-lg bg-[#0a0a0a]",
+            "overflow-hidden rounded-lg bg-black",
             featured && "ring-1 ring-white/10",
           )}
           style={
