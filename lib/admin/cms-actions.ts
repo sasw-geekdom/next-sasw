@@ -47,6 +47,7 @@ async function saveLogoEntity(
   const parsed = logoEntitySchema.safeParse({
     name: form.get("name"),
     link: form.get("link"),
+    scale: form.get("scale"),
   });
   if (!parsed.success) {
     return { ok: false, error: "Check the form.", issues: parsed.error.flatten().fieldErrors };

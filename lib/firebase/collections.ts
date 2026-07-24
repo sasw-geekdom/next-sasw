@@ -113,6 +113,7 @@ export interface LogoEntityDoc {
   imageUrl: string;
   link: string;
   order?: number; // admin drag order; new docs get Date.now() → sort last
+  scale?: number; // per-logo size multiplier on the wall (1 = default)
   createdAt: Timestamp;
 }
 

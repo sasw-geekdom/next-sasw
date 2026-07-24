@@ -143,6 +143,13 @@ const url = z.string().trim().url("Enter a valid URL.").max(500);
 export const logoEntitySchema = z.object({
   name: z.string().trim().min(2, "Name is required.").max(160),
   link: url,
+  // Display-size multiplier on the wall — bump wide/small wordmarks. Blank or
+  // out-of-range falls back to 1 (the optical balancer's default).
+  scale: z.coerce
+    .number()
+    .min(0.5)
+    .max(3)
+    .catch(1),
 });
 export type LogoEntityInput = z.infer<typeof logoEntitySchema>;
 

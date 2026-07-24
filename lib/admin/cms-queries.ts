@@ -37,6 +37,7 @@ async function listLogoEntities(
         name: d.name ?? "",
         imageUrl: d.imageUrl ?? "",
         link: d.link ?? "",
+        scale: typeof d.scale === "number" ? d.scale : undefined,
         createdAt: toMillis(d.createdAt) ?? 0,
       };
     });

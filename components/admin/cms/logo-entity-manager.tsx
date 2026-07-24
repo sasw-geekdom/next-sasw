@@ -168,6 +168,23 @@ export function LogoEntityManager({
             </div>
 
             <div>
+              <Label htmlFor="scale">Display size</Label>
+              <Input
+                id="scale"
+                name="scale"
+                type="number"
+                min={0.5}
+                max={3}
+                step={0.05}
+                defaultValue={current?.scale ?? 1}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                1 = default. Bump up (e.g. 1.3) for a wide or small wordmark
+                that reads too small on the wall.
+              </p>
+            </div>
+
+            <div>
               <Label htmlFor="image">
                 Logo {current ? "(leave blank to keep current)" : ""}
               </Label>

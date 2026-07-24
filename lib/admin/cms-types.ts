@@ -8,6 +8,7 @@ export interface LogoEntityRow {
   name: string;
   imageUrl: string;
   link: string;
+  scale?: number; // per-logo size multiplier on the wall (1 = default)
   createdAt: number;
 }
 

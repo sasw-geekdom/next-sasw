@@ -33,6 +33,9 @@ function LogoCell({ row, size }: { row: LogoEntityRow; size: "lg" | "sm" }) {
     setBalance(Math.min(1.5, Math.max(1, Math.sqrt(REF_ASPECT / aspect))));
   }
 
+  // Optical balance × the admin's per-logo override (1 = untouched).
+  const effective = balance * (row.scale ?? 1);
+
   // The chip follows the cursor like a probe readout — positioned directly
   // on the DOM so tracking stays smooth without re-rendering per mousemove.
   function onMove(e: React.MouseEvent) {
@@ -70,7 +73,9 @@ function LogoCell({ row, size }: { row: LogoEntityRow; size: "lg" | "sm" }) {
       >
         <span
           className="absolute inset-0"
-          style={balance > 1 ? { transform: `scale(${balance})` } : undefined}
+          style={
+            effective !== 1 ? { transform: `scale(${effective})` } : undefined
+          }
         >
           <Image
             src={row.imageUrl}
