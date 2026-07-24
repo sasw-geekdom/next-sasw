@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/button";
 import type { LogoEntityRow } from "@/lib/admin/cms-types";
 import { cn } from "@/lib/utils";
 
@@ -161,22 +161,23 @@ export function PowerGrid({
           </div>
         )}
 
-        {/* The door — sponsorship inquiries run through Get Involved. */}
-        <div className="mt-16 lg:mt-20">
-          <Link
-            href="/get-involved"
-            className="group inline-flex items-baseline gap-2 font-display text-xl font-bold uppercase tracking-tight text-white transition-colors hover:text-magenta sm:text-2xl"
-          >
-            Power the week
-            <span
-              aria-hidden="true"
-              className="transition-transform duration-200 group-hover:translate-x-1"
-            >
-              &rarr;
-            </span>
-          </Link>
-          <p className="mt-2 font-mono text-[11px] uppercase tracking-widest text-white/40">
-            Sponsorships are open — get involved.
+        {/* The door — the section's end-cap CTA into Get Involved. Promoted
+            from a text link to a filled button so the sponsor ask lands. */}
+        <div className="mt-20 border-t border-white/10 pt-14 text-center lg:mt-28 lg:pt-16">
+          <h3 className="font-display text-2xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-3xl">
+            Put your brand on the grid.
+          </h3>
+          <p className="mx-auto mt-3 max-w-md text-pretty text-white/60">
+            Reach founders, builders, and the capital behind them — five
+            circuits, one current.
+          </p>
+          <div className="mt-7 flex justify-center">
+            <ButtonLink href="/get-involved" size="lg">
+              Power the week
+            </ButtonLink>
+          </div>
+          <p className="mt-4 font-mono text-[11px] uppercase tracking-widest text-white/40">
+            Sponsorships are open · Sept 28 – Oct 2
           </p>
         </div>
       </div>
