@@ -47,9 +47,9 @@ export const ROOMS: Room[] = [
    __|▓▓▓▓▓|__
   |___________|`,
     sessions: [
-      { title: "Defense in Depth For Founders", kind: "Tech & Builders" },
-      { title: "Humans + Tech", kind: "AI & Applied Innovation" },
-      { title: "Capital Fireside ", kind: "Capital" },
+      { title: "Mission Pitch", kind: "Capital" },
+      { title: "State of Innovation", kind: "AI & Applied Innovation" },
+      { title: "Latin Tech Pitch", kind: "Capital" },
     ],
   },
   {
@@ -69,9 +69,9 @@ export const ROOMS: Room[] = [
 |▒ ▒ ▒ ▒ ▒| |
 |▒_▒_▒_▒_▒|/`,
     sessions: [
-      { title: "PySanAntonio II", kind: "Alamo Python x PyTexas Foundation" },
-      { title: "Game Design Summit", kind: "Greater Gaming Society" },
-      { title: "Founder Speed Date", kind: "Tech Bloc" },
+      { title: "Founder Funder Speed Networking", kind: "Founders" },
+      { title: "PySanAntonio II", kind: "Tech & Builders" },
+      { title: "Game Design Summit", kind: "Tech & Builders" },
     ],
   },
   {
@@ -92,8 +92,8 @@ export const ROOMS: Room[] = [
   ||‖_‖_‖_‖||
   ===========`,
     sessions: [
-      { title: "UX in the development process", kind: "AI & Applied Innovation" },
-      { title: "Your AI cofounder and dev team", kind: "Small Business & Solopreneur" },
+      { title: "1 Million Cups", kind: "Small Business & Solopreneur" },
+      { title: "Small Business Speed Networking", kind: "Small Business & Solopreneur" },
     ],
   },
   {
@@ -113,8 +113,7 @@ export const ROOMS: Room[] = [
   ____________
  [__  STAGE __]`,
     sessions: [
-      { title: "UTSA RowdyHacks Coffee Social", kind: "ACM UTSA" },
-      { title: "Founders social", kind: "Mixer" },
+      { title: "Startup Bash", kind:"" },
     ],
   },
 ];
