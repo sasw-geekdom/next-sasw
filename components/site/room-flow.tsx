@@ -39,10 +39,25 @@ function Portrait({ room }: { room: Room }) {
   );
 }
 
+// The current is revealed only in a soft pool around the cursor.
+const SPOTLIGHT =
+  "radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), #000 0%, #000 32%, transparent 75%)";
+
 function Activation({ room, flip }: { room: Room; flip: boolean }) {
   const reduce = useReducedMotion();
   const featured = Boolean(room.featured);
   const [hovered, setHovered] = React.useState(false);
+  const boxRef = React.useRef<HTMLDivElement>(null);
+
+  // Write the pointer position straight to CSS vars (no re-render per move) —
+  // the spotlight mask reads them to localize the shader to the cursor.
+  function onMove(e: React.MouseEvent) {
+    const el = boxRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+  }
 
   return (
     <motion.article
@@ -84,9 +99,11 @@ function Activation({ room, flip }: { room: Room; flip: boolean }) {
       {/* The breakdown — the current flows through the card on hover. */}
       <div className={cn("relative", flip ? "lg:order-2" : "lg:order-1")}>
         <div
+          ref={boxRef}
           tabIndex={0}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
+          onMouseMove={onMove}
           onFocus={() => setHovered(true)}
           onBlur={() => setHovered(false)}
           className="node-glow relative overflow-hidden rounded-lg border border-white/10 bg-white/3 outline-none"
@@ -97,8 +114,13 @@ function Activation({ room, flip }: { room: Room; flip: boolean }) {
               aria-hidden="true"
               className={cn(
                 "absolute inset-0 z-0 transition-opacity duration-500",
-                hovered ? "opacity-60" : "opacity-0",
+                hovered ? "opacity-70" : "opacity-0",
               )}
+              // Mask the full-box current down to a pool that tracks the cursor.
+              style={{
+                maskImage: SPOTLIGHT,
+                WebkitMaskImage: SPOTLIGHT,
+              }}
             >
               <ShaderCanvas
                 color={room.color}
@@ -140,7 +162,11 @@ function Activation({ room, flip }: { room: Room; flip: boolean }) {
             <ul className="mt-4 flex flex-col gap-2 border-t border-white/10 pt-4">
               {room.sessions.map((s) => (
                 <li key={s.title} className="flex items-baseline gap-2.5 text-sm">
-                  <span style={{ color: room.color }}>▸</span>
+                  <span
+                    aria-hidden="true"
+                    className="mt-1.25 h-1.5 w-1.5 shrink-0 self-start rounded-xs"
+                    style={{ backgroundColor: room.color }}
+                  />
                   <span className="text-white">{s.title}</span>
                   <span className="ml-auto shrink-0 font-mono text-[9px] uppercase tracking-widest text-white/40">
                     {s.kind}

@@ -60,7 +60,7 @@ export const ROOMS: Room[] = [
     tag: "Tech & Builders",
     color: "#4d7cff",
     port: "p2",
-    image: ASSET("sastw-rand.jpg"),
+    image: ASSET("glogo-rand.jpg"),
     imageWidth: 1280,
     imageHeight: 720,
     ascii: `  ____________
