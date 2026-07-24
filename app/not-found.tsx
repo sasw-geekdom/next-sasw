@@ -5,7 +5,7 @@ import { NotFoundGame } from "@/components/site/not-found-game";
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-black px-6 py-16 text-center text-white">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-black px-6 py-8 text-center text-white">
       <Link
         href="/"
         aria-label="San Antonio Startup + Tech Week — home"
@@ -14,23 +14,23 @@ export default function NotFound() {
         <Image
           src="/brand/sastw-horizontal-white.png"
           alt="San Antonio Startup + Tech Week"
-          width={168}
-          height={42}
+          width={280}
+          height={70}
           priority
-          className="h-9 w-auto"
+          className="h-14 w-auto sm:h-16"
         />
       </Link>
 
       <div>
         <p className="font-mono text-xs uppercase tracking-widest text-magenta">
-          Error 404
+          404 · off the grid
         </p>
         <h1 className="mt-2 font-display text-4xl font-bold uppercase leading-none sm:text-5xl">
-          Signal lost.
+          Coming online.
         </h1>
         <p className="mx-auto mt-3 max-w-md text-pretty text-white/60">
-          This page isn&apos;t on the grid yet — the lineup&apos;s still being
-          wired. Run the bolt while you wait, or ride the current back.
+          The lineup comes online soon. Register and we&apos;ll send it your way
+          the moment it&apos;s live — run the bolt while you wait.
         </p>
       </div>
 
