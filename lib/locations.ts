@@ -20,6 +20,10 @@ export interface Room {
   image?: string; // ASCII portrait (magenta-on-black)
   imageWidth?: number;
   imageHeight?: number;
+  // How the image sits in the shared 4:3 frame (non-featured only).
+  // "cover" (default) fills and top-crops; "contain" fits the whole image
+  // for near-square art that would otherwise lose its base to the crop.
+  fit?: "cover" | "contain";
   ascii: string; // placeholder art when no image
   sessions: RoomSession[];
 }
@@ -61,8 +65,10 @@ export const ROOMS: Room[] = [
     color: "#4d7cff",
     port: "p2",
     image: ASSET("glogo-rand.jpg"),
-    imageWidth: 1280,
+    imageWidth: 698,
     imageHeight: 720,
+    fit: "contain", // near-square art — fit it whole rather than crop the base
+
     ascii: `  ____________
  /▒ ▒ ▒ ▒ ▒/|
 |▒ ⚡▒ ▒ ▒| |
@@ -83,7 +89,7 @@ export const ROOMS: Room[] = [
     color: "#b45cff",
     port: "p3",
     image: ASSET("sastw-launchsa.jpg"),
-    imageWidth: 1280,
+    imageWidth: 819,
     imageHeight: 720,
     ascii: `    ________
    / ______ \\
@@ -105,7 +111,7 @@ export const ROOMS: Room[] = [
     color: "#ff6b57",
     port: "p4",
     image: ASSET("sastw-legacypark.jpg"),
-    imageWidth: 1280,
+    imageWidth: 784,
     imageHeight: 720,
     ascii: `   ♣   ♣  ⚡♣
   ♣♣♣ ♣♣♣ ♣♣♣

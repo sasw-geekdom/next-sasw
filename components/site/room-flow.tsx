@@ -27,6 +27,10 @@ function Portrait({ room }: { room: Room }) {
       </pre>
     );
   }
+  // The featured main stage keeps its natural (wider) aspect. The three
+  // supporting venues are near-square at source, so we normalize them to a
+  // shared 4:3 with a top-biased crop — that trims only the street foreground
+  // and preserves each venue's brand mark, which sits in the upper portion.
   return (
     <Image
       src={room.image}
@@ -34,7 +38,14 @@ function Portrait({ room }: { room: Room }) {
       width={room.imageWidth ?? 1280}
       height={room.imageHeight ?? 720}
       sizes="(min-width: 1024px) 58vw, 100vw"
-      className="h-auto w-full"
+      className={cn(
+        "w-full",
+        room.featured
+          ? "h-auto"
+          : room.fit === "contain"
+            ? "aspect-4/3 object-contain"
+            : "aspect-4/3 object-cover object-top",
+      )}
     />
   );
 }
