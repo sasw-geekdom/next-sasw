@@ -21,6 +21,11 @@ const okResult = (id: string): SaveResult => ({ ok: true, id });
 
 function revalidate(entity: CmsEntity) {
   revalidatePath(`/admin/content/${entity}`);
+  // Partners + sponsors feed the homepage wall — bust it on save/delete too,
+  // otherwise edits sit behind the page's ISR window (revalidate = 300).
+  if (entity === "partners" || entity === "sponsors") {
+    revalidatePath("/");
+  }
 }
 
 /** Pull the optional uploaded image; upload if present, else return null. */
