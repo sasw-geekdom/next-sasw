@@ -99,7 +99,7 @@ pnpm dlx firebase-tools deploy --only firestore:rules,storage
 ## Deployment
 
 - Deployed on **Vercel**. Env vars and (if used) a Blob store must be configured in the project.
-- **firebase-admin is pinned to v12** — v14 pulls an ESM-only `jose`, which fails with `ERR_REQUIRE_ESM` on Node runtimes below 20.19. v12's CommonJS chain runs on any Node version.
+- **firebase-admin is pinned to v12** — it shipped on `^14.1.0` and broke production admin login (v14 pulls an ESM-only `jose` → `ERR_REQUIRE_ESM`); `51e5be4` pinned it back. v12's CommonJS chain runs on any Node version. Note that `firebase-admin@14` now also requires **Node >= 22**, while this project targets Node 20 — so a version bump has to be paired with a Node bump (`.nvmrc`, `engines`, and the Vercel project's Node setting).
 - After deploy, verify: the Resend sending domain (`send.sasw.co`), BotID in the Firewall settings, and grant the service account **Viewer** on the GA4 property (and enable the Analytics Data API) for the dashboard.
 
 ## Project structure

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm -v)",
+      "Bash(pnpm install*)",
+      "Bash(pnpm build*)",
+      "Bash(pnpm lint*)",
+      "Bash(pnpm dev*)",
+      "Bash(node_modules/.bin/next --version)",
+      "Bash(npm view *)",
+
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git branch*)",
+
+      "Bash(sed -n:*)",
+      "Bash(lsof -ti:3000)",
+      "Bash(lsof -tiTCP:3000 -sTCP:LISTEN)",
+      "Bash(lsof -iTCP:3000 -sTCP:LISTEN -n -P)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"next-server\")",
+      "Bash(xargs -r kill)",
+      "Bash(xargs -r kill -9)",
+
+      "Bash(firebase --version)",
+      "Bash(firebase projects:list)"
+    ]
+  }
+}
