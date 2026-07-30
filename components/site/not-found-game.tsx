@@ -6,6 +6,7 @@ import { ShaderCanvas } from "@/components/site/shader-canvas";
 
 // ─── Tuning (logical px; see docs/404-bolt-runner.md) ───────────────────────
 const W = 800;
+const W_NARROW = 340; // portrait phones: same world height, less lookahead
 const H = 260;
 const GROUND_Y = 214;
 const GRAVITY = 2200;
@@ -621,6 +622,14 @@ function getReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+/**
+ * Logical view width for a viewport. A rotated phone is wide enough for the
+ * full world — the narrow window exists for portrait, not for "is a phone".
+ */
+function viewWidthFor(innerWidth: number) {
+  return innerWidth < 640 ? W_NARROW : W;
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 export function NotFoundGame() {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -632,10 +641,11 @@ export function NotFoundGame() {
   const [started, setStarted] = React.useState(false);
   const [over, setOver] = React.useState(false);
   const [result, setResult] = React.useState({ volts: 0, best: 0 });
-  // Narrower view window on phones → the panel renders taller (same world
-  // height, less horizontal lookahead). Decided once on mount.
-  const [viewW] = React.useState(() =>
-    typeof window !== "undefined" && window.innerWidth < 640 ? 340 : W,
+  // Narrower view window in portrait → the panel renders taller (same world
+  // height, less horizontal lookahead). Re-evaluated on rotate, so landscape
+  // gets the full-width world instead of a stretched portrait one.
+  const [viewW, setViewW] = React.useState(() =>
+    typeof window !== "undefined" ? viewWidthFor(window.innerWidth) : W,
   );
   const [touch] = React.useState(
     () =>
@@ -746,37 +756,57 @@ export function NotFoundGame() {
     startLoop();
   }, [startLoop]);
 
-  const toggleMute = React.useCallback(() => {
-    setMuted((m) => {
-      const next = !m;
-      if (sfxRef.current) sfxRef.current.muted = next;
-      try {
-        localStorage.setItem(MUTE_KEY, next ? "1" : "0");
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
+  const toggleMute = React.useCallback(() => setMuted((m) => !m), []);
+
+  // Rotate / resize → recompute the view window. `resize` covers
+  // orientationchange everywhere that matters, and setting the same value is a
+  // React bail-out, so iOS toolbar-collapse resizes cost nothing.
+  React.useEffect(() => {
+    const onResize = () => setViewW(viewWidthFor(window.innerWidth));
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // Canvas sizing only — deliberately does NOT touch phase, so rotating
+  // mid-run resizes the window without ending the run.
   React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    // Assigning width/height clears the context state — reapply both.
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    g.current.viewW = viewW;
-    g.current.touch = touch;
     canvas.width = viewW * dpr;
     canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.imageSmoothingEnabled = false;
     ctxRef.current = ctx;
+    g.current.viewW = viewW;
+    g.current.touch = touch;
+    // Reduced mode has no loop running, so the cleared canvas needs one draw.
+    if (g.current.phase === "reduced") draw(ctx, g.current);
+  }, [viewW, touch]);
 
-    const sfx = new Sfx();
-    sfx.muted = muted;
-    sfxRef.current = sfx;
+  // One AudioContext for the life of the component. Sfx creates it lazily and
+  // has no close() — rebuilding it per mute toggle leaks contexts, and iOS
+  // caps how many a page may hold.
+  React.useEffect(() => {
+    sfxRef.current = new Sfx();
+    return () => {
+      sfxRef.current = null;
+    };
+  }, []);
 
+  React.useEffect(() => {
+    if (sfxRef.current) sfxRef.current.muted = muted;
+    try {
+      localStorage.setItem(MUTE_KEY, muted ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [muted]);
+
+  React.useEffect(() => {
     try {
       g.current.best = Number(localStorage.getItem(BEST_KEY)) || 0;
     } catch {
@@ -785,7 +815,8 @@ export function NotFoundGame() {
 
     if (reduced) {
       g.current.phase = "reduced";
-      draw(ctx, g.current);
+      const ctx = ctxRef.current;
+      if (ctx) draw(ctx, g.current);
     } else {
       g.current.phase = "idle";
       startLoop();
@@ -795,7 +826,7 @@ export function NotFoundGame() {
       cancelAnimationFrame(rafRef.current);
       loopingRef.current = false;
     };
-  }, [reduced, startLoop, muted, viewW, touch]);
+  }, [reduced, startLoop]);
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
