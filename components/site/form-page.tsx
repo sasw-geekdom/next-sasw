@@ -17,7 +17,10 @@ export function FormPage({
         <section className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 py-10 lg:min-h-[calc(100vh-4rem)] lg:grid-cols-2 lg:gap-16 lg:py-0">
           {/* Left — the bolt, standing on its own (desktop, sticky) */}
           <div className="hidden lg:sticky lg:top-16 lg:flex lg:h-[calc(100vh-4rem)] lg:items-center lg:justify-center lg:self-start">
-            <div className="w-full max-w-md">
+            {/* Matches the home hero's bolt (~37rem at max-w-7xl), but the
+                column is a fixed-height sticky rail — so cap on viewport
+                height too, or the square clips on short laptops. */}
+            <div className="w-full max-w-[min(37rem,calc(100vh-8rem))]">
               <FormBolt />
             </div>
           </div>
