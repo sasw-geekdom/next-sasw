@@ -630,6 +630,14 @@ function viewWidthFor(innerWidth: number) {
   return innerWidth < 640 ? W_NARROW : W;
 }
 
+// Hydration gate: false on the server and through hydration, true after.
+// Client-only state (localStorage) must render its server value first —
+// React does not patch attribute mismatches during hydration, so rendering
+// it directly would freeze the wrong value until an unrelated re-render.
+const subscribeNever = () => () => {};
+const alwaysTrue = () => true;
+const alwaysFalse = () => false;
+
 // ─── Component ──────────────────────────────────────────────────────────────
 export function NotFoundGame() {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -664,6 +672,11 @@ export function NotFoundGame() {
     subscribeReducedMotion,
     getReducedMotion,
     () => false,
+  );
+  const hydrated = React.useSyncExternalStore(
+    subscribeNever,
+    alwaysTrue,
+    alwaysFalse,
   );
 
   const startLoop = React.useCallback(() => {
@@ -860,9 +873,16 @@ export function NotFoundGame() {
           onPointerCancel={releaseDuck}
           tabIndex={0}
           aria-hidden="true"
-          suppressHydrationWarning
-          className="block h-auto w-full touch-none bg-[#0a0a0a] [image-rendering:pixelated] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
-          style={{ aspectRatio: `${viewW} / ${H}` }}
+          // Box aspect comes from CSS, not from viewW. This page is statically
+          // prerendered, and React does not patch attribute mismatches during
+          // hydration — a state-derived inline style would keep the server's
+          // desktop value on phones until some later re-render (a rotation)
+          // happened to correct it. The breakpoint is pinned in px to match
+          // viewWidthFor's `innerWidth < 640` exactly — Tailwind compiles
+          // max-[640px] to `not all and (min-width:640px)`, i.e. strictly under
+          // 640, the same boundary. A rem-based `sm:` would drift at
+          // non-default font sizes.
+          className="block h-auto w-full touch-none bg-[#0a0a0a] aspect-800/260 max-[640px]:aspect-340/260 [image-rendering:pixelated] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
         />
         {/* CRT scanlines */}
         <div
@@ -875,11 +895,14 @@ export function NotFoundGame() {
         />
         <button
           onClick={toggleMute}
-          suppressHydrationWarning
-          aria-label={muted ? "Unmute" : "Mute"}
+          aria-label={hydrated && muted ? "Unmute" : "Mute"}
           className="absolute left-2 top-2 grid h-8 w-8 place-items-center rounded-md bg-white/10 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
         >
-          {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          {hydrated && muted ? (
+            <VolumeX className="h-4 w-4" />
+          ) : (
+            <Volume2 className="h-4 w-4" />
+          )}
         </button>
 
         {/* Game over — the bolt blooms into the WebGL shader. */}
@@ -926,13 +949,16 @@ export function NotFoundGame() {
           </div>
         )}
       </div>
-      <p
-        suppressHydrationWarning
-        className="mt-2 text-center font-mono text-[11px] uppercase tracking-widest text-white/40"
-      >
-        {touch
-          ? "Tap to jump · hold low to duck · grab the circuits"
-          : "Space / tap to jump · ↓ duck · grab the circuits"}
+      {/* Both variants ship; CSS picks one. Same hydration reason as the canvas
+          aspect above — a `touch`-derived string would freeze on the server's
+          keyboard copy for every phone visitor. */}
+      <p className="mt-2 text-center font-mono text-[11px] uppercase tracking-widest text-white/40">
+        <span className="pointer-coarse:hidden">
+          Space / tap to jump · ↓ duck · grab the circuits
+        </span>
+        <span className="hidden pointer-coarse:inline">
+          Tap to jump · hold low to duck · grab the circuits
+        </span>
       </p>
     </div>
   );
