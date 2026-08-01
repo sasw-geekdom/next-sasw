@@ -87,3 +87,24 @@ Solopreneur · Capital.
 
 Circuits deliberately **do not** get their own brand colors. Differentiate by
 charge, glow intensity, or position — the palette stays magenta + space blue.
+
+The worked example is [room-flow.tsx](components/site/room-flow.tsx): the five
+pips on the main stage card are one magenta at five ascending charges
+(`text-magenta/35` → `text-magenta`, with `bg-current` and a `currentColor`
+glow, so one opacity drives fill and glow together). Venue hierarchy comes from
+charge and position — only the anchor throws a glow, the supporting three share
+a `space-blue/20` ground. Copy that pattern before inventing a new one.
+
+**Two shipped exceptions**, both knowingly kept — don't "fix" them without
+asking, and don't cite them as precedent for new work:
+
+- **The hero bolt sweep** ([hero.tsx](components/site/hero.tsx)) sweeps the five
+  `CIRCUIT_COLORS` across one silhouette. It's the site's signature moment and
+  reads as one current changing charge rather than five branded tracks.
+- **Track selection in the three forms** (registration, get-involved, speaker)
+  uses the five hues as a *functional* affordance — five magenta intensities are
+  measurably harder to tell apart mid-selection than five hues.
+
+`CIRCUIT_COLORS` in [lib/tracks.ts](lib/tracks.ts) exists to serve those two
+cases. It is a UI accent, not brand track data. New public sections should not
+reach for it.

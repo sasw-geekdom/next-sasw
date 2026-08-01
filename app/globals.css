@@ -81,13 +81,7 @@ h3,
   mask: url("/brand/og-geekdom.svg") center / contain no-repeat;
 }
 
-/* ─── Four rooms: the card border warms to its circuit colour on hover,
-       while the WebGL current flows behind the text (see room-flow). ─── */
-.node-glow {
-  transition: border-color 0.4s ease;
-}
-.node-glow:hover,
-.node-glow:focus-within {
-  border-color: color-mix(in srgb, var(--c) 50%, transparent);
-}
+/* Removed: `.node-glow` warmed each room card's border on hover. The cards
+   aren't links, and a hover border reads as one — see room-flow. If they
+   ever gain a destination, that's the state to bring back. */
 
