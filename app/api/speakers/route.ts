@@ -17,9 +17,7 @@ import {
   internalNotificationEmail,
 } from "@/lib/email/templates";
 import { getEmailCopy } from "@/lib/email/copy-store";
-
-const MAX_HEADSHOT_BYTES = 5 * 1024 * 1024; // 5 MB
-const HEADSHOT_TYPES = ["image/jpeg", "image/png", "image/webp"];
+import { imageFileError, PHOTO_TYPES } from "@/lib/images";
 
 export async function POST(request: Request) {
   // 1) BotID — invisible CAPTCHA. Reject bots before any write or email.
@@ -61,15 +59,12 @@ export async function POST(request: Request) {
   let headshotUrl: string | undefined;
   const headshot = form.get("headshot");
   if (headshot instanceof File && headshot.size > 0) {
-    if (!HEADSHOT_TYPES.includes(headshot.type)) {
+    // Shared with the admin uploads — the ceiling is Vercel's 4.5 MB request
+    // body, so a 5 MB file 413s at the platform before this route is reached.
+    const problem = imageFileError(headshot, PHOTO_TYPES);
+    if (problem) {
       return NextResponse.json(
-        { error: "Headshot must be JPEG, PNG, or WebP." },
-        { status: 422 },
-      );
-    }
-    if (headshot.size > MAX_HEADSHOT_BYTES) {
-      return NextResponse.json(
-        { error: "Headshot must be under 5 MB." },
+        { error: problem.replace("Image", "Headshot") },
         { status: 422 },
       );
     }

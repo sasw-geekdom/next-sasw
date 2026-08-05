@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Drawer } from "@/components/ui/drawer";
 import { useDragReorder } from "@/lib/admin/use-drag-reorder";
+import { imageFileError } from "@/lib/images";
 import { cn } from "@/lib/utils";
 import type { SaveResult } from "@/lib/admin/cms-actions";
 import type { LogoEntityRow } from "@/lib/admin/cms-types";
@@ -56,6 +57,19 @@ export function LogoEntityManager({
     setError(null);
     setIssues({});
     const form = new FormData(e.currentTarget);
+
+    // Catch an oversized logo here. Past the server action's body limit the
+    // request is rejected by the framework before our code runs, which
+    // surfaces as an unhandled runtime error rather than a form message.
+    const picked = form.get("image");
+    if (picked instanceof File && picked.size > 0) {
+      const problem = imageFileError(picked);
+      if (problem) {
+        setError(problem);
+        return;
+      }
+    }
+
     startTransition(async () => {
       const res = await saveAction(form);
       if (!res.ok) {

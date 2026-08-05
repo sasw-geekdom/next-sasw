@@ -2,20 +2,17 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { put, del } from "@vercel/blob";
-
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
-const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
+import { imageFileError } from "@/lib/images";
 
 export class ImageError extends Error {}
 
 /** Upload an image to Vercel Blob under `prefix/`. Returns the public URL. */
 export async function uploadImage(file: File, prefix: string): Promise<string> {
-  if (!IMAGE_TYPES.includes(file.type)) {
-    throw new ImageError("Image must be JPEG, PNG, WebP, or SVG.");
-  }
-  if (file.size > MAX_IMAGE_BYTES) {
-    throw new ImageError("Image must be under 5 MB.");
-  }
+  // The admin form checks this too, so a rejection is usually an inline
+  // message rather than a round trip — but the action is directly callable,
+  // so it can't be the only gate.
+  const problem = imageFileError(file);
+  if (problem) throw new ImageError(problem);
   const ext = file.name.split(".").pop()?.toLowerCase() || "png";
   const blob = await put(`${prefix}/${randomUUID()}.${ext}`, file, {
     access: "public",
