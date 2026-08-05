@@ -13,7 +13,9 @@ import {
 } from "@/lib/tracks";
 
 // Cursor sweeps the five circuit colors across the bolt — "five circuits, one
-// current" — and the bolt itself is the doorway into the 15-years archive.
+// current" — and the bolt itself is the doorway into /bolt-runner, the hidden
+// page. It used to open the 15-years archive; that's still reachable from the
+// footer, which is now its only route in.
 const SWEEP = TRACK_NAMES.map((n) => CIRCUIT_COLORS[n]);
 
 export function Hero() {
@@ -89,11 +91,11 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Right — the current; the bolt is the doorway into 15 years */}
+      {/* Right — the current; the bolt is the doorway into the hidden page */}
       <div className="order-1 lg:order-2">
         <Link
-          href="/15-years"
-          aria-label="15 years of Geekdom — enter the archive"
+          href="/bolt-runner"
+          aria-label="Run the current — a hidden page"
           className="group mx-auto block w-80 cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:w-96 lg:w-full"
         >
           <ShaderCanvas
