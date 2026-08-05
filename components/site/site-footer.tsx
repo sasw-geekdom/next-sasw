@@ -20,7 +20,7 @@ export function SiteFooter() {
               className="h-28 w-auto"
             />
             <p className="mt-5 max-w-xs text-sm text-white/60">
-              Five circuits, four rooms, one current — Sept 28 – Oct 2,
+              Five circuits, five rooms, one current — Sept 28 – Oct 2,
               downtown San Antonio.
             </p>
           </div>
@@ -36,14 +36,15 @@ export function SiteFooter() {
                     Register
                   </Link>
                 </li>
-                <li>
-                  <Link href="/speakers" className="hover:text-magenta">
-                    Speakers
-                  </Link>
-                </li>
+                {/* Same order as the navbar — sessions, then speakers. */}
                 <li>
                   <Link href="/sessions" className="hover:text-magenta">
                     Sessions
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/speakers" className="hover:text-magenta">
+                    Speakers
                   </Link>
                 </li>
               </ul>
