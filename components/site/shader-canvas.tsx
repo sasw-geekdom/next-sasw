@@ -101,6 +101,7 @@ export function ShaderCanvas({
   base = [0.08, 0.0, 0.05],
   sweep,
   active = true,
+  still = false,
 }: {
   color: string;
   maskClassName: string;
@@ -112,6 +113,13 @@ export function ShaderCanvas({
   sweep?: string[];
   /** When false, keep the context warm but skip GPU work (paused). */
   active?: boolean;
+  /**
+   * Freeze the flow — one frame, held. `active={false}` won't do this: the
+   * loop bails before its first draw, so the canvas is never painted and the
+   * shape comes out empty. This paints once at a fixed time and then only
+   * repaints on resize, which is what a dead circuit needs.
+   */
+  still?: boolean;
 }) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const reduce = useReducedMotion();
@@ -120,6 +128,10 @@ export function ShaderCanvas({
   React.useEffect(() => {
     activeRef.current = active;
   }, [active]);
+  const stillRef = React.useRef(still);
+  React.useEffect(() => {
+    stillRef.current = still;
+  }, [still]);
 
   const mouse = React.useRef<[number, number]>([0.5, 0.55]);
   const target = React.useRef<[number, number, number]>(hexToRgb(color));
@@ -177,6 +189,10 @@ export function ShaderCanvas({
       const start = performance.now();
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
+      // A frozen canvas still has to repaint when its size changes, or the
+      // held frame stretches. Tracked so `still` can skip every other frame.
+      let painted = false;
+
       const draw = (now: number) => {
         if (!activeRef.current) {
           raf = requestAnimationFrame(draw);
@@ -186,15 +202,22 @@ export function ShaderCanvas({
         const h = canvas.clientHeight;
         const bw = Math.max(1, Math.floor(w * dpr));
         const bh = Math.max(1, Math.floor(h * dpr));
-        if (canvas.width !== bw || canvas.height !== bh) {
+        const resized = canvas.width !== bw || canvas.height !== bh;
+        if (resized) {
           canvas.width = bw;
           canvas.height = bh;
           gl!.viewport(0, 0, bw, bh);
         }
+        if (stillRef.current && painted && !resized) {
+          raf = requestAnimationFrame(draw);
+          return; // held — the frame on screen is the one we want
+        }
         for (let i = 0; i < 3; i++) {
           current.current[i] += (target.current[i] - current.current[i]) * 0.07;
         }
-        gl!.uniform1f(uTime, (now - start) / 1000);
+        // A fixed sample of the flow rather than the clock, so the pattern is
+        // the same every visit instead of whatever the page load happened on.
+        gl!.uniform1f(uTime, stillRef.current ? 12 : (now - start) / 1000);
         gl!.uniform2f(uMouse, mouse.current[0], mouse.current[1]);
         gl!.uniform3f(
           uColor,
@@ -203,6 +226,7 @@ export function ShaderCanvas({
           current.current[2],
         );
         gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4);
+        painted = true;
         raf = requestAnimationFrame(draw);
       };
       raf = requestAnimationFrame(draw);

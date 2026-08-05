@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { ButtonLink } from "@/components/ui/button";
+import { ProbeChip, useProbeChip } from "@/components/site/probe-chip";
 import type { LogoEntityRow } from "@/lib/admin/cms-types";
 import { cn } from "@/lib/utils";
 
@@ -14,17 +15,9 @@ import { cn } from "@/lib/utils";
 
 const REF_ASPECT = 1.6; // a typical horizontal wordmark
 
-// The probe chip's resting spot (keyboard focus, first paint): centered
-// under the logo. Mouse movement overrides it to track the cursor.
-const CHIP_HOME = {
-  left: "50%",
-  top: "calc(100% + 6px)",
-  transform: "translateX(-50%)",
-} as const;
-
 function LogoCell({ row, size }: { row: LogoEntityRow; size: "lg" | "sm" }) {
   const [balance, setBalance] = React.useState(1);
-  const chipRef = React.useRef<HTMLSpanElement>(null);
+  const { chipRef, probeProps } = useProbeChip();
 
   function onLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const img = e.currentTarget;
@@ -36,32 +29,12 @@ function LogoCell({ row, size }: { row: LogoEntityRow; size: "lg" | "sm" }) {
   // Optical balance × the admin's per-logo override (1 = untouched).
   const effective = balance * (row.scale ?? 1);
 
-  // The chip follows the cursor like a probe readout — positioned directly
-  // on the DOM so tracking stays smooth without re-rendering per mousemove.
-  function onMove(e: React.MouseEvent) {
-    const chip = chipRef.current;
-    if (!chip) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    chip.style.left = `${e.clientX - r.left + 14}px`;
-    chip.style.top = `${e.clientY - r.top + 18}px`;
-    chip.style.transform = "none";
-  }
-
-  function onLeave() {
-    const chip = chipRef.current;
-    if (!chip) return;
-    chip.style.left = CHIP_HOME.left;
-    chip.style.top = CHIP_HOME.top;
-    chip.style.transform = CHIP_HOME.transform;
-  }
-
   return (
     <a
       href={row.link}
       target="_blank"
       rel="noreferrer"
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
+      {...probeProps}
       className="group relative flex items-center justify-center"
     >
       <span
@@ -89,17 +62,7 @@ function LogoCell({ row, size }: { row: LogoEntityRow; size: "lg" | "sm" }) {
       </span>
 
       {/* Cursor-following name chip — the multimeter probe readout. */}
-      <span
-        ref={chipRef}
-        aria-hidden="true"
-        style={CHIP_HOME}
-        className="pointer-events-none absolute z-20 whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
-      >
-        <span className="flex items-center gap-2 rounded-sm border border-white/15 bg-black/90 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-white/80 shadow-lg shadow-black/50">
-          <span aria-hidden="true" className="h-1.5 w-1.5 bg-magenta" />
-          {row.name}
-        </span>
-      </span>
+      <ProbeChip chipRef={chipRef}>{row.name}</ProbeChip>
     </a>
   );
 }

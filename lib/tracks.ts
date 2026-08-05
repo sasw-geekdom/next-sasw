@@ -57,3 +57,23 @@ export const CIRCUIT_COLORS: Record<TrackName, string> = {
 };
 
 export const DEFAULT_CIRCUIT_COLOR = "#ff32a0";
+
+/**
+ * An even sRGB blend of two circuits — the midpoint the eye expects.
+ *
+ * Used to give a page's hero bolt its own charge without inventing a colour
+ * outside the system: /sessions runs Tech & Builders × AI & Applied
+ * Innovation, /speakers runs Small Business × Capital. Derived rather than
+ * pasted, so retuning a circuit moves every bolt built from it.
+ *
+ * A literal is unavoidable at the WebGL boundary — a shader uniform can't read
+ * a CSS custom property — which is why this returns hex rather than a token.
+ */
+export function mixCircuits(a: TrackName, b: TrackName): string {
+  const channel = (hex: string, i: number) =>
+    parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+  const mid = [0, 1, 2].map((i) =>
+    Math.round((channel(CIRCUIT_COLORS[a], i) + channel(CIRCUIT_COLORS[b], i)) / 2),
+  );
+  return `#${mid.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
+}
