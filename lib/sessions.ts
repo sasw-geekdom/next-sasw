@@ -41,6 +41,20 @@ export interface FeaturedSession {
    * tracks whatever the admin uploads and can't fall out of date here.
    */
   logoFromPartner?: string;
+  /**
+   * Force the typeset title to wrap before this substring on wide screens,
+   * instead of letting it break wherever the cell runs out of room. For titles
+   * carrying a trailing attribution ("… powered by X") the natural break lands
+   * mid-phrase; this keeps the credit on its own line.
+   *
+   * Only applies at `lg` and up — a narrow cell already wraps a long title, so
+   * forcing the split on mobile just adds a stub line.
+   *
+   * Visual only — `title` stays a single clean string, since it's also the
+   * logo's alt text and the screen-reader heading. Ignored if the substring
+   * isn't found, so editing a title can't break the card.
+   */
+  titleBreakBefore?: string;
 }
 
 /** The one activation big enough to carry the page on its own. */
@@ -80,7 +94,8 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
   },
   {
     slug: "creative-futures-brunch",
-    title: "Creative Futures Brunch",
+    title: "The Creative Futures ™ Brunch powered by The Down Market",
+    titleBreakBefore: "powered by",
     room: "300-main",
     circuit: "Social",
     blurb:

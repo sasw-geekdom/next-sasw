@@ -36,11 +36,36 @@ function Lockup({ session }: { session: SessionCard }) {
     );
   }
 
+  const [first, credit] = titleLines(session);
   return (
-    <h3 className="font-display text-2xl font-bold uppercase leading-none text-white">
-      {session.title}
+    <h3 className="font-display text-2xl font-bold uppercase leading-tight text-white">
+      {first}
+      {credit && (
+        <>
+          {" "}
+          {/*
+            Desktop-only break. A narrow cell already wraps this title on its
+            own, and forcing the split there just buys a stub line — so the
+            `br` is display:none below lg and the space above survives to keep
+            the two halves as one flowing phrase. Above lg the trailing space
+            collapses against the break, so it costs nothing there either.
+          */}
+          <br className="hidden lg:inline" />
+          {credit}
+        </>
+      )}
     </h3>
   );
+}
+
+/** The title, split at `titleBreakBefore` — or whole, when there's no break. */
+function titleLines(session: SessionCard): [string] | [string, string] {
+  const at = session.titleBreakBefore;
+  if (!at) return [session.title];
+  const i = session.title.indexOf(at);
+  // A break at position 0 would leave an empty first line.
+  if (i <= 0) return [session.title];
+  return [session.title.slice(0, i).trimEnd(), session.title.slice(i)];
 }
 
 function Card({
