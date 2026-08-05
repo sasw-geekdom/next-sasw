@@ -6,6 +6,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import { COLLECTIONS } from "@/lib/firebase/collections";
 import { requireAdmin } from "@/lib/auth/session";
 import { uploadImage, deleteImage, ImageError } from "@/lib/admin/blob";
+import { slugify, uniqueSlug } from "@/lib/slug";
 import {
   logoEntitySchema,
   speakerSchema,
@@ -21,11 +22,33 @@ const okResult = (id: string): SaveResult => ({ ok: true, id });
 
 function revalidate(entity: CmsEntity) {
   revalidatePath(`/admin/content/${entity}`);
-  // Partners + sponsors feed the homepage wall — bust it on save/delete too,
-  // otherwise edits sit behind the page's ISR window (revalidate = 300).
+  // Both public pages are ISR'd (revalidate = 300) — an edit that feeds one
+  // has to bust it, or it sits behind that window. Partners + sponsors feed
+  // the homepage wall; speakers feed the homepage lineup *and* /speakers; and
+  // sessions decide which circuits a speaker carries on /speakers, so a
+  // session write moves speaker chips even though no speaker doc changed.
   if (entity === "partners" || entity === "sponsors") {
     revalidatePath("/");
   }
+  if (entity === "speakers") {
+    revalidatePath("/");
+    revalidatePath("/speakers");
+    revalidateSpeakerPages();
+  }
+  if (entity === "sessions") {
+    revalidatePath("/speakers");
+    revalidateSpeakerPages();
+  }
+}
+
+// Every /speakers/[slug] page at once — the writer doesn't know which slugs
+// moved (a session edit can change several people's circuits), and the route
+// pattern form busts them all. Both spellings are issued because the page
+// lives inside the (site) route group and revalidatePath matches on the route
+// file structure; the one that doesn't match is a no-op.
+function revalidateSpeakerPages() {
+  revalidatePath("/speakers/[slug]", "page");
+  revalidatePath("/(site)/speakers/[slug]", "page");
 }
 
 /** Pull the optional uploaded image; upload if present, else return null. */
@@ -171,6 +194,10 @@ export async function saveSpeaker(form: FormData): Promise<SaveResult> {
 
   const parsed = speakerSchema.safeParse({
     name: form.get("name"),
+    // Absent for anything submitting the pre-title/company/slug form shape.
+    slug: form.get("slug") ?? "",
+    title: form.get("title") ?? "",
+    company: form.get("company") ?? "",
     bio: form.get("bio"),
     linkedin: form.get("linkedin"),
   });
@@ -189,15 +216,58 @@ export async function saveSpeaker(form: FormData): Promise<SaveResult> {
     ? adminDb.collection(COLLECTIONS.speakers).doc(id)
     : adminDb.collection(COLLECTIONS.speakers).doc();
 
+  // Every slug spoken for by someone else — current *and* retired, so a new
+  // speaker can't claim a URL that already redirects to a different person.
+  const collection = await adminDb.collection(COLLECTIONS.speakers).get();
+  const taken = new Set<string>();
+  for (const doc of collection.docs) {
+    if (doc.id === ref.id) continue;
+    const current = doc.get("slug");
+    if (typeof current === "string" && current) taken.add(current);
+    for (const old of doc.get("previousSlugs") ?? []) {
+      if (typeof old === "string") taken.add(old);
+    }
+  }
+
+  // Blank means derive from the name. The admin form pre-fills the field with
+  // the existing slug, so a rename leaves the URL alone unless the slug was
+  // edited too — published links stay published.
+  const slug = uniqueSlug(
+    parsed.data.slug || slugify(parsed.data.name),
+    taken,
+  );
+
   if (id) {
     const snap = await ref.get();
     if (!snap.exists) return { ok: false, error: "Not found." };
     if (imageUrl) await deleteImage(snap.get("imageUrl"));
-    await ref.update({ ...parsed.data, ...(imageUrl ? { imageUrl } : {}) });
+
+    // A changed slug retires the old one rather than dropping it, so links
+    // already in the wild redirect instead of 404ing. Reclaiming a slug this
+    // speaker used before just removes it from the retired list.
+    const retired = new Set<string>(
+      (snap.get("previousSlugs") ?? []).filter(
+        (s: unknown): s is string => typeof s === "string",
+      ),
+    );
+    const previous = snap.get("slug");
+    if (typeof previous === "string" && previous && previous !== slug) {
+      retired.add(previous);
+    }
+    retired.delete(slug);
+
+    await ref.update({
+      ...parsed.data,
+      slug,
+      previousSlugs: [...retired],
+      ...(imageUrl ? { imageUrl } : {}),
+    });
   } else {
     if (!imageUrl) return { ok: false, error: "A headshot is required." };
     await ref.set({
       ...parsed.data,
+      slug,
+      previousSlugs: [],
       imageUrl,
       order: Date.now(), // new entries sort after any drag-ordered ones
       createdAt: FieldValue.serverTimestamp(),

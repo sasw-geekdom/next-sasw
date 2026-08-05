@@ -1,5 +1,7 @@
 // Client-safe CMS types. Timestamps serialized to epoch millis.
 
+import type { TrackName } from "@/lib/tracks";
+
 export type ParticipantRole = "speaker" | "moderator";
 
 // Partners and sponsors share the same shape: image, name, link.
@@ -14,7 +16,15 @@ export interface LogoEntityRow {
 
 export interface SpeakerRow {
   id: string;
+  /** URL segment for /speakers/[slug]. Stable across renames. */
+  slug: string;
+  /** Slugs this speaker used to answer to — kept so old links redirect. */
+  previousSlugs: string[];
   name: string;
+  /** Role — "Founder", "CTO". Empty until an admin fills it in. */
+  title: string;
+  /** Org the role belongs to. Empty until an admin fills it in. */
+  company: string;
   imageUrl: string;
   bio: string;
   linkedin: string;
@@ -42,6 +52,25 @@ export interface SessionRow {
   track: string | null;
   participants: ResolvedParticipant[];
   createdAt: number;
+}
+
+// ─── Public lineup ──────────────────────────────────────────────────────────
+// A speaker as the public surfaces need them: the CMS row plus the circuits
+// and sessions inverted out of the schedule. Lives here rather than beside
+// the loader so client components can import the type without pulling a
+// server-only module into their graph.
+
+export interface LineupSession {
+  id: string;
+  title: string;
+  startsAt: number;
+  location: string;
+  track: string | null;
+}
+
+export interface LineupSpeaker extends SpeakerRow {
+  circuits: TrackName[];
+  sessions: LineupSession[];
 }
 
 // The CMS entities, used for routing + labels.

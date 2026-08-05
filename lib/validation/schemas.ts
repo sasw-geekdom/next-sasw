@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isSlug } from "@/lib/slug";
 import { TRACK_NAMES } from "@/lib/tracks";
 import {
   DESCRIBES_YOU,
@@ -155,6 +156,21 @@ export type LogoEntityInput = z.infer<typeof logoEntitySchema>;
 
 export const speakerSchema = z.object({
   name: z.string().trim().min(2, "Name is required.").max(160),
+  // The /speakers/[slug] segment. Empty means "derive it from the name" — the
+  // action resolves that and guarantees uniqueness, so this only checks shape.
+  slug: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(80)
+    .refine((v) => v === "" || isSlug(v), {
+      message: "Lowercase letters, numbers, and hyphens only.",
+    }),
+  // Role and org, stacked under the name on the public lineup card. Both are
+  // optional — an empty string is a valid answer, so speakers created before
+  // these fields existed keep validating on edit.
+  title: z.string().trim().max(120),
+  company: z.string().trim().max(120),
   bio: z.string().trim().min(10, "Add a short bio.").max(2000),
   linkedin: url,
 });

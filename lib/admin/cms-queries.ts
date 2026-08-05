@@ -3,6 +3,7 @@ import "server-only";
 import { Timestamp } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/admin";
 import { COLLECTIONS } from "@/lib/firebase/collections";
+import { slugify, uniqueSlug } from "@/lib/slug";
 import type {
   LogoEntityRow,
   SpeakerRow,
@@ -51,25 +52,50 @@ export function listSponsors() {
   return listLogoEntities(COLLECTIONS.sponsors);
 }
 
+function strings(v: unknown): string[] {
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+}
+
 export async function listSpeakers(): Promise<SpeakerRow[]> {
   const snap = await adminDb.collection(COLLECTIONS.speakers).get();
-  return snap.docs
-    .sort(
-      (a, b) =>
-        orderOf(a.data()) - orderOf(b.data()) ||
-        (a.get("name") ?? "").localeCompare(b.get("name") ?? ""),
-    )
-    .map((doc) => {
-      const d = doc.data();
-      return {
-        id: doc.id,
-        name: d.name ?? "",
-        imageUrl: d.imageUrl ?? "",
-        bio: d.bio ?? "",
-        linkedin: d.linkedin ?? "",
-        createdAt: toMillis(d.createdAt) ?? 0,
-      };
-    });
+  const docs = snap.docs.sort(
+    (a, b) =>
+      orderOf(a.data()) - orderOf(b.data()) ||
+      (a.get("name") ?? "").localeCompare(b.get("name") ?? ""),
+  );
+
+  // Two passes, because a stored slug is a published URL and must never lose
+  // one to a derived one. Pass 1 reserves every slug an admin save has
+  // committed (current and retired); pass 2 fills in anything added before
+  // this field existed, deriving from the name and de-duping in list order.
+  // Those derived slugs are provisional — the next admin save promotes one to
+  // stored, which is what makes it safe to link to.
+  const taken = new Set<string>();
+  for (const doc of docs) {
+    const stored = doc.get("slug");
+    if (typeof stored === "string" && stored) taken.add(stored);
+    for (const old of strings(doc.get("previousSlugs"))) taken.add(old);
+  }
+
+  return docs.map((doc) => {
+    const d = doc.data();
+    const stored = typeof d.slug === "string" && d.slug ? d.slug : null;
+    const slug = stored ?? uniqueSlug(slugify(d.name ?? ""), taken);
+    if (!stored) taken.add(slug);
+
+    return {
+      id: doc.id,
+      slug,
+      previousSlugs: strings(d.previousSlugs),
+      name: d.name ?? "",
+      title: d.title ?? "",
+      company: d.company ?? "",
+      imageUrl: d.imageUrl ?? "",
+      bio: d.bio ?? "",
+      linkedin: d.linkedin ?? "",
+      createdAt: toMillis(d.createdAt) ?? 0,
+    };
+  });
 }
 
 export async function listSessions(): Promise<SessionRow[]> {
