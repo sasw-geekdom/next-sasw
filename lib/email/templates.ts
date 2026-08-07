@@ -6,6 +6,8 @@
 // calendar block, footer) is locked here. This module is PURE — no server-only
 // deps — so the same render functions drive the live preview in the browser.
 
+import { SITE_URL } from "@/lib/event";
+
 const MAGENTA = "#ff32a0";
 const BLACK = "#000000";
 const INK = "#111111";
@@ -269,12 +271,11 @@ function renderBody(body: string, vars: TemplateVars): string {
 // self-contained link; Apple/Outlook use the hosted .ics file.
 const CAL = {
   title: "San Antonio Startup + Tech Week",
-  details:
-    "Year 11. Five days, five circuits, one current. Sessions, the Bash, and where to be. https://sasw.co",
+  details: `Year 11. Five days, five circuits, one current. Sessions, the Bash, and where to be. ${SITE_URL}`,
   location: "Texas Public Radio, Downtown San Antonio",
   start: "20260928",
   endExclusive: "20261003",
-  ics: "https://sasw.co/sastw-2026.ics",
+  ics: `${SITE_URL}/sastw-2026.ics`,
 };
 
 function googleCalUrl(): string {

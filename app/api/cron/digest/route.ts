@@ -3,6 +3,7 @@ import { listRegistrations } from "@/lib/admin/queries";
 import { resend, EMAIL_FROM, DIGEST_TO } from "@/lib/email/resend";
 import { internalNotificationEmail } from "@/lib/email/templates";
 import { TRACK_NAMES } from "@/lib/tracks";
+import { SITE_URL } from "@/lib/event";
 
 // Weekly registration digest ("nice to have" in the 2026 form requirements).
 // Vercel Cron hits this route Monday mornings; the CRON_SECRET check keeps
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
       { label: "Circuit interest", value: circuits },
       {
         label: "Full list",
-        value: "https://sasw.co/admin/registrations",
+        value: `${SITE_URL}/admin/registrations`,
       },
     ],
   });

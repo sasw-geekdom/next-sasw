@@ -1,6 +1,13 @@
 // Hosted calendar file for the whole week. Linked from the branded emails so
 // recipients can add SASTW to Apple Calendar, Outlook desktop, or any app that
 // reads .ics. All-day, multi-day event (DTEND is exclusive → Oct 3).
+//
+// UID is deliberately NOT built from SITE_URL. A VEVENT's UID is its identity
+// forever — change it and every calendar that already imported this gets a
+// second, duplicate event rather than an update. It is an opaque identifier
+// that happens to look like an address; the host inside it means nothing.
+
+import { SITE_URL } from "@/lib/event";
 
 export const dynamic = "force-static";
 
@@ -16,9 +23,9 @@ const ICS = [
   "DTSTART;VALUE=DATE:20260928",
   "DTEND;VALUE=DATE:20261003",
   "SUMMARY:San Antonio Startup + Tech Week",
-  "DESCRIPTION:Year 11. Five days, five circuits, one current. Sessions, the Bash, and where to be. https://sasw.co",
+  `DESCRIPTION:Year 11. Five days, five circuits, one current. Sessions, the Bash, and where to be. ${SITE_URL}`,
   "LOCATION:Texas Public Radio, Downtown San Antonio, TX",
-  "URL:https://sasw.co",
+  `URL:${SITE_URL}`,
   "END:VEVENT",
   "END:VCALENDAR",
 ].join("\r\n");

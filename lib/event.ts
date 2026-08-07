@@ -2,6 +2,22 @@
 // five-day window (Sept 28 – Oct 2, 2026). Shared by check-in and (later) the
 // public schedule.
 
+/**
+ * The canonical origin, with no trailing slash.
+ *
+ * One constant because this was hardcoded in seven files — canonical tags,
+ * OG urls, robots, the sitemap, the .ics feed and two email templates — and
+ * every one of them said `https://sasw.co` while Vercel serves `www` as the
+ * primary domain. So every canonical, every sitemap entry and every link in
+ * an outgoing email pointed at a URL that immediately 308s. Search engines
+ * follow it, but it asks them to index an address that redirects.
+ *
+ * `www` because that's what production actually answers on today. If the
+ * apex is preferred instead, flip Vercel's primary domain and change this one
+ * line — the point is that the two agree, not which one wins.
+ */
+export const SITE_URL = "https://www.sasw.co";
+
 export interface EventDay {
   iso: string; // YYYY-MM-DD (local)
   label: string; // "Sep 28"

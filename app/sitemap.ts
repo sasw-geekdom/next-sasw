@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { loadLineup } from "@/lib/speakers";
 import { scheduleSlugs } from "@/lib/sessions";
+import { SITE_URL } from "@/lib/event";
 
-const BASE = "https://sasw.co";
+const BASE = SITE_URL;
 
 const STATIC_ROUTES = [
   "",

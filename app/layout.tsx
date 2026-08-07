@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Oswald } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { SITE_URL } from "@/lib/event";
 import "./globals.css";
 
 // Body — Geist Sans (per the build spec, overriding the brand's Open Sans).
@@ -24,7 +25,7 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://sasw.co"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "San Antonio Startup + Tech Week",
     template: "%s · SASTW",
@@ -50,7 +51,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    url: "https://sasw.co",
+    url: SITE_URL,
     siteName: "San Antonio Startup + Tech Week",
     title: "San Antonio Startup + Tech Week",
     description: "Sept 28 – Oct 2, 2026. Five circuits, one current. Plug in.",
