@@ -73,16 +73,28 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     title: "Mission Pitch",
     room: "tpr",
     circuit: "Capital",
+    // Nonprofit leaders, not founders. missionpitch.org describes it as "an
+    // accelerator for nonprofit leaders in the greater San Antonio area", run
+    // by Social Venture Partners with Geekdom, and what's awarded is
+    // unrestricted grant money — the 2025 cohort took $72,855, part of it
+    // raised from the room on the night. The old blurb said "founders" and
+    // "capital", which described a startup demo day this isn't.
     blurb:
-      "Founders pitch from the main stage, with the capital that can move on it in the room.",
+      "San Antonio nonprofit leaders pitch funders from the main stage — grants decided in the room.",
   },
   {
     slug: "latin-tech-pitch",
     title: "Latin Tech Pitch",
     room: "tpr",
     circuit: "Capital",
+    // Per latintechpitch.com: "an elite startup competition for early-stage,
+    // Latino-led tech companies", eligibility Texas-wide rather than local
+    // (the old "building here" implied San Antonio), presented in partnership
+    // with the Consulate General of Israel. "$110k in prizes and mentorship"
+    // mirrors their own framing — the cash placings total far less, so it
+    // shouldn't be described as a purse.
     blurb:
-      "A pitch stage for Latino founders building here — and the investors backing them.",
+      "Latino-led startups from across Texas, pitching for $110k in prizes and mentorship — presented with the Consulate General of Israel.",
   },
   {
     slug: "1-million-cups",
