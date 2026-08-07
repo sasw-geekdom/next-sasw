@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ROOMS } from "@/lib/locations";
 
 const SOCIALS = [
   { label: "Instagram", href: "https://www.instagram.com/sastartup/" },
@@ -80,11 +81,16 @@ export function SiteFooter() {
               <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/40">
                 Where
               </div>
+              {/*
+                Derived from ROOMS, not retyped. The hand-written list had
+                drifted: it omitted 300 Main while the blurb above still
+                claimed five rooms, and it called Central Library "LaunchSA"
+                — the org that programmes it, not the venue room-flow names.
+              */}
               <ul className="space-y-2 text-white/70">
-                <li>Texas Public Radio</li>
-                <li>The Rand</li>
-                <li>LaunchSA</li>
-                <li>Legacy Park</li>
+                {ROOMS.map((room) => (
+                  <li key={room.slug}>{room.name}</li>
+                ))}
               </ul>
             </div>
             <div>
