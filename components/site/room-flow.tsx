@@ -171,8 +171,14 @@ function Anchor({ room }: { room: Room }) {
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className="grid overflow-hidden lg:grid-cols-[3fr_2fr]"
     >
-      {/* The portrait sets the row height; the panel stretches to meet it. */}
-      <div className="relative aspect-3/2 bg-black">
+      {/* The portrait sets the row height; the panel stretches to meet it.
+          16/9 rather than 3/2: the panel pins its name to the portrait's top
+          edge and its session list to the bottom, so the portrait's height IS
+          the distance between them. At 3/2 that left ~210px of dead centre on
+          a 1440 screen — the framing was right, the span was just too tall to
+          hold. `aspect-video` is the canonical 16/9 — it keeps the crop
+          generous and takes ~77px out of the middle. */}
+      <div className="relative aspect-video bg-black">
         <Portrait
           room={room}
           sizes="(min-width: 1024px) 60vw, 100vw"
