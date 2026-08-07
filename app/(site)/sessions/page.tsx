@@ -64,7 +64,12 @@ export default async function SessionsPage() {
 
       <PysaBand />
 
-      <section className="bg-black">
+      {/* Full-bleed rule on the section, not the inner container — the same
+          seam the homepage uses between room-flow and the logo wall. Inset to
+          max-w-7xl it reads as a divider inside one long black column; edge to
+          edge it reads as the wall between two sections, which is the only cue
+          available when neighbouring sections share a ground. */}
+      <section className="border-t border-white/10 bg-black">
         <div className="mx-auto w-full max-w-7xl px-6 py-24 lg:py-32">
           <div className="max-w-2xl">
             <p className="font-mono text-xs uppercase tracking-widest text-magenta">
@@ -82,28 +87,37 @@ export default async function SessionsPage() {
             <SessionBento sessions={cards} />
           </div>
 
-          {/* The section's two doors: one for anyone who wants to add to the
-              schedule, one for anyone who just wants to be in the room. */}
-          <div className="mt-20 border-t border-white/10 pt-14 text-center lg:mt-28 lg:pt-16">
-            <h2 className="font-display text-2xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-3xl">
+        </div>
+      </section>
+
+      {/*
+        The way onto the schedule, as its own band rather than a tail on the
+        bento — the same move the homepage's sponsor ask needed. Tucked inside
+        that container it was centred on a page that is left-aligned
+        everywhere else, and small enough to scan as footer furniture.
+
+        One button, not two. It previously offered "Get involved" beside
+        "Register", which is the section failing to decide what it wants:
+        Register already appears in the navbar, the footer and the hero, so
+        the second button spent the section's one decision on a link the
+        reader has passed three times. It also had to hand-override the
+        `outline` variant, whose text is `foreground` — black, invisible here.
+      */}
+      <section className="border-t border-white/10 bg-black">
+        <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
+          <div className="max-w-2xl">
+            <p className="font-mono text-xs uppercase tracking-widest text-magenta">
+              Hosting is open · Sept 28 – Oct 2
+            </p>
+            <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
               Want a slot on it?
             </h2>
-            <p className="mx-auto mt-3 max-w-md text-pretty text-white/60">
+            <p className="mt-4 max-w-xl text-pretty text-white/60">
               Host an activation, sponsor the week, or just take a seat.
             </p>
-            <div className="mt-7 flex flex-wrap justify-center gap-3">
+            <div className="mt-7">
               <ButtonLink href="/get-involved" size="lg">
                 Get involved
-              </ButtonLink>
-              {/* `outline` is built for the light theme — its text is
-                  `foreground`, which is black, and would vanish here. */}
-              <ButtonLink
-                href="/register"
-                size="lg"
-                variant="outline"
-                className="border-white/25 text-white hover:bg-white/10"
-              >
-                Register
               </ButtonLink>
             </div>
           </div>
