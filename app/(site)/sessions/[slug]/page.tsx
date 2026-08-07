@@ -7,7 +7,13 @@ import { SessionBento, type SessionCard } from "@/components/site/session-bento"
 import { ButtonLink } from "@/components/ui/button";
 import { ARROW_MOTION } from "@/lib/motion";
 import { listPartners } from "@/lib/admin/cms-queries";
-import { resolveSchedule, scheduleSlugs } from "@/lib/sessions";
+import {
+  resolveSchedule,
+  scheduleSlugs,
+  type ResolvedSession,
+} from "@/lib/sessions";
+import { PYSA } from "@/lib/pysa";
+import { PysaBand } from "@/components/site/pysa-band";
 import { cn } from "@/lib/utils";
 
 // A venue's own week. /sessions is the whole grid; this is one room's slice of
@@ -39,19 +45,148 @@ export async function generateMetadata({
   const schedule = resolveSchedule(slug);
   if (!schedule) return {};
 
-  const { room } = schedule;
-  const description = `${room.desc} ${room.name} during San Antonio Startup + Tech Week, Sept 28 – Oct 2, 2026.`;
+  const { title, description, path } =
+    schedule.kind === "venue"
+      ? {
+          title: schedule.room.name,
+          description: `${schedule.room.desc} ${schedule.room.name} during San Antonio Startup + Tech Week, Sept 28 – Oct 2, 2026.`,
+          path: `/sessions/${schedule.room.slug}`,
+        }
+      : {
+          title: schedule.session.title,
+          description: `${schedule.session.blurb} ${PYSA.dateLabel}, ${PYSA.timeLabel} at ${schedule.session.venue.name} — part of San Antonio Startup + Tech Week.`,
+          path: `/sessions/${schedule.session.page}`,
+        };
+
   return {
-    title: room.name,
+    title,
     description,
-    alternates: { canonical: `/sessions/${room.slug}` },
-    openGraph: {
-      title: `${room.name} · SASTW 2026`,
-      description,
-      url: `/sessions/${room.slug}`,
-    },
-    twitter: { title: `${room.name} · SASTW 2026`, description },
+    alternates: { canonical: path },
+    openGraph: { title: `${title} · SASTW 2026`, description, url: path },
+    twitter: { title: `${title} · SASTW 2026`, description },
   };
+}
+
+/**
+ * An activation's own page — PySanAntonio is the first and, for now, only one.
+ *
+ * The band from /sessions is the masthead rather than a second treatment: it
+ * already carries the wordmark, the mascot and PySA's blue, and reusing it
+ * means arriving here confirms you clicked the right thing. It renders without
+ * its CTA here, since that button is what brought you.
+ *
+ * What this adds over the band is the part a teaser can't hold — the venue in
+ * context with a route to the rest of that room's week, the organisers at
+ * size, and a named slot for the running order once it exists.
+ */
+function ActivationPage({ session }: { session: ResolvedSession }) {
+  return (
+    <main>
+      <section className="border-t border-white/10 bg-black">
+        <div className="mx-auto w-full max-w-7xl px-6 pt-8 lg:pt-10">
+          <Link
+            href="/sessions"
+            className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none"
+          >
+            <ArrowLeft
+              className={cn(
+                ARROW_MOTION,
+                "h-3.5 w-3.5",
+                "group-hover:-translate-x-0.5 group-hover:text-magenta",
+                "group-focus-visible:-translate-x-0.5 group-focus-visible:text-magenta",
+              )}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            The full schedule
+          </Link>
+        </div>
+      </section>
+
+      {/* No `detailHref` — the band is the page here, not a link to it. */}
+      <PysaBand masthead />
+
+      <section className="border-t border-white/10 bg-black">
+        <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
+          <div className="max-w-2xl">
+            <p className="font-mono text-xs uppercase tracking-widest text-magenta">
+              The running order
+            </p>
+            <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
+              Still being locked.
+            </h2>
+            {/* TODO(content): the talk and workshop schedule goes here once
+                PySanAntonio publishes it. Until then this says so plainly
+                rather than showing an empty grid. */}
+            <p className="mt-4 max-w-xl text-pretty text-white/60">
+              Talks and workshops go up as they&rsquo;re confirmed. What&rsquo;s
+              fixed is the date, the floor, and who&rsquo;s running it.
+            </p>
+
+            <dl className="mt-10 grid gap-x-10 gap-y-6 border-t border-white/10 pt-8 sm:grid-cols-2">
+              <div>
+                <dt className="font-mono text-[11px] uppercase tracking-widest text-white/55">
+                  When
+                </dt>
+                <dd className="mt-1.5 text-white">
+                  {PYSA.dateLabel}
+                  <span className="block text-white/60">{PYSA.timeLabel}</span>
+                </dd>
+              </div>
+              <div>
+                <dt className="font-mono text-[11px] uppercase tracking-widest text-white/55">
+                  Where
+                </dt>
+                <dd className="mt-1.5 text-white">
+                  {PYSA.venue}, {PYSA.venueDetail}
+                  {/* Into the rest of that room's week — the reason an
+                      activation page and a venue page both exist. */}
+                  {/* ArrowUpRight, not a `&rarr;` entity — every arrow that
+                      leads somewhere else on this site is the diagonal lucide
+                      glyph, and it jumps the way it points. */}
+                  <Link
+                    href={`/sessions/${session.venue.slug}`}
+                    className="group mt-1.5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-200 hover:text-magenta"
+                  >
+                    Everything else at {session.venue.name}
+                    <ArrowUpRight
+                      className={cn(
+                        ARROW_MOTION,
+                        "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                      )}
+                      strokeWidth={2.5}
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-white/10 bg-black">
+        <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
+          <div className="max-w-2xl">
+            <p className="font-mono text-xs uppercase tracking-widest text-magenta">
+              Free registration · Sept 28 – Oct 2
+            </p>
+            <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
+              Get on the list.
+            </h2>
+            <p className="mt-4 max-w-xl text-pretty text-white/60">
+              One registration covers the whole week, {session.title} included.
+            </p>
+            <div className="mt-7">
+              <ButtonLink href="/register" size="lg">
+                Get on the list.
+              </ButtonLink>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
 }
 
 export default async function VenueSchedulePage({
@@ -62,6 +197,10 @@ export default async function VenueSchedulePage({
   const { slug } = await params;
   const schedule = resolveSchedule(slug);
   if (!schedule) notFound();
+
+  if (schedule.kind === "activation") {
+    return <ActivationPage session={schedule.session} />;
+  }
 
   const { room, sessions } = schedule;
   const partners = await safeList(listPartners());

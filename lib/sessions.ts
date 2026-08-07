@@ -55,11 +55,23 @@ export interface FeaturedSession {
    * isn't found, so editing a title can't break the card.
    */
   titleBreakBefore?: string;
+  /**
+   * Gives this session its own page at `/sessions/<page>`, for an activation
+   * big enough to be a mini-conference inside the week rather than a card in
+   * someone else's room.
+   *
+   * Separate from `slug` on purpose. `slug` names the edition — the 2026 run
+   * is `pysanantonio-ii` — while the URL should outlive it, so next year's
+   * third edition keeps the same address and whatever links to it. Omit this
+   * and the session simply has no page.
+   */
+  page?: string;
 }
 
 /** The one activation big enough to carry the page on its own. */
 export const HEADLINE_SESSION: FeaturedSession = {
   slug: "pysanantonio-ii",
+  page: "pysanantonio",
   title: "PySanAntonio II",
   room: "the-rand",
   circuit: "Tech & Builders",
@@ -171,23 +183,52 @@ export interface VenueSchedule {
   sessions: ResolvedSession[];
 }
 
+export interface ActivationSchedule {
+  kind: "activation";
+  session: ResolvedSession;
+}
+
+export type Schedule = VenueSchedule | ActivationSchedule;
+
+/** Activations big enough to hold a page, keyed by the segment they answer to. */
+function activations(): Map<string, FeaturedSession> {
+  const m = new Map<string, FeaturedSession>();
+  for (const s of allSessions()) if (s.page) m.set(s.page, s);
+  return m;
+}
+
 /**
- * Slugs /sessions/[slug] builds. Only rooms carrying at least one featured
- * session get a page — an empty schedule is a worse answer than no link, and
- * room-flow only links the rooms it renders.
+ * Slugs /sessions/[slug] builds — every room carrying at least one featured
+ * session, plus every activation that has opted into a page.
+ *
+ * A room with an empty schedule gets nothing: no link points at it, and an
+ * empty page is a worse answer than a 404.
  */
 export function scheduleSlugs(): string[] {
   const withSessions = new Set(allSessions().map((s) => s.room));
-  return ROOMS.filter((r) => withSessions.has(r.slug)).map((r) => r.slug);
+  return [
+    ...ROOMS.filter((r) => withSessions.has(r.slug)).map((r) => r.slug),
+    ...activations().keys(),
+  ];
 }
 
-/** Resolve a /sessions/[slug] segment, or null when nothing claims it. */
-export function resolveSchedule(slug: string): VenueSchedule | null {
+/**
+ * Resolve a /sessions/[slug] segment, or null when nothing claims it.
+ *
+ * Rooms resolve first, so an activation can never shadow a venue that happens
+ * to share its name — the venue is the older, more linked-to URL of the two.
+ */
+export function resolveSchedule(slug: string): Schedule | null {
   const room = ROOMS.find((r) => r.slug === slug);
-  if (!room) return null;
+  if (room) {
+    const sessions = resolveSessions(
+      allSessions().filter((s) => s.room === room.slug),
+    );
+    return sessions.length > 0 ? { kind: "venue", room, sessions } : null;
+  }
 
-  const sessions = resolveSessions(
-    allSessions().filter((s) => s.room === room.slug),
-  );
-  return sessions.length > 0 ? { kind: "venue", room, sessions } : null;
+  const activation = activations().get(slug);
+  if (!activation) return null;
+  const session = resolveSession(activation);
+  return session ? { kind: "activation", session } : null;
 }

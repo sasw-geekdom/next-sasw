@@ -62,7 +62,7 @@ export default async function SessionsPage() {
     <main>
       <SessionsHero />
 
-      <PysaBand />
+      <PysaBand detailHref="/sessions/pysanantonio" />
 
       {/* Full-bleed rule on the section, not the inner container — the same
           seam the homepage uses between room-flow and the logo wall. Inset to

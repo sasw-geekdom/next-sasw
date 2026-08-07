@@ -2,8 +2,10 @@
 
 import * as React from "react";
 import { useReducedMotion } from "motion/react";
-import { CalendarDays, Clock, MapPin } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Clock, MapPin } from "lucide-react";
 import { ProbeChip, useProbeChip } from "@/components/site/probe-chip";
+import { ButtonLink } from "@/components/ui/button";
+import { ARROW_MOTION } from "@/lib/motion";
 import { PYSA, PYSA_BLUE, PYSA_ORGANIZERS } from "@/lib/pysa";
 import { cn } from "@/lib/utils";
 
@@ -120,7 +122,19 @@ function OrganizerLogo({
   );
 }
 
-export function PysaBand() {
+export function PysaBand({
+  detailHref,
+  masthead = false,
+}: {
+  detailHref?: string;
+  /**
+   * Opens a page rather than sitting between sections. Trims the top padding:
+   * as a band it needs air above to separate it from what precedes it, but as
+   * a masthead the only thing above is a back link, and the full `lg:pt-28`
+   * pushed the credits off the bottom of a 13" laptop.
+   */
+  masthead?: boolean;
+} = {}) {
   const reduce = useReducedMotion();
 
   return (
@@ -165,7 +179,12 @@ export function PysaBand() {
         className="pointer-events-none absolute inset-0 z-10 bg-linear-to-b from-black/70 via-transparent to-black/70"
       />
 
-      <div className="relative z-20 mx-auto w-full max-w-7xl px-6 py-20 lg:py-28">
+      <div
+        className={cn(
+          "relative z-20 mx-auto w-full max-w-7xl px-6 pb-20 lg:pb-28",
+          masthead ? "pt-8 lg:pt-10" : "pt-20 lg:pt-28",
+        )}
+      >
         <div className="max-w-xl xl:max-w-2xl">
           <p className="font-mono text-[11px] uppercase tracking-widest text-white/55">
             The Rand · Tech &amp; Builders
@@ -230,6 +249,31 @@ export function PysaBand() {
               ))}
             </ul>
           </div>
+
+          {/* After the credits, not before: the band reads name -> what ->
+              when -> who runs it, and the way in belongs at the end of that,
+              not interrupting it. Only when the band is a teaser — omitted on
+              PySanAntonio's own page, where it would link to the page you are
+              already on. */}
+          {detailHref && (
+            <div className="mt-10">
+              <ButtonLink
+                href={detailHref}
+                size="md"
+                className="group bg-white/10 text-white duration-200 hover:bg-white/20"
+              >
+                Full event details
+                <ArrowUpRight
+                  className={cn(
+                    ARROW_MOTION,
+                    "h-4 w-4 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                  )}
+                  strokeWidth={2.5}
+                  aria-hidden="true"
+                />
+              </ButtonLink>
+            </div>
+          )}
         </div>
       </div>
     </section>
