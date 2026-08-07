@@ -47,10 +47,14 @@ export const ROOMS: Room[] = [
     host: "San Antonio Startup + Tech Week",
     // "Five circuits" is dropped from the copy on purpose — the pip ramp and
     // the `tag` beside this already say it, and the panel shouldn't state the
-    // same fact three times. What it says instead is who holds the stage:
-    // Mission Pitch and Latin Tech Pitch anchor it, and DEVSA fills the days
-    // between with technical programming.
-    desc: "The anchor. Mission Pitch and Latin Tech Pitch take the main stage, and DEVSA carries the current between them — security, AI, and design.",
+    // same fact three times. What it says instead is who holds the stage.
+    //
+    // No partner named here, deliberately. DEVSA does fill the days between
+    // the two pitch events, but this room's host line is the event itself, so
+    // crediting a partner inside it read as DEVSA operating the main stage
+    // rather than programming into it. The fact survives without the name,
+    // and the phrasing leaves room for the keynotes still to be added.
+    desc: "The anchor. Mission Pitch and Latin Tech Pitch take the main stage, and the days between fill with technical sessions — security, AI, and design.",
     tag: "5 circuits · main stage",
     port: "p1",
     tier: "anchor",
@@ -73,7 +77,16 @@ export const ROOMS: Room[] = [
     slug: "the-rand",
     name: "The Rand",
     host: "Geekdom · DEVSA Community",
-    desc: "Find your people. Build your future. DEVSA runs the community floor all week — the orgs, the partners, and the resources to plug into.",
+    // Leads with the communities, not the org that convenes them, and names
+    // DEVSA once — the host line above already says whose floor this is, so
+    // repeating it in the blurb spent the section's most-used name again.
+    //
+    // It also opened on "Find your people. Build your future.", which is
+    // devsa.community's own tagline verbatim; a partner's brand line reads as
+    // marketing when it's the event doing the describing. Naming the groups
+    // instead matches how DEVSA positions itself anyway — "we don't replace
+    // the communities doing the work, we host them, connect them".
+    desc: "The community floor. The partners and grassroots groups that run all year, together in one room for the week — connected by DEVSA.",
     tag: "Tech & Builders",
     port: "p2",
     tier: "day",
