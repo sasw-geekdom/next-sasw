@@ -27,9 +27,78 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    // The Call for Speakers page became the Plug In hub — keep old links alive.
+    // `permanent: true` is a 308, which Google treats as a 301 for ranking
+    // but which also preserves the request method.
+    //
+    // CAUTION: this matcher is case-INSENSITIVE (`sensitive: false` in Next's
+    // path-match). A source that differs from its destination only by case
+    // matches its own destination and loops forever — `/Speakers` ->
+    // `/speakers` took the live speakers page down in testing, 308ing to
+    // itself. Case-only redirects live in proxy.ts, which compares exactly.
+    // Every source below differs from its destination by more than case.
     return [
+      // The Call for Speakers page became the Plug In hub.
       { source: "/call-for-speakers", destination: "/plug-in", permanent: true },
+
+      // ── Paths from the two previous sasw.co builds ───────────────────────
+      // Found by enumerating the Wayback Machine's CDX index for the domain:
+      // 245 archived HTML paths, of which the ones below still had crawlable
+      // captures and a genuine equivalent here. Anything without a real
+      // counterpart is deliberately left to 404 — see the note at the end.
+
+      // Same page, new address.
+      { source: "/Home", destination: "/", permanent: true },
+      { source: "/homepage-2", destination: "/", permanent: true },
+      { source: "/about", destination: "/", permanent: true },
+      { source: "/GetInvolved", destination: "/get-involved", permanent: true },
+      {
+        source: "/get-involved-2-2",
+        destination: "/get-involved",
+        permanent: true,
+      },
+
+      // The schedule, and the tracks that became circuits. `:slug*` also
+      // matches the bare path, so these cover /tracks and its ~20 children.
+      { source: "/schedule", destination: "/sessions", permanent: true },
+      { source: "/tracks/:slug*", destination: "/sessions", permanent: true },
+
+      // Sponsorship now runs through Get Involved — the wall on the homepage
+      // is display only. Covers /sponsors and its ~20 per-sponsor pages.
+      { source: "/our-sponsors", destination: "/get-involved", permanent: true },
+      {
+        source: "/sponsors/:slug*",
+        destination: "/get-involved",
+        permanent: true,
+      },
+
+      // A retrospective on the event's history, which is what /15-years is.
+      {
+        source: "/five-year-impact-report",
+        destination: "/15-years",
+        permanent: true,
+      },
+
+      // Attendee logistics. There's no housing or parking page here, so these
+      // go to the nearest matching intent rather than the homepage: someone
+      // looking for where to stay is an attendee, and /register is the page
+      // that promises to email them the schedule.
+      { source: "/attend", destination: "/register", permanent: true },
+      { source: "/HousingLogistics", destination: "/register", permanent: true },
+      { source: "/housing", destination: "/register", permanent: true },
+      { source: "/TransitParking", destination: "/register", permanent: true },
+      { source: "/transit-parking", destination: "/register", permanent: true },
+
+      // The old news section. No blog on this build, and the homepage is the
+      // closest thing to "what's happening".
+      { source: "/Blog", destination: "/", permanent: true },
+      { source: "/BlogPost", destination: "/", permanent: true },
+
+      // NOT redirected, on purpose: ~40 individual blog posts and press
+      // releases, /core-team and its ~30 bios, /category/* and /author/*,
+      // /gaming-summit, and the WordPress leftovers (/wp-*, /feed.xml). None
+      // has a counterpart here, and pointing dozens of unrelated URLs at the
+      // homepage is what Google treats as a soft 404 — a clean 404 is the
+      // honest answer and the better signal.
     ];
   },
 };
