@@ -28,7 +28,7 @@ export function FormPage({
           {/* Right — form header + form */}
           <div className="flex flex-col justify-center lg:py-16">
             <div className="mb-8">
-              <p className="font-mono text-xs uppercase tracking-widest text-magenta sm:text-sm">
+              <p className="font-mono text-xs uppercase tracking-widest text-magenta-ink sm:text-sm">
                 {eyebrow}
               </p>
               <h1 className="mt-2 font-display text-3xl font-bold uppercase leading-tight tracking-tight text-foreground sm:text-4xl">

@@ -923,7 +923,7 @@ export function NotFoundGame() {
             <p className="font-mono text-[10px] uppercase tracking-widest text-white/70 sm:text-xs">
               {result.volts.toLocaleString()} volts
               {result.best > 0 && (
-                <span className="text-white/40">
+                <span className="text-white/55">
                   {" "}
                   · best {result.best.toLocaleString()}
                 </span>
@@ -952,7 +952,7 @@ export function NotFoundGame() {
       {/* Both variants ship; CSS picks one. Same hydration reason as the canvas
           aspect above — a `touch`-derived string would freeze on the server's
           keyboard copy for every phone visitor. */}
-      <p className="mt-2 text-center font-mono text-[11px] uppercase tracking-widest text-white/40">
+      <p className="mt-2 text-center font-mono text-[11px] uppercase tracking-widest text-white/55">
         <span className="pointer-coarse:hidden">
           Space / tap to jump · ↓ duck · grab the circuits
         </span>

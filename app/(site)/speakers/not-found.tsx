@@ -45,7 +45,7 @@ export default function SpeakerNotFound() {
 
             <Link
               href="/"
-              className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/45 transition-colors duration-300 hover:text-white/70 focus-visible:outline-none focus-visible:text-white/70"
+              className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:outline-none focus-visible:text-white/70"
             >
               Plug back in
               <ArrowUpRight

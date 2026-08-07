@@ -154,7 +154,7 @@ export function PysaBand() {
 
       <div className="relative z-20 mx-auto w-full max-w-7xl px-6 py-20 lg:py-28">
         <div className="max-w-xl xl:max-w-2xl">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-white/55">
             The Rand · Tech &amp; Builders
           </p>
 
@@ -206,7 +206,7 @@ export function PysaBand() {
               rather than folded into SASTW's own partner wall, because they're
               hosting this one event, not the week. */}
           <div className="mt-12 flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-10">
-            <p className="shrink-0 font-mono text-[11px] uppercase tracking-widest text-white/40">
+            <p className="shrink-0 font-mono text-[11px] uppercase tracking-widest text-white/55">
               Activated by
             </p>
             <ul className="flex flex-wrap items-center gap-x-8 gap-y-5">

@@ -124,7 +124,7 @@ export function SpeakerCard({
       </h3>
 
       {caption && (
-        <p className="mt-1.5 line-clamp-2 font-mono text-[11px] uppercase leading-relaxed tracking-widest text-white/45">
+        <p className="mt-1.5 line-clamp-2 font-mono text-[11px] uppercase leading-relaxed tracking-widest text-white/55">
           {caption}
         </p>
       )}
@@ -135,7 +135,7 @@ export function SpeakerCard({
             {circuits[0]}
           </span>
           {circuits.length > 1 && (
-            <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-white/40">
+            <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-white/55">
               +{circuits.length - 1}
             </span>
           )}

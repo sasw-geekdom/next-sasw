@@ -86,7 +86,8 @@ export function SpeakerForm() {
       </div>
 
       <fieldset>
-        <p className="font-mono text-xs uppercase tracking-widest text-magenta">
+        {/* Light ground — needs the ink variant, not brand magenta. */}
+        <p className="font-mono text-xs uppercase tracking-widest text-magenta-ink">
           Five circuits · one current
         </p>
         <legend className="mb-2 mt-1.5 block text-sm font-medium text-foreground">

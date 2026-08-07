@@ -119,7 +119,7 @@ function SessionList({
           />
           <span className="text-white">{s.title}</span>
           {showKind && s.kind && (
-            <span className="ml-auto shrink-0 font-mono text-[11px] uppercase tracking-widest text-white/40">
+            <span className="ml-auto shrink-0 font-mono text-[11px] uppercase tracking-widest text-white/55">
               {s.kind}
             </span>
           )}

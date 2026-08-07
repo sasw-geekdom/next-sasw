@@ -92,7 +92,7 @@ export default async function SpeakerPage({
             control — the page has one loud element and it's the portrait. */}
         <Link
           href="/speakers"
-          className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/45 transition-colors duration-300 hover:text-white/70 focus-visible:outline-none focus-visible:text-white/70"
+          className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:outline-none focus-visible:text-white/70"
         >
           <ArrowLeft
             className={cn(
@@ -185,7 +185,7 @@ export default async function SpeakerPage({
 
             {speaker.sessions.length > 0 && (
               <div className="mt-12 border-t border-white/10 pt-8">
-                <h2 className="font-mono text-[11px] uppercase tracking-widest text-white/40">
+                <h2 className="font-mono text-[11px] uppercase tracking-widest text-white/55">
                   On the schedule
                 </h2>
                 <ul className="mt-4 flex flex-col gap-4">
@@ -199,7 +199,7 @@ export default async function SpeakerPage({
                         <p className="font-display text-lg font-bold uppercase leading-tight text-white">
                           {s.title}
                         </p>
-                        <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-white/40">
+                        <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-white/55">
                           {formatDateTime(s.startsAt)}
                           {s.location ? ` · ${s.location}` : ""}
                         </p>
@@ -220,7 +220,7 @@ export default async function SpeakerPage({
               </h2>
               <Link
                 href="/speakers"
-                className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/45 transition-colors duration-300 hover:text-white/70 focus-visible:outline-none focus-visible:text-white/70"
+                className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:outline-none focus-visible:text-white/70"
               >
                 See everyone
                 <ArrowUpRight

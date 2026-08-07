@@ -91,7 +91,7 @@ function Card({
       }}
       className={cn("flex flex-col bg-white/5 p-6 lg:p-7", className)}
     >
-      <p className="mb-4 truncate font-mono text-[11px] uppercase tracking-widest text-white/45">
+      <p className="mb-4 truncate font-mono text-[11px] uppercase tracking-widest text-white/55">
         {session.venue.name}
       </p>
 

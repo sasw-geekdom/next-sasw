@@ -12,6 +12,36 @@
 
   /* Brand */
   --magenta: #ff32a0;
+
+  /*
+   * The same magenta, dark enough to carry text.
+   *
+   * `--magenta` against white is 3.38:1 — below the 4.5:1 AA needs for normal
+   * text, and symmetric, so it fails both as white text on a magenta button
+   * and as magenta text on a light ground. Against black it's a comfortable
+   * 6.22:1, which is why eyebrows on the dark sections are fine and the same
+   * class on a light hero is not.
+   *
+   * This one is 5.23:1 against white. Use it for button fills (white text sits
+   * on it) and for magenta text on light grounds. Do NOT use it for magenta
+   * text on black — there it drops to 4.01:1, where plain `--magenta` is
+   * already 6.22:1.
+   *
+   * The bolt, the circuit chips, focus rings and every accent on a dark
+   * section keep `--magenta`. This exists only where the colour has to be
+   * legible as type.
+   *
+   * KNOWN EXCEPTION — buttons. The primary button was tried in this ink and
+   * rejected: beside a headline whose accent word is `--magenta`, two pinks
+   * a shade apart read as a mistake rather than a system. The button keeps
+   * `--magenta` with a white label at 3.38:1, which is under the 4.5:1 AA
+   * floor for the label. It is deliberate, not an oversight. WCAG judges a
+   * button's boundary as a UI component at 3:1, which it clears; the label
+   * is the part that fails. A black label on the same fill measures 6.22:1
+   * and remains the fix if this is ever revisited.
+   */
+  --magenta-ink: #c7277d;
+
   --space-blue: #00266f;
   --black: #000000;
   --white: #ffffff;
@@ -30,6 +60,7 @@
   --color-foreground: var(--foreground);
 
   --color-magenta: var(--magenta);
+  --color-magenta-ink: var(--magenta-ink);
   --color-space-blue: var(--space-blue);
   --color-brand-black: var(--black);
   --color-brand-white: var(--white);

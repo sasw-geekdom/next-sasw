@@ -35,7 +35,7 @@ export default function PlugInPage() {
         Want to sponsor or host an event?{" "}
         <Link
           href="/get-involved"
-          className="inline-flex items-center gap-0.5 font-medium text-magenta hover:underline"
+          className="inline-flex items-center gap-0.5 font-medium text-magenta-ink hover:underline"
         >
           Get involved
           <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden="true" />

@@ -125,10 +125,15 @@ export function GetInvolvedForm() {
               )}
             >
               <span className="block text-sm font-medium">{t.label}</span>
+              {/* Full `muted-foreground`, not /70: at 70% over the tab ground
+                  this composited to 3.54:1, under AA. The selected state is
+                  already carried by the filled background and the label
+                  colour, so the extra dimming bought nothing but a contrast
+                  failure. */}
               <span
                 className={cn(
                   "hidden text-[11px] sm:block",
-                  on ? "text-magenta" : "text-muted-foreground/70",
+                  on ? "text-magenta" : "text-muted-foreground",
                 )}
               >
                 {t.blurb}

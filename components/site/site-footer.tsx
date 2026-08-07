@@ -28,7 +28,7 @@ export function SiteFooter() {
 
           <div className="grid grid-cols-2 gap-10 text-sm sm:grid-cols-4 sm:gap-12">
             <div>
-              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/40">
+              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/55">
                 Event
               </div>
               <ul className="space-y-2 text-white/70">
@@ -51,7 +51,7 @@ export function SiteFooter() {
               </ul>
             </div>
             <div>
-              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/40">
+              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/55">
                 Get involved
               </div>
               <ul className="space-y-2 text-white/70">
@@ -78,7 +78,7 @@ export function SiteFooter() {
               </ul>
             </div>
             <div>
-              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/40">
+              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/55">
                 Where
               </div>
               {/*
@@ -94,7 +94,7 @@ export function SiteFooter() {
               </ul>
             </div>
             <div>
-              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/40">
+              <div className="mb-3 font-mono text-xs uppercase tracking-widest text-white/55">
                 Follow
               </div>
               <ul className="space-y-2 text-white/70">
@@ -116,12 +116,12 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between">
           <span>© 2026 San Antonio Startup + Tech Week</span>
           <Link
             href="/15-years"
             aria-label="15 years of Geekdom"
-            className="group inline-flex items-center gap-2 text-white/40 transition-colors hover:text-white/70"
+            className="group inline-flex items-center gap-2 text-white/55 transition-colors hover:text-white/70"
           >
             <span>15 years of</span>
             {/* eslint-disable-next-line @next/next/no-img-element */}

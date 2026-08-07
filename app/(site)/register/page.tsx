@@ -48,7 +48,7 @@ export default function RegisterPage() {
         Want to be on the schedule?{" "}
         <Link
           href="/plug-in"
-          className="inline-flex items-center gap-0.5 font-medium text-magenta hover:underline"
+          className="inline-flex items-center gap-0.5 font-medium text-magenta-ink hover:underline"
         >
           Plug in
           <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden="true" />

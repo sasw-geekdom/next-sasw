@@ -35,7 +35,7 @@ export default function GetInvolvedPage() {
         Have a session to pitch?{" "}
         <Link
           href="/plug-in"
-          className="inline-flex items-center gap-0.5 font-medium text-magenta hover:underline"
+          className="inline-flex items-center gap-0.5 font-medium text-magenta-ink hover:underline"
         >
           Plug in
           <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden="true" />

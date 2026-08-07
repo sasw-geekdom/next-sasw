@@ -105,7 +105,7 @@ export function HeroShell({
         {/* Masthead — eyebrow and headline. First thing on a phone, so the
             page says what it is before it shows the graphic. */}
         <div className="order-1 text-center lg:text-left">
-          <p className="font-mono text-sm uppercase tracking-widest text-magenta">
+          <p className="font-mono text-sm uppercase tracking-widest text-magenta-ink">
             {eyebrow}
           </p>
           <h1 className="mt-4 font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-foreground sm:text-6xl xl:text-7xl">

@@ -94,7 +94,7 @@ export default async function VenueSchedulePage({
               brightness, the arrow is the only thing that takes colour. */}
           <Link
             href="/sessions"
-            className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/45 transition-colors duration-300 hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none"
+            className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none"
           >
             <ArrowLeft
               className={cn(
@@ -151,7 +151,7 @@ export default async function VenueSchedulePage({
                 </span>
               </div>
               <p className="mt-4 text-pretty text-white/60">{room.desc}</p>
-              <p className="mt-auto pt-6 font-mono text-[11px] uppercase tracking-widest text-white/40">
+              <p className="mt-auto pt-6 font-mono text-[11px] uppercase tracking-widest text-white/55">
                 Sept 28 – Oct 2 · Downtown San Antonio
               </p>
             </div>
