@@ -42,6 +42,20 @@ function MascotClip({
       playsInline
       preload="metadata"
       aria-hidden="true"
+      // `object-top`, because the poster and the clip are different shapes.
+      //
+      // The mp4 is 1114×720 and every box it sits in is `aspect-1114/720`, so
+      // `object-cover` crops the video by nothing at all and this has no
+      // effect on it. The poster is 1842×2304 — portrait — and covering it
+      // into a landscape box throws away 558px of height. Centred, that took
+      // the top and bottom evenly and cut the mascot's head off, which is
+      // what showed before the video arrived and on reduced-motion, where
+      // the poster is all there is.
+      //
+      // Anchoring to the top keeps the head and drops the empty floor
+      // instead. If the clip is ever re-encoded at a different ratio this
+      // becomes load-bearing for the video too — check both then.
+      className={`${className ?? ""} object-top`.trim()}
       // The source is a longer reel; hold the window the DEVSA site uses.
       onLoadedMetadata={(e) => {
         e.currentTarget.currentTime = PYSA.clip.start;
@@ -50,7 +64,6 @@ function MascotClip({
         const v = e.currentTarget;
         if (v.currentTime >= PYSA.clip.end) v.currentTime = PYSA.clip.start;
       }}
-      className={className}
       style={style}
     />
   );
