@@ -4,7 +4,6 @@ import * as React from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
-import { ShaderCanvas } from "@/components/site/shader-canvas";
 import { ButtonLink } from "@/components/ui/button";
 import { ARROW_MOTION } from "@/lib/motion";
 import { ROOMS, type Room } from "@/lib/locations";
@@ -23,22 +22,18 @@ const CHARGE = [
   "text-magenta",
 ] satisfies { length: (typeof TRACK_NAMES)["length"] } & string[];
 
-// 1×1 transparent GIF — shown only if WebGL is unavailable (never for us).
-const BLANK =
-  "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
-
-// WebGL uniforms need a literal — the shader can't read a CSS custom
-// property. Keep in sync with `--magenta` in app/globals.css.
-const MAGENTA = "#ff32a0";
-
-// The current is revealed only in a soft pool around the cursor.
+// The pool of raised light that follows the cursor across a portrait.
 //
-// 140px, not 220. The panel is ~490px wide, so the old pool covered close to
-// half of it and read as the whole card lighting up rather than the cursor
-// finding a current. The solid core is smaller too and the falloff runs all
-// the way out — a hard rim at 75% was what made the edge legible as a shape.
-const SPOTLIGHT =
-  "radial-gradient(140px circle at var(--mx, 50%) var(--my, 50%), #000 0%, #000 12%, transparent 100%)";
+// A mask, not a painted gradient: the overlay carries `backdrop-filter`, and
+// masking it clips where that filter applies. So the picture underneath is
+// genuinely brightened inside the pool rather than having a translucent white
+// wash laid over it — which on halftone art would fog the black between the
+// dots instead of lighting the dots themselves.
+//
+// The falloff runs all the way out with only a small solid core; a hard rim
+// is what makes a spotlight read as a disc stuck to the page.
+const GLOW =
+  "radial-gradient(200px circle at var(--mx, 50%) var(--my, 50%), #000 0%, #000 10%, transparent 100%)";
 
 function Portrait({
   room,
@@ -134,27 +129,33 @@ function SessionList({
   );
 }
 
-// The anchor — portrait and breakdown butted flush into one hard-edged
-// rectangle, contained rather than bled.
+// One venue row, used for all three rooms — portrait and breakdown butted
+// flush into a single hard-edged rectangle, contained rather than bled.
 //
 // Square corners, no border, no glow. That combination was what made an
 // earlier full-width version read as a sticker laid on the page; containment
 // was never the problem. Flush edges and a solid panel do the integrating
-// instead, so the anchor stays inside the same margins as everything else.
+// instead, so a row stays inside the same margins as everything else.
 //
-// The portrait's 3:2 sets the row height and the panel stretches to match, so
-// on a 13" MacBook Air the whole thing lands around 490px — inside the
-// viewport without any vh arithmetic. The session list is pushed to the foot
-// of the panel so the space above it reads as a column, not a gap.
+// This used to be two components: a wide anchor for Texas Public Radio and a
+// pair of half-width tiles for the others. The anchor draws the partner-led
+// programming, but the community floor and the small-business house are hosts
+// in their own right, and a tile half the size said otherwise. Same frame for
+// all three now; what differs between them is what's true — how many circuits
+// a room carries, and what's on its schedule.
 //
-// It's also the only room here that mounts a shader: one GL context, not three.
-function Anchor({ room }: { room: Room }) {
+// Each row links on to that venue's own page, which is where a full week of
+// programming belongs — this panel shows what's confirmed, not everything.
+function VenueRow({ room, index }: { room: Room; index: number }) {
   const reduce = useReducedMotion();
-  const [hovered, setHovered] = React.useState(false);
+  const isAnchor = room.tier === "anchor";
+  const flip = index % 2 === 1;
+  const [lit, setLit] = React.useState(false);
   const boxRef = React.useRef<HTMLDivElement>(null);
 
-  // Write the pointer position straight to CSS vars (no re-render per move) —
-  // the spotlight mask reads them to localize the shader to the cursor.
+  // Pointer position goes straight to CSS vars rather than through state — the
+  // mask reads them, so the pool tracks the cursor without a React render per
+  // mousemove.
   function onMove(e: React.MouseEvent) {
     const el = boxRef.current;
     if (!el) return;
@@ -167,90 +168,193 @@ function Anchor({ room }: { room: Room }) {
     <motion.article
       initial={reduce ? undefined : { opacity: 0, y: 40 }}
       whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="grid overflow-hidden lg:grid-cols-[3fr_2fr]"
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{
+        duration: 0.6,
+        delay: reduce ? 0 : index * 0.08,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      // Alternating sides, so three identical rows read as a column of
+      // distinct venues rather than one row repeated. Both the template and
+      // the order flip: the wide cell has to move with the portrait, or the
+      // image lands in the narrow column and the copy gets the big one.
+      //
+      // Only from lg. Stacked, every row is portrait-then-panel — alternating
+      // there would just make the reading order unpredictable.
+      className={cn(
+        "grid overflow-hidden",
+        // `auto` for the portrait column, not a fraction. A fixed fraction
+        // forces every room's art into the same width, and these three don't
+        // share an aspect (1.50, 0.97, 1.14) — so the two near-square marks
+        // had to letterbox inside it, leaving 135–170px of black either side.
+        // Sizing the column to the image instead means no bars and no crop;
+        // the shared row height is what keeps the rhythm.
+        flip ? "lg:grid-cols-[1fr_auto]" : "lg:grid-cols-[auto_1fr]",
+      )}
     >
-      {/* The portrait sets the row height; the panel stretches to meet it.
-          16/9 rather than 3/2: the panel pins its name to the portrait's top
-          edge and its session list to the bottom, so the portrait's height IS
-          the distance between them. At 3/2 that left ~210px of dead centre on
-          a 1440 screen — the framing was right, the span was just too tall to
-          hold. `aspect-video` is the canonical 16/9 — it keeps the crop
-          generous and takes ~77px out of the middle. */}
-      <div className="relative aspect-video bg-black">
+      {/* Height is the constant, width follows the art. Every row is 26rem
+          tall at lg, so the section keeps one rhythm, and each image arrives
+          at its own natural width inside that — uncropped, and with no black
+          either side of it.
+
+          The trade is that the seam between portrait and panel sits at a
+          different point in each row (624 / 403 / 473 px of image at 1440).
+          Alternating sides makes that read as a spread rather than as three
+          rows failing to line up.
+
+          Below lg the row stacks and the image simply runs full width at its
+          own aspect — nothing to fit it into, so nothing to letterbox. */}
+      <div
+        ref={boxRef}
+        onMouseEnter={() => setLit(true)}
+        onMouseLeave={() => setLit(false)}
+        onMouseMove={onMove}
+        className={cn("relative bg-black", flip && "lg:order-2")}
+      >
         <Portrait
           room={room}
-          sizes="(min-width: 1024px) 60vw, 100vw"
-          className="absolute inset-0 h-full object-cover object-center"
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          className="h-auto lg:h-104 lg:w-auto lg:max-w-none"
         />
+
+        {/* Light raised under the cursor, not across the whole picture. These
+            portraits are ~75–85% near-black, so `brightness` alone lifts only
+            the magenta halftone — the ground stays black and the dots come up,
+            which is the effect wanted. `saturate` keeps them from drifting
+            pink as they climb.
+
+            Skipped entirely under reduced motion: the pool is driven by
+            pointer movement, so there's nothing to show if it can't follow. */}
+        {!reduce && (
+          <div
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute inset-0 transition-opacity duration-300",
+              lit ? "opacity-100" : "opacity-0",
+            )}
+            style={{
+              maskImage: GLOW,
+              WebkitMaskImage: GLOW,
+              backdropFilter: "brightness(2.1) saturate(1.2)",
+              WebkitBackdropFilter: "brightness(2.1) saturate(1.2)",
+            }}
+          />
+        )}
       </div>
 
-      {/* The breakdown — the current flows through it on hover. Black, so the
-          panel sits on the page rather than on a tinted plate; the portrait's
-          top and bottom edges do the framing instead, which is why the name
-          aligns to one and the session list to the other. */}
-      <div className="relative bg-black">
-        <div
-          ref={boxRef}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          onMouseMove={onMove}
-          className="relative h-full overflow-hidden"
-        >
-          {!reduce && (
-            <div
-              aria-hidden="true"
-              className={cn(
-                // 40%, down from 70 — at full strength the pool competed with
-                // the portrait beside it. It should read as a trace under the
-                // cursor, not a second light source on the page.
-                "absolute inset-0 z-0 transition-opacity duration-500",
-                hovered ? "opacity-40" : "opacity-0",
-              )}
-              // Mask the full-box current down to a pool that tracks the cursor.
-              style={{ maskImage: SPOTLIGHT, WebkitMaskImage: SPOTLIGHT }}
-            >
-              <ShaderCanvas
-                color={MAGENTA}
-                maskClassName=""
-                fallbackSrc={BLANK}
-                className="h-full w-full"
-                base={[0.05, 0.0, 0.035]}
-                active={hovered}
-              />
-            </div>
-          )}
+      {/* The breakdown. Black, so the panel sits on the page rather than on a
+          tinted plate; the portrait's top and bottom edges do the framing
+          instead, which is why the name aligns to one and the session list to
+          the other.
 
-          {/* pointer-events-none lets the cursor reach the shader beneath */}
-          <div className="pointer-events-none relative z-10 flex h-full flex-col p-6 lg:p-8">
+          It used to reveal a magenta current under the cursor — a shader
+          masked to a pool that tracked the pointer. That was the panel's only
+          answer to being hovered, back when nothing in it was clickable. Now
+          each row has a real link, and a whole panel lighting up competed
+          with it: it implied the panel itself was the target, and left the
+          one thing you can actually click doing the quieter job. The hover
+          state belongs to the link now. It also drops three WebGL contexts
+          from the homepage, which had four. */}
+      <div className={cn("relative bg-black", flip && "lg:order-1")}>
+        <div className="relative h-full overflow-hidden">
+          {/* `max-w-2xl` because the panel is no longer a fixed fraction: a
+              room whose art is narrow hands its column the difference, and at
+              765px the blurb ran past a readable measure while the session
+              list threw each circuit label a third of a screen from its
+              title. The cap only bites on the wider panels. */}
+          <div className="relative z-10 flex h-full max-w-2xl flex-col p-6 lg:p-8">
             <div className="mb-3.5 flex items-center justify-between gap-3 border-b border-white/10 pb-3">
               <span className="font-mono text-[11px] uppercase tracking-widest text-white/50">
                 {room.host}
               </span>
-              <span
-                role="img"
-                aria-label="All five circuits run here"
-                className="flex shrink-0 items-center gap-1.5"
-              >
-                {TRACK_NAMES.map((name, i) => (
-                  <span
-                    key={name}
-                    className={cn(
-                      "h-1.5 w-1.5 rounded-full bg-current shadow-[0_0_6px_currentColor]",
-                      CHARGE[i],
-                    )}
-                  />
-                ))}
-              </span>
+              {/* The anchor is the one room every circuit runs through, so it
+                  gets the five-charge ramp — a glyph compact enough to sit
+                  beside the host. A named circuit can't: "Small Business &
+                  Solopreneur" wrapped to two lines here and forced the host
+                  to wrap with it, so those rooms name their circuit under the
+                  venue instead. Same fact, placed where it fits. */}
+              {isAnchor && (
+                <span
+                  role="img"
+                  aria-label="All five circuits run here"
+                  className="flex shrink-0 items-center gap-1.5"
+                >
+                  {TRACK_NAMES.map((name, i) => (
+                    <span
+                      key={name}
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full bg-current shadow-[0_0_6px_currentColor]",
+                        CHARGE[i],
+                      )}
+                    />
+                  ))}
+                </span>
+              )}
             </div>
             <h3 className="font-display text-2xl font-bold uppercase leading-none text-white sm:text-3xl">
               {room.name}
             </h3>
+            {!isAnchor && (
+              <div className="mt-2.5">
+                <CircuitChip room={room} />
+              </div>
+            )}
             <p className="mt-2.5 text-base text-white/60">{room.desc}</p>
-            {/* Anchored to the foot of the panel, so the space above it reads
-                as a deliberate column rather than a gap left over. */}
-            <SessionList room={room} showKind className="mt-auto pt-5" />
+
+            {/* Straight after the blurb, not pinned to the panel's foot. The
+                list used to carry `mt-auto`, which parked every row's slack in
+                one 90px hole between the summary and the schedule — the copy
+                read as two disconnected halves. The slack now collects below
+                the button, where an empty margin is just breathing room. */}
+            <SessionList room={room} showKind />
+
+            {/* A real button rather than the mono text link this was. Three
+                rows each ending in a small caption gave the section no
+                terminus, and the panel had height to spare — a button uses
+                some of it and makes the target obvious.
+
+                `ghost` rather than `outline`, carrying its own fill: nothing
+                else in this section is bordered — the portrait butts flush
+                against the panel and the card has no frame — so an outlined
+                button was the only ruled box on the row. A tinted plate reads
+                as a button without drawing an edge that fights that.
+
+                `duration-200` on both button and arrow, because buttonClass
+                ships bare `transition-colors` — Tailwind's 150ms default —
+                and against a 300ms arrow one hover reads as two events. */}
+            {/* The venue name is dropped from the visible label below sm and
+                carried by `aria-label` instead. On a phone the panel is ~294px
+                wide and "See the full week at Texas Public Radio" needs ~360 —
+                it wrapped inside a fixed-height button and spilled out of it.
+                Shortened it fits every width down to 320.
+
+                The accessible name still contains the visible text, so this
+                satisfies WCAG 2.5.3 Label in Name, and screen readers get the
+                venue on every breakpoint — which is what stops three links
+                reading identically in a link list. `whitespace-nowrap` so the
+                short form can't wrap either. */}
+            <div className="mt-auto pt-7">
+              <ButtonLink
+                href={`/sessions/${room.slug}`}
+                aria-label={`See the full week at ${room.name}`}
+                variant="ghost"
+                size="md"
+                className="group bg-white/10 text-white duration-200 hover:bg-white/20"
+              >
+                <span className="whitespace-nowrap">
+                  See the full week
+                  <span className="hidden sm:inline"> at {room.name}</span>
+                </span>
+                <ArrowUpRight
+                  className={cn(
+                    ARROW_MOTION,
+                    "h-4 w-4 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                  )}
+                  strokeWidth={2.5}
+                  aria-hidden="true"
+                />
+              </ButtonLink>
+            </div>
           </div>
         </div>
       </div>
@@ -258,72 +362,14 @@ function Anchor({ room }: { room: Room }) {
   );
 }
 
-// A day-long venue — Central Library and The Rand. Square, borderless, on the
-// page's own black, the same grammar as the anchor: the portrait butting flush
-// against the copy is what defines the tile. Type and rhythm track the anchor
-// panel too; only the name steps down a size, which is the hierarchy.
-function DayTile({ room, index }: { room: Room; index: number }) {
-  const reduce = useReducedMotion();
-
-  return (
-    <motion.article
-      initial={reduce ? undefined : { opacity: 0, y: 24 }}
-      whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{
-        duration: 0.5,
-        delay: reduce ? 0 : index * 0.08,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-      className="grid grow overflow-hidden sm:grid-cols-[2fr_3fr]"
-    >
-      {/* From sm the copy sets the row height and the image fills to match,
-          rather than sitting at its own aspect with black beneath it.
-
-          Below sm the tile stacks and the cell turns landscape (4:3) while
-          this art is portrait-ish — covering it there crops top and bottom,
-          which is exactly where The Rand's "g" descender lives. Contain shows
-          each mark whole on a phone and costs only some side letterboxing;
-          from sm the cell is portrait again and cover fills it without loss. */}
-      <div className="bg-black">
-        <Portrait
-          room={room}
-          sizes="(min-width: 1024px) 18vw, (min-width: 640px) 40vw, 100vw"
-          className={cn(
-            "max-sm:aspect-4/3 max-sm:object-contain sm:h-full",
-            room.fit === "contain"
-              ? "sm:object-contain"
-              : "sm:object-cover sm:object-top",
-          )}
-        />
-      </div>
-
-      <div className="flex flex-col p-5">
-        <div className="mb-3.5 border-b border-white/10 pb-3">
-          <p className="truncate font-mono text-[11px] uppercase tracking-widest text-white/50">
-            {room.host}
-          </p>
-        </div>
-        <h3 className="font-display text-xl font-bold uppercase leading-none text-white">
-          {room.name}
-        </h3>
-        <div className="mt-2.5">
-          <CircuitChip room={room} />
-        </div>
-        <p className="mt-2.5 text-base text-white/60">{room.desc}</p>
-        <SessionList room={room} />
-      </div>
-    </motion.article>
-  );
-}
-
-
 export function RoomFlow() {
-  const anchor = ROOMS.find((r) => r.tier === "anchor");
   // Only the anchor and the all-week rooms are rendered. The two
   // single-activation rooms (300 Main, Legacy Park) stay in ROOMS but have no
   // surface on the homepage now — they need /sessions or a venues page.
-  const dayRooms = ROOMS.filter((r) => r.tier === "day");
+  //
+  // Anchor first, then the day rooms in ROOMS order. Position is the only
+  // hierarchy left in the section now that the frames match.
+  const rooms = ROOMS.filter((r) => r.tier === "anchor" || r.tier === "day");
 
   return (
     <section className="bg-black">
@@ -343,9 +389,20 @@ export function RoomFlow() {
             Where the current lands.
           </h2>
 
+          {/* Not a list of the rooms below. This used to read "From the main
+              stage, to the community floor, small-business house, and more",
+              which previewed three labels the panels then repeated verbatim —
+              "main stage" is TPR's own tag, "community floor" is a phrase in
+              The Rand's blurb, "small-business" is Central Library's chip. It
+              also ended on "and more", gesturing at two rooms this section
+              doesn't render.
+
+              What the panels can't say individually is the thing they have in
+              common: each is a different host running its own week. No count,
+              so it survives the two rooms still to come back. */}
           <p className="mt-4 max-w-xl text-pretty text-white/60 lg:col-start-1 lg:row-start-3">
-            From the main stage, to the community floor,
-            small-business house, and more.
+            Every room, its own host and its own programming — run by the orgs
+            already building here.
           </p>
 
           {/* Rendered by ButtonLink, which is an anchor wearing the button
@@ -386,13 +443,9 @@ export function RoomFlow() {
             page exists, because a text-only tile is the weakest thing in a
             section this dependent on the artwork. */}
         <div className="mt-16 flex flex-col gap-6 lg:mt-20">
-          {anchor && <Anchor room={anchor} />}
-
-          <div className="grid gap-6 sm:grid-cols-2">
-            {dayRooms.map((room, i) => (
-              <DayTile key={room.slug} room={room} index={i} />
-            ))}
-          </div>
+          {rooms.map((room, i) => (
+            <VenueRow key={room.slug} room={room} index={i} />
+          ))}
         </div>
       </div>
     </section>

@@ -45,7 +45,12 @@ export const ROOMS: Room[] = [
     slug: "tpr",
     name: "Texas Public Radio",
     host: "San Antonio Startup + Tech Week",
-    desc: "The anchor. Five circuits, the keynotes, and the biggest rooms of the week.",
+    // "Five circuits" is dropped from the copy on purpose — the pip ramp and
+    // the `tag` beside this already say it, and the panel shouldn't state the
+    // same fact three times. What it says instead is who holds the stage:
+    // Mission Pitch and Latin Tech Pitch anchor it, and DEVSA fills the days
+    // between with technical programming.
+    desc: "The anchor. Mission Pitch and Latin Tech Pitch take the main stage, and DEVSA carries the current between them — security, AI, and design.",
     tag: "5 circuits · main stage",
     port: "p1",
     tier: "anchor",
@@ -68,19 +73,20 @@ export const ROOMS: Room[] = [
     slug: "the-rand",
     name: "The Rand",
     host: "Geekdom · DEVSA Community",
-    desc: "Community-driven activations — run by the orgs and partners that build here.",
+    desc: "Find your people. Build your future. DEVSA runs the community floor all week — the orgs, the partners, and the resources to plug into.",
     tag: "Tech & Builders",
     port: "p2",
     tier: "day",
     image: ASSET("glogo-rand.jpg"),
     imageWidth: 698,
     imageHeight: 720,
-    // Fills like the others. From sm the cell is portrait and this art is
-    // near-square, so covering it crops width, not the base — about 27px off
-    // each side at desktop, which trims building edge and leaves the Geekdom
-    // mark whole. Below sm the cell turns landscape and room-flow switches to
-    // contain, since covering there would cut the "g" descender.
-    fit: "cover",
+    // Contain, now that every venue runs the anchor's wide portrait cell.
+    // This art is near-square (698×720); in a landscape cell, covering it
+    // crops top and bottom, and the bottom is where the Geekdom "g" descender
+    // lives. Contained on a black ground it reads as the mark sitting in
+    // space rather than as letterboxing — there's no border for the bars to
+    // show against.
+    fit: "contain",
     ascii: `  ____________
  /▒ ▒ ▒ ▒ ▒/|
 |▒ ⚡▒ ▒ ▒| |
@@ -89,19 +95,35 @@ export const ROOMS: Room[] = [
     sessions: [
       { title: "Founder Funder Speed Networking", kind: "Founders" },
       { title: "PySanAntonio II", kind: "Tech & Builders" },
+      { title: "Access Granted", kind: "Tech & Builders" },
     ],
   },
   {
     slug: "central-library",
     name: "Central Library",
     host: "LaunchSA · Small Business",
-    desc: "LaunchSA HQ — Programming built for small business and solopreneurs.",
+    // From launchsa.org: "San Antonio's Resource Center for Small Business
+    // Owners and Entrepreneurs", "a partnership between City of San Antonio
+    // and Geekdom", and its help is explicitly no-cost — advising, workshops
+    // and networking. It also sits at 600 Soledad St, 1st floor, *inside*
+    // Central Library, which is why this room carries the library's name and
+    // LaunchSA's host line.
+    //
+    // "No-cost" is the fact worth surfacing: it's the site's own framing, and
+    // it tells a small-business owner scanning the section whether the room
+    // is for them.
+    desc: "LaunchSA HQ — the City of San Antonio and Geekdom's no-cost resource center for small business. Programming built for owners and solopreneurs.",
     tag: "Small Business & Solopreneur",
     port: "p3",
     tier: "day",
     image: ASSET("sastw-launchsa.jpg"),
     imageWidth: 819,
     imageHeight: 720,
+    // Contain, for the same reason as The Rand. At 819×720 this is near-square
+    // too, so covering it in room-flow's landscape cell threw away 234px —
+    // half off the top, which is where this illustration's sky and its orange
+    // bolt live. The whole mark shows now.
+    fit: "contain",
     ascii: `    ________
    / ______ \\
   ||‖ ‖ ‖ ‖||
