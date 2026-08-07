@@ -73,9 +73,15 @@ export default async function SpeakersPage() {
               <h2 className="font-display text-2xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-3xl">
                 Still charging.
               </h2>
+              {/* Two facts, no conditional. This read "If you've got
+                  something worth saying, the stage is still open" — the only
+                  second-person conditional on the site, and it put a
+                  qualifying test in front of an invitation. Everything else
+                  here states what's true and lets the CTA do the asking, so
+                  this does too. */}
               <p className="mt-3 max-w-md text-pretty text-white/60">
-                The lineup comes online before Sept 28. If you&rsquo;ve got
-                something worth saying, the stage is still open.
+                The lineup comes online before Sept 28. The stage is still
+                open.
               </p>
               <div className="mt-7">
                 <ButtonLink href="/plug-in" size="lg">
