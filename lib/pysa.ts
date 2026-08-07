@@ -8,8 +8,14 @@
 // so it needs no `remotePatterns` entry, but it does mean the band depends on
 // a bucket this repo doesn't control.
 
-/** PySA's ink, blue and yellow — its palette, deliberately not SASTW's. */
-export const PYSA_INK = "#0a0a0a";
+/**
+ * PySA's blue — its own accent, deliberately not SASTW's magenta.
+ *
+ * Its ink (#0a0a0a) used to live here too and grounded the band, but a second
+ * near-black on a site whose sections are otherwise pure black read as drift
+ * rather than as PySA's palette. The band sits on site black now and carries
+ * its brand through this blue instead.
+ */
 export const PYSA_BLUE = "#4a90d9";
 
 export const PYSA = {

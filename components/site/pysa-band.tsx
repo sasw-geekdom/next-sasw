@@ -4,7 +4,7 @@ import * as React from "react";
 import { useReducedMotion } from "motion/react";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
 import { ProbeChip, useProbeChip } from "@/components/site/probe-chip";
-import { PYSA, PYSA_BLUE, PYSA_INK, PYSA_ORGANIZERS } from "@/lib/pysa";
+import { PYSA, PYSA_BLUE, PYSA_ORGANIZERS } from "@/lib/pysa";
 import { cn } from "@/lib/utils";
 
 // PySanAntonio II — adapted from the DEVSA site's own hero
@@ -111,10 +111,12 @@ export function PysaBand() {
   const reduce = useReducedMotion();
 
   return (
-    <section
-      className="relative overflow-hidden"
-      style={{ backgroundColor: PYSA_INK }}
-    >
+    // Site black, not PySA's own ink. The band used to ground itself on
+    // #0a0a0a, which put a second near-black on a site whose sections are
+    // otherwise pure black — close enough to read as an inconsistency rather
+    // than a choice. PySA's palette still carries the band through PYSA_BLUE
+    // (the bloom, the wordmark accents); only the floor is shared now.
+    <section className="relative overflow-hidden bg-black">
       {/* Blue bloom behind the clip. */}
       <div
         aria-hidden="true"
