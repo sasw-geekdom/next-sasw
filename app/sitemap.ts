@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { loadLineup } from "@/lib/speakers";
+import { scheduleSlugs } from "@/lib/sessions";
 
 const BASE = "https://sasw.co";
 
@@ -24,6 +25,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE}${path}`,
       changeFrequency: "weekly" as const,
       priority: path === "" ? 1 : 0.8,
+    })),
+    // One page per venue under /sessions. Derived rather than listed, so a
+    // room gaining or losing its programming can't leave a 404 in here.
+    ...scheduleSlugs().map((slug) => ({
+      url: `${BASE}/sessions/${slug}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
     })),
     ...lineup.map((s) => ({
       url: `${BASE}/speakers/${s.slug}`,

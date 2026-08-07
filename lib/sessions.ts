@@ -133,3 +133,49 @@ export function resolveSession(
 ): ResolvedSession | null {
   return resolveSessions([session])[0] ?? null;
 }
+
+// ─── /sessions/[slug] ───────────────────────────────────────────────────────
+//
+// One namespace under /sessions, holding two kinds of page.
+//
+// Today every slug is a venue — /sessions/tpr is Texas Public Radio's week.
+// The second kind is an activation big enough to be its own mini-conference
+// inside the week (PySanAntonio is the first), which will want its own page
+// rather than a card in someone else's room.
+//
+// They share a namespace because a reader doesn't sort them: both answer
+// "what's happening at this thing". Venues resolve first, so a room slug can
+// never be shadowed by an activation that happens to share its name.
+
+/** Every session known to the site, headline included. */
+export function allSessions(): FeaturedSession[] {
+  return [HEADLINE_SESSION, ...FEATURED_SESSIONS];
+}
+
+export interface VenueSchedule {
+  kind: "venue";
+  room: Room;
+  /** Featured activations in this room, headline first if it has one. */
+  sessions: ResolvedSession[];
+}
+
+/**
+ * Slugs /sessions/[slug] builds. Only rooms carrying at least one featured
+ * session get a page — an empty schedule is a worse answer than no link, and
+ * room-flow only links the rooms it renders.
+ */
+export function scheduleSlugs(): string[] {
+  const withSessions = new Set(allSessions().map((s) => s.room));
+  return ROOMS.filter((r) => withSessions.has(r.slug)).map((r) => r.slug);
+}
+
+/** Resolve a /sessions/[slug] segment, or null when nothing claims it. */
+export function resolveSchedule(slug: string): VenueSchedule | null {
+  const room = ROOMS.find((r) => r.slug === slug);
+  if (!room) return null;
+
+  const sessions = resolveSessions(
+    allSessions().filter((s) => s.room === room.slug),
+  );
+  return sessions.length > 0 ? { kind: "venue", room, sessions } : null;
+}
