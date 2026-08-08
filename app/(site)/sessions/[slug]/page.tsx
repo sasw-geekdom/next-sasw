@@ -24,6 +24,7 @@ import {
   type ResolvedSession,
 } from "@/lib/sessions";
 import { PYSA } from "@/lib/pysa";
+import { BackLink } from "@/components/site/back-link";
 import { PysaBand } from "@/components/site/pysa-band";
 import { AddToCalendar } from "@/components/site/add-to-calendar";
 import { cn } from "@/lib/utils";
@@ -136,7 +137,7 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
     <main>
       <section className="border-t border-white/10 bg-black">
         <div className="mx-auto w-full max-w-7xl px-6 pt-8 lg:pt-10">
-          <Link
+          <BackLink
             href="/sessions"
             className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none"
           >
@@ -151,7 +152,7 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
               aria-hidden="true"
             />
             The full schedule
-          </Link>
+          </BackLink>
         </div>
       </section>
 
@@ -598,7 +599,7 @@ export default async function VenueSchedulePage({
           {/* Same back link as /speakers/[slug], down to the charge landing on
               the arrow rather than the whole control: the label lifts a step in
               brightness, the arrow is the only thing that takes colour. */}
-          <Link
+          <BackLink
             href="/sessions"
             className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none"
           >
@@ -613,7 +614,7 @@ export default async function VenueSchedulePage({
               aria-hidden="true"
             />
             The full schedule
-          </Link>
+          </BackLink>
 
           <div className="mt-8 grid overflow-hidden lg:grid-cols-[3fr_2fr]">
             <div className="relative aspect-4/3 bg-black lg:aspect-video">
