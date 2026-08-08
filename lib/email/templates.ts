@@ -7,6 +7,11 @@
 // deps — so the same render functions drive the live preview in the browser.
 
 import { SITE_URL } from "@/lib/event";
+import {
+  googleCalendarUrl,
+  outlookCalendarUrl,
+  type CalendarEvent,
+} from "@/lib/calendar";
 
 const MAGENTA = "#ff32a0";
 const BLACK = "#000000";
@@ -278,26 +283,27 @@ const CAL = {
   ics: `${SITE_URL}/sastw-2026.ics`,
 };
 
+const CAL_EVENT: CalendarEvent = {
+  title: CAL.title,
+  details: CAL.details,
+  location: CAL.location,
+  start: CAL.start,
+  end: CAL.endExclusive,
+  allDay: true,
+};
+
 function googleCalUrl(): string {
-  const e = encodeURIComponent;
-  return (
-    "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-    `&text=${e(CAL.title)}` +
-    `&dates=${CAL.start}/${CAL.endExclusive}` +
-    `&details=${e(CAL.details)}` +
-    `&location=${e(CAL.location)}`
-  );
+  return googleCalendarUrl(CAL_EVENT);
 }
 
 function outlookCalUrl(): string {
-  const e = encodeURIComponent;
-  return (
-    "https://outlook.live.com/calendar/0/action/compose?rru=addevent&allday=true" +
-    `&subject=${e(CAL.title)}` +
-    "&startdt=2026-09-28&enddt=2026-10-03" +
-    `&location=${e(CAL.location)}` +
-    `&body=${e(CAL.details)}`
-  );
+  // Outlook wants dashed dates for an all-day span, not the compact form the
+  // .ics and Google use.
+  return outlookCalendarUrl({
+    ...CAL_EVENT,
+    start: "2026-09-28",
+    end: "2026-10-03",
+  });
 }
 
 function calendarBlock(): string {
