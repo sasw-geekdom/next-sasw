@@ -122,6 +122,15 @@ export async function generateMetadata({
  */
 function ActivationPage({ session }: { session: ResolvedSession }) {
   const isPysa = session.page === "pysanantonio";
+  /**
+   * "Everything else at X" has to actually be true.
+   *
+   * Legacy Park and 300 Main host exactly one activation each, so on those
+   * pages the link promises a room's week and delivers the page you are
+   * already standing on. Read off the room rather than hardcoded, so it
+   * returns by itself the moment a second session lands there.
+   */
+  const hasMoreAtVenue = session.venue.sessions.length > 1;
   return (
     <main>
       <section className="border-t border-white/10 bg-black">
@@ -170,22 +179,24 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                     }}
                   />
                 </div>
-                <p className="mt-8">
-                  <Link
-                    href={`/sessions/${session.venue.slug}`}
-                    className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-200 hover:text-magenta"
-                  >
-                    Everything else at {session.venue.name}
-                    <ArrowUpRight
-                      className={cn(
-                        ARROW_MOTION,
-                        "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
-                      )}
-                      strokeWidth={2.5}
-                      aria-hidden="true"
-                    />
-                  </Link>
-                </p>
+                {hasMoreAtVenue && (
+                  <p className="mt-8">
+                    <Link
+                      href={`/sessions/${session.venue.slug}`}
+                      className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-200 hover:text-magenta"
+                    >
+                      Everything else at {session.venue.name}
+                      <ArrowUpRight
+                        className={cn(
+                          ARROW_MOTION,
+                          "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                        )}
+                        strokeWidth={2.5}
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  </p>
+                )}
               </div>
             </section>
           )}
@@ -386,20 +397,22 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                         // go, and this one is us.
                         <span>Run by {session.site.label}</span>
                       ))}
-                    <Link
-                      href={`/sessions/${session.venue.slug}`}
-                      className="group inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-magenta"
-                    >
-                      Everything else at {session.venue.name}
-                      <ArrowUpRight
-                        className={cn(
-                          ARROW_MOTION,
-                          "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
-                        )}
-                        strokeWidth={2.5}
-                        aria-hidden="true"
-                      />
-                    </Link>
+                    {hasMoreAtVenue && (
+                      <Link
+                        href={`/sessions/${session.venue.slug}`}
+                        className="group inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-magenta"
+                      >
+                        Everything else at {session.venue.name}
+                        <ArrowUpRight
+                          className={cn(
+                            ARROW_MOTION,
+                            "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                          )}
+                          strokeWidth={2.5}
+                          aria-hidden="true"
+                        />
+                      </Link>
+                    )}
                   </p>
                 </>
               ) : (
@@ -446,20 +459,22 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                     {/* ArrowUpRight, not a `&rarr;` entity — every arrow that
                       leads somewhere else on this site is the diagonal lucide
                       glyph, and it jumps the way it points. */}
-                    <Link
-                      href={`/sessions/${session.venue.slug}`}
-                      className="group mt-1.5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-200 hover:text-magenta"
-                    >
-                      Everything else at {session.venue.name}
-                      <ArrowUpRight
-                        className={cn(
-                          ARROW_MOTION,
-                          "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
-                        )}
-                        strokeWidth={2.5}
-                        aria-hidden="true"
-                      />
-                    </Link>
+                    {hasMoreAtVenue && (
+                      <Link
+                        href={`/sessions/${session.venue.slug}`}
+                        className="group mt-1.5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-200 hover:text-magenta"
+                      >
+                        Everything else at {session.venue.name}
+                        <ArrowUpRight
+                          className={cn(
+                            ARROW_MOTION,
+                            "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                          )}
+                          strokeWidth={2.5}
+                          aria-hidden="true"
+                        />
+                      </Link>
+                    )}
                   </dd>
                 </div>
 
