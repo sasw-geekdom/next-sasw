@@ -62,7 +62,11 @@ export async function generateMetadata({
       description,
       url: `/speakers/${speaker.slug}`,
     },
-    twitter: { title: `${speaker.name} · SASTW 2026`, description },
+    twitter: {
+      card: "summary_large_image",
+      title: `${speaker.name} · SASTW 2026`,
+      description,
+    },
   };
 }
 

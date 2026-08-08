@@ -15,7 +15,11 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: "/15-years",
   },
-  twitter: { title: "15 Years of Geekdom · SASTW", description: DESCRIPTION },
+  twitter: {
+    card: "summary_large_image",
+    title: "15 Years of Geekdom · SASTW",
+    description: DESCRIPTION,
+  },
 };
 
 export const dynamic = "force-dynamic";

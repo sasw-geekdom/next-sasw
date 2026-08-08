@@ -16,7 +16,11 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: "/plug-in",
   },
-  twitter: { title: "Plug In · SASTW 2026", description: DESCRIPTION },
+  twitter: {
+    card: "summary_large_image",
+    title: "Plug In · SASTW 2026",
+    description: DESCRIPTION,
+  },
 };
 
 export default function PlugInPage() {
@@ -38,7 +42,11 @@ export default function PlugInPage() {
           className="inline-flex items-center gap-0.5 font-medium text-magenta-ink hover:underline"
         >
           Get involved
-          <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+          <ArrowUpRight
+            className="h-4 w-4"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
         </Link>
       </p>
     </FormPage>

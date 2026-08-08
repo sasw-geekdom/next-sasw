@@ -70,7 +70,10 @@ export async function GET(
     `DTSTART:${icsStamp(when.start)}`,
     `DTEND:${icsStamp(when.end)}`,
     line("SUMMARY", session.title),
-    line("DESCRIPTION", `${session.blurb} Part of San Antonio Startup + Tech Week.`),
+    line(
+      "DESCRIPTION",
+      `${session.blurb} Part of San Antonio Startup + Tech Week.`,
+    ),
     line("LOCATION", `${session.venue.name}, Downtown San Antonio, TX`),
     "END:VEVENT",
     "END:VCALENDAR",

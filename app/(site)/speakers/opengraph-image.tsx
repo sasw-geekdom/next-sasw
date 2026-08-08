@@ -1,7 +1,6 @@
 import { boltOgImage, OG_SIZE } from "@/lib/og";
 
-export const alt =
-  "The speaker lineup — San Antonio Startup + Tech Week 2026";
+export const alt = "The speaker lineup — San Antonio Startup + Tech Week 2026";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 

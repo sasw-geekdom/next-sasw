@@ -103,7 +103,11 @@ export async function generateMetadata({
     description,
     alternates: { canonical: path },
     openGraph: { title: `${title} · SASTW 2026`, description, url: path },
-    twitter: { title: `${title} · SASTW 2026`, description },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} · SASTW 2026`,
+      description,
+    },
   };
 }
 

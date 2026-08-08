@@ -16,7 +16,11 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: "/get-involved",
   },
-  twitter: { title: "Get Involved · SASTW 2026", description: DESCRIPTION },
+  twitter: {
+    card: "summary_large_image",
+    title: "Get Involved · SASTW 2026",
+    description: DESCRIPTION,
+  },
 };
 
 export default function GetInvolvedPage() {
@@ -38,7 +42,11 @@ export default function GetInvolvedPage() {
           className="inline-flex items-center gap-0.5 font-medium text-magenta-ink hover:underline"
         >
           Plug in
-          <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+          <ArrowUpRight
+            className="h-4 w-4"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
         </Link>
       </p>
     </FormPage>

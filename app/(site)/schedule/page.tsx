@@ -21,11 +21,15 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/schedule" },
   openGraph: {
-    title: "Sessions · SASTW 2026",
+    title: "Schedule · SASTW 2026",
     description: DESCRIPTION,
     url: "/schedule",
   },
-  twitter: { title: "Sessions · SASTW 2026", description: DESCRIPTION },
+  twitter: {
+    card: "summary_large_image",
+    title: "Schedule · SASTW 2026",
+    description: DESCRIPTION,
+  },
 };
 
 async function safeList<T>(promise: Promise<T[]>): Promise<T[]> {

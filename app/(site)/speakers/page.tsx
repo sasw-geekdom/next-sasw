@@ -20,7 +20,11 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: "/speakers",
   },
-  twitter: { title: "Speakers · SASTW 2026", description: DESCRIPTION },
+  twitter: {
+    card: "summary_large_image",
+    title: "Speakers · SASTW 2026",
+    description: DESCRIPTION,
+  },
 };
 
 export default async function SpeakersPage() {
@@ -80,8 +84,7 @@ export default async function SpeakersPage() {
                   here states what's true and lets the CTA do the asking, so
                   this does too. */}
               <p className="mt-3 max-w-md text-pretty text-white/60">
-                The lineup comes online before Sept 28. The stage is still
-                open.
+                The lineup comes online before Sept 28. The stage is still open.
               </p>
               <div className="mt-7">
                 <ButtonLink href="/plug-in" size="lg">
