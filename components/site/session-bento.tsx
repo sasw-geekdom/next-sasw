@@ -6,7 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import { ARROW_MOTION } from "@/lib/motion";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
-import type { ResolvedSession } from "@/lib/schedule";
+import { whenShort, type ResolvedSession } from "@/lib/schedule";
 
 // The confirmed activations, minus PySanAntonio — that one has its own band
 // above. Three across, then two, so the five don't leave a widowed cell.
@@ -144,19 +144,37 @@ function Card({
 
       <p className="mt-4 text-pretty text-white/60">{session.blurb}</p>
 
-      {session.page && (
-        <p className="mt-auto inline-flex items-center gap-1.5 pt-6 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 group-hover:text-magenta">
-          Event details
-          <ArrowUpRight
-            className={cn(
-              ARROW_MOTION,
-              "h-3.5 w-3.5 duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
-            )}
-            strokeWidth={2.5}
-            aria-hidden="true"
-          />
-        </p>
-      )}
+      {/* When it runs, and the way in — the card's two pieces of utility, in a
+          bar of their own under a hairline.
+
+          Above the blurb the date was two stacked mono lines before the reader
+          knew what the event was. Down here the top of the card stays clean,
+          and because `mt-auto` pins every footer to the bottom, the dates line
+          up across a row and can be scanned in one pass.
+
+          The row renders whether or not the activation has a page — the date
+          is the card's job on this page, and gating it on the link would drop
+          it for anything not yet given a page of its own. */}
+      <p className="mt-auto flex items-center justify-between gap-3 border-t border-white/10 pt-4 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 group-hover:text-magenta">
+        <span className="text-white/75">
+          {session.when
+            ? `${whenShort(session.when).day} · ${whenShort(session.when).time}`
+            : "Time still landing"}
+        </span>
+        {session.page && (
+          <span className="inline-flex items-center gap-1.5">
+            Event details
+            <ArrowUpRight
+              className={cn(
+                ARROW_MOTION,
+                "h-3.5 w-3.5 duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+              )}
+              strokeWidth={2.5}
+              aria-hidden="true"
+            />
+          </span>
+        )}
+      </p>
     </motion.article>
   );
 }

@@ -1,3 +1,4 @@
+import { EVENT_DAYS } from "@/lib/event";
 import { ASSET, ROOMS, type Room } from "@/lib/locations";
 import { PYSA } from "@/lib/pysa";
 import type { TrackName } from "@/lib/tracks";
@@ -374,6 +375,71 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
 
 /** The week's timezone. Every label and calendar stamp is resolved in it. */
 const TZ = "America/Chicago";
+
+/**
+ * The short form, for anywhere a full "Monday, September 28, 2026" would
+ * crowd the layout — the schedule cards and the week strip.
+ *
+ * Same `when` and the same timezone as whenLabels, so the card and the page it
+ * links to can't disagree about the day.
+ */
+export function whenShort(when: { start: string; end: string }) {
+  const start = new Date(when.start);
+  return {
+    day: start.toLocaleDateString("en-US", {
+      timeZone: TZ,
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    }),
+    time: start
+      .toLocaleTimeString("en-US", {
+        timeZone: TZ,
+        hour: "numeric",
+        minute: "2-digit",
+      })
+      .replace(":00", ""),
+  };
+}
+
+/** Which of the week's days a confirmed slot falls on, as `YYYY-MM-DD`. */
+function dayKey(iso: string): string {
+  // en-CA gives ISO order; bucketing on the venue's clock rather than the
+  // reader's is what stops a 6pm Thursday event showing up on Friday for
+  // someone browsing from Europe.
+  return new Date(iso).toLocaleDateString("en-CA", { timeZone: TZ });
+}
+
+export interface DayColumn {
+  iso: string;
+  /** "Mon", for the column head. */
+  weekday: string;
+  /** "Sep 28". */
+  label: string;
+  sessions: ResolvedSession[];
+}
+
+/**
+ * The whole week as five columns, for the strip at the top of /schedule.
+ *
+ * Every day in EVENT_DAYS appears whether or not anything is confirmed on it —
+ * a day the reader can see is empty-for-now is information; a day silently
+ * missing from the list is a hole they have to notice themselves.
+ */
+export function scheduleByDay(): DayColumn[] {
+  const withTimes = resolveSessions(allSessions()).filter((s) => s.when);
+  return EVENT_DAYS.map((d) => ({
+    iso: d.iso,
+    weekday: new Date(`${d.iso}T12:00:00-05:00`).toLocaleDateString("en-US", {
+      timeZone: TZ,
+      weekday: "short",
+    }),
+    label: d.label,
+    sessions: withTimes
+      .filter((s) => dayKey(s.when!.start) === d.iso)
+      .sort((a, b) => a.when!.start.localeCompare(b.when!.start)),
+  }));
+}
 
 /**
  * Display strings for a confirmed slot, both derived from `when` so a change

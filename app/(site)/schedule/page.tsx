@@ -65,13 +65,12 @@ export default async function SessionsPage() {
     <main>
       <SessionsHero />
 
-      <PysaBand detailHref="/schedule/pysanantonio" />
-
-      {/* The second banded activation. Both sit above the bento rather than
-          inside it: a full-day takeover with its own brand reduced to one card
-          in a five-across grid reads as smaller than it is, and it would then
-          appear twice on the same page. */}
-      <AccessGrantedBand detailHref="/schedule/access-granted" />
+      {/* The week strip lives at components/site/week-strip.tsx and is built
+          and working — it renders all five days including the ones still
+          filling. It is out of the page while it grows filters for the five
+          circuits and for venue, plus add-to-calendar per row. Drop
+          `<WeekStrip />` back in here when that's ready; nothing else has to
+          change. */}
 
       {/* Full-bleed rule on the section, not the inner container — the same
           seam the homepage uses between room-flow and the logo wall. Inset to
@@ -88,7 +87,8 @@ export default async function SessionsPage() {
               Already on the grid.
             </h2>
             <p className="mt-4 max-w-xl text-pretty text-white/60">
-              More lands as it&rsquo;s locked. These are running.
+              Room, time and circuit for each. The two full-day takeovers have
+              their own pages below.
             </p>
           </div>
 
@@ -97,6 +97,14 @@ export default async function SessionsPage() {
           </div>
         </div>
       </section>
+
+      <PysaBand detailHref="/schedule/pysanantonio" />
+
+      {/* The second banded activation. Both sit above the bento rather than
+          inside it: a full-day takeover with its own brand reduced to one card
+          in a five-across grid reads as smaller than it is, and it would then
+          appear twice on the same page. */}
+      <AccessGrantedBand detailHref="/schedule/access-granted" />
 
       {/*
         The way onto the schedule, as its own band rather than a tail on the
