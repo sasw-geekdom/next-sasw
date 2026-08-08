@@ -66,6 +66,36 @@ export interface FeaturedSession {
    * and the session simply has no page.
    */
   page?: string;
+  /**
+   * The organiser's own page for this activation, when it has one.
+   *
+   * These are partner-run events with their own sites, schedules and
+   * applications. This site holds where it sits in the week; the depth lives
+   * there, and its page should say so rather than pretend otherwise.
+   */
+  site?: { label: string; href: string };
+  /**
+   * Confirmed start and end, once the organiser has fixed them.
+   *
+   * ISO 8601 with an explicit offset, not display strings: the page label, the
+   * metadata description and the downloadable calendar file all derive from
+   * this one value, so they cannot drift apart. Absent means genuinely
+   * unconfirmed — the page says so rather than inventing a placeholder.
+   *
+   * The week runs in America/Chicago and ends well before DST does (Nov 1
+   * 2026), so every 2026 session is -05:00.
+   */
+  when?: { start: string; end: string };
+  /**
+   * A photograph for the page's hero, laid into the right of the frame behind
+   * the copy — not a card image and not shown anywhere else.
+   *
+   * Desktop only by the time it renders: below `lg` the hero is a single
+   * column and a photograph under the type would fight it. Pick something
+   * that reads at a glance and survives being masked and dimmed, because it
+   * is set into the black rather than placed on top of it.
+   */
+  hero?: { src: string; width: number; height: number; alt: string };
 }
 
 /** The one activation big enough to carry the page on its own. */
@@ -75,6 +105,9 @@ export const HEADLINE_SESSION: FeaturedSession = {
   title: "PySanAntonio II",
   room: "the-rand",
   circuit: "Tech & Builders",
+  // Friday, October 2, 1:00–6:00 PM — the same slot lib/pysa states in prose
+  // for the band, expressed here in the shape every activation uses.
+  when: { start: "2026-10-02T13:00:00-05:00", end: "2026-10-02T18:00:00-05:00" },
   blurb:
     "The city's Python community, back for a second run — talks, workshops, and the people who build with it every day.",
 };
@@ -82,9 +115,41 @@ export const HEADLINE_SESSION: FeaturedSession = {
 export const FEATURED_SESSIONS: FeaturedSession[] = [
   {
     slug: "mission-pitch",
+    page: "mission-pitch",
+    site: { label: "missionpitch.org", href: "https://www.missionpitch.org/" },
+    // White-on-transparent, so it sits on the dark card and the dark page
+    // without a plate behind it. Copied into the repo rather than hotlinked
+    // from the bucket it arrived in: next/image needs the host in
+    // `remotePatterns`, and a mark the layout depends on shouldn't hang off a
+    // third party.
+    //
+    // Cropped to its ink before committing. As supplied it was 1200x400 with
+    // 157px of transparent margin down the left, so `object-left` aligned the
+    // file's edge while the visible mark sat indented from the eyebrow above
+    // it. Trimmed, the box and the mark are the same thing and CSS controls
+    // the spacing. Any future lockup wants the same treatment.
+    logo: {
+      src: "/sessions/mission-pitch.png",
+      width: 920,
+      height: 225,
+      alt: "Mission Pitch",
+    },
     title: "Mission Pitch",
     room: "tpr",
     circuit: "Capital",
+    // The 2025 showcase — a $20,000 grant handed over on the night, which is
+    // the blurb's "grants decided in the room" as a photograph. Resized from
+    // the 2500px original on missionpitch.org; anything larger is bytes that
+    // never reach a screen.
+    hero: {
+      src: "/sessions/mission-pitch-hero.jpg",
+      width: 1800,
+      height: 1200,
+      alt: "",
+    },
+    // Confirmed: Monday 28 September, 5–7pm, and the only thing running at
+    // Texas Public Radio that evening.
+    when: { start: "2026-09-28T17:00:00-05:00", end: "2026-09-28T19:00:00-05:00" },
     // Nonprofit leaders, not founders. missionpitch.org describes it as "an
     // accelerator for nonprofit leaders in the greater San Antonio area", run
     // by Social Venture Partners with Geekdom, and what's awarded is
@@ -96,6 +161,11 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
   },
   {
     slug: "latin-tech-pitch",
+    page: "latin-tech-pitch",
+    site: {
+      label: "latintechpitch.com",
+      href: "https://www.latintechpitch.com/about-1",
+    },
     title: "Latin Tech Pitch",
     room: "tpr",
     circuit: "Capital",
@@ -110,6 +180,11 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
   },
   {
     slug: "1-million-cups",
+    page: "1-million-cups",
+    site: {
+      label: "1millioncups.com",
+      href: "https://www.1millioncups.com/sanantonio",
+    },
     title: "1 Million Cups",
     room: "central-library",
     circuit: "Small Business & Solopreneur",
@@ -118,6 +193,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
   },
   {
     slug: "creative-futures-brunch",
+    page: "creative-futures-brunch",
     title: "The Creative Futures ™ Brunch powered by The Down Market",
     titleBreakBefore: "powered by",
     room: "300-main",
@@ -127,6 +203,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
   },
   {
     slug: "startup-bash",
+    page: "startup-bash",
     title: "Startup Bash",
     room: "legacy-park",
     circuit: "Social",
@@ -134,6 +211,34 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       "Where the week unwinds. Open-air, the whole ecosystem in one place, no badge scanning.",
   },
 ];
+
+/** The week's timezone. Every label and calendar stamp is resolved in it. */
+const TZ = "America/Chicago";
+
+/**
+ * Display strings for a confirmed slot, both derived from `when` so a change
+ * to the time can't leave a stale label behind.
+ */
+export function whenLabels(when: { start: string; end: string }) {
+  const start = new Date(when.start);
+  const end = new Date(when.end);
+  const date = start.toLocaleDateString("en-US", {
+    timeZone: TZ,
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  const t = (d: Date) =>
+    d
+      .toLocaleTimeString("en-US", {
+        timeZone: TZ,
+        hour: "numeric",
+        minute: "2-digit",
+      })
+      .replace(":00", ":00");
+  return { date, time: `${t(start)} – ${t(end)}` };
+}
 
 export interface ResolvedSession extends FeaturedSession {
   venue: Room;

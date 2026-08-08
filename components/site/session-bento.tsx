@@ -1,6 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import { ARROW_MOTION } from "@/lib/motion";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import type { ResolvedSession } from "@/lib/sessions";
@@ -22,14 +25,21 @@ export interface SessionCard extends ResolvedSession {
 function Lockup({ session }: { session: SessionCard }) {
   if (session.logoSrc) {
     return (
-      <div className="relative h-12 w-full max-w-56">
+      // The mark is the card's headline, so the slot is sized to lead rather
+      // than to label — where a typeset title gets `text-2xl` across the full
+      // width, this gets the same room. `max-w-56` used to cap it at 224px,
+      // which left a 3:1 mark 144px wide in a ~340px card: legible, but not
+      // the thing you saw first.
+      //
+      // Height-led with the width free, because lockups arrive at wildly
+      // different ratios — a letterbox with the mark set left keeps a wide
+      // wordmark and a squarer badge on the same baseline.
+      <div className="relative h-16 w-full sm:h-20 lg:h-24">
         <Image
           src={session.logoSrc}
           alt={session.logoAlt ?? session.title}
           fill
-          sizes="224px"
-          // Lockups arrive at wildly different aspects, so the slot is a
-          // letterbox and the mark sits left inside it at its own ratio.
+          sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 90vw"
           className="object-contain object-left"
         />
       </div>
@@ -89,7 +99,13 @@ function Card({
         delay: reduce ? 0 : index * 0.06,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className={cn("flex flex-col bg-white/5 p-6 lg:p-7", className)}
+      className={cn(
+        "group relative flex flex-col bg-white/5 p-6 lg:p-7",
+        // Only lifts when the whole card is a target.
+        session.page &&
+          "transition-colors duration-300 hover:bg-white/10 focus-within:bg-white/10",
+        className,
+      )}
     >
       <p className="mb-4 truncate font-mono text-[11px] uppercase tracking-widest text-white/55">
         {session.venue.name}
@@ -98,7 +114,27 @@ function Card({
       {/* A logo replaces the heading, so the card still needs an accessible
           name — the visually-hidden one carries it when art is present. */}
       {session.logoSrc && <h3 className="sr-only">{session.title}</h3>}
-      <Lockup session={session} />
+
+      {/*
+        The link wraps the lockup and stretches over the whole card with
+        `after:inset-0`, so the card is one target rather than a small one
+        inside a large clickable-looking box — and the accessible name stays
+        the title, not "read more".
+
+        Everything that has to stay clickable above it needs `relative z-10`;
+        nothing here does yet, which is why the circuit chip and blurb sit
+        under the overlay without issue.
+      */}
+      {session.page ? (
+        <Link
+          href={`/sessions/${session.page}`}
+          className="after:absolute after:inset-0 after:z-10 focus-visible:outline-none"
+        >
+          <Lockup session={session} />
+        </Link>
+      ) : (
+        <Lockup session={session} />
+      )}
 
       <div className="mt-3.5">
         <span className="inline-block rounded-full border border-magenta/35 bg-magenta/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-magenta">
@@ -107,6 +143,20 @@ function Card({
       </div>
 
       <p className="mt-4 text-pretty text-white/60">{session.blurb}</p>
+
+      {session.page && (
+        <p className="mt-auto inline-flex items-center gap-1.5 pt-6 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 group-hover:text-magenta">
+          Event details
+          <ArrowUpRight
+            className={cn(
+              ARROW_MOTION,
+              "h-3.5 w-3.5 duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+            )}
+            strokeWidth={2.5}
+            aria-hidden="true"
+          />
+        </p>
+      )}
     </motion.article>
   );
 }
