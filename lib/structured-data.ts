@@ -49,13 +49,19 @@ const FREE_OFFER = {
  * instead — each venue publishes exactly what has been confirmed for it and
  * nothing inferred.
  */
-function place(room: { name: string; place?: Room["place"] }) {
+function place(room: {
+  name: string;
+  place?: Room["place"];
+  /** An authority URL for the place, for entity linking. */
+  sameAs?: string;
+}) {
   const addr = room.place?.address;
   const zip = room.place?.postalCode;
   const coords = room.place?.coords;
   return {
     "@type": "Place",
     name: room.name,
+    ...(room.sameAs ? { sameAs: room.sameAs } : {}),
     address: {
       "@type": "PostalAddress",
       ...(addr ? { streetAddress: addr } : {}),
@@ -90,12 +96,20 @@ export function weekEvent() {
     endDate: "2026-10-02",
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    // Named for the district rather than pinned to one building. The week
-    // genuinely runs across five venues, and borrowing the anchor's street
-    // address here — which the whole-week .ics does — would state something
-    // that isn't true to buy a stronger result. The activations carry the
+    // The district, not a building. The week genuinely runs across five
+    // venues, and borrowing the anchor's street address here would state
+    // something untrue to buy a stronger result — the activations carry the
     // precise addresses, and those are the pages people search for.
-    location: place({ name: "Downtown San Antonio" }),
+    //
+    // "Downtown West San Antonio" rather than the vaguer "Downtown": it is a
+    // real named district west of the River Walk, with its own authority at
+    // downtownwestsa.com — whose own events page lists gatherings in Legacy
+    // Park, one of these venues. `sameAs` points at it so the place resolves
+    // to that entity rather than to a string a crawler has to guess at.
+    location: place({
+      name: "Downtown West San Antonio",
+      sameAs: "https://www.downtownwestsa.com/",
+    }),
     organizer: ORGANIZER,
     offers: FREE_OFFER,
     url: SITE_URL,

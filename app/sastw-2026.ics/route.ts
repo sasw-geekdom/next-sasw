@@ -24,7 +24,9 @@ const ICS = [
   "DTEND;VALUE=DATE:20261003",
   "SUMMARY:San Antonio Startup + Tech Week",
   `DESCRIPTION:Year 11. Five days, five circuits, one current. Sessions, the Bash, and where to be. ${SITE_URL}`,
-  "LOCATION:Texas Public Radio, Downtown San Antonio, TX",
+  // The district, not one building — this is the whole week, and naming the
+  // anchor venue told anyone importing it to go to TPR for all five days.
+  "LOCATION:Downtown West San Antonio, TX",
   `URL:${SITE_URL}`,
   "END:VEVENT",
   "END:VCALENDAR",
