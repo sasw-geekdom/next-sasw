@@ -283,7 +283,21 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                     width={session.logo.width}
                     height={session.logo.height}
                     priority
-                    className="mt-6 h-auto w-full max-w-sm sm:max-w-md lg:max-w-lg"
+                    className={cn(
+                      "mt-6 h-auto w-full",
+                      // Capped by width, a stacked mark comes out about twice
+                      // the height of a wide one — 1 Million Cups rendered
+                      // 512x256 against Mission Pitch's 512x125, and pushed
+                      // the copy block from 430px to 557px. The bento cards
+                      // already normalise on height; this does the same by
+                      // giving anything squarer than 3:1 a narrower ceiling,
+                      // which lands every mark near the same optical size
+                      // without the distortion `max-height` would cause on an
+                      // element whose width is already fixed.
+                      session.logo.width / session.logo.height >= 3
+                        ? "max-w-sm sm:max-w-md lg:max-w-lg"
+                        : "max-w-56 sm:max-w-64 lg:max-w-xs",
+                    )}
                   />
                 </>
               ) : (

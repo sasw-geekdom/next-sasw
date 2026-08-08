@@ -107,7 +107,10 @@ export const HEADLINE_SESSION: FeaturedSession = {
   circuit: "Tech & Builders",
   // Friday, October 2, 1:00–6:00 PM — the same slot lib/pysa states in prose
   // for the band, expressed here in the shape every activation uses.
-  when: { start: "2026-10-02T13:00:00-05:00", end: "2026-10-02T18:00:00-05:00" },
+  when: {
+    start: "2026-10-02T13:00:00-05:00",
+    end: "2026-10-02T18:00:00-05:00",
+  },
   blurb:
     "The city's Python community, back for a second run — talks, workshops, and the people who build with it every day.",
 };
@@ -149,7 +152,10 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     },
     // Confirmed: Monday 28 September, 5–7pm, and the only thing running at
     // Texas Public Radio that evening.
-    when: { start: "2026-09-28T17:00:00-05:00", end: "2026-09-28T19:00:00-05:00" },
+    when: {
+      start: "2026-09-28T17:00:00-05:00",
+      end: "2026-09-28T19:00:00-05:00",
+    },
     // Nonprofit leaders, not founders. missionpitch.org describes it as "an
     // accelerator for nonprofit leaders in the greater San Antonio area", run
     // by Social Venture Partners with Geekdom, and what's awarded is
@@ -177,7 +183,10 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // shouldn't be described as a purse.
     blurb:
       "Latino-led startups from across Texas, pitching for $110k in prizes and mentorship — presented with the Consulate General of Israel.",
-    when: { start: "2026-09-30T14:00:00-05:00", end: "2026-09-30T18:00:00-05:00" },
+    when: {
+      start: "2026-09-30T14:00:00-05:00",
+      end: "2026-09-30T18:00:00-05:00",
+    },
     // The mark reads "LatinTECH PITCH 2026" — the only version they publish
     // that carries the full name; the plain "LatinTECH" wordmark drops
     // "Pitch". The year is baked into the artwork, so this file needs a new
@@ -203,15 +212,45 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
   {
     slug: "1-million-cups",
     page: "1-million-cups",
+    // The chapter is run by Launch SA, who host it at their Central Library
+    // HQ — so the "run by" credit points at them rather than at 1MC's national
+    // site. 1millioncups.com/sanantonio still redirects to the chapter page if
+    // that's ever wanted back.
     site: {
-      label: "1millioncups.com",
-      href: "https://www.1millioncups.com/sanantonio",
+      label: "launchsa.org",
+      href: "https://launchsa.org/",
     },
     title: "1 Million Cups",
     room: "central-library",
     circuit: "Small Business & Solopreneur",
     blurb:
       "The weekly founder format, run at LaunchSA HQ: present, take questions, leave with answers.",
+    when: {
+      start: "2026-09-30T09:00:00-05:00",
+      end: "2026-09-30T11:00:00-05:00",
+    },
+    // 1millioncups.com's stacked white mark, which already carries the
+    // Kauffman Foundation line — their other lockup is white knocked out of an
+    // orange square, and a square of brand colour would fight the black.
+    // Stacked, so it sits taller and narrower than the wide lockups on the
+    // other cards; the slot is height-led, which keeps them on one baseline.
+    logo: {
+      src: "/sessions/1-million-cups.png",
+      width: 1072,
+      height: 536,
+      alt: "1 Million Cups",
+    },
+    // From launchsa.org, and shot at an actual 1 Million Cups morning there —
+    // the venue's own branding is on the glass, which is worth more than a
+    // generic room given the blurb names LaunchSA HQ. Deliberately quieter
+    // than the other two: a cheque handover and a full auditorium already
+    // carry the week's big moments, and this one is a weekly working session.
+    hero: {
+      src: "/sessions/1-million-cups-hero.jpg",
+      width: 1800,
+      height: 1200,
+      alt: "",
+    },
   },
   {
     slug: "creative-futures-brunch",
