@@ -59,12 +59,26 @@ function MascotClip({
       // becomes load-bearing for the video too — check both then.
       className={`${className ?? ""} object-top`.trim()}
       // The source is a longer reel; hold the window the DEVSA site uses.
+      //
+      // Seeking back was once ruinous — /schedule pulled this file four times
+      // in fifteen seconds, 20.3MB — but that was the file's layout, not the
+      // seek: its `moov` atom sat after 7MB of `mdat`, so every seek made the
+      // browser hunt the end for metadata and start again. The copy served
+      // now is remuxed `ftyp/moov/mdat`, so it buffers once and a seek is free.
+      //
+      // A media fragment plus `loop` was tried instead and is wrong: Chrome
+      // honours `#t=start,end` by *stopping* at the end, and `loop` does not
+      // restart it. The mascot froze on its last frame.
       onLoadedMetadata={(e) => {
         e.currentTarget.currentTime = PYSA.clip.start;
       }}
       onTimeUpdate={(e) => {
         const v = e.currentTarget;
-        if (v.currentTime >= PYSA.clip.end) v.currentTime = PYSA.clip.start;
+        // `timeupdate` fires several times a second; without the seeking
+        // guard this asks for the same seek repeatedly.
+        if (!v.seeking && v.currentTime >= PYSA.clip.end) {
+          v.currentTime = PYSA.clip.start;
+        }
       }}
       style={style}
     />

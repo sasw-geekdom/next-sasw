@@ -29,7 +29,7 @@ export const PYSA = {
   wordmarkWidth: 4066,
   wordmarkHeight: 958,
 
-  video: "https://devsa-assets.s3.us-east-2.amazonaws.com/pysa/pysa2.mp4",
+  video: "/pysa/pysa2.mp4",
   mascotStill:
     "https://devsa-assets.s3.us-east-2.amazonaws.com/pysa/pysa2-bgdark.jpg",
   /** The reel is longer than the loop we want; hold this window. */
