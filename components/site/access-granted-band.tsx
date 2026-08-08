@@ -68,10 +68,12 @@ export function AccessGrantedBand({
         masthead && "flex min-h-[calc(100vh-4rem)] flex-col justify-center",
       )}
     >
-      {/* Green bloom behind the lock, the counterpart to PySA's blue one. */}
+      {/* Green bloom behind the lock, the counterpart to PySA's blue one —
+          anchored left now that the art is, or it would glow at empty space on
+          the far side of the copy. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-24 top-1/4 hidden h-140 w-140 rounded-full opacity-20 blur-[120px] sm:block"
+        className="pointer-events-none absolute -left-24 top-1/4 hidden h-140 w-140 rounded-full opacity-20 blur-[120px] sm:block"
         style={{
           background: `radial-gradient(circle, ${ACCESS_GREEN} 0%, transparent 65%)`,
         }}
@@ -92,8 +94,8 @@ export function AccessGrantedBand({
           into the black; this one carries its own glow and a defined
           silhouette, so it wants to sit beside the copy, not behind it.
         */}
-        <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-16">
-          <div className="max-w-xl xl:max-w-2xl">
+        <div className="grid gap-10 lg:grid-cols-[auto_1fr] lg:items-center lg:gap-16">
+          <div className="max-w-xl lg:order-2 xl:max-w-2xl">
             <Prompt>The Rand · Tech &amp; Builders</Prompt>
 
             <h2 className="mt-4 font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl">
@@ -147,7 +149,12 @@ export function AccessGrantedBand({
             {actions && <div className="mt-9">{actions}</div>}
           </div>
 
-          <div className="mx-auto w-44 sm:w-52 lg:mx-0 lg:w-64 xl:w-72">
+          {/* Left of the copy from lg up, via `order` rather than DOM position
+              — the same trick room-flow uses to alternate its venue rows.
+              Reordering the markup instead would put a decorative image ahead
+              of the heading, and on mobile, where the grid collapses to one
+              column, it would push the copy below a tall render. */}
+          <div className="mx-auto w-44 sm:w-52 lg:order-1 lg:mx-0 lg:w-64 xl:w-72">
             <Image
               src={ACCESS_GRANTED.lock}
               alt=""
