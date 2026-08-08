@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SessionsHero } from "@/components/site/schedule-hero";
+import { AccessGrantedBand } from "@/components/site/access-granted-band";
 import { PysaBand } from "@/components/site/pysa-band";
 import {
   SessionBento,
@@ -65,6 +66,12 @@ export default async function SessionsPage() {
       <SessionsHero />
 
       <PysaBand detailHref="/schedule/pysanantonio" />
+
+      {/* The second banded activation. Both sit above the bento rather than
+          inside it: a full-day takeover with its own brand reduced to one card
+          in a five-across grid reads as smaller than it is, and it would then
+          appear twice on the same page. */}
+      <AccessGrantedBand detailHref="/schedule/access-granted" />
 
       {/* Full-bleed rule on the section, not the inner container — the same
           seam the homepage uses between room-flow and the logo wall. Inset to

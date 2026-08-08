@@ -26,6 +26,7 @@ import {
 import { PYSA } from "@/lib/pysa";
 import { BackLink } from "@/components/site/back-link";
 import { activationEvent, jsonLd } from "@/lib/structured-data";
+import { AccessGrantedBand } from "@/components/site/access-granted-band";
 import { PysaBand } from "@/components/site/pysa-band";
 import { AddToCalendar } from "@/components/site/add-to-calendar";
 import { cn } from "@/lib/utils";
@@ -129,6 +130,9 @@ export async function generateMetadata({
  */
 function ActivationPage({ session }: { session: ResolvedSession }) {
   const isPysa = session.page === "pysanantonio";
+  const isAccessGranted = session.page === "access-granted";
+  /** Both banded activations render the same actions in their band's slot. */
+  const banded = isPysa || isAccessGranted;
   /**
    * "Everything else at X" has to actually be true.
    *
@@ -178,55 +182,60 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
           band carries its own date, time and venue, so PySanAntonio gets the
           actions in a strip beneath it rather than the detail row the
           type-led hero draws. */}
-      {isPysa ? (
+      {banded ? (
         /* The actions ride inside the band rather than in a strip beneath it.
-           The mascot column runs taller than the copy, so a separate strip
-           left ~140px of empty black under "Activated by" and put the register
-           button at y=692 — below the fold on a MacBook Air once the browser's
-           own chrome is counted. In the band's own slot they sit directly
-           under the organisers, where the eye already is. */
-        <PysaBand
-          masthead
-          actions={
-            session.when && (
-              <>
-                <div className="flex flex-wrap items-center gap-3">
-                  <ButtonLink href="/register" size="lg">
-                    Get on the list.
-                  </ButtonLink>
-                  <AddToCalendar
-                    icsHref={`/schedule/${session.page}/calendar`}
-                    event={{
-                      title: session.title,
-                      details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
-                      location: `${session.venue.name}, Downtown San Antonio`,
-                      start: session.when.start,
-                      end: session.when.end,
-                    }}
-                  />
-                </div>
-                {hasMoreAtVenue && (
-                  <p className="mt-8">
-                    <Link
-                      href={`/schedule/${session.venue.slug}`}
-                      className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-200 hover:text-magenta"
-                    >
-                      Everything else at {session.venue.name}
-                      <ArrowUpRight
-                        className={cn(
-                          ARROW_MOTION,
-                          "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
-                        )}
-                        strokeWidth={2.5}
-                        aria-hidden="true"
-                      />
-                    </Link>
-                  </p>
-                )}
-              </>
-            )
-          }
-        />
+           The art column runs taller than the copy, so a separate strip left
+           ~140px of empty black under the organisers and put the register
+           button below the fold on a MacBook Air once browser chrome is
+           counted. In the band's own slot they sit right under the partners,
+           where the eye already is.
+
+           No `detailHref` on either — the band is the page here, not a link
+           to it. */
+        (() => {
+          const actions = session.when && (
+            <>
+              <div className="flex flex-wrap items-center gap-3">
+                <ButtonLink href="/register" size="lg">
+                  Get on the list.
+                </ButtonLink>
+                <AddToCalendar
+                  icsHref={`/schedule/${session.page}/calendar`}
+                  event={{
+                    title: session.title,
+                    details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
+                    location: `${session.venue.name}, Downtown San Antonio`,
+                    start: session.when.start,
+                    end: session.when.end,
+                  }}
+                />
+              </div>
+              {hasMoreAtVenue && (
+                <p className="mt-8">
+                  <Link
+                    href={`/schedule/${session.venue.slug}`}
+                    className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-200 hover:text-magenta"
+                  >
+                    Everything else at {session.venue.name}
+                    <ArrowUpRight
+                      className={cn(
+                        ARROW_MOTION,
+                        "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                      )}
+                      strokeWidth={2.5}
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </p>
+              )}
+            </>
+          );
+          return isPysa ? (
+            <PysaBand masthead actions={actions} />
+          ) : (
+            <AccessGrantedBand masthead actions={actions} />
+          );
+        })()
       ) : (
         /* Type-led, and deliberately not the venue's portrait. Borrowing the
            room's art made the venue look like the subject — on

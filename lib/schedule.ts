@@ -139,6 +139,27 @@ export const HEADLINE_SESSION: FeaturedSession = {
     "The city's Python conference, back for a second run — talks, workshops, and the people who build with it every day.",
 };
 
+/**
+ * The second activation with a band of its own.
+ *
+ * Kept out of FEATURED_SESSIONS for the same reason PySanAntonio is: the bento
+ * renders that array, and a banded activation appearing again as a card three
+ * sections lower reads as the schedule repeating itself.
+ */
+export const ACCESS_GRANTED_SESSION: FeaturedSession = {
+  slug: "access-granted",
+  page: "access-granted",
+  title: "Access Granted",
+  room: "the-rand",
+  circuit: "Tech & Builders",
+  when: {
+    start: "2026-09-30T13:00:00-05:00",
+    end: "2026-09-30T18:00:00-05:00",
+  },
+  blurb:
+    "Every other room this week is people talking about technology. This one is people taking it apart — lockpicking, threat modeling, and zero-pitch technical talks.",
+};
+
 export const FEATURED_SESSIONS: FeaturedSession[] = [
   {
     slug: "mission-pitch",
@@ -417,7 +438,7 @@ export function resolveSession(
 
 /** Every session known to the site, headline included. */
 export function allSessions(): FeaturedSession[] {
-  return [HEADLINE_SESSION, ...FEATURED_SESSIONS];
+  return [HEADLINE_SESSION, ACCESS_GRANTED_SESSION, ...FEATURED_SESSIONS];
 }
 
 export interface VenueSchedule {
