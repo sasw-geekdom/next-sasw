@@ -118,20 +118,6 @@ export const ACCESS_TRACKS: readonly AccessTrack[] = [
  * square mark needs more height than a wide wordmark to carry the same
  * weight, which is why these are not all the same number.
  *
- * San Antonio Hacker Association is deliberately absent for now. Its mark is
- * still at `public/access-granted/orgs/saha.png` and its entry was:
- *
- *   { name: "San Antonio Hacker Association",
- *     href: "https://satxhackers.com/",
- *     logo: "/access-granted/orgs/saha.png",
- *     heightClass: "h-10 sm:h-11" }
- *
- * Worth knowing before it goes back: satxhackers.com served an EXPIRED TLS
- * certificate on 2026-08-08 — the host is up and redirects http to https, but
- * the cert fails validation, so a browser shows a full-page security
- * interstitial before the site. Checked with curl: `SSL certificate problem:
- * certificate has expired`. Restore the entry without the `href` if that
- * hasn't been fixed.
  */
 export const ACCESS_ORGANIZERS = [
   {
@@ -150,6 +136,15 @@ export const ACCESS_ORGANIZERS = [
     // of the artwork and the DCG-SATX wordmark only the lower half, so matched
     // on box height it read smaller than every mark beside it.
     heightClass: "h-12 sm:h-14",
+  },
+  {
+    name: "San Antonio Hacker Association",
+    href: "https://www.devsa.community/buildingtogether/saha",
+    logo: "/access-granted/orgs/saha.png",
+    // 44px is what the ink maths asks for at 57.3% coverage and a 1.81 ratio
+    // — the same value it carried before it came out, arrived at again from
+    // the rebalanced wall rather than restored on faith.
+    heightClass: "h-10 sm:h-11",
   },
   {
     name: "UTSA CyberJedis",
