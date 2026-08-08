@@ -160,11 +160,17 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
           actions in a strip beneath it rather than the detail row the
           type-led hero draws. */}
       {isPysa ? (
-        <>
-          <PysaBand masthead />
-          {session.when && (
-            <section className="bg-black">
-              <div className="mx-auto w-full max-w-7xl px-6 pb-16 lg:pb-20">
+        /* The actions ride inside the band rather than in a strip beneath it.
+           The mascot column runs taller than the copy, so a separate strip
+           left ~140px of empty black under "Activated by" and put the register
+           button at y=692 — below the fold on a MacBook Air once the browser's
+           own chrome is counted. In the band's own slot they sit directly
+           under the organisers, where the eye already is. */
+        <PysaBand
+          masthead
+          actions={
+            session.when && (
+              <>
                 <div className="flex flex-wrap items-center gap-3">
                   <ButtonLink href="/register" size="lg">
                     Get on the list.
@@ -198,10 +204,10 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                     </Link>
                   </p>
                 )}
-              </div>
-            </section>
-          )}
-        </>
+              </>
+            )
+          }
+        />
       ) : (
         /* Type-led, and deliberately not the venue's portrait. Borrowing the
            room's art made the venue look like the subject — on

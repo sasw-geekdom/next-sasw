@@ -96,11 +96,7 @@ function Detail({
 // Same probe readout the sponsor wall uses — the cursor names what it's over.
 // Safe to use here because the band already clips its own overflow; the chip
 // is `whitespace-nowrap` and would otherwise reach past a narrow cell.
-function OrganizerLogo({
-  org,
-}: {
-  org: (typeof PYSA_ORGANIZERS)[number];
-}) {
+function OrganizerLogo({ org }: { org: (typeof PYSA_ORGANIZERS)[number] }) {
   const { chipRef, probeProps } = useProbeChip();
 
   return (
@@ -124,9 +120,22 @@ function OrganizerLogo({
 
 export function PysaBand({
   detailHref,
+  actions,
   masthead = false,
 }: {
   detailHref?: string;
+  /**
+   * Rendered in the same slot `detailHref` uses, for the band's own page —
+   * where there is no "full event details" to link to and the slot would
+   * otherwise sit empty.
+   *
+   * It isn't decoration. The mascot column is taller than the copy, so an
+   * empty slot left ~140px of dead black under "Activated by" and pushed the
+   * register button to y=692 — off the bottom of a MacBook Air once the
+   * browser's own chrome is counted. Putting the actions here fills the gap
+   * and lifts them by that much.
+   */
+  actions?: React.ReactNode;
   /**
    * Opens a page rather than sitting between sections. Trims the top padding:
    * as a band it needs air above to separate it from what precedes it, but as
@@ -143,7 +152,22 @@ export function PysaBand({
     // otherwise pure black — close enough to read as an inconsistency rather
     // than a choice. PySA's palette still carries the band through PYSA_BLUE
     // (the bloom, the wordmark accents); only the floor is shared now.
-    <section className="relative overflow-hidden bg-black">
+    <section
+      className={cn(
+        "relative overflow-hidden bg-black",
+        // As a masthead this is the page's hero and owes the same
+        // full-viewport measure the other heroes use (hero-shell, form-page,
+        // the type-led activation hero). Without it the band was a flat 710px
+        // on every display, which reads as deliberate on a laptop and left
+        // 600px of footer above the fold on a 1440px-tall monitor. It also
+        // gives the clip room: at 2560 the clip is 1059px tall and the fixed
+        // section was cutting 349px off its bottom.
+        //
+        // Not applied when the band is a mid-page section on /sessions, where
+        // a full-viewport block would shove everything after it off-screen.
+        masthead && "flex min-h-[calc(100vh-4rem)] flex-col justify-center",
+      )}
+    >
       {/* Blue bloom behind the clip. */}
       <div
         aria-hidden="true"
@@ -152,17 +176,6 @@ export function PysaBand({
           background: `radial-gradient(circle, ${PYSA_BLUE} 0%, transparent 65%)`,
         }}
       />
-
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-1/2 hidden aspect-1114/720 w-[78%] -translate-y-1/2 select-none sm:block lg:w-[64%]"
-      >
-        <MascotClip
-          reduce={reduce}
-          className="h-full w-full object-cover"
-          style={{ maskImage: VIDEO_MASK, WebkitMaskImage: VIDEO_MASK }}
-        />
-      </div>
 
       {/* Two scrims: one laying the copy side down over the clip, one settling
           the band into the black sections above and below it. */}
@@ -179,103 +192,157 @@ export function PysaBand({
         className="pointer-events-none absolute inset-0 z-10 bg-linear-to-b from-black/70 via-transparent to-black/70"
       />
 
-      <div
-        className={cn(
-          "relative z-20 mx-auto w-full max-w-7xl px-6 pb-20 lg:pb-28",
-          masthead ? "pt-8 lg:pt-10" : "pt-20 lg:pt-28",
-        )}
-      >
-        <div className="max-w-xl xl:max-w-2xl">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-white/55">
-            The Rand · Tech &amp; Builders
-          </p>
+      {/* The clip hangs from the top of this wrapper rather than being centred
+          on the section.
 
-          <h2 className="mt-4 flex flex-col items-start gap-2">
-            {/* The wordmark is the title — the alt carries the name for
-                anything that can't render it. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={PYSA.wordmark}
-              alt="PySanAntonio II"
-              width={PYSA.wordmarkWidth}
-              height={PYSA.wordmarkHeight}
-              className="h-auto w-full max-w-104 lg:max-w-lg"
-            />
-            <span
-              className="font-display text-2xl font-bold uppercase tracking-tight sm:text-3xl"
-              style={{ color: PYSA_BLUE }}
-            >
-              Returns October 2026
-            </span>
-          </h2>
+          Two bugs, one cause. Centred on the section it moved whenever
+          anything below changed height — folding the register button into the
+          band grew the copy by ~140px and dragged the clip down 70px.
+          Re-centring it on this wrapper then overcorrected: the wrapper is
+          shorter than the clip, so half the overflow went off the top of the
+          section, and `overflow-hidden` took the mascot's hat with it.
 
-          {/* The clip on mobile, where there's no room for it beside the copy. */}
+          Anchored at the top, the clip is never clipped from above and never
+          moves for anything below. It lands within ~14px of where it sat
+          before any of this, and it can only overflow downward, where the
+          section has room.
+          Centred on the section, it moved whenever anything below it changed
+          height — folding the register button and calendar menu into the band
+          grew the copy column by ~140px and dragged the clip down 70px with
+          it. Anchored here, it stays level with the wordmark and the
+          organisers it belongs to, and whatever follows can grow freely.
+
+          Full-bleed on purpose: `right-0` has to mean the section's edge, so
+          this cannot live inside the `max-w-7xl` container. */}
+      <div className="relative">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-0 top-0 hidden aspect-1114/720 w-[78%] select-none sm:block lg:w-[64%]"
+        >
           <MascotClip
             reduce={reduce}
-            className="-mx-6 mt-6 aspect-1114/720 w-auto object-cover sm:hidden"
-            style={{ maskImage: MOBILE_MASK, WebkitMaskImage: MOBILE_MASK }}
+            className="h-full w-full object-cover"
+            style={{ maskImage: VIDEO_MASK, WebkitMaskImage: VIDEO_MASK }}
           />
+        </div>
 
-          <p className="mt-6 max-w-xl text-pretty text-lg text-white/70">
-            San Antonio&rsquo;s Python conference is back for a second year — an
-            afternoon of learning, networking, and community building with the
-            people already doing the work here.
-          </p>
+        <div
+          className={cn(
+            "relative z-20 mx-auto w-full max-w-7xl px-6",
+            masthead ? "pt-8 lg:pt-10" : "pt-20 lg:pt-28",
+            // No bottom padding when actions follow — they bring their own,
+            // and the band would otherwise carry two floors.
+            actions ? "pb-0" : "pb-20 lg:pb-28",
+          )}
+        >
+          <div className="max-w-xl xl:max-w-2xl">
+            <p className="font-mono text-[11px] uppercase tracking-widest text-white/55">
+              The Rand · Tech &amp; Builders
+            </p>
 
-          <dl className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
-            <Detail icon={CalendarDays} label="Date">
-              {PYSA.dateLabel}
-            </Detail>
-            <Detail icon={Clock} label="Time">
-              {PYSA.timeLabel}
-            </Detail>
-            <Detail icon={MapPin} label="Location">
-              {PYSA.venue}, {PYSA.venueDetail}
-            </Detail>
-          </dl>
+            <h2 className="mt-4 flex flex-col items-start gap-2">
+              {/* The wordmark is the title — the alt carries the name for
+                anything that can't render it. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={PYSA.wordmark}
+                alt="PySanAntonio II"
+                width={PYSA.wordmarkWidth}
+                height={PYSA.wordmarkHeight}
+                className="h-auto w-full max-w-104 lg:max-w-lg"
+              />
+              {/* Dropped on the activation's own page, where the hero states
+                "Friday, October 2, 2026 · 1:00 – 6:00 PM · Geekdom" a few
+                lines below — this says the same thing less precisely, and
+                twice. It still earns its place on /sessions, where the band
+                is the only thing carrying the date.
 
-          {/* Activated by — the orgs actually running it, credited in the band
+                The h2 keeps an accessible name either way: the wordmark's
+                alt text sits inside it. */}
+              {!masthead && (
+                <span
+                  className="font-display text-2xl font-bold uppercase tracking-tight sm:text-3xl"
+                  style={{ color: PYSA_BLUE }}
+                >
+                  Returns October 2026
+                </span>
+              )}
+            </h2>
+
+            {/* The clip on mobile, where there's no room for it beside the copy. */}
+            <MascotClip
+              reduce={reduce}
+              className="-mx-6 mt-6 aspect-1114/720 w-auto object-cover sm:hidden"
+              style={{ maskImage: MOBILE_MASK, WebkitMaskImage: MOBILE_MASK }}
+            />
+
+            <p className="mt-6 max-w-xl text-pretty text-lg text-white/70">
+              San Antonio&rsquo;s Python conference is back for a second year —
+              an afternoon of learning, networking, and community building with
+              the people already doing the work here.
+            </p>
+
+            <dl className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
+              <Detail icon={CalendarDays} label="Date">
+                {PYSA.dateLabel}
+              </Detail>
+              <Detail icon={Clock} label="Time">
+                {PYSA.timeLabel}
+              </Detail>
+              <Detail icon={MapPin} label="Location">
+                {PYSA.venue}, {PYSA.venueDetail}
+              </Detail>
+            </dl>
+
+            {/* Activated by — the orgs actually running it, credited in the band
               rather than folded into SASTW's own partner wall, because they're
               hosting this one event, not the week. */}
-          <div className="mt-12 flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-10">
-            <p className="shrink-0 font-mono text-[11px] uppercase tracking-widest text-white/55">
-              Activated by
-            </p>
-            <ul className="flex flex-wrap items-center gap-x-8 gap-y-5">
-              {PYSA_ORGANIZERS.map((org) => (
-                <li key={org.name}>
-                  <OrganizerLogo org={org} />
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div className="mt-12 flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-10">
+              <p className="shrink-0 font-mono text-[11px] uppercase tracking-widest text-white/55">
+                Activated by
+              </p>
+              <ul className="flex flex-wrap items-center gap-x-8 gap-y-5">
+                {PYSA_ORGANIZERS.map((org) => (
+                  <li key={org.name}>
+                    <OrganizerLogo org={org} />
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* After the credits, not before: the band reads name -> what ->
+            {/* After the credits, not before: the band reads name -> what ->
               when -> who runs it, and the way in belongs at the end of that,
               not interrupting it. Only when the band is a teaser — omitted on
               PySanAntonio's own page, where it would link to the page you are
               already on. */}
-          {detailHref && (
-            <div className="mt-10">
-              <ButtonLink
-                href={detailHref}
-                size="md"
-                className="group bg-white/10 text-white duration-200 hover:bg-white/20"
-              >
-                Full event details
-                <ArrowUpRight
-                  className={cn(
-                    ARROW_MOTION,
-                    "h-4 w-4 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
-                  )}
-                  strokeWidth={2.5}
-                  aria-hidden="true"
-                />
-              </ButtonLink>
-            </div>
-          )}
+            {detailHref && (
+              <div className="mt-10">
+                <ButtonLink
+                  href={detailHref}
+                  size="md"
+                  className="group bg-white/10 text-white duration-200 hover:bg-white/20"
+                >
+                  Full event details
+                  <ArrowUpRight
+                    className={cn(
+                      ARROW_MOTION,
+                      "h-4 w-4 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                    )}
+                    strokeWidth={2.5}
+                    aria-hidden="true"
+                  />
+                </ButtonLink>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {actions && (
+        <div className="relative z-20 mx-auto w-full max-w-7xl px-6 pb-20 pt-10 lg:pb-28">
+          <div className="max-w-xl xl:max-w-2xl">{actions}</div>
+        </div>
+      )}
     </section>
   );
 }

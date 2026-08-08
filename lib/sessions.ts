@@ -1,4 +1,5 @@
 import { ASSET, ROOMS, type Room } from "@/lib/locations";
+import { PYSA } from "@/lib/pysa";
 import type { TrackName } from "@/lib/tracks";
 
 // The confirmed activations, for /sessions. Curated here for now, like ROOMS —
@@ -121,8 +122,21 @@ export const HEADLINE_SESSION: FeaturedSession = {
     start: "2026-10-02T13:00:00-05:00",
     end: "2026-10-02T18:00:00-05:00",
   },
+  // The wordmark, not the typeset title — this is the one activation with its
+  // own brand, and the band on /sessions already leads with the mark.
+  //
+  // `wordmark-dark` is the right one of the pair: it draws in PySA's lighter
+  // blue (#4a90d9) for dark grounds, where plain `wordmark.svg` uses #0059b7
+  // and would sink into the card. Dimensions come from lib/pysa so the band
+  // and the card can't disagree about the same file.
+  logo: {
+    src: PYSA.wordmark,
+    width: PYSA.wordmarkWidth,
+    height: PYSA.wordmarkHeight,
+    alt: PYSA.name,
+  },
   blurb:
-    "The city's Python community, back for a second run — talks, workshops, and the people who build with it every day.",
+    "The city's Python conference, back for a second run — talks, workshops, and the people who build with it every day.",
 };
 
 export const FEATURED_SESSIONS: FeaturedSession[] = [
