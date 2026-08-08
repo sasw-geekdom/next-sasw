@@ -34,8 +34,11 @@ import { cn } from "@/lib/utils";
 // /sessions so a CMS-driven partner logo lands here at the same moment.
 // Dissolve the picture's left edge instead of cutting it — a hard vertical
 // boundary beside the copy is exactly what makes an image look pasted on.
+// `--hero-fade` is set by a class on the element so the dissolve can lengthen
+// with the frame: past 2xl the picture starts far enough left to reach under
+// the copy, and a fade that stayed at 28% would go solid on top of the text.
 const HERO_MASK =
-  "linear-gradient(to right, transparent 0%, black 28%, black 100%)";
+  "linear-gradient(to right, transparent 0%, black var(--hero-fade), black 100%)";
 
 // And bring the copy side back to solid black, so the type sits on ground
 // rather than on a photograph.
@@ -194,7 +197,13 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
            Radio. These are their own events and will get their own hero art;
            until it lands, the title carries the page and the right-hand space
            is left open for it. */
-        <section className="relative overflow-hidden bg-black">
+        /* `min-h-[calc(100vh-4rem)]` is the site's full-viewport hero, the
+           same measure hero-shell and form-page use — 4rem being the header.
+           Without it this section was content-sized at a flat 578px, which
+           looks deliberate on a laptop and leaves 700px of footer above the
+           fold on a 1440px-tall monitor. Centred rather than top-aligned so
+           the copy sits with the picture as the box grows. */
+        <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden bg-black">
           {/* Set into the black, not laid on top of it — the same grammar the
               PySanAntonio band uses for its clip.
     
@@ -209,13 +218,26 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
             <>
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-y-0 right-0 hidden w-[54%] lg:block"
+                // Wider past 2xl, because the picture bleeds to the right edge
+                // while the copy stops at the centred `max-w-7xl` — which
+                // orphans the left gutter as a dead black quadrant, 664px of
+                // it on a 2560px monitor. Reaching across means that space
+                // holds the dissolved edge of the photograph instead of
+                // nothing, without moving the copy off the site's grid.
+                className="pointer-events-none absolute inset-y-0 right-0 hidden w-[54%] [--hero-fade:28%] lg:block 2xl:w-[68%] 2xl:[--hero-fade:44%]"
               >
                 <Image
                   src={session.hero.src}
                   alt=""
                   fill
                   sizes="54vw"
+                  // No `priority`, despite Next logging this as the LCP and
+                  // asking for eager loading. `priority` emits a preload link,
+                  // and a preload ignores the `hidden lg:block` wrapper — a
+                  // 390px phone then downloads 217KB of a photograph it never
+                  // renders. Measured both ways: without it, phones and
+                  // tablets don't request the file at all. A slightly later
+                  // LCP on desktop is the cheaper side of that trade.
                   // The wider the screen, the more `cover` has to crop off the
                   // vertical — 470px of a 1200px frame on a 2560px monitor.
                   // Centred, that takes half off the top, which on this
