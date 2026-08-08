@@ -17,7 +17,7 @@ const DESCRIPTION =
   "The full schedule for San Antonio Startup + Tech Week lands closer to the week. These activations are confirmed — Sept 28 – Oct 2.";
 
 export const metadata: Metadata = {
-  title: "Sessions",
+  title: "Schedule",
   description: DESCRIPTION,
   alternates: { canonical: "/schedule" },
   openGraph: {
@@ -48,9 +48,7 @@ export default async function SessionsPage() {
     }
     if (s.logoFromPartner) {
       const needle = s.logoFromPartner.toLowerCase();
-      const match = partners.find((p) =>
-        p.name.toLowerCase().includes(needle),
-      );
+      const match = partners.find((p) => p.name.toLowerCase().includes(needle));
       if (match?.imageUrl) {
         return { ...s, logoSrc: match.imageUrl, logoAlt: match.name };
       }
@@ -86,7 +84,6 @@ export default async function SessionsPage() {
           <div className="mt-14 lg:mt-16">
             <SessionBento sessions={cards} />
           </div>
-
         </div>
       </section>
 

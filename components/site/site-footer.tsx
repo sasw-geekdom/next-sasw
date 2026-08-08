@@ -41,10 +41,10 @@ export function SiteFooter() {
                     Register
                   </Link>
                 </li>
-                {/* Same order as the navbar — sessions, then speakers. */}
+                {/* Same order as the navbar — schedule, then speakers. */}
                 <li>
                   <Link href="/schedule" className="hover:text-magenta">
-                    Sessions
+                    Schedule
                   </Link>
                 </li>
                 <li>
