@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { ROOMS } from "@/lib/locations";
+import { venueRedirect } from "@/lib/sessions";
 
 const SOCIALS = [
   { label: "Instagram", href: "https://www.instagram.com/sastartup/" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/company/san-antonio-startup-week/" },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/san-antonio-startup-week/",
+  },
   { label: "YouTube", href: "https://www.youtube.com/@Geekdomsa" },
   { label: "X", href: "https://x.com/Geekdom" },
 ];
@@ -21,8 +25,8 @@ export function SiteFooter() {
               className="h-28 w-auto"
             />
             <p className="mt-5 max-w-xs text-sm text-white/60">
-              Five circuits, five rooms, one current — Sept 28 – Oct 2,
-              downtown San Antonio.
+              Five circuits, five rooms, one current — Sept 28 – Oct 2, downtown
+              San Antonio.
             </p>
           </div>
 
@@ -86,10 +90,28 @@ export function SiteFooter() {
                 drifted: it omitted 300 Main while the blurb above still
                 claimed five rooms, and it called Central Library "LaunchSA"
                 — the org that programmes it, not the venue room-flow names.
+
+                Linked through `venueRedirect` rather than straight at
+                `/sessions/<room>`. Legacy Park and 300 Main host a single
+                activation each and 308 to it, so the plain URL would make
+                every footer click a redirect hop — and would be the only
+                thing on the site still pointing at those two venue slugs.
+                This sends people where they were going to end up anyway, and
+                goes back to the venue page on its own if a room gains a
+                second session.
               */}
               <ul className="space-y-2 text-white/70">
                 {ROOMS.map((room) => (
-                  <li key={room.slug}>{room.name}</li>
+                  <li key={room.slug}>
+                    <Link
+                      href={
+                        venueRedirect(room.slug) ?? `/sessions/${room.slug}`
+                      }
+                      className="hover:text-magenta"
+                    >
+                      {room.name}
+                    </Link>
+                  </li>
                 ))}
               </ul>
             </div>

@@ -1,4 +1,5 @@
 import { ASSET, ROOMS, type Room } from "@/lib/locations";
+import type { TrackName } from "@/lib/tracks";
 
 // The confirmed activations, for /sessions. Curated here for now, like ROOMS —
 // the sessions CMS can feed this later.
@@ -23,7 +24,7 @@ export interface FeaturedSession {
   /** A `Room["slug"]` from lib/locations. */
   room: string;
   /** The circuit or strand this runs under. Matches the room's session kind. */
-  circuit: string;
+  circuit: TrackName | "Social";
   blurb: string;
   /**
    * Optional programme lockup, shown in place of the typeset title.

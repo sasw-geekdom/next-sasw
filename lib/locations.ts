@@ -6,9 +6,22 @@
 // Venues fall into two tiers, and the layout reads `tier` directly rather than
 // inferring it from session count — a room can run all week on two sessions.
 
+import type { TrackName } from "@/lib/tracks";
+
 export interface RoomSession {
   title: string;
-  kind: string;
+  /**
+   * One of the five circuits, or "Social" for the two evening/brunch
+   * activations that sit outside them.
+   *
+   * Typed rather than a bare string because a bare string let this drift: The
+   * Rand's speed-networking session was tagged "Founders" while the homepage
+   * hero, a few hundred pixels above it, rendered the canonical "Founder"
+   * from TRACK_NAMES. Same page, two spellings of one circuit, and nothing to
+   * catch it — the value is only ever displayed, never looked up, so no
+   * lookup failed loudly.
+   */
+  kind: TrackName | "Social";
 }
 
 /**
@@ -106,7 +119,7 @@ export const ROOMS: Room[] = [
 |▒ ▒ ▒ ▒ ▒| |
 |▒_▒_▒_▒_▒|/`,
     sessions: [
-      { title: "Founder Funder Speed Networking", kind: "Founders" },
+      { title: "Founder Funder Speed Networking", kind: "Founder" },
       { title: "PySanAntonio II", kind: "Tech & Builders" },
       { title: "Access Granted", kind: "Tech & Builders" },
     ],
