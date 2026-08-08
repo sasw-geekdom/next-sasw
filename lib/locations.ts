@@ -8,6 +8,29 @@
 
 import type { TrackName } from "@/lib/tracks";
 
+/**
+ * Where a room physically is.
+ *
+ * Shape deliberately mirrors `RoomPlace` on the schedule-and-venues branch —
+ * a subset of it — so merging that work adds `parking` and `node` rather than
+ * colliding with a different design for the same facts.
+ *
+ * Optional throughout: every consumer renders conditionally, and one venue
+ * (300 Main) has no address on that branch either.
+ */
+export interface RoomPlace {
+  address?: string;
+  /**
+   * Only where it's been confirmed. Every one of these is almost certainly
+   * 78205 — they are all within a few downtown blocks — but "almost certainly"
+   * is not a fact to publish in structured data, so this is set for the one
+   * address that arrived with it rather than inferred for the rest.
+   */
+  postalCode?: string;
+  /** Real coordinates, for `geo` in the Event markup. */
+  coords?: { lat: number; lon: number };
+}
+
 export interface RoomSession {
   title: string;
   /**
@@ -46,6 +69,7 @@ export interface Room {
   // "cover" (default) fills and top-crops; "contain" fits the whole image
   // for near-square art that would otherwise lose its base to the crop.
   fit?: "cover" | "contain";
+  place?: RoomPlace;
   ascii: string; // placeholder art when no image
   sessions: RoomSession[];
 }
@@ -57,6 +81,10 @@ export const ROOMS: Room[] = [
   {
     slug: "tpr",
     name: "Texas Public Radio",
+    place: {
+      address: "321 W Commerce St",
+      coords: { lat: 29.425941, lon: -98.49713 },
+    },
     host: "San Antonio Startup + Tech Week",
     // "Five circuits" is dropped from the copy on purpose — the pip ramp and
     // the `tag` beside this already say it, and the panel shouldn't state the
@@ -89,6 +117,10 @@ export const ROOMS: Room[] = [
   {
     slug: "the-rand",
     name: "The Rand",
+    place: {
+      address: "110 E Houston St",
+      coords: { lat: 29.426244, lon: -98.4935 },
+    },
     host: "Geekdom · DEVSA Community",
     // Leads with the communities, not the org that convenes them, and names
     // DEVSA once — the host line above already says whose floor this is, so
@@ -127,6 +159,10 @@ export const ROOMS: Room[] = [
   {
     slug: "central-library",
     name: "Central Library",
+    place: {
+      address: "600 Soledad St",
+      coords: { lat: 29.432316, lon: -98.492844 },
+    },
     host: "LaunchSA · Small Business",
     // From launchsa.org: "San Antonio's Resource Center for Small Business
     // Owners and Entrepreneurs", "a partnership between City of San Antonio
@@ -175,6 +211,10 @@ export const ROOMS: Room[] = [
     // fallback; drop in `image: ASSET("sastw-300main.…")` when the art lands.
     slug: "300-main",
     name: "300 Main",
+    place: {
+      address: "300 N Main Ave",
+      postalCode: "78205",
+    },
     host: "Startup + Tech Week · Social",
     desc: "One morning — the creative side of the week, over brunch.",
     tag: "One morning · social",
@@ -191,6 +231,15 @@ export const ROOMS: Room[] = [
   {
     slug: "legacy-park",
     name: "Legacy Park",
+    place: {
+      // Derived, not sourced — 103 W Houston is one short block west of The
+      // Rand at 110 E Houston. Carried over from schedule-and-venues with its
+      // caveat intact: the other three came from map providers, this one was
+      // reasoned out. Worth confirming before it drives anything a visitor
+      // navigates by.
+      address: "103 W Houston St",
+      coords: { lat: 29.4263, lon: -98.4947 },
+    },
     host: "Startup + Tech Week · Social",
     desc: "Where the week unwinds — the Startup Bash, open-air.",
     tag: "One night · social",

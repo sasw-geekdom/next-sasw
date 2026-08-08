@@ -12,6 +12,7 @@
 // something still being locked would be marking up a guess.
 
 import { SITE_URL } from "@/lib/event";
+import type { Room } from "@/lib/locations";
 import type { ResolvedSession } from "@/lib/schedule";
 
 /** Stable @id for the week, so activations can point at it as their parent. */
@@ -39,22 +40,39 @@ const FREE_OFFER = {
 /**
  * A venue as a Place.
  *
- * `address` is required for an offline event, and this is as precise as the
- * data goes today — the rooms carry a name, a host and a description, but no
- * street address. Locality/region/country is valid and accepted; adding
- * `streetAddress` per room would strengthen the result, and is the one field
- * worth filling in if the addresses are to hand.
+ * `address` is required for an offline event. Four of the five rooms now carry
+ * a street address and real coordinates, so those emit `streetAddress` and
+ * `geo` — the difference between "somewhere in San Antonio" and a pin.
+ *
+ * All five rooms now carry a street address. Four also carry coordinates and
+ * so emit `geo`; 300 Main arrived from a different source, with a postal code
+ * instead — each venue publishes exactly what has been confirmed for it and
+ * nothing inferred.
  */
-function place(name: string) {
+function place(room: { name: string; place?: Room["place"] }) {
+  const addr = room.place?.address;
+  const zip = room.place?.postalCode;
+  const coords = room.place?.coords;
   return {
     "@type": "Place",
-    name,
+    name: room.name,
     address: {
       "@type": "PostalAddress",
+      ...(addr ? { streetAddress: addr } : {}),
       addressLocality: "San Antonio",
       addressRegion: "TX",
+      ...(zip ? { postalCode: zip } : {}),
       addressCountry: "US",
     },
+    ...(coords
+      ? {
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: coords.lat,
+            longitude: coords.lon,
+          },
+        }
+      : {}),
   };
 }
 
@@ -72,7 +90,12 @@ export function weekEvent() {
     endDate: "2026-10-02",
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    location: place("Downtown San Antonio"),
+    // Named for the district rather than pinned to one building. The week
+    // genuinely runs across five venues, and borrowing the anchor's street
+    // address here — which the whole-week .ics does — would state something
+    // that isn't true to buy a stronger result. The activations carry the
+    // precise addresses, and those are the pages people search for.
+    location: place({ name: "Downtown San Antonio" }),
     organizer: ORGANIZER,
     offers: FREE_OFFER,
     url: SITE_URL,
@@ -106,7 +129,7 @@ export function activationEvent(session: ResolvedSession) {
     endDate: session.when.end,
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    location: place(session.venue.name),
+    location: place(session.venue),
     // The partner running it where there is one; otherwise us.
     organizer: session.site
       ? {
