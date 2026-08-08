@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { loadLineup } from "@/lib/speakers";
-import { scheduleSlugs } from "@/lib/sessions";
+import { scheduleSlugs, venueRedirect } from "@/lib/sessions";
 import { SITE_URL } from "@/lib/event";
 
 const BASE = SITE_URL;
@@ -29,11 +29,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     // One page per venue under /sessions. Derived rather than listed, so a
     // room gaining or losing its programming can't leave a 404 in here.
-    ...scheduleSlugs().map((slug) => ({
-      url: `${BASE}/sessions/${slug}`,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    })),
+    ...scheduleSlugs()
+      // A single-activation venue slug only redirects to its activation, and
+      // listing a redirect asks Google to crawl a hop to a URL already here.
+      .filter((slug) => !venueRedirect(slug))
+      .map((slug) => ({
+        url: `${BASE}/sessions/${slug}`,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      })),
     ...lineup.map((s) => ({
       url: `${BASE}/speakers/${s.slug}`,
       changeFrequency: "weekly" as const,

@@ -398,6 +398,28 @@ function activations(): Map<string, FeaturedSession> {
  * A room with an empty schedule gets nothing: no link points at it, and an
  * empty page is a worse answer than a 404.
  */
+/**
+ * Where a venue slug should send people instead of rendering a page.
+ *
+ * A room with a single activation has no week to show. /sessions/legacy-park
+ * was 898 words that named Startup Bash twelve times and nothing else — a
+ * second URL competing with the activation's own page for the same searches,
+ * and by then nothing linked to it either.
+ *
+ * Derived from the room's programming rather than a hardcoded slug, so a room
+ * that gains a second session stops redirecting on the next build and gets
+ * its venue page back with no config to remember.
+ *
+ * Returns null when the room genuinely has a week worth showing, or when its
+ * one activation has no page of its own to send anyone to.
+ */
+export function venueRedirect(slug: string): string | null {
+  const room = ROOMS.find((r) => r.slug === slug);
+  if (!room || room.sessions.length > 1) return null;
+  const only = allSessions().find((s) => s.room === slug);
+  return only?.page ? `/sessions/${only.page}` : null;
+}
+
 export function scheduleSlugs(): string[] {
   const withSessions = new Set(allSessions().map((s) => s.room));
   return [

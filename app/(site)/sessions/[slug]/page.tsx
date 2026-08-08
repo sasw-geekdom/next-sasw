@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -19,6 +19,7 @@ import { listPartners } from "@/lib/admin/cms-queries";
 import {
   resolveSchedule,
   scheduleSlugs,
+  venueRedirect,
   whenLabels,
   type ResolvedSession,
 } from "@/lib/sessions";
@@ -557,6 +558,12 @@ export default async function VenueSchedulePage({
   if (schedule.kind === "activation") {
     return <ActivationPage session={schedule.session} />;
   }
+
+  // A room with one activation sends people to that activation instead of
+  // rendering a venue page restating it. 308 rather than 307, so search
+  // engines move the ranking across rather than holding both.
+  const to = venueRedirect(slug);
+  if (to) permanentRedirect(to);
 
   const { room, sessions } = schedule;
   const partners = await safeList(listPartners());
