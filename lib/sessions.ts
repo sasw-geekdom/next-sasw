@@ -262,14 +262,49 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     },
   },
   {
-    slug: "creative-futures-brunch",
-    page: "creative-futures-brunch",
+    slug: "the-creative-futures-brunch",
+    page: "the-creative-futures-brunch",
     title: "The Creative Futures ™ Brunch powered by The Down Market",
     titleBreakBefore: "powered by",
     room: "300-main",
     circuit: "Social",
+    // Per thecreativefutures.com, which is sharper about this than the old
+    // line was. "The creator class" is their own term and their own roster —
+    // "designers, filmmakers, founders, technologists, storytellers, civic
+    // leaders, students, and the people who back them" — and "creativity is
+    // infrastructure, not a job title" is their answer to whether you have to
+    // work a creative job to belong. The previous copy ("the creative side of
+    // the week", "the work in between") named a mood rather than a room, and
+    // read as though it were for designers only, which is the one thing they
+    // go out of their way to deny.
+    //
+    // Deliberately not borrowing "come for the edge, leave with the blueprint"
+    // — that is their December full-day flagship, and this is three hours over
+    // brunch. "Brunch" is left to the title, which already carries it.
     blurb:
-      "One morning for the creative side of the week — designers, makers, and the work in between.",
+      "One morning for the creator class — designers, filmmakers, founders, and the people who back them. Creativity as infrastructure, not a job title.",
+    when: {
+      start: "2026-10-01T09:00:00-05:00",
+      end: "2026-10-01T12:00:00-05:00",
+    },
+    site: {
+      label: "thecreativefutures.com",
+      href: "https://www.thecreativefutures.com/",
+    },
+    // No logo: the title already carries both brands in full — "The Creative
+    // Futures ™ Brunch powered by The Down Market" — so a mark would be the
+    // third time the page says who is behind it.
+    //
+    // From thecreativefutures.com. Chosen over their table-and-laptops shot
+    // because of where the hero shows a picture: the right of the frame is
+    // the part that survives the mask, and there it is someone making
+    // something rather than the backs of people's heads.
+    hero: {
+      src: "/sessions/creative-futures-hero.jpg",
+      width: 1800,
+      height: 1440,
+      alt: "",
+    },
   },
   {
     slug: "startup-bash",
