@@ -251,22 +251,6 @@ export function PysaBand({
                 height={PYSA.wordmarkHeight}
                 className="h-auto w-full max-w-104 lg:max-w-lg"
               />
-              {/* Dropped on the activation's own page, where the hero states
-                "Friday, October 2, 2026 · 1:00 – 6:00 PM · Geekdom" a few
-                lines below — this says the same thing less precisely, and
-                twice. It still earns its place on /sessions, where the band
-                is the only thing carrying the date.
-
-                The h2 keeps an accessible name either way: the wordmark's
-                alt text sits inside it. */}
-              {!masthead && (
-                <span
-                  className="font-display text-2xl font-bold uppercase tracking-tight sm:text-3xl"
-                  style={{ color: PYSA_BLUE }}
-                >
-                  Returns October 2026
-                </span>
-              )}
             </h2>
 
             {/* The clip on mobile, where there's no room for it beside the copy. */}
@@ -316,7 +300,11 @@ export function PysaBand({
               PySanAntonio's own page, where it would link to the page you are
               already on. */}
             {detailHref && (
-              <div className="mt-10">
+              // mt-14, not mt-10: the organisers above are a row of logos with
+              // their own optical weight, and 40px read as the button
+              // belonging to that row rather than being the way out of the
+              // band.
+              <div className="mt-14">
                 <ButtonLink
                   href={detailHref}
                   size="md"
