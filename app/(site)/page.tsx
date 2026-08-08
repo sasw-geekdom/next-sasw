@@ -1,4 +1,5 @@
 import { Hero } from "@/components/site/hero";
+import { jsonLd, weekEvent } from "@/lib/structured-data";
 import { RoomFlow } from "@/components/site/room-flow";
 import { SpeakerLineup } from "@/components/site/speaker-lineup";
 import { PowerGrid } from "@/components/site/power-grid";
@@ -37,15 +38,23 @@ export default async function Home() {
 
   return (
     <>
-      <Hero />
-      <RoomFlow />
-      {/* Hidden until announcement. `SPEAKERS_ANNOUNCED` in lib/speakers.ts is
+      {/* Event rich results — the date, venue and "Free" shown in the search
+          listing itself. Built from the same constants the page renders. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(weekEvent()) }}
+      />
+      <>
+        <Hero />
+        <RoomFlow />
+        {/* Hidden until announcement. `SPEAKERS_ANNOUNCED` in lib/speakers.ts is
           the single switch — flipping it restores this band and the /speakers
           wall together. */}
-      {SPEAKERS_ANNOUNCED && (
-        <SpeakerLineup speakers={speakers.slice(0, FEATURED)} />
-      )}
-      <PowerGrid sponsors={sponsors} partners={partners} />
+        {SPEAKERS_ANNOUNCED && (
+          <SpeakerLineup speakers={speakers.slice(0, FEATURED)} />
+        )}
+        <PowerGrid sponsors={sponsors} partners={partners} />
+      </>
     </>
   );
 }

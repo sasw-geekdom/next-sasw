@@ -25,6 +25,7 @@ import {
 } from "@/lib/schedule";
 import { PYSA } from "@/lib/pysa";
 import { BackLink } from "@/components/site/back-link";
+import { activationEvent, jsonLd } from "@/lib/structured-data";
 import { PysaBand } from "@/components/site/pysa-band";
 import { AddToCalendar } from "@/components/site/add-to-calendar";
 import { cn } from "@/lib/utils";
@@ -139,6 +140,19 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
   const hasMoreAtVenue = session.venue.sessions.length > 1;
   return (
     <main>
+      {/* Event rich results for this activation, tied to the week through
+          superEvent so the two read as parent and child rather than as rival
+          events on the same day. Only when the time is confirmed — an Event
+          without a start date isn't eligible anyway, and publishing one for
+          something still being locked would be marking up a guess. */}
+      {activationEvent(session) && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: jsonLd(activationEvent(session)!),
+          }}
+        />
+      )}
       <section className="border-t border-white/10 bg-black">
         <div className="mx-auto w-full max-w-7xl px-6 pt-8 lg:pt-10">
           <BackLink
