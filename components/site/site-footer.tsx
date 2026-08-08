@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ROOMS } from "@/lib/locations";
-import { venueRedirect } from "@/lib/sessions";
+import { venueRedirect } from "@/lib/schedule";
 
 const SOCIALS = [
   { label: "Instagram", href: "https://www.instagram.com/sastartup/" },
@@ -43,7 +43,7 @@ export function SiteFooter() {
                 </li>
                 {/* Same order as the navbar — sessions, then speakers. */}
                 <li>
-                  <Link href="/sessions" className="hover:text-magenta">
+                  <Link href="/schedule" className="hover:text-magenta">
                     Sessions
                   </Link>
                 </li>
@@ -92,7 +92,7 @@ export function SiteFooter() {
                 — the org that programmes it, not the venue room-flow names.
 
                 Linked through `venueRedirect` rather than straight at
-                `/sessions/<room>`. Legacy Park and 300 Main host a single
+                `/schedule/<room>`. Legacy Park and 300 Main host a single
                 activation each and 308 to it, so the plain URL would make
                 every footer click a redirect hop — and would be the only
                 thing on the site still pointing at those two venue slugs.
@@ -105,7 +105,7 @@ export function SiteFooter() {
                   <li key={room.slug}>
                     <Link
                       href={
-                        venueRedirect(room.slug) ?? `/sessions/${room.slug}`
+                        venueRedirect(room.slug) ?? `/schedule/${room.slug}`
                       }
                       className="hover:text-magenta"
                     >

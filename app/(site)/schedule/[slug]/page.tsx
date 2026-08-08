@@ -22,18 +22,18 @@ import {
   venueRedirect,
   whenLabels,
   type ResolvedSession,
-} from "@/lib/sessions";
+} from "@/lib/schedule";
 import { PYSA } from "@/lib/pysa";
 import { BackLink } from "@/components/site/back-link";
 import { PysaBand } from "@/components/site/pysa-band";
 import { AddToCalendar } from "@/components/site/add-to-calendar";
 import { cn } from "@/lib/utils";
 
-// A venue's own week. /sessions is the whole grid; this is one room's slice of
+// A venue's own week. /schedule is the whole grid; this is one room's slice of
 // it, which is what room-flow's per-venue CTA promises.
 //
 // Static at build time from scheduleSlugs(), revalidated on the same cycle as
-// /sessions so a CMS-driven partner logo lands here at the same moment.
+// /schedule so a CMS-driven partner logo lands here at the same moment.
 // Dissolve the picture's left edge instead of cutting it — a hard vertical
 // boundary beside the copy is exactly what makes an image look pasted on.
 // `--hero-fade` is set by a class on the element so the dissolve can lengthen
@@ -83,7 +83,7 @@ export async function generateMetadata({
       ? {
           title: schedule.room.name,
           description: `${schedule.room.desc} ${schedule.room.name} during San Antonio Startup + Tech Week, Sept 28 – Oct 2, 2026.`,
-          path: `/sessions/${schedule.room.slug}`,
+          path: `/schedule/${schedule.room.slug}`,
         }
       : {
           title: schedule.session.title,
@@ -95,7 +95,7 @@ export async function generateMetadata({
             const { date, time } = whenLabels(w);
             return `${schedule.session.blurb} ${date}, ${time} at ${schedule.session.venue.name} — part of San Antonio Startup + Tech Week.`;
           })(),
-          path: `/sessions/${schedule.session.page}`,
+          path: `/schedule/${schedule.session.page}`,
         };
 
   return {
@@ -138,7 +138,7 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
       <section className="border-t border-white/10 bg-black">
         <div className="mx-auto w-full max-w-7xl px-6 pt-8 lg:pt-10">
           <BackLink
-            href="/sessions"
+            href="/schedule"
             className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none"
           >
             <ArrowLeft
@@ -177,7 +177,7 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                     Get on the list.
                   </ButtonLink>
                   <AddToCalendar
-                    icsHref={`/sessions/${session.page}/calendar`}
+                    icsHref={`/schedule/${session.page}/calendar`}
                     event={{
                       title: session.title,
                       details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
@@ -190,7 +190,7 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                 {hasMoreAtVenue && (
                   <p className="mt-8">
                     <Link
-                      href={`/sessions/${session.venue.slug}`}
+                      href={`/schedule/${session.venue.slug}`}
                       className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-200 hover:text-magenta"
                     >
                       Everything else at {session.venue.name}
@@ -212,7 +212,7 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
       ) : (
         /* Type-led, and deliberately not the venue's portrait. Borrowing the
            room's art made the venue look like the subject — on
-           /sessions/mission-pitch the first thing you saw was Texas Public
+           /schedule/mission-pitch the first thing you saw was Texas Public
            Radio. These are their own events and will get their own hero art;
            until it lands, the title carries the page and the right-hand space
            is left open for it. */
@@ -366,7 +366,7 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                       Get on the list.
                     </ButtonLink>
                     <AddToCalendar
-                      icsHref={`/sessions/${session.page}/calendar`}
+                      icsHref={`/schedule/${session.page}/calendar`}
                       event={{
                         title: session.title,
                         details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
@@ -407,7 +407,7 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                       ))}
                     {hasMoreAtVenue && (
                       <Link
-                        href={`/sessions/${session.venue.slug}`}
+                        href={`/schedule/${session.venue.slug}`}
                         className="group inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-magenta"
                       >
                         Everything else at {session.venue.name}
@@ -469,7 +469,7 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                       glyph, and it jumps the way it points. */}
                     {hasMoreAtVenue && (
                       <Link
-                        href={`/sessions/${session.venue.slug}`}
+                        href={`/schedule/${session.venue.slug}`}
                         className="group mt-1.5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-200 hover:text-magenta"
                       >
                         Everything else at {session.venue.name}
@@ -575,7 +575,7 @@ export default async function VenueSchedulePage({
   const { room, sessions } = schedule;
   const partners = await safeList(listPartners());
 
-  // Same lockup resolution as /sessions — a session that borrows a partner's
+  // Same lockup resolution as /schedule — a session that borrows a partner's
   // mark tracks whatever the admin has uploaded rather than a file in the repo.
   const cards: SessionCard[] = sessions.map((s) => {
     if (s.logo) return { ...s, logoSrc: s.logo.src, logoAlt: s.logo.alt };
@@ -600,7 +600,7 @@ export default async function VenueSchedulePage({
               the arrow rather than the whole control: the label lifts a step in
               brightness, the arrow is the only thing that takes colour. */}
           <BackLink
-            href="/sessions"
+            href="/schedule"
             className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none"
           >
             <ArrowLeft
@@ -704,7 +704,7 @@ export default async function VenueSchedulePage({
                 Get involved
               </ButtonLink>
               <Link
-                href="/sessions"
+                href="/schedule"
                 className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/50 transition-colors duration-200 hover:text-magenta"
               >
                 Every room

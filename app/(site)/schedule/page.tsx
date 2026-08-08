@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SessionsHero } from "@/components/site/sessions-hero";
+import { SessionsHero } from "@/components/site/schedule-hero";
 import { PysaBand } from "@/components/site/pysa-band";
 import {
   SessionBento,
@@ -7,7 +7,7 @@ import {
 } from "@/components/site/session-bento";
 import { ButtonLink } from "@/components/ui/button";
 import { listPartners } from "@/lib/admin/cms-queries";
-import { FEATURED_SESSIONS, resolveSessions } from "@/lib/sessions";
+import { FEATURED_SESSIONS, resolveSessions } from "@/lib/schedule";
 
 // Partner logos come from the CMS, so this page carries the same ISR window as
 // the homepage and /speakers.
@@ -19,11 +19,11 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: "Sessions",
   description: DESCRIPTION,
-  alternates: { canonical: "/sessions" },
+  alternates: { canonical: "/schedule" },
   openGraph: {
     title: "Sessions · SASTW 2026",
     description: DESCRIPTION,
-    url: "/sessions",
+    url: "/schedule",
   },
   twitter: { title: "Sessions · SASTW 2026", description: DESCRIPTION },
 };
@@ -62,7 +62,7 @@ export default async function SessionsPage() {
     <main>
       <SessionsHero />
 
-      <PysaBand detailHref="/sessions/pysanantonio" />
+      <PysaBand detailHref="/schedule/pysanantonio" />
 
       {/* Full-bleed rule on the section, not the inner container — the same
           seam the homepage uses between room-flow and the logo wall. Inset to

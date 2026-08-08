@@ -335,7 +335,7 @@ function VenueRow({ room, index }: { room: Room; index: number }) {
                 short form can't wrap either. */}
             <div className="mt-auto pt-7">
               <ButtonLink
-                href={`/sessions/${room.slug}`}
+                href={`/schedule/${room.slug}`}
                 aria-label={`See the full week at ${room.name}`}
                 variant="ghost"
                 size="md"
@@ -365,7 +365,7 @@ function VenueRow({ room, index }: { room: Room; index: number }) {
 export function RoomFlow() {
   // Only the anchor and the all-week rooms are rendered. The two
   // single-activation rooms (300 Main, Legacy Park) stay in ROOMS but have no
-  // surface on the homepage now — they need /sessions or a venues page.
+  // surface on the homepage now — they need /schedule or a venues page.
   //
   // Anchor first, then the day rooms in ROOMS order. Position is the only
   // hierarchy left in the section now that the frames match.
@@ -419,7 +419,7 @@ export function RoomFlow() {
               Sized down on mobile, where it follows the blurb as a normal
               in-flow CTA rather than sitting beside a headline. */}
           <ButtonLink
-            href="/sessions"
+            href="/schedule"
             size="md"
             className="group mt-8 justify-self-start font-display text-base font-bold uppercase tracking-tight duration-200 lg:col-start-2 lg:row-start-2 lg:mt-0 lg:h-13 lg:self-end lg:px-7 lg:text-lg"
           >
@@ -439,7 +439,7 @@ export function RoomFlow() {
         </div>
 
         {/* Only the rooms with building portraits appear here; the two
-            single-activation rooms are held back until /sessions or a venues
+            single-activation rooms are held back until /schedule or a venues
             page exists, because a text-only tile is the weakest thing in a
             section this dependent on the artwork. */}
         <div className="mt-16 flex flex-col gap-6 lg:mt-20">

@@ -38,7 +38,11 @@ const nextConfig: NextConfig = {
     // Every source below differs from its destination by more than case.
     return [
       // The Call for Speakers page became the Plug In hub.
-      { source: "/call-for-speakers", destination: "/plug-in", permanent: true },
+      {
+        source: "/call-for-speakers",
+        destination: "/plug-in",
+        permanent: true,
+      },
 
       // ── Paths from the two previous sasw.co builds ───────────────────────
       // Found by enumerating the Wayback Machine's CDX index for the domain:
@@ -59,12 +63,33 @@ const nextConfig: NextConfig = {
 
       // The schedule, and the tracks that became circuits. `:slug*` also
       // matches the bare path, so these cover /tracks and its ~20 children.
-      { source: "/schedule", destination: "/sessions", permanent: true },
-      { source: "/tracks/:slug*", destination: "/sessions", permanent: true },
+      { source: "/tracks/:slug*", destination: "/schedule", permanent: true },
 
       // Sponsorship now runs through Get Involved — the wall on the homepage
       // is display only. Covers /sponsors and its ~20 per-sponsor pages.
-      { source: "/our-sponsors", destination: "/get-involved", permanent: true },
+      // NOTE: redirects run before static files are served, so this rule
+      // would swallow anything under `public/sessions/` too — it did, and
+      // turned every activation logo and hero into a 404 pointing at
+      // /schedule/<file>. That art lives in `public/activations/` now, clear
+      // of both this rule and the /schedule/[slug] route.
+      //
+      // Ours, not the old site's. /sessions was this build's schedule until the
+      // word turned out to mean two things: every piece of copy on that page
+      // already called it "the schedule", while "session" is what a speaker
+      // pitches on /plug-in. The child route has to come first — Next matches
+      // in order, and the bare /sessions rule would otherwise swallow
+      // /sessions/mission-pitch and drop people at the index.
+      {
+        source: "/sessions/:slug*",
+        destination: "/schedule/:slug*",
+        permanent: true,
+      },
+      { source: "/sessions", destination: "/schedule", permanent: true },
+      {
+        source: "/our-sponsors",
+        destination: "/get-involved",
+        permanent: true,
+      },
       {
         source: "/sponsors/:slug*",
         destination: "/get-involved",
@@ -83,7 +108,11 @@ const nextConfig: NextConfig = {
       // looking for where to stay is an attendee, and /register is the page
       // that promises to email them the schedule.
       { source: "/attend", destination: "/register", permanent: true },
-      { source: "/HousingLogistics", destination: "/register", permanent: true },
+      {
+        source: "/HousingLogistics",
+        destination: "/register",
+        permanent: true,
+      },
       { source: "/housing", destination: "/register", permanent: true },
       { source: "/TransitParking", destination: "/register", permanent: true },
       { source: "/transit-parking", destination: "/register", permanent: true },

@@ -6,7 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import { ARROW_MOTION } from "@/lib/motion";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
-import type { ResolvedSession } from "@/lib/sessions";
+import type { ResolvedSession } from "@/lib/schedule";
 
 // The confirmed activations, minus PySanAntonio — that one has its own band
 // above. Three across, then two, so the five don't leave a widowed cell.
@@ -127,7 +127,7 @@ function Card({
       */}
       {session.page ? (
         <Link
-          href={`/sessions/${session.page}`}
+          href={`/schedule/${session.page}`}
           className="after:absolute after:inset-0 after:z-10 focus-visible:outline-none"
         >
           <Lockup session={session} />

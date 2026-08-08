@@ -6,10 +6,10 @@ import { Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { ButtonLink } from "@/components/ui/button";
 
-// Sessions before Speakers — the schedule is what most people arrive looking
+// Schedule before Speakers — the schedule is what most people arrive looking
 // for, and the lineup reads as a detail of it rather than the other way round.
 const LINKS = [
-  { label: "Sessions", href: "/sessions" },
+  { label: "Schedule", href: "/schedule" },
   { label: "Speakers", href: "/speakers" },
 ];
 const EASE = [0.32, 0.72, 0, 1] as const;

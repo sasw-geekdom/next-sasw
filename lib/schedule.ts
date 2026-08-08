@@ -2,7 +2,7 @@ import { ASSET, ROOMS, type Room } from "@/lib/locations";
 import { PYSA } from "@/lib/pysa";
 import type { TrackName } from "@/lib/tracks";
 
-// The confirmed activations, for /sessions. Curated here for now, like ROOMS —
+// The confirmed activations, for /schedule. Curated here for now, like ROOMS —
 // the sessions CMS can feed this later.
 //
 // `room` is a ROOMS slug rather than a repeated venue name, so a venue rename
@@ -15,7 +15,7 @@ import type { TrackName } from "@/lib/tracks";
 //
 // TODO(assets): Mission Pitch, Latin Tech Pitch and 1 Million Cups each have a
 // lockup that hasn't landed in the repo yet. Save each as white-on-transparent
-// at `public/sessions/<slug>.svg` and uncomment its `logo` block — the cards
+// at `public/schedule/<slug>.svg` and uncomment its `logo` block — the cards
 // already render a logo when one is present and typeset the title when it
 // isn't, so nothing else has to change.
 
@@ -30,7 +30,7 @@ export interface FeaturedSession {
   /**
    * Optional programme lockup, shown in place of the typeset title.
    *
-   * Drop a white-on-transparent SVG (or PNG) into `public/sessions/` and point
+   * Drop a white-on-transparent SVG (or PNG) into `public/schedule/` and point
    * here; the card falls back to display type when this is absent, so an
    * activation without artwork still renders correctly. Wide lockups suit the
    * slot better than square marks — it's a letterbox, not a badge.
@@ -58,7 +58,7 @@ export interface FeaturedSession {
    */
   titleBreakBefore?: string;
   /**
-   * Gives this session its own page at `/sessions/<page>`, for an activation
+   * Gives this session its own page at `/schedule/<page>`, for an activation
    * big enough to be a mini-conference inside the week rather than a card in
    * someone else's room.
    *
@@ -123,7 +123,7 @@ export const HEADLINE_SESSION: FeaturedSession = {
     end: "2026-10-02T18:00:00-05:00",
   },
   // The wordmark, not the typeset title — this is the one activation with its
-  // own brand, and the band on /sessions already leads with the mark.
+  // own brand, and the band on /schedule already leads with the mark.
   //
   // `wordmark-dark` is the right one of the pair: it draws in PySA's lighter
   // blue (#4a90d9) for dark grounds, where plain `wordmark.svg` uses #0059b7
@@ -156,7 +156,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // it. Trimmed, the box and the mark are the same thing and CSS controls
     // the spacing. Any future lockup wants the same treatment.
     logo: {
-      src: "/sessions/mission-pitch.png",
+      src: "/activations/mission-pitch.png",
       width: 920,
       height: 225,
       alt: "Mission Pitch",
@@ -169,7 +169,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // the 2500px original on missionpitch.org; anything larger is bytes that
     // never reach a screen.
     hero: {
-      src: "/sessions/mission-pitch-hero.jpg",
+      src: "/activations/mission-pitch-hero.jpg",
       width: 1800,
       height: 1200,
       alt: "",
@@ -216,7 +216,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // "Pitch". The year is baked into the artwork, so this file needs a new
     // one if the page outlives the 2026 edition.
     logo: {
-      src: "/sessions/latin-tech-pitch.png",
+      src: "/activations/latin-tech-pitch.png",
       width: 936,
       height: 243,
       alt: "Latin Tech Pitch",
@@ -227,7 +227,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // template. A full house also survives the hero's mask — whatever the
     // dissolve eats is still a crowd, where a single subject would be lost.
     hero: {
-      src: "/sessions/latin-tech-pitch-hero.jpg",
+      src: "/activations/latin-tech-pitch-hero.jpg",
       width: 1800,
       height: 1200,
       alt: "",
@@ -259,7 +259,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // Stacked, so it sits taller and narrower than the wide lockups on the
     // other cards; the slot is height-led, which keeps them on one baseline.
     logo: {
-      src: "/sessions/1-million-cups.png",
+      src: "/activations/1-million-cups.png",
       width: 1072,
       height: 536,
       alt: "1 Million Cups",
@@ -270,7 +270,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // than the other two: a cheque handover and a full auditorium already
     // carry the week's big moments, and this one is a weekly working session.
     hero: {
-      src: "/sessions/1-million-cups-hero.jpg",
+      src: "/activations/1-million-cups-hero.jpg",
       width: 1800,
       height: 1200,
       alt: "",
@@ -315,7 +315,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // the part that survives the mask, and there it is someone making
     // something rather than the backs of people's heads.
     hero: {
-      src: "/sessions/creative-futures-hero.jpg",
+      src: "/activations/creative-futures-hero.jpg",
       width: 1800,
       height: 1440,
       alt: "",
@@ -402,11 +402,11 @@ export function resolveSession(
   return resolveSessions([session])[0] ?? null;
 }
 
-// ─── /sessions/[slug] ───────────────────────────────────────────────────────
+// ─── /schedule/[slug] ───────────────────────────────────────────────────────
 //
-// One namespace under /sessions, holding two kinds of page.
+// One namespace under /schedule, holding two kinds of page.
 //
-// Today every slug is a venue — /sessions/tpr is Texas Public Radio's week.
+// Today every slug is a venue — /schedule/tpr is Texas Public Radio's week.
 // The second kind is an activation big enough to be its own mini-conference
 // inside the week (PySanAntonio is the first), which will want its own page
 // rather than a card in someone else's room.
@@ -442,7 +442,7 @@ function activations(): Map<string, FeaturedSession> {
 }
 
 /**
- * Slugs /sessions/[slug] builds — every room carrying at least one featured
+ * Slugs /schedule/[slug] builds — every room carrying at least one featured
  * session, plus every activation that has opted into a page.
  *
  * A room with an empty schedule gets nothing: no link points at it, and an
@@ -451,7 +451,7 @@ function activations(): Map<string, FeaturedSession> {
 /**
  * Where a venue slug should send people instead of rendering a page.
  *
- * A room with a single activation has no week to show. /sessions/legacy-park
+ * A room with a single activation has no week to show. /schedule/legacy-park
  * was 898 words that named Startup Bash twelve times and nothing else — a
  * second URL competing with the activation's own page for the same searches,
  * and by then nothing linked to it either.
@@ -467,7 +467,7 @@ export function venueRedirect(slug: string): string | null {
   const room = ROOMS.find((r) => r.slug === slug);
   if (!room || room.sessions.length > 1) return null;
   const only = allSessions().find((s) => s.room === slug);
-  return only?.page ? `/sessions/${only.page}` : null;
+  return only?.page ? `/schedule/${only.page}` : null;
 }
 
 export function scheduleSlugs(): string[] {
@@ -479,7 +479,7 @@ export function scheduleSlugs(): string[] {
 }
 
 /**
- * Resolve a /sessions/[slug] segment, or null when nothing claims it.
+ * Resolve a /schedule/[slug] segment, or null when nothing claims it.
  *
  * Rooms resolve first, so an activation can never shadow a venue that happens
  * to share its name — the venue is the older, more linked-to URL of the two.

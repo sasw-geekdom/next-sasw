@@ -1,5 +1,5 @@
 import { icsStamp } from "@/lib/calendar";
-import { resolveSchedule, scheduleSlugs } from "@/lib/sessions";
+import { resolveSchedule, scheduleSlugs } from "@/lib/schedule";
 
 // A single activation's calendar entry.
 //
