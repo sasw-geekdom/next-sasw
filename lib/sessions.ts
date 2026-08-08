@@ -177,6 +177,28 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // shouldn't be described as a purse.
     blurb:
       "Latino-led startups from across Texas, pitching for $110k in prizes and mentorship — presented with the Consulate General of Israel.",
+    when: { start: "2026-09-30T14:00:00-05:00", end: "2026-09-30T18:00:00-05:00" },
+    // The mark reads "LatinTECH PITCH 2026" — the only version they publish
+    // that carries the full name; the plain "LatinTECH" wordmark drops
+    // "Pitch". The year is baked into the artwork, so this file needs a new
+    // one if the page outlives the 2026 edition.
+    logo: {
+      src: "/sessions/latin-tech-pitch.png",
+      width: 936,
+      height: 243,
+      alt: "Latin Tech Pitch",
+    },
+    // The 2024 competition's room, from latintechpitch.com. Chosen over their
+    // cheque-presentation shots on purpose: Mission Pitch already leads with
+    // one, and two sibling pages running the same composition reads as a
+    // template. A full house also survives the hero's mask — whatever the
+    // dissolve eats is still a crowd, where a single subject would be lost.
+    hero: {
+      src: "/sessions/latin-tech-pitch-hero.jpg",
+      width: 1800,
+      height: 1200,
+      alt: "",
+    },
   },
   {
     slug: "1-million-cups",

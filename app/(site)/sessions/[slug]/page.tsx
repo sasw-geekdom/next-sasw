@@ -274,7 +274,12 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                   <h1 className="sr-only">{session.title}</h1>
                   <Image
                     src={session.logo.src}
-                    alt={session.logo.alt}
+                    // Decorative here, deliberately: the sr-only h1 above
+                    // already announces the name, so alt text on the mark
+                    // would say it twice. `logo.alt` still carries a real name
+                    // for the bento card, where the mark is the only content
+                    // inside the link and has to name it.
+                    alt=""
                     width={session.logo.width}
                     height={session.logo.height}
                     priority
