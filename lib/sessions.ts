@@ -1,4 +1,4 @@
-import { ROOMS, type Room } from "@/lib/locations";
+import { ASSET, ROOMS, type Room } from "@/lib/locations";
 
 // The confirmed activations, for /sessions. Curated here for now, like ROOMS —
 // the sessions CMS can feed this later.
@@ -73,7 +73,16 @@ export interface FeaturedSession {
    * applications. This site holds where it sits in the week; the depth lives
    * there, and its page should say so rather than pretend otherwise.
    */
-  site?: { label: string; href: string };
+  site?: {
+    label: string;
+    /**
+     * Omitted when we run the thing ourselves — Startup Bash is ours, so the
+     * credit is a statement of fact with nowhere else to send anyone. The
+     * page renders it as plain text rather than a link back to this same
+     * site, which would be a dead loop dressed as a handoff.
+     */
+    href?: string;
+  };
   /**
    * Confirmed start and end, once the organiser has fixed them.
    *
@@ -270,6 +279,25 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     circuit: "Social",
     blurb:
       "Where the week unwinds. Open-air, the whole ecosystem in one place, no badge scanning.",
+    when: {
+      start: "2026-10-01T18:00:00-05:00",
+      end: "2026-10-01T20:00:00-05:00",
+    },
+    // Ours, so there is no organiser to hand off to — see `site.href`.
+    site: { label: "Startup + Tech Week" },
+    // No logo on purpose: this one is the week's own party, not a partner
+    // brand, so the title is typeset like any other heading.
+    //
+    // The art is Legacy Park's own magenta ASCII illustration, already in the
+    // asset bucket the venue images come from. It is near-black at 20/255, so
+    // unlike the photographs it never threatens the copy — the mask is doing
+    // composition here, not rescue.
+    hero: {
+      src: ASSET("sastw-legacypark.jpg"),
+      width: 784,
+      height: 720,
+      alt: "",
+    },
   },
 ];
 

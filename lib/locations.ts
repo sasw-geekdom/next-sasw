@@ -37,7 +37,7 @@ export interface Room {
   sessions: RoomSession[];
 }
 
-const ASSET = (file: string) =>
+export const ASSET = (file: string) =>
   `https://firebasestorage.googleapis.com/v0/b/sasw2026-783a5.firebasestorage.app/o/sasw-assets%2F${file}?alt=media`;
 
 export const ROOMS: Room[] = [
@@ -145,7 +145,10 @@ export const ROOMS: Room[] = [
   ===========`,
     sessions: [
       { title: "1 Million Cups", kind: "Small Business & Solopreneur" },
-      { title: "Small Business Speed Networking", kind: "Small Business & Solopreneur" },
+      {
+        title: "Small Business Speed Networking",
+        kind: "Small Business & Solopreneur",
+      },
     ],
   },
   // The two single-activation rooms run in the order they happen — the brunch
@@ -170,9 +173,7 @@ export const ROOMS: Room[] = [
   |‖ ‖ ‖ ‖ ‖ |
   |‖_‖_‖_‖_‖_|
   =============`,
-    sessions: [
-      { title: "Creative Futures Brunch", kind: "Social" },
-    ],
+    sessions: [{ title: "Creative Futures Brunch", kind: "Social" }],
   },
   {
     slug: "legacy-park",
@@ -190,8 +191,6 @@ export const ROOMS: Room[] = [
    |   |   |
   ____________
  [__  STAGE __]`,
-    sessions: [
-      { title: "Startup Bash", kind: "Social" },
-    ],
+    sessions: [{ title: "Startup Bash", kind: "Social" }],
   },
 ];

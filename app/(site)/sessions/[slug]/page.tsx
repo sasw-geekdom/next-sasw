@@ -363,24 +363,29 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                       there's nothing else to say, and a whole band under this
                       one to hold two links was padding. */}
                   <p className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
-                    {session.site && (
-                      <a
-                        href={session.site.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="group inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-magenta"
-                      >
-                        Run by {session.site.label}
-                        <ArrowUpRight
-                          className={cn(
-                            ARROW_MOTION,
-                            "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
-                          )}
-                          strokeWidth={2.5}
-                          aria-hidden="true"
-                        />
-                      </a>
-                    )}
+                    {session.site &&
+                      (session.site.href ? (
+                        <a
+                          href={session.site.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="group inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-magenta"
+                        >
+                          Run by {session.site.label}
+                          <ArrowUpRight
+                            className={cn(
+                              ARROW_MOTION,
+                              "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                            )}
+                            strokeWidth={2.5}
+                            aria-hidden="true"
+                          />
+                        </a>
+                      ) : (
+                        // No arrow and no link: an arrow promises somewhere to
+                        // go, and this one is us.
+                        <span>Run by {session.site.label}</span>
+                      ))}
                     <Link
                       href={`/sessions/${session.venue.slug}`}
                       className="group inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-magenta"
@@ -467,22 +472,26 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
                       Run by
                     </dt>
                     <dd className="mt-1.5">
-                      <a
-                        href={session.site.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="group inline-flex items-center gap-1.5 text-white transition-colors duration-200 hover:text-magenta"
-                      >
-                        {session.site.label}
-                        <ArrowUpRight
-                          className={cn(
-                            ARROW_MOTION,
-                            "h-4 w-4 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
-                          )}
-                          strokeWidth={2.5}
-                          aria-hidden="true"
-                        />
-                      </a>
+                      {session.site.href ? (
+                        <a
+                          href={session.site.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="group inline-flex items-center gap-1.5 text-white transition-colors duration-200 hover:text-magenta"
+                        >
+                          {session.site.label}
+                          <ArrowUpRight
+                            className={cn(
+                              ARROW_MOTION,
+                              "h-4 w-4 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                            )}
+                            strokeWidth={2.5}
+                            aria-hidden="true"
+                          />
+                        </a>
+                      ) : (
+                        <span className="text-white">{session.site.label}</span>
+                      )}
                     </dd>
                   </div>
                 )}
