@@ -151,7 +151,7 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
               strokeWidth={2}
               aria-hidden="true"
             />
-            The full schedule
+            Back
           </BackLink>
         </div>
       </section>
@@ -613,7 +613,7 @@ export default async function VenueSchedulePage({
               strokeWidth={2}
               aria-hidden="true"
             />
-            The full schedule
+            Back
           </BackLink>
 
           <div className="mt-8 grid overflow-hidden lg:grid-cols-[3fr_2fr]">

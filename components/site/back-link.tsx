@@ -15,6 +15,12 @@ import { cameFromInsideTheApp } from "@/lib/nav-history";
  * lands at the top of the schedule, even for someone who reached the page
  * from a venue's list halfway down.
  *
+ * Label it generically. This used to read "The full schedule", which was true
+ * only when /sessions was where you came from — arriving from a venue's own
+ * list, the control said "the full schedule" and returned you to the venue
+ * page. The alternative was setting the label from the actual destination,
+ * which can only be known after mount and so would visibly flash.
+ *
  * `href` is not decoration. It stays on the anchor so the control is a real
  * link — crawlable, openable in a new tab, and working without JavaScript —
  * and it is the destination whenever going back would leave the site.
