@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useReducedMotion } from "motion/react";
 import { ArrowUpRight, CalendarDays, Clock, MapPin } from "lucide-react";
-import { ProbeChip, useProbeChip } from "@/components/site/probe-chip";
+import { OrganizerLogo } from "@/components/site/organizer-logo";
 import { ButtonLink } from "@/components/ui/button";
 import { ARROW_MOTION } from "@/lib/motion";
 import { PYSA, PYSA_BLUE, PYSA_ORGANIZERS } from "@/lib/pysa";
@@ -96,27 +96,6 @@ function Detail({
 // Same probe readout the sponsor wall uses — the cursor names what it's over.
 // Safe to use here because the band already clips its own overflow; the chip
 // is `whitespace-nowrap` and would otherwise reach past a narrow cell.
-function OrganizerLogo({ org }: { org: (typeof PYSA_ORGANIZERS)[number] }) {
-  const { chipRef, probeProps } = useProbeChip();
-
-  return (
-    <a
-      href={org.href}
-      target="_blank"
-      rel="noreferrer"
-      {...probeProps}
-      className="group relative block opacity-85 transition-opacity duration-200 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/60"
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={org.logo}
-        alt={org.name}
-        className={cn("w-auto object-contain", org.heightClass)}
-      />
-      <ProbeChip chipRef={chipRef}>{org.name}</ProbeChip>
-    </a>
-  );
-}
 
 export function PysaBand({
   detailHref,
