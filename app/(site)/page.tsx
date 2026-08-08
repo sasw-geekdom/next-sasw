@@ -1,6 +1,7 @@
 import { Hero } from "@/components/site/hero";
 import { jsonLd, weekEvent } from "@/lib/structured-data";
 import { RoomFlow } from "@/components/site/room-flow";
+import { AccessGrantedBand } from "@/components/site/access-granted-band";
 import { SpeakerLineup } from "@/components/site/speaker-lineup";
 import { PowerGrid } from "@/components/site/power-grid";
 import {
@@ -44,9 +45,22 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(weekEvent()) }}
       />
-      <>
+      {/* The only page on the site that had no <main>. Every other one wraps
+          its sections in it; without it there is no main landmark to skip to. */}
+      <main>
         <Hero />
         <RoomFlow />
+
+        {/* One event, after the rooms — by which point "Geekdom, 3rd floor"
+          means something.
+
+          The band itself, not a homepage-only variant. A bespoke spotlight was
+          built first and it drifted immediately: different grid, different
+          mobile order, the art landing after the copy instead of between the
+          one-liner and the event details. Two components rendering one event
+          is two places for that to happen again, so the teaser is the same
+          teaser /schedule uses. */}
+        <AccessGrantedBand detailHref="/schedule/access-granted" />
         {/* Hidden until announcement. `SPEAKERS_ANNOUNCED` in lib/speakers.ts is
           the single switch — flipping it restores this band and the /speakers
           wall together. */}
@@ -54,7 +68,7 @@ export default async function Home() {
           <SpeakerLineup speakers={speakers.slice(0, FEATURED)} />
         )}
         <PowerGrid sponsors={sponsors} partners={partners} />
-      </>
+      </main>
     </>
   );
 }

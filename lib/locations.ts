@@ -226,7 +226,10 @@ export const ROOMS: Room[] = [
   |‖ ‖ ‖ ‖ ‖ |
   |‖_‖_‖_‖_‖_|
   =============`,
-    sessions: [{ title: "Creative Futures Brunch", kind: "Social" }],
+    // "The" is part of the name — they asked for it. This is the short form
+    // room-flow prints; the activation's own title in lib/schedule carries the
+    // full "The Creative Futures ™ Brunch powered by The Down Market".
+    sessions: [{ title: "The Creative Futures Brunch", kind: "Social" }],
   },
   {
     slug: "legacy-park",

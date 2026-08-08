@@ -8,6 +8,8 @@ import {
   ACCESS_GRANTED,
   ACCESS_GREEN,
   ACCESS_ORGANIZERS,
+  GRID_FADE,
+  GRID_LINE,
   ACCESS_TRACKS,
 } from "@/lib/access-granted";
 import { cn } from "@/lib/utils";
@@ -26,14 +28,6 @@ import { cn } from "@/lib/utils";
 // Site black as the ground, not the spec's #0F1115: a second near-black on a
 // site whose sections are otherwise pure black reads as drift. PySA's band
 // already learned that and moved. See lib/access-granted.ts.
-
-/** Hairline schematic grid — a surface for the lock's glow to fall on. */
-const GRID_LINE = "rgba(255,255,255,0.055)";
-
-/** Nothing beyond the object's own pool of light: tiled to the section edges
- *  the grid stops being a hint and becomes wallpaper. */
-const GRID_FADE =
-  "radial-gradient(ellipse 58% 62% at 68% 52%, black 0%, black 20%, transparent 74%)";
 
 function Prompt({ children }: { children: React.ReactNode }) {
   return (

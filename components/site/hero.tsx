@@ -25,7 +25,9 @@ export function Hero() {
 
   return (
     <HeroShell
-      eyebrow="Sept 28 – Oct 2, 2026"
+      // Year 11 leads. It is the strongest credibility fact the week has and it
+      // appeared nowhere a visitor could see it — only inside the .ics PRODID.
+      eyebrow="Year 11 · Sept 28 – Oct 2, 2026"
       headline={
         <>
           The current{" "}

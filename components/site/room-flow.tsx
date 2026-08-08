@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
@@ -363,13 +364,16 @@ function VenueRow({ room, index }: { room: Room; index: number }) {
 }
 
 export function RoomFlow() {
-  // Only the anchor and the all-week rooms are rendered. The two
-  // single-activation rooms (300 Main, Legacy Park) stay in ROOMS but have no
-  // surface on the homepage now — they need /schedule or a venues page.
-  //
   // Anchor first, then the day rooms in ROOMS order. Position is the only
   // hierarchy left in the section now that the frames match.
   const rooms = ROOMS.filter((r) => r.tier === "anchor" || r.tier === "day");
+
+  // The two single-activation rooms don't get a portrait panel — a text-only
+  // tile is the weakest thing in a section this dependent on artwork — but
+  // they can't be silent either. The footer claims five rooms while this
+  // section showed three, and Startup Bash appeared nowhere on the homepage
+  // at all. A named line each keeps the count honest and gets them a link.
+  const alsoRooms = ROOMS.filter((r) => r.tier === "single");
 
   return (
     <section className="bg-black">
@@ -438,15 +442,46 @@ export function RoomFlow() {
           </ButtonLink>
         </div>
 
-        {/* Only the rooms with building portraits appear here; the two
-            single-activation rooms are held back until /schedule or a venues
-            page exists, because a text-only tile is the weakest thing in a
-            section this dependent on the artwork. */}
+        {/* The rooms with building portraits. The other two follow as a
+            named line rather than a weak tile. */}
         <div className="mt-16 flex flex-col gap-6 lg:mt-20">
           {rooms.map((room, i) => (
             <VenueRow key={room.slug} room={room} index={i} />
           ))}
         </div>
+
+        {alsoRooms.length > 0 && (
+          <div className="mt-10 border-t border-white/10 pt-8">
+            <p className="font-mono text-[11px] uppercase tracking-widest text-white/55">
+              Also lighting up
+            </p>
+            <ul className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-10">
+              {alsoRooms.map((room) => (
+                <li key={room.slug}>
+                  <Link
+                    href={`/schedule/${room.slug}`}
+                    className="group inline-flex items-baseline gap-2.5 transition-colors duration-200 hover:text-magenta"
+                  >
+                    <span className="font-display text-lg font-bold uppercase tracking-tight text-white transition-colors duration-200 group-hover:text-magenta">
+                      {room.name}
+                    </span>
+                    <span className="font-mono text-[11px] uppercase tracking-widest text-white/45">
+                      {room.sessions.map((s) => s.title).join(" · ")}
+                    </span>
+                    <ArrowUpRight
+                      className={cn(
+                        ARROW_MOTION,
+                        "h-3.5 w-3.5 shrink-0 self-center duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                      )}
+                      strokeWidth={2.5}
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </section>
   );

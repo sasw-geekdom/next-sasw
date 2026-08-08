@@ -113,8 +113,14 @@ export function PowerGrid({
             <h2 className="mt-3 font-display text-4xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-5xl">
               Powering the current.
             </h2>
+            {/* Who runs the week, stated once. The homepage named Geekdom
+                only as a room's host and as one mark in a wall of fifteen,
+                which left a first-time visitor unable to tell who is behind
+                any of it. This section is already titled "the power source" —
+                it is where someone looks for that answer. */}
             <p className="mt-4 max-w-xl text-pretty text-white/60">
-              The sponsors and partners keeping the grid live, Sept 28 – Oct 2.
+              Organized and sponsored by Geekdom, with community organizations,
+              local foundations, and the volunteers who make it run.
             </p>
           </div>
 

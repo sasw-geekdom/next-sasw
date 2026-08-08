@@ -26,6 +26,22 @@ export const ACCESS_GREEN = "#00ff66";
 /** Hardware amber, for the second rank of callouts. From the same spec. */
 export const ACCESS_AMBER = "#ffb800";
 
+/**
+ * The schematic field the padlock sits in — a hairline grid for its glow to
+ * fall on, so the render reads as being in a space rather than pasted onto
+ * one. Shared by the band and the homepage spotlight; a value that lived in
+ * one of them would drift from the other.
+ */
+export const GRID_LINE = "rgba(255,255,255,0.055)";
+
+/**
+ * And the mask that stops it. Tiled to the section edges the grid stops being
+ * a hint and becomes wallpaper, so it is an ellipse centred on the artwork
+ * rather than on its (much wider) box.
+ */
+export const GRID_FADE =
+  "radial-gradient(ellipse 58% 62% at 68% 52%, black 0%, black 20%, transparent 74%)";
+
 export const ACCESS_GRANTED = {
   name: "Access Granted",
   dateLabel: "Wednesday, September 30, 2026",
