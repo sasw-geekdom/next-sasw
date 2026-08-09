@@ -29,11 +29,24 @@ export const PYSA = {
   wordmarkWidth: 4066,
   wordmarkHeight: 958,
 
-  video: "/pysa/pysa2.mp4",
+  /**
+   * Trimmed to the loop and re-encoded, so nothing here has to hold a window
+   * any more: the file starts where the loop starts and ends where it ends,
+   * and `loop` on the element replays it from the buffer.
+   *
+   * The reel it came from was 6.8MB at 5.83Mbps for nine seconds, with its
+   * moov atom after 7MB of media data — so the browser downloaded to the end
+   * to find the index, started over, and did it again on every pass. This is
+   * the same seven seconds at 930KB, faststart, visually identical (SSIM
+   * 0.991, PSNR 41.2dB against a lossless cut).
+   *
+   * New filename on purpose: browsers and CDNs cache video by URL, so
+   * replacing the bytes behind the old path would have left caches serving
+   * the 6.8MB reel. Same trap the padlock hit.
+   */
+  video: "/pysa/pysa2-loop.mp4",
   mascotStill:
     "https://devsa-assets.s3.us-east-2.amazonaws.com/pysa/pysa2-bgdark.jpg",
-  /** The reel is longer than the loop we want; hold this window. */
-  clip: { start: 1.3, end: 8.4 },
 } as const;
 
 /**
