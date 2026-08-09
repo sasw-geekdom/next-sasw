@@ -52,11 +52,18 @@ const META = [
 
 export function AccessGrantedBand({
   detailHref,
+  scheduleHref,
   actions,
   masthead = false,
 }: {
   /** Omitted on the activation's own page, where it would link to itself. */
   detailHref?: string;
+  /**
+   * A second way out, for the homepage: this band is the front door's one
+   * event, so it should also open onto the week it belongs to rather than
+   * dead-ending at a single activation.
+   */
+  scheduleHref?: string;
   /** Register + calendar, for the band's own page. */
   actions?: React.ReactNode;
   masthead?: boolean;
@@ -65,6 +72,12 @@ export function AccessGrantedBand({
     <section
       className={cn(
         "relative overflow-hidden bg-black",
+        // A seam when this is a section among others. The gap either side of
+        // it is 240px, the same as the gap to the sponsor wall below — but
+        // that one has a rule and this one didn't, so the same distance read
+        // as a hole rather than a boundary. Not as a masthead, where the back
+        // link above already draws one.
+        !masthead && "border-t border-white/10",
         // Full-viewport as a masthead — the measure every other hero here
         // uses. Not as a mid-page band, where it would shove the rest of
         // /schedule off-screen.
@@ -168,23 +181,45 @@ export function AccessGrantedBand({
 
             {actions && <div className="order-9 mt-9">{actions}</div>}
 
-            {detailHref && (
-              <div className="order-10 mt-12">
-                <ButtonLink
-                  href={detailHref}
-                  size="md"
-                  className="group bg-white/10 text-white duration-200 hover:bg-white/20"
-                >
-                  Full event details
-                  <ArrowUpRight
-                    className={cn(
-                      ARROW_MOTION,
-                      "h-4 w-4 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
-                    )}
-                    strokeWidth={2.5}
-                    aria-hidden="true"
-                  />
-                </ButtonLink>
+            {(detailHref || scheduleHref) && (
+              <div className="order-10 mt-12 flex flex-wrap items-center gap-3">
+                {detailHref && (
+                  <ButtonLink
+                    href={detailHref}
+                    size="md"
+                    className="group bg-white/10 text-white duration-200 hover:bg-white/20"
+                  >
+                    Full event details
+                    <ArrowUpRight
+                      className={cn(
+                        ARROW_MOTION,
+                        "h-4 w-4 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                      )}
+                      strokeWidth={2.5}
+                      aria-hidden="true"
+                    />
+                  </ButtonLink>
+                )}
+                {/* Outlined against the filled one, so the pair reads as a
+                    primary and a way past it rather than two equals — the
+                    house rule is one primary action per section. */}
+                {scheduleHref && (
+                  <ButtonLink
+                    href={scheduleHref}
+                    size="md"
+                    className="group border border-white/20 bg-transparent text-white duration-200 hover:bg-white/10"
+                  >
+                    See the full week
+                    <ArrowUpRight
+                      className={cn(
+                        ARROW_MOTION,
+                        "h-4 w-4 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                      )}
+                      strokeWidth={2.5}
+                      aria-hidden="true"
+                    />
+                  </ButtonLink>
+                )}
               </div>
             )}
           </div>

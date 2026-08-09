@@ -60,7 +60,10 @@ export default async function Home() {
           one-liner and the event details. Two components rendering one event
           is two places for that to happen again, so the teaser is the same
           teaser /schedule uses. */}
-        <AccessGrantedBand detailHref="/schedule/access-granted" />
+        <AccessGrantedBand
+          detailHref="/schedule/access-granted"
+          scheduleHref="/schedule"
+        />
         {/* Hidden until announcement. `SPEAKERS_ANNOUNCED` in lib/speakers.ts is
           the single switch — flipping it restores this band and the /speakers
           wall together. */}

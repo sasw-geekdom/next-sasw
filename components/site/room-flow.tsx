@@ -340,7 +340,13 @@ function VenueRow({ room, index }: { room: Room; index: number }) {
                 aria-label={`See the full week at ${room.name}`}
                 variant="ghost"
                 size="md"
-                className="group bg-white/10 text-white duration-200 hover:bg-white/20"
+                // No fill. Measured, it was carrying no accessibility duty: the
+                // label reads 17.4:1 on the tint and 21:1 without it, and the
+                // tint itself is 1.21:1 against black — far under the 3:1
+                // WCAG 1.4.11 asks of a boundary that identifies a control.
+                // `px-0` too, since padding with nothing behind it is just
+                // dead space around the words.
+                className="group bg-transparent px-0 text-white duration-200 hover:bg-transparent hover:text-magenta"
               >
                 <span className="whitespace-nowrap">
                   See the full week
