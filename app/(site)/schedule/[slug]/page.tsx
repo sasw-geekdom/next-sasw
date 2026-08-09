@@ -15,7 +15,9 @@ import {
 } from "@/components/site/session-bento";
 import { ButtonLink } from "@/components/ui/button";
 import { ARROW_MOTION } from "@/lib/motion";
-import { listPartners } from "@/lib/admin/cms-queries";
+import { ActivationSessions } from "@/components/site/activation-sessions";
+import { listPartners, listSessions } from "@/lib/admin/cms-queries";
+import type { SessionRow } from "@/lib/admin/cms-types";
 import {
   resolveSchedule,
   scheduleSlugs,
@@ -128,7 +130,14 @@ export async function generateMetadata({
  * that they're partner-run events with their own sites — this page says where
  * the thing sits in the week and sends you to the organiser for the depth.
  */
-function ActivationPage({ session }: { session: ResolvedSession }) {
+function ActivationPage({
+  session,
+  sessions,
+}: {
+  session: ResolvedSession;
+  /** CMS sessions linked to this activation, in start order. */
+  sessions: SessionRow[];
+}) {
   const isPysa = session.page === "pysanantonio";
   const isAccessGranted = session.page === "access-granted";
   /** Both banded activations render the same actions in their band's slot. */
@@ -460,10 +469,15 @@ function ActivationPage({ session }: { session: ResolvedSession }) {
         </section>
       )}
 
-      {/* Only while the slot is open. A confirmed session is hero and nothing
-          else — the date, the room, the two actions and the two links all fit
-          above the fold, and a second band under it would be filler. */}
-      {!session.when && (
+      {/* The programme, when an organiser has entered one. */}
+      <ActivationSessions sessions={sessions} />
+
+      {/* Only while the slot is open, and only while nothing real has landed —
+          a promise of times is worth printing until there are times and
+          embarrassing after. A confirmed session is otherwise hero and nothing
+          else: the date, the room, the two actions and the two links all fit
+          above the fold. */}
+      {!session.when && sessions.length === 0 && (
         <section className="border-t border-white/10 bg-black">
           <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
             <div className="max-w-2xl">
@@ -590,7 +604,12 @@ export default async function VenueSchedulePage({
   if (!schedule) notFound();
 
   if (schedule.kind === "activation") {
-    return <ActivationPage session={schedule.session} />;
+    // Filtered in memory rather than queried: this is a handful of rows,
+    // Firestore would want an index for it, and listSessions is already
+    // fetched and request-cached for the speaker pages.
+    const all = await safeList(listSessions());
+    const mine = all.filter((s) => s.activation === schedule.session.page);
+    return <ActivationPage session={schedule.session} sessions={mine} />;
   }
 
   // A room with one activation sends people to that activation instead of

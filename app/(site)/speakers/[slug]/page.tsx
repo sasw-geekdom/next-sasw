@@ -10,6 +10,8 @@ import { formatDateTime } from "@/lib/format";
 import { ARROW_MOTION } from "@/lib/motion";
 import { loadLineup, resolveSlug } from "@/lib/speakers";
 import { cn } from "@/lib/utils";
+import { venueLabel } from "@/lib/locations";
+import { activationTitle } from "@/lib/schedule";
 
 export const revalidate = 300;
 
@@ -205,8 +207,23 @@ export default async function SpeakerPage({
                         </p>
                         <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-white/55">
                           {formatDateTime(s.startsAt)}
-                          {s.location ? ` · ${s.location}` : ""}
+                          {venueLabel(s.location)
+                            ? ` \u00b7 ${venueLabel(s.location)}`
+                            : ""}
                         </p>
+                        {/* Where the talk sits in the week. Only rendered when
+                            the activation still resolves — a slug left behind
+                            by a renamed page should go quiet, not print a
+                            dead link. */}
+                        {activationTitle(s.activation) && (
+                          <Link
+                            href={`/schedule/${s.activation}`}
+                            className="mt-2 inline-block font-mono text-[11px] uppercase tracking-widest text-magenta transition-colors duration-200 hover:text-white"
+                          >
+                            Part of {activationTitle(s.activation)}
+                            <span aria-hidden="true"> &rarr;</span>
+                          </Link>
+                        )}
                       </div>
                     </li>
                   ))}

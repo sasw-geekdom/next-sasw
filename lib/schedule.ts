@@ -557,6 +557,33 @@ export function venueRedirect(slug: string): string | null {
   return only?.page ? `/schedule/${only.page}` : null;
 }
 
+/**
+ * Activations that have a page of their own, for the admin's picker.
+ *
+ * Derived rather than listed, so an activation gaining a `page` becomes
+ * linkable without anyone remembering to add it here too.
+ */
+/**
+ * The activation's own title, from its slug — for pages that hold a link to
+ * one but not the activation itself, like a speaker's session list.
+ */
+export function activationTitle(
+  slug: string | null | undefined,
+): string | null {
+  if (!slug) return null;
+  return allSessions().find((s) => s.page === slug)?.title ?? null;
+}
+
+export function activationOptions(): { slug: string; title: string }[] {
+  return allSessions()
+    .filter((s) => s.page)
+    .map((s) => ({ slug: s.page as string, title: s.title }));
+}
+
+export const ACTIVATION_SLUGS = allSessions()
+  .filter((s) => s.page)
+  .map((s) => s.page as string) as [string, ...string[]];
+
 export function scheduleSlugs(): string[] {
   const withSessions = new Set(allSessions().map((s) => s.room));
   return [

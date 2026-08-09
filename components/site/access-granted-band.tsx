@@ -10,7 +10,6 @@ import {
   ACCESS_ORGANIZERS,
   GRID_FADE,
   GRID_LINE,
-  ACCESS_TRACKS,
 } from "@/lib/access-granted";
 import { cn } from "@/lib/utils";
 
@@ -297,38 +296,17 @@ export function AccessGrantedBand({
           </div>
         </div>
 
-        {/* The running order is detail, not a teaser. On /schedule the band
-            keeps PySanAntonio's shape and the two columns live on the
-            activation's own page, where someone has already decided to look.
-            This rule stays: it divides the hero from the programme, which is a
-            real boundary, unlike the one that used to cut the hero in half. */}
-        {masthead && (
-          <div className="mt-14 grid gap-8 border-t border-white/10 pt-10 sm:grid-cols-2 lg:gap-14">
-            {ACCESS_TRACKS.map((t) => (
-              <div key={t.label}>
-                <Prompt>{t.label}</Prompt>
-                <ul className="mt-4 space-y-2.5">
-                  {t.items.map((item) => (
-                    <li
-                      key={item}
-                      className="flex gap-3 text-pretty text-white/80"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="mt-2.5 h-1 w-1 shrink-0 rounded-full"
-                        style={{ backgroundColor: ACCESS_GREEN }}
-                      />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-3.5 max-w-sm text-pretty text-sm text-white/50">
-                  {t.note}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* The two-column programme that used to sit here — the continuous
+            track and the workshops track — is out for now. It named specific
+            sessions ("Threat-modeling workshop for founders") that organisers
+            will enter in the CMS, and the page would then have listed them
+            twice in two different formats. ActivationSessions renders the real
+            thing on the slug page instead.
+
+            ACCESS_TRACKS is still in lib/access-granted.ts. Whatever comes
+            back here should be the shape of the afternoon — the lockpicking
+            village, the resume corner — and not anything that is a talk with
+            a speaker, because that now has somewhere better to live. */}
       </div>
     </section>
   );

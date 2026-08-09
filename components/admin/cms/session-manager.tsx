@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Combobox } from "@/components/ui/combobox";
 import { saveSession, deleteSession } from "@/lib/admin/cms-actions";
 import { formatDateTime } from "@/lib/format";
+import { VENUE_OPTIONS, roomSlugFromLegacy, venueLabel } from "@/lib/locations";
+import { activationOptions } from "@/lib/schedule";
 import { TRACKS } from "@/lib/tracks";
 import type {
   SessionRow,
@@ -41,12 +43,14 @@ export function SessionManager({
     [],
   );
   const [track, setTrack] = React.useState("");
+  const [venue, setVenue] = React.useState("");
+  const [activation, setActivation] = React.useState("");
   const [pickerValue, setPickerValue] = React.useState("");
   const [pending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
-  const [issues, setIssues] = React.useState<Record<string, string[] | undefined>>(
-    {},
-  );
+  const [issues, setIssues] = React.useState<
+    Record<string, string[] | undefined>
+  >({});
 
   const speakerName = React.useCallback(
     (id: string) => speakers.find((s) => s.id === id)?.name ?? "Unknown",
@@ -59,9 +63,18 @@ export function SessionManager({
     setParticipants(
       row === "new"
         ? []
-        : row.participants.map((p) => ({ speakerId: p.speakerId, role: p.role })),
+        : row.participants.map((p) => ({
+            speakerId: p.speakerId,
+            role: p.role,
+          })),
     );
     setTrack(row === "new" ? "" : (row.track ?? ""));
+    // Legacy rows hold a free-text location. Match it back to a slug where
+    // possible so an edit doesn't silently blank a field the admin never
+    // touched; leave it empty where it can't be matched, so the ambiguous
+    // ones get chosen rather than guessed.
+    setVenue(row === "new" ? "" : (roomSlugFromLegacy(row.location) ?? ""));
+    setActivation(row === "new" ? "" : (row.activation ?? ""));
     setPickerValue("");
     setEditing(row);
   }
@@ -93,6 +106,8 @@ export function SessionManager({
     const form = new FormData(e.currentTarget);
     form.set("participants", JSON.stringify(participants));
     form.set("track", track);
+    form.set("location", venue);
+    form.set("activation", activation);
     startTransition(async () => {
       const res = await saveSession(form);
       if (!res.ok) {
@@ -157,15 +172,20 @@ export function SessionManager({
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {formatDateTime(row.startsAt)}
-                    {row.endsAt ? ` – ${formatDateTime(row.endsAt)}` : ""} ·{" "}
-                    {row.location}
+                    {row.endsAt
+                      ? ` – ${formatDateTime(row.endsAt)}`
+                      : ""} · {venueLabel(row.location)}
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => open(row)}>
                     Edit
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => onDelete(row)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onDelete(row)}
+                  >
                     Delete
                   </Button>
                 </div>
@@ -202,7 +222,12 @@ export function SessionManager({
 
             <div>
               <Label htmlFor="title">Title</Label>
-              <Input id="title" name="title" defaultValue={current?.title} required />
+              <Input
+                id="title"
+                name="title"
+                defaultValue={current?.title}
+                required
+              />
               {issues.title?.[0] && <FieldError>{issues.title[0]}</FieldError>}
             </div>
 
@@ -246,16 +271,46 @@ export function SessionManager({
             </div>
 
             <div>
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                name="location"
-                placeholder="Room, venue, floor…"
-                defaultValue={current?.location}
-                required
+              <Label>Venue</Label>
+              {/* One of the five rooms, stored as a slug. Free text let "The
+                  Rand", "the rand" and "Geekdom 3rd floor" all coexist, so
+                  sessions could not be grouped by venue or linked to a venue
+                  page. Rows saved before this show an empty picker when their
+                  old value can't be matched — that's deliberate, it makes the
+                  ambiguous ones get chosen rather than guessed. */}
+              <Combobox
+                value={venue}
+                onChange={setVenue}
+                placeholder="Pick a venue"
+                options={VENUE_OPTIONS.map((v) => ({
+                  value: v.slug,
+                  label: v.name,
+                }))}
               />
               {issues.location?.[0] && (
                 <FieldError>{issues.location[0]}</FieldError>
+              )}
+            </div>
+
+            <div>
+              <Label>Part of</Label>
+              {/* Optional. Set it and the session shows on that activation's
+                  page; leave it and the session stands on its own in the
+                  week. */}
+              <Combobox
+                value={activation}
+                onChange={setActivation}
+                placeholder="Stands on its own"
+                options={[
+                  { value: "", label: "Stands on its own" },
+                  ...activationOptions().map((a) => ({
+                    value: a.slug,
+                    label: a.title,
+                  })),
+                ]}
+              />
+              {issues.activation?.[0] && (
+                <FieldError>{issues.activation[0]}</FieldError>
               )}
             </div>
 
@@ -328,7 +383,11 @@ export function SessionManager({
               <Button type="submit" disabled={pending}>
                 {pending ? "Saving…" : "Save"}
               </Button>
-              <Button type="button" variant="ghost" onClick={() => setEditing(null)}>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setEditing(null)}
+              >
                 Cancel
               </Button>
             </div>

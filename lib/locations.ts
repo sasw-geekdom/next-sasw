@@ -259,3 +259,47 @@ export const ROOMS: Room[] = [
     sessions: [{ title: "Startup Bash", kind: "Social" }],
   },
 ];
+
+/**
+ * The rooms as a picker: slug for storage, name for the label.
+ *
+ * A session's venue is stored as a slug, not a display name. Names get
+ * rewritten — Central Library's host line once read "LaunchSA" — and a stored
+ * name would then point at nothing. Slugs already carry the URLs, so they are
+ * the stable key, and a CMS session holding one can link straight to its venue
+ * page without a lookup table.
+ */
+export const VENUE_OPTIONS = ROOMS.map((r) => ({ slug: r.slug, name: r.name }));
+
+export const VENUE_SLUGS = ROOMS.map((r) => r.slug) as [string, ...string[]];
+
+/**
+ * Best guess at a slug for a value stored before the field was constrained.
+ *
+ * Sessions entered while `location` was free text hold things like "The Rand"
+ * or "Geekdom 3rd floor". Matching those back means an admin editing an old row
+ * sees the right venue pre-selected rather than an empty required field.
+ * Returns null when it can't tell — which is the honest answer for "Geekdom
+ * 3rd floor", a room inside The Rand rather than one of these five.
+ */
+/**
+ * A venue slug as a human reads it.
+ *
+ * Session rows hold `location` as a slug now, so every surface that prints one
+ * — a speaker's "on the schedule" list, the admin table — needs the name back.
+ * Falls through to the stored string for rows saved before the picker landed,
+ * which is what they always displayed anyway.
+ */
+export function venueLabel(value: string | null | undefined): string {
+  if (!value) return "";
+  return ROOMS.find((r) => r.slug === value)?.name ?? value;
+}
+
+export function roomSlugFromLegacy(
+  value: string | null | undefined,
+): string | null {
+  if (!value) return null;
+  const v = value.trim().toLowerCase();
+  const hit = ROOMS.find((r) => r.slug === v || r.name.toLowerCase() === v);
+  return hit?.slug ?? null;
+}

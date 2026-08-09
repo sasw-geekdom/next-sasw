@@ -48,8 +48,14 @@ export interface SessionRow {
   description: string;
   startsAt: number;
   endsAt: number | null;
+  /** A room slug from lib/locations. Legacy rows may hold free text. */
   location: string;
   track: string | null;
+  /**
+   * The activation this runs inside, as its page slug — or null for a session
+   * that stands on its own in the week.
+   */
+  activation: string | null;
   participants: ResolvedParticipant[];
   createdAt: number;
 }
@@ -66,6 +72,8 @@ export interface LineupSession {
   startsAt: number;
   location: string;
   track: string | null;
+  /** Activation slug this belongs to, so a speaker's page can link to it. */
+  activation: string | null;
 }
 
 export interface LineupSpeaker extends SpeakerRow {

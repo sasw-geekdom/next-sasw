@@ -38,6 +38,11 @@ function revalidate(entity: CmsEntity) {
   if (entity === "sessions") {
     revalidatePath("/speakers");
     revalidateSpeakerPages();
+    // Sessions render on the activation pages now, and those are ISR'd at
+    // 300s like everything else public. Without this an admin saves a session
+    // and it stays invisible on /schedule/<activation> for five minutes —
+    // the same failure partners and sponsors hit on reorder.
+    revalidateActivationPages();
   }
 }
 
@@ -46,6 +51,12 @@ function revalidate(entity: CmsEntity) {
 // pattern form busts them all. Both spellings are issued because the page
 // lives inside the (site) route group and revalidatePath matches on the route
 // file structure; the one that doesn't match is a no-op.
+function revalidateActivationPages() {
+  revalidatePath("/schedule");
+  revalidatePath("/schedule/[slug]", "page");
+  revalidatePath("/(site)/schedule/[slug]", "page");
+}
+
 function revalidateSpeakerPages() {
   revalidatePath("/speakers/[slug]", "page");
   revalidatePath("/(site)/speakers/[slug]", "page");
@@ -78,14 +89,21 @@ async function saveLogoEntity(
     scale: form.get("scale"),
   });
   if (!parsed.success) {
-    return { ok: false, error: "Check the form.", issues: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: "Check the form.",
+      issues: parsed.error.flatten().fieldErrors,
+    };
   }
 
   let imageUrl: string | null;
   try {
     imageUrl = await nextImageUrl(form, entity);
   } catch (e) {
-    return { ok: false, error: e instanceof ImageError ? e.message : "Upload failed." };
+    return {
+      ok: false,
+      error: e instanceof ImageError ? e.message : "Upload failed.",
+    };
   }
 
   const ref = id
@@ -202,14 +220,21 @@ export async function saveSpeaker(form: FormData): Promise<SaveResult> {
     linkedin: form.get("linkedin"),
   });
   if (!parsed.success) {
-    return { ok: false, error: "Check the form.", issues: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: "Check the form.",
+      issues: parsed.error.flatten().fieldErrors,
+    };
   }
 
   let imageUrl: string | null;
   try {
     imageUrl = await nextImageUrl(form, "speakers");
   } catch (e) {
-    return { ok: false, error: e instanceof ImageError ? e.message : "Upload failed." };
+    return {
+      ok: false,
+      error: e instanceof ImageError ? e.message : "Upload failed.",
+    };
   }
 
   const ref = id
@@ -232,10 +257,7 @@ export async function saveSpeaker(form: FormData): Promise<SaveResult> {
   // Blank means derive from the name. The admin form pre-fills the field with
   // the existing slug, so a rename leaves the URL alone unless the slug was
   // edited too — published links stay published.
-  const slug = uniqueSlug(
-    parsed.data.slug || slugify(parsed.data.name),
-    taken,
-  );
+  const slug = uniqueSlug(parsed.data.slug || slugify(parsed.data.name), taken);
 
   if (id) {
     const snap = await ref.get();
@@ -312,10 +334,15 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
     endsAt: form.get("endsAt") || null,
     location: form.get("location"),
     track: form.get("track") ?? "",
+    activation: form.get("activation") ?? "",
     participants,
   });
   if (!parsed.success) {
-    return { ok: false, error: "Check the form.", issues: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: "Check the form.",
+      issues: parsed.error.flatten().fieldErrors,
+    };
   }
   const data = parsed.data;
 
@@ -326,6 +353,7 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
     endsAt: data.endsAt ?? null,
     location: data.location,
     track: data.track ?? null,
+    activation: data.activation ?? null,
     participants: data.participants,
   };
 

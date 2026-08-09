@@ -66,11 +66,11 @@ export default async function SessionsPage() {
       <SessionsHero />
 
       {/* The week strip lives at components/site/week-strip.tsx and is built
-          and working — it renders all five days including the ones still
-          filling. It is out of the page while it grows filters for the five
-          circuits and for venue, plus add-to-calendar per row. Drop
-          `<WeekStrip />` back in here when that's ready; nothing else has to
-          change. */}
+          and working — all five days including the ones still filling, and
+          now the circuit and venue filters too. Only add-to-calendar per row
+          is still outstanding of the three things it was pulled out to grow.
+          Drop `<WeekStrip />` back in here whenever it should ship; nothing
+          else has to change. */}
 
       {/* Full-bleed rule on the section, not the inner container — the same
           seam the homepage uses between room-flow and the logo wall. Inset to

@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { isSlug } from "@/lib/slug";
+import { VENUE_SLUGS } from "@/lib/locations";
+import { ACTIVATION_SLUGS } from "@/lib/schedule";
 import { TRACK_NAMES } from "@/lib/tracks";
 import {
   DESCRIBES_YOU,
@@ -146,11 +148,7 @@ export const logoEntitySchema = z.object({
   link: url,
   // Display-size multiplier on the wall — bump wide/small wordmarks. Blank or
   // out-of-range falls back to 1 (the optical balancer's default).
-  scale: z.coerce
-    .number()
-    .min(0.5)
-    .max(3)
-    .catch(1),
+  scale: z.coerce.number().min(0.5).max(3).catch(1),
 });
 export type LogoEntityInput = z.infer<typeof logoEntitySchema>;
 
@@ -187,7 +185,21 @@ export const sessionSchema = z.object({
   // ISO strings from <input type="datetime-local">, converted to Date.
   startsAt: z.coerce.date({ message: "Pick a start date and time." }),
   endsAt: z.coerce.date().optional().nullable(),
-  location: z.string().trim().min(2, "Where's it happening?").max(200),
+  // A room slug, not free text. Unconstrained, "The Rand", "the rand" and
+  // "Geekdom 3rd floor" all coexisted, so sessions could be neither grouped by
+  // venue nor linked to a venue page.
+  location: z.enum(VENUE_SLUGS, { message: "Pick a venue." }),
+  /**
+   * The activation this session runs inside, if any.
+   *
+   * Null means it stands on its own in the week. Set means it belongs to a
+   * branded activation and shows on that activation's page.
+   */
+  activation: z
+    .enum(ACTIVATION_SLUGS)
+    .nullable()
+    .optional()
+    .or(z.literal("").transform(() => null)),
   track: z
     .enum(TRACK_NAMES)
     .nullable()

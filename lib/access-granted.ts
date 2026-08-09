@@ -98,6 +98,16 @@ export interface AccessTrack {
 /**
  * Two columns, as the spec lays them out: what runs continuously for five
  * hours, and what runs to a clock.
+ *
+ * **Not currently rendered anywhere.** Pulled off the slug page because the
+ * second column names sessions an organiser will enter in the CMS, and the
+ * page would then list them twice in two formats — once as static copy here,
+ * once through ActivationSessions with a time and a speaker attached.
+ *
+ * Kept rather than deleted because the first column is still true and still
+ * has no better home: a lockpicking village that runs for five hours isn't a
+ * talk and doesn't want a talk's fields. If this comes back, it should be that
+ * column only.
  */
 export const ACCESS_TRACKS: readonly AccessTrack[] = [
   {

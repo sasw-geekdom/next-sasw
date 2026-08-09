@@ -21,9 +21,7 @@ function orderOf(d: FirebaseFirestore.DocumentData): number {
   return typeof d.order === "number" ? d.order : Number.MAX_SAFE_INTEGER;
 }
 
-async function listLogoEntities(
-  collection: string,
-): Promise<LogoEntityRow[]> {
+async function listLogoEntities(collection: string): Promise<LogoEntityRow[]> {
   const snap = await adminDb.collection(collection).get();
   return snap.docs
     .sort(
@@ -53,7 +51,9 @@ export function listSponsors() {
 }
 
 function strings(v: unknown): string[] {
-  return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+  return Array.isArray(v)
+    ? v.filter((x): x is string => typeof x === "string")
+    : [];
 }
 
 export async function listSpeakers(): Promise<SpeakerRow[]> {
@@ -129,6 +129,7 @@ export async function listSessions(): Promise<SessionRow[]> {
       endsAt: toMillis(d.endsAt),
       location: d.location ?? "",
       track: d.track ?? null,
+      activation: d.activation ?? null,
       participants,
       createdAt: toMillis(d.createdAt) ?? 0,
     };

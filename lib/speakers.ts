@@ -68,6 +68,7 @@ export const loadLineup = cache(async (): Promise<LineupSpeaker[]> => {
         startsAt: session.startsAt,
         location: session.location,
         track: session.track,
+        activation: session.activation,
       });
       if (isTrack(session.track)) entry.circuits.add(session.track);
     }
