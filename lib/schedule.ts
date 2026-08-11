@@ -25,6 +25,16 @@ export interface FeaturedSession {
   title: string;
   /** A `Room["slug"]` from lib/locations. */
   room: string;
+  /**
+   * The part of the room this runs in, when the organisers named one.
+   *
+   * The banded activations carry this in their own constants files
+   * (PYSA.venueDetail, ACCESS_GRANTED.venueDetail); this is the same idea for
+   * the type-led heroes. Without it, a brief that says "300 Main — Skylounge +
+   * Rooftop Patio" renders as "300 Main" and the reader arrives at a
+   * twenty-five-storey building with no floor.
+   */
+  venueDetail?: string;
   /** The circuit or strand this runs under. Matches the room's session kind. */
   circuit: TrackName | "Social";
   blurb: string;
@@ -58,6 +68,86 @@ export interface FeaturedSession {
    * isn't found, so editing a title can't break the card.
    */
   titleBreakBefore?: string;
+  /**
+   * The same idea for the hero's `h1`, and a separate field because the two
+   * want different break points.
+   *
+   * The bento card is a narrow cell at a modest size, so it breaks before
+   * "powered by" and the credit gets a line. The hero is display type at up to
+   * 7xl in a `max-w-3xl` column, where that same break leaves a second line too
+   * long to hold and it wraps again mid-credit. Sharing one value made one of
+   * the two wrong wherever it was set.
+   *
+   * `lg` and up only. A narrow column already wraps a long title, and forcing
+   * the split there just adds a stub line.
+   */
+  heroBreakBefore?: string;
+  /**
+   * Long-form content for the activation's own page: the organiser's account
+   * of their own morning, in their words.
+   *
+   * Rendered only when no CMS session points at this activation. The moment an
+   * organiser enters the programme properly — with speakers, and rows the
+   * speaker pages can link back to — that supersedes this, so the page can
+   * never show the same running order twice in two formats. That collision is
+   * exactly what took Access Granted's hardcoded columns off its page.
+   */
+  detail?: {
+    /**
+     * The section's display headline.
+     *
+     * Required, not optional: every other section on this site runs
+     * eyebrow → headline → body, and the first version of this one skipped
+     * straight to prose. With no Oswald anchor the block had nothing to hang
+     * on, and the lede ended up carrying the weight at 24px — body type doing
+     * a display font's job, which is the one place on the site that happens.
+     */
+    headline: string;
+    /**
+     * The standfirst, in the pinned intro column.
+     *
+     * Keep it short — one paragraph, two at the very most. The column has to
+     * stay under the viewport height or the pin has nowhere to go, and the
+     * headline above it already takes a good share of that. Anything longer
+     * belongs in `coda`.
+     */
+    lede: readonly string[];
+    programme?: readonly {
+      /** Pre-formatted, because these aren't all instants — "7:30" is a door
+       *  time and "8:45 – 9:30" is a slot, and inventing a `when` for each
+       *  would put five fake entries into the week's data. */
+      time: string;
+      title: string;
+      body: string;
+      /**
+       * The draw, pulled out of the prose so it can be read rather than
+       * scanned for. Names buried mid-paragraph are names nobody sees.
+       */
+      people?: readonly { name: string; role: string }[];
+      /**
+       * Headline content rather than texture.
+       *
+       * A running order where doors, an announcement and a DJ set carry the
+       * same weight as two conversations with four named guests is a list of
+       * five equal things, and reads as flat as that sounds. This marks which
+       * ones are actually why someone comes.
+       */
+      feature?: boolean;
+    }[];
+    /**
+     * The paragraph the section closes on, full width under the programme.
+     *
+     * Where the "why this matters" goes. It reads better after the running
+     * order than before it — the reader has seen what actually happens by
+     * then — and it keeps the intro column short enough to pin.
+     */
+    coda?: string;
+    /** The line the morning closes on. */
+    kicker?: string;
+    /** How to get in, when that isn't simply "register". */
+    access?: string;
+  };
+
   /**
    * Gives this session its own page at `/schedule/<page>`, for an activation
    * big enough to be a mini-conference inside the week rather than a card in
@@ -301,45 +391,144 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
   {
     slug: "the-creative-futures-brunch",
     page: "the-creative-futures-brunch",
-    title: "The Creative Futures ™ Brunch powered by The Down Market",
+    title: "The Creative Futures™ Brunch powered by The Down Market",
     titleBreakBefore: "powered by",
+    // Keeps the partner's name whole on one line, and pulls the trailing "the"
+    // off the end of the line above — at hero size that word ran out over the
+    // photograph and landed on the left speaker's face.
+    heroBreakBefore: "The Down Market",
     room: "300-main",
-    circuit: "Social",
-    // Per thecreativefutures.com, which is sharper about this than the old
-    // line was. "The creator class" is their own term and their own roster —
-    // "designers, filmmakers, founders, technologists, storytellers, civic
-    // leaders, students, and the people who back them" — and "creativity is
-    // infrastructure, not a job title" is their answer to whether you have to
-    // work a creative job to belong. The previous copy ("the creative side of
-    // the week", "the work in between") named a mood rather than a room, and
-    // read as though it were for designers only, which is the one thing they
-    // go out of their way to deny.
-    //
-    // Deliberately not borrowing "come for the edge, leave with the blueprint"
-    // — that is their December full-day flagship, and this is three hours over
-    // brunch. "Brunch" is left to the title, which already carries it.
+    venueDetail: "Skylounge + Rooftop Patio",
+    circuit: "AI & Applied Innovation",
+    // Condensed from the organisers' own "short version", which runs ~640
+    // characters — every other card on /schedule is 86–161, and dropping
+    // theirs in whole made this one cell four times the height of the rest
+    // and broke the grid. What survives is what their version has that the
+    // previous copy didn't: the floor, the DJ, both conversations by name,
+    // and the fact that it costs nothing extra. The rest is on the page.
     blurb:
-      "One morning for the creator class — designers, filmmakers, founders, and the people who back them. Creativity as infrastructure, not a job title.",
+      "Espresso, brunch and DJ Novasoul on the 25th floor, plus two live conversations with the people building here. Included with your registration.",
+    // Doors 7:30, programme through 11:00, per the organisers. This ran
+    // 9:00–12:00 on the old listing.
     when: {
-      start: "2026-10-01T09:00:00-05:00",
-      end: "2026-10-01T12:00:00-05:00",
+      start: "2026-10-01T07:30:00-05:00",
+      end: "2026-10-01T11:00:00-05:00",
     },
     site: {
       label: "thecreativefutures.com",
       href: "https://www.thecreativefutures.com/",
     },
+    // The organisers' own account of their morning, lightly edited in one
+    // respect only: they write "San Antonio Startup Week" and "SASW", and this
+    // site cannot refer to itself by a name it doesn't use anywhere else, so
+    // those read "Startup + Tech Week" here.
+    detail: {
+      // Their closing line, promoted to lead the section, and cut from three
+      // sentences to two.
+      //
+      // It replaced "Coffee first. Conversations second.", which ranked the
+      // morning's two halves against each other and put the talks in the
+      // lesser slot — with four named guests on the rail below, the headline
+      // would have been arguing with its own section.
+      //
+      // "Stay for the conversations" came out because the full line ran five
+      // lines of Oswald in a 384px column, and that middle beat is the one the
+      // page already demonstrates: nearly everything under this headline is a
+      // conversation. What's left is the arc and the payoff.
+      headline: "Come for the coffee. Leave with something to build.",
+      lede: [
+        "Start Startup + Tech Week twenty-five floors up, espresso pulled fresh, brunch on the table, a DJ easing the morning open, and downtown San Antonio stretched out below.",
+      ],
+      programme: [
+        {
+          time: "7:30",
+          title: "Doors",
+          body: "Pulp Coffee\u2019s mobile espresso experience, brunch service, and DJ Novasoul setting the tone inside and out on the rooftop patio.",
+        },
+        {
+          time: "8:45 \u2013 9:30",
+          title: "The Fifth Degree Live",
+          feature: true,
+          // Full positioning as the organisers wrote it. An earlier pass cut
+          // these to "Co-founder, Rackspace" and "Family office advisor",
+          // which reads as a founder and a money person — it drops that both
+          // of them are hands-on in product design and AI, which is the whole
+          // reason this pairing makes sense on an AI & Applied Innovation
+          // morning.
+          people: [
+            {
+              name: "Dirk Elmendorf",
+              role: "Co-founder, Rackspace · Product design · Engineering · Data + AI",
+            },
+            {
+              name: "Nic McGinnis",
+              role: "Family office advisor · Product design + Data + AI",
+            },
+          ],
+          body: "Will and Nate of The Fifth Degree podcast host a conversation at the intersection of AI, product design and engineering \u2014 and what it takes to build what comes next.",
+        },
+        {
+          time: "9:45 \u2013 10:30",
+          title: "The Down Market Conversation",
+          feature: true,
+          people: [
+            { name: "Daniel Trevino", role: "Maitre" },
+            { name: "Ben Hodge", role: "EEVET" },
+          ],
+          body: "Madison King talks with two builders solving real problems for real places \u2014 Maitre, built to help restaurants open smarter and last longer, and EEVET, built to help venues, artists and promoters book better. Different rooms, same mission: giving creative businesses the information they\u2019ve always deserved.",
+        },
+        {
+          time: "10:30",
+          title: "A special announcement",
+          body: "From The Creative Futures, before the morning closes. You\u2019ll want to be in the room for this one.",
+        },
+        {
+          time: "10:35",
+          title: "The coffeehouse set",
+          body: "DJ Novasoul takes it home. Stay, refill, meet the person next to you. That\u2019s the point.",
+        },
+      ],
+      // Moved out of the intro. It's the argument rather than the invitation,
+      // and it lands harder once the reader has seen the actual morning —
+      // "some of the people building it live here" means more directly under
+      // four names than three screens above them.
+      coda: "The Creative Futures Brunch has been bringing this city\u2019s creative and tech communities to the same table since 2019. This year it opens Thursday morning with a simple idea: creativity and technology aren\u2019t two different industries. They\u2019re one economy \u2014 and some of the people building it live here.",
+      // The one operational thing a reader could get wrong: there is no
+      // separate RSVP, and looking for one is how someone talks themselves
+      // out of turning up.
+      // The third beat of their "Coffee first. Conversations second. Community
+      // all morning." Only the first two were ever in play — one became the
+      // headline, one came out — and this one had fallen off the page
+      // entirely. It's the beat that says the value isn't only the
+      // programming, which the 10:35 entry demonstrates and nothing states.
+      // Last line in the section, in display type, after the coda.
+      kicker: "Community all morning.",
+      access:
+        "No separate RSVP. Access is included with your Startup + Tech Week registration \u2014 register, then check in with your badge to join us on the 25th floor at 300 Main, Skylounge and rooftop patio.",
+    },
     // No logo: the title already carries both brands in full — "The Creative
     // Futures ™ Brunch powered by The Down Market" — so a mark would be the
     // third time the page says who is behind it.
     //
-    // From thecreativefutures.com. Chosen over their table-and-laptops shot
-    // because of where the hero shows a picture: the right of the frame is
-    // the part that survives the mask, and there it is someone making
-    // something rather than the backs of people's heads.
+    // Dirk and Nic, who headline the 8:45 conversation, from the organisers'
+    // own KLPZ set. Chosen over the other frame, a wide room shot in which
+    // both of them are small and most of the picture is the backs of heads.
+    //
+    // Cropped near-portrait (0.93) rather than left as the landscape original,
+    // to match the hero container's own ratio at laptop widths so object-cover
+    // takes nothing off the sides — a landscape crop lost the left man
+    // entirely there.
+    //
+    // He still dissolves on a very wide monitor. Past 2xl the picture reaches
+    // further left and the mask fades across 44% of it, and there simply isn't
+    // enough room to the left of these two in the source to push both clear of
+    // that. A tighter crop was tried and made it worse: it zoomed far enough
+    // in to cut his face at laptop width, which is where most people read
+    // this. This is the better side of that trade, not a free choice.
     hero: {
-      src: "/activations/creative-futures-hero.jpg",
-      width: 1800,
-      height: 1440,
+      src: "/activations/creative-futures-conversation.jpg",
+      width: 1500,
+      height: 1613,
       alt: "",
     },
   },

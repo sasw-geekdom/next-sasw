@@ -17,7 +17,13 @@ const variants: Record<Variant, string> = {
   ghost: "text-foreground hover:bg-muted focus-visible:ring-magenta",
 };
 
-const sizes: Record<Size, string> = {
+/**
+ * Exported so anything that has to build a button-shaped control outside this
+ * file still lands on the same scale. AddToCalendar hardcoded `h-13 px-7
+ * text-lg` — correct on the day it was written, and silently free to drift
+ * from `lg` forever after.
+ */
+export const buttonSizes: Record<Size, string> = {
   sm: "h-9 px-3 text-sm",
   md: "h-11 px-5 text-base",
   lg: "h-13 px-7 text-lg",
@@ -33,13 +39,12 @@ export function buttonClass(
     "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
     "disabled:pointer-events-none disabled:opacity-50",
     variants[variant],
-    sizes[size],
+    buttonSizes[size],
     className,
   );
 }
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
 }
@@ -56,8 +61,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-export interface ButtonLinkProps
-  extends React.ComponentProps<typeof Link> {
+export interface ButtonLinkProps extends React.ComponentProps<typeof Link> {
   variant?: Variant;
   size?: Size;
 }

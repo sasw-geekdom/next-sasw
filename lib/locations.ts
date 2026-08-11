@@ -34,8 +34,9 @@ export interface RoomPlace {
 export interface RoomSession {
   title: string;
   /**
-   * One of the five circuits, or "Social" for the two evening/brunch
-   * activations that sit outside them.
+   * One of the five circuits, or "Social" for Startup Bash, the one evening
+   * activation that sits outside them. The brunch was the other until the
+   * organisers placed it on AI & Applied Innovation.
    *
    * Typed rather than a bare string because a bare string let this drift: The
    * Rand's speed-networking session was tagged "Founders" while the homepage
@@ -215,9 +216,13 @@ export const ROOMS: Room[] = [
       address: "300 N Main Ave",
       postalCode: "78205",
     },
-    host: "Startup + Tech Week · Social",
+    host: "Startup + Tech Week · AI & Applied Innovation",
     desc: "One morning — the creative side of the week, over brunch.",
-    tag: "One morning · social",
+    // 300 Main lights up once, for the brunch, so the room's strand is simply
+    // the activation's. Both said "social" until the organisers placed it on
+    // AI & Applied Innovation; leaving these behind would have put a Social
+    // chip on the room card and an AI chip on the event inside it.
+    tag: "One morning · AI & applied innovation",
     port: "p4",
     tier: "single",
     ascii: `   ___________
@@ -229,7 +234,9 @@ export const ROOMS: Room[] = [
     // "The" is part of the name — they asked for it. This is the short form
     // room-flow prints; the activation's own title in lib/schedule carries the
     // full "The Creative Futures ™ Brunch powered by The Down Market".
-    sessions: [{ title: "The Creative Futures Brunch", kind: "Social" }],
+    sessions: [
+      { title: "The Creative Futures Brunch", kind: "AI & Applied Innovation" },
+    ],
   },
   {
     slug: "legacy-park",

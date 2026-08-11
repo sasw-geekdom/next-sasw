@@ -74,7 +74,15 @@ export async function GET(
       "DESCRIPTION",
       `${session.blurb} Part of San Antonio Startup + Tech Week.`,
     ),
-    line("LOCATION", `${session.venue.name}, Downtown San Antonio, TX`),
+    // Includes the floor or room where the organisers named one — this is the
+    // line a phone shows on the lock screen when the reminder fires, and
+    // "300 Main" alone is a twenty-five-storey building.
+    line(
+      "LOCATION",
+      session.venueDetail
+        ? `${session.venue.name}, ${session.venueDetail}, Downtown San Antonio, TX`
+        : `${session.venue.name}, Downtown San Antonio, TX`,
+    ),
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");

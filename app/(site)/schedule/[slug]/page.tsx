@@ -15,6 +15,7 @@ import {
 } from "@/components/site/session-bento";
 import { ButtonLink } from "@/components/ui/button";
 import { ARROW_MOTION } from "@/lib/motion";
+import { ActivationDetail } from "@/components/site/activation-detail";
 import { ActivationSessions } from "@/components/site/activation-sessions";
 import { listPartners, listSessions } from "@/lib/admin/cms-queries";
 import type { SessionRow } from "@/lib/admin/cms-types";
@@ -116,6 +117,19 @@ export async function generateMetadata({
 }
 
 /**
+ * The hero title, split at `heroBreakBefore` — or whole, when there's no break
+ * or the substring isn't found. Editing a title can't break the page.
+ */
+function heroTitleParts(session: ResolvedSession): [string] | [string, string] {
+  const at = session.heroBreakBefore;
+  if (!at) return [session.title];
+  const i = session.title.indexOf(at);
+  // A break at position 0 would leave an empty first line.
+  if (i <= 0) return [session.title];
+  return [session.title.slice(0, i).trimEnd(), session.title.slice(i)];
+}
+
+/**
  * An activation's own page.
  *
  * PySanAntonio gets the band as its masthead — it already carries the
@@ -151,6 +165,7 @@ function ActivationPage({
    * returns by itself the moment a second session lands there.
    */
   const hasMoreAtVenue = session.venue.sessions.length > 1;
+  const heroTitle = heroTitleParts(session);
   return (
     <main>
       {/* Event rich results for this activation, tied to the week through
@@ -204,8 +219,17 @@ function ActivationPage({
         (() => {
           const actions = session.when && (
             <>
+              {/* Full width below sm. These already wrap to two rows on a
+                  390px phone — 178px and 238px inside a 342px container — so
+                  stacking isn't the change; matching their widths is. Ragged
+                  right edges on two stacked buttons read as a mistake, and the
+                  tap targets get bigger for free. */}
               <div className="flex flex-wrap items-center gap-3">
-                <ButtonLink href="/register" size="lg">
+                <ButtonLink
+                  href="/register"
+                  size="lg"
+                  className="w-full sm:w-auto"
+                >
                   Get on the list.
                 </ButtonLink>
                 <AddToCalendar
@@ -286,18 +310,30 @@ function ActivationPage({
                   alt=""
                   fill
                   sizes="54vw"
-                  // No `priority`, despite Next logging this as the LCP and
-                  // asking for eager loading. `priority` emits a preload link,
-                  // and a preload ignores the `hidden lg:block` wrapper — a
-                  // 390px phone then downloads 217KB of a photograph it never
-                  // renders. Measured both ways: without it, phones and
-                  // tablets don't request the file at all. A slightly later
-                  // LCP on desktop is the cheaper side of that trade.
+                  // Neither `priority` nor `loading="eager"`, which is why Next
+                  // logs this as the LCP and asks for one on every build.
+                  //
+                  // Both defeat the `hidden lg:block` wrapper: a hidden image
+                  // is only skipped because the default is lazy, so anything
+                  // that turns lazy off makes phones fetch a picture they never
+                  // render. Re-measured on this photograph — 390px phone and
+                  // 820px tablet request nothing at all as it stands; with
+                  // `loading="eager"` the phone pulls 30KB. (An earlier note
+                  // here claimed 217KB. That was wrong: `sizes="54vw"` means a
+                  // narrow viewport picks a narrow variant, so the waste is far
+                  // smaller than recorded — it just isn't zero.)
+                  //
+                  // So this is a live trade, not a closed one. 30KB of unused
+                  // mobile transfer per activation page buys a real desktop LCP
+                  // improvement, and if that's the call, `loading="eager"` is
+                  // the one to add — `priority` also emits a preload link and
+                  // costs more.
+                  //
                   // The wider the screen, the more `cover` has to crop off the
                   // vertical — 470px of a 1200px frame on a 2560px monitor.
-                  // Centred, that takes half off the top, which on this
-                  // photograph is where the faces are. Anchoring high spends
-                  // the crop on the carpet instead.
+                  // Centred, that takes half off the top, which on these
+                  // photographs is where the faces are. Anchoring high spends
+                  // the crop on the floor instead.
                   className="object-cover object-[center_15%]"
                   style={{ maskImage: HERO_MASK, WebkitMaskImage: HERO_MASK }}
                 />
@@ -357,7 +393,20 @@ function ActivationPage({
                 </>
               ) : (
                 <h1 className="mt-4 font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl xl:text-7xl">
-                  {session.title}
+                  {/* `lg:block` on a span rather than a `<br>`: a break element
+                      is unconditional, and below lg this has to fall back to
+                      wrapping wherever the narrow column runs out. Going block
+                      only at lg gives the tail its own line on desktop and
+                      leaves the phone alone. The h1's text content is
+                      unchanged either way, so the outline and anything reading
+                      the page still see one clean string. */}
+                  {heroTitle[0]}
+                  {heroTitle[1] && (
+                    <>
+                      {" "}
+                      <span className="lg:block">{heroTitle[1]}</span>
+                    </>
+                  )}
                 </h1>
               )}
               <p className="mt-6 max-w-xl text-pretty text-lg text-white/60">
@@ -393,12 +442,20 @@ function ActivationPage({
                         aria-hidden="true"
                       />
                       <dt className="sr-only">Location</dt>
-                      <dd>{session.venue.name}</dd>
+                      <dd>
+                        {session.venue.name}
+                        {session.venueDetail ? `, ${session.venueDetail}` : ""}
+                      </dd>
                     </div>
                   </dl>
 
+                  {/* Full width below sm — see the note on the banded row. */}
                   <div className="mt-8 flex flex-wrap items-center gap-3">
-                    <ButtonLink href="/register" size="lg">
+                    <ButtonLink
+                      href="/register"
+                      size="lg"
+                      className="w-full sm:w-auto"
+                    >
                       Get on the list.
                     </ButtonLink>
                     <AddToCalendar
@@ -406,7 +463,9 @@ function ActivationPage({
                       event={{
                         title: session.title,
                         details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
-                        location: `${session.venue.name}, Downtown San Antonio`,
+                        location: session.venueDetail
+                          ? `${session.venue.name}, ${session.venueDetail}, Downtown San Antonio`
+                          : `${session.venue.name}, Downtown San Antonio`,
                         start: session.when.start,
                         end: session.when.end,
                       }}
@@ -469,8 +528,15 @@ function ActivationPage({
         </section>
       )}
 
-      {/* The programme, when an organiser has entered one. */}
-      <ActivationSessions sessions={sessions} />
+      {/* One programme or the other, never both. CMS rows win when they exist:
+          they carry speakers, they link back from the speaker pages, and an
+          organiser can change them without a deploy. The prose version is what
+          an organiser sent over before any of that was entered. */}
+      {sessions.length > 0 ? (
+        <ActivationSessions sessions={sessions} />
+      ) : (
+        <ActivationDetail detail={session.detail} />
+      )}
 
       {/* Only while the slot is open, and only while nothing real has landed —
           a promise of times is worth printing until there are times and

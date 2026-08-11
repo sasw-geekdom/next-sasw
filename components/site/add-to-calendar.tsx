@@ -7,6 +7,7 @@ import {
   outlookCalendarUrl,
   type CalendarEvent,
 } from "@/lib/calendar";
+import { buttonSizes } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // The same four destinations the branded emails already offer, in a menu
@@ -28,15 +29,24 @@ import { cn } from "@/lib/utils";
 // closes on Escape and on outside click.
 
 /** Four items plus padding — enough to decide which way to open. */
-const MENU_HEIGHT = 180;
+const MENU_HEIGHT = 140;
 
 export function AddToCalendar({
   event,
   icsHref,
+  size = "lg",
 }: {
   event: CalendarEvent;
   /** This session's `.ics` route. */
   icsHref: string;
+  /**
+   * Matches the register button beside it by default.
+   *
+   * Routed through the shared scale rather than the hardcoded `h-13 px-7
+   * text-lg` this used to carry — same rendered size, but it can no longer
+   * drift from `lg` without anyone noticing.
+   */
+  size?: "md" | "lg";
 }) {
   const [open, setOpen] = React.useState(false);
   const [up, setUp] = React.useState(false);
@@ -75,23 +85,39 @@ export function AddToCalendar({
     };
   }, [open]);
 
+  // Four one-word destinations don't need a full-size menu. Tighter than the
+  // site's `text-sm` body default on purpose — this is a picker, and its rows
+  // are labels rather than anything anyone reads. Still 13px, so it stays
+  // comfortably above the mono captions elsewhere on the page.
+  // Centred below sm, left-aligned from sm up. The panel is full width there
+  // and sits under a trigger whose own label is centred, so left-aligned rows
+  // read as hanging off the edge of a wide box. On desktop the panel is 160px
+  // and left alignment is what makes four items scan as a list.
   const item =
-    "block px-4 py-2.5 text-sm text-white transition-colors duration-150 hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none";
+    "block px-3 py-1.5 text-center text-[13px] text-white transition-colors duration-150 hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none sm:text-left";
 
   return (
-    <div ref={root} className="relative">
+    <div ref={root} className="relative w-full sm:w-auto">
       <button
         type="button"
         onClick={toggle}
         aria-expanded={open}
         aria-controls="add-to-calendar-options"
-        className="group inline-flex h-13 items-center justify-center gap-2 rounded-md bg-white/10 px-7 text-lg font-medium text-white transition-colors duration-200 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+        className={cn(
+          "group inline-flex w-full items-center justify-center gap-2 rounded-md bg-white/10 font-medium text-white transition-colors duration-200 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:w-auto",
+          buttonSizes[size],
+        )}
       >
-        <CalendarPlus className="h-4 w-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+        <CalendarPlus
+          className={cn("shrink-0", size === "lg" ? "h-4 w-4" : "h-3.5 w-3.5")}
+          strokeWidth={2.5}
+          aria-hidden="true"
+        />
         Add to calendar
         <ChevronDown
           className={cn(
-            "h-4 w-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none",
+            "shrink-0 transition-transform duration-200 motion-reduce:transition-none",
+            size === "lg" ? "h-4 w-4" : "h-3.5 w-3.5",
             open && "rotate-180",
           )}
           strokeWidth={2.5}
@@ -103,7 +129,15 @@ export function AddToCalendar({
         <div
           id="add-to-calendar-options"
           className={cn(
-            "absolute left-0 z-20 w-56 overflow-hidden rounded-md border border-white/15 bg-black py-1 shadow-lg",
+            // Right-aligned, so the panel hangs under the chevron that opens
+            // it. Anchored left it opened from the far end of a 238px button,
+            // which puts the thing you just clicked and the thing that appears
+            // at opposite ends of the control.
+            //
+            // Full width below sm, where the trigger is too and centres its
+            // label — there is no right-hand chevron to hang under, so the
+            // panel matches the button instead.
+            "absolute right-0 z-20 w-full overflow-hidden rounded-md border border-white/15 bg-black py-1 shadow-lg sm:w-40",
             up ? "bottom-full mb-2" : "top-full mt-2",
           )}
         >
