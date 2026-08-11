@@ -185,9 +185,22 @@ function Row({ item, last }: { item: Item; last: boolean }) {
         {item.time}
       </p>
 
+      {/* The show name above the session title, not concatenated into it.
+          "The Fifth Degree Live · The Collision: AI, Design, and What Gets
+          Built Next" is too long to scan as one heading, and the two facts
+          aren't equal — the title is what this hour is about, the series is
+          who's running it. Kept out of the h3 so the heading text stays the
+          session, which is what an outline and a share card should carry. */}
+      {item.series && (
+        <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-white/45">
+          {item.series}
+        </p>
+      )}
+
       <h3
         className={cn(
-          "mt-2 text-pretty font-display font-bold uppercase leading-[1.05] tracking-tight text-white",
+          "text-pretty font-display font-bold uppercase leading-[1.05] tracking-tight text-white",
+          item.series ? "mt-1.5" : "mt-2",
           feature ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl",
         )}
       >

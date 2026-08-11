@@ -117,6 +117,16 @@ export interface FeaturedSession {
        *  time and "8:45 – 9:30" is a slot, and inventing a `when` for each
        *  would put five fake entries into the week's data. */
       time: string;
+      /**
+       * The recurring format this sits inside, when it has one — "The Fifth
+       * Degree Live", "The Down Market Conversation".
+       *
+       * Separate from `title` because the organisers' second pass gave every
+       * slot a session title of its own and kept the show name alongside it.
+       * Concatenating the two makes a heading too long to scan; the show name
+       * is the smaller fact, so it rides above as a label.
+       */
+      series?: string;
       title: string;
       body: string;
       /**
@@ -408,12 +418,17 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // and the fact that it costs nothing extra. The rest is on the page.
     blurb:
       "Espresso, brunch and DJ Novasoul on the 25th floor, plus two live conversations with the people building here. Included with your registration.",
-    // Doors 7:30, programme through 11:00, per the organisers. This ran
-    // 9:00–12:00 on the old listing.
+    // Doors 7:30. The organisers' first brief said "programme through 11:00",
+    // but their revised running order ends the coffeehouse set at 11:30 — so
+    // the event runs to 11:30 here. Leaving 11:00 would have put a hero that
+    // says the morning ends at 11:00 directly above a programme row that runs
+    // to 11:30, and shipped an .ics that clears an attendee's calendar while
+    // the DJ is still playing. Worth confirming with them.
     when: {
       start: "2026-10-01T07:30:00-05:00",
-      end: "2026-10-01T11:00:00-05:00",
+      end: "2026-10-01T11:30:00-05:00",
     },
+
     site: {
       label: "thecreativefutures.com",
       href: "https://www.thecreativefutures.com/",
@@ -442,12 +457,13 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       programme: [
         {
           time: "7:30",
-          title: "Doors",
-          body: "Pulp Coffee\u2019s mobile espresso experience, brunch service, and DJ Novasoul setting the tone inside and out on the rooftop patio.",
+          title: "The Wake-Up \u2014 coffee, sound, skyline",
+          body: "Doors. Pulp Coffee\u2019s mobile espresso experience, brunch service, and DJ Novasoul setting the tone inside and out on the rooftop.",
         },
         {
           time: "8:45 \u2013 9:30",
-          title: "The Fifth Degree Live",
+          series: "The Fifth Degree Live",
+          title: "The Collision: AI, Design, and What Gets Built Next",
           feature: true,
           // Full positioning as the organisers wrote it. An earlier pass cut
           // these to "Co-founder, Rackspace" and "Family office advisor",
@@ -469,22 +485,23 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         },
         {
           time: "9:45 \u2013 10:30",
-          title: "The Down Market Conversation",
+          series: "The Down Market Conversation",
+          title: "Keep the Doors Open: Tech for the Places Culture Lives",
           feature: true,
           people: [
-            { name: "Daniel Trevino", role: "Maitre" },
+            { name: "Daniel Trevino", role: "Box Street Social \u00b7 Maitre" },
             { name: "Ben Hodge", role: "EEVET" },
           ],
           body: "Madison King talks with two builders solving real problems for real places \u2014 Maitre, built to help restaurants open smarter and last longer, and EEVET, built to help venues, artists and promoters book better. Different rooms, same mission: giving creative businesses the information they\u2019ve always deserved.",
         },
         {
           time: "10:30",
-          title: "A special announcement",
+          title: "The Reveal",
           body: "From The Creative Futures, before the morning closes. You\u2019ll want to be in the room for this one.",
         },
         {
-          time: "10:35",
-          title: "The coffeehouse set",
+          time: "10:35 \u2013 11:30",
+          title: "The Coffeehouse Set",
           body: "DJ Novasoul takes it home. Stay, refill, meet the person next to you. That\u2019s the point.",
         },
       ],
@@ -526,9 +543,9 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // in to cut his face at laptop width, which is where most people read
     // this. This is the better side of that trade, not a free choice.
     hero: {
-      src: "/activations/creative-futures-conversation.jpg",
+      src: "/activations/creative-futures-crew.jpg",
       width: 1500,
-      height: 1613,
+      height: 1079,
       alt: "",
     },
   },
