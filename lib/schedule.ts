@@ -67,6 +67,16 @@ export interface FeaturedSession {
    * logo's alt text and the screen-reader heading. Ignored if the substring
    * isn't found, so editing a title can't break the card.
    */
+  /**
+   * A short name for lists that can't take the full one — filter chips, the
+   * admin's activation picker.
+   *
+   * "The Creative Futures™ Brunch powered by The Down Market" is 54 characters
+   * and carries two brands; as a chip beside "Access Granted" it swamped the
+   * row. Omit it and `title` is used, which is right for everything else on
+   * the schedule.
+   */
+  shortTitle?: string;
   titleBreakBefore?: string;
   /**
    * The same idea for the hero's `h1`, and a separate field because the two
@@ -407,6 +417,8 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // off the end of the line above — at hero size that word ran out over the
     // photograph and landed on the left speaker's face.
     heroBreakBefore: "The Down Market",
+    // The name locations.ts already prints in room-flow, so the two agree.
+    shortTitle: "The Creative Futures Brunch",
     room: "300-main",
     venueDetail: "Skylounge + Rooftop Patio",
     circuit: "AI & Applied Innovation",
@@ -780,10 +792,11 @@ export function activationTitle(
   return allSessions().find((s) => s.page === slug)?.title ?? null;
 }
 
+/** Slug and display name for every activation with a page, short name first. */
 export function activationOptions(): { slug: string; title: string }[] {
   return allSessions()
     .filter((s) => s.page)
-    .map((s) => ({ slug: s.page as string, title: s.title }));
+    .map((s) => ({ slug: s.page as string, title: s.shortTitle ?? s.title }));
 }
 
 export const ACTIVATION_SLUGS = allSessions()

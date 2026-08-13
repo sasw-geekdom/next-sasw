@@ -3,6 +3,8 @@ import { ButtonLink } from "@/components/ui/button";
 import { SpeakerWall } from "@/components/site/speaker-wall";
 import { SpeakersHero } from "@/components/site/speakers-hero";
 import { loadLineup, SPEAKERS_ANNOUNCED } from "@/lib/speakers";
+import { activationOptions } from "@/lib/schedule";
+import { VENUE_OPTIONS } from "@/lib/locations";
 
 // Speakers and sessions both come from the CMS; admin saves bust this path
 // directly, so the window is the ceiling rather than the usual wait.
@@ -35,10 +37,12 @@ export default async function SpeakersPage() {
   // already says the right thing — while the hero keeps the page from being
   // a blank screen. Flip SPEAKERS_ANNOUNCED to bring the wall back.
   //
-  // TODO(launch): this does NOT hide /speakers/[slug]. Those pages still
-  // prerender from the same data and still appear in the sitemap, so an
-  // unannounced speaker's page is reachable by URL and indexable. Gate the
-  // route and drop the sitemap entries if the names need to stay private.
+  // Note: this does NOT hide /speakers/[slug]. Those pages prerender from the
+  // same data and appear in the sitemap regardless — fine now that the lineup
+  // is announced and this page links to every one of them, but it means
+  // flipping SPEAKERS_ANNOUNCED back to false would leave six orphaned,
+  // indexable pages behind. Gate the route and drop the sitemap entries if
+  // that ever has to happen.
   const hasLineup = SPEAKERS_ANNOUNCED && lineup.length > 0;
 
   return (
@@ -59,18 +63,41 @@ export default async function SpeakersPage() {
                 <p className="font-mono text-xs uppercase tracking-widest text-magenta">
                   Confirmed
                 </p>
+                {/* The counterpart to /schedule's "Coming online, room by
+                    room." — the two index pages now rhyme, and "online" is
+                    already the site's word for a thing that has gone from
+                    planned to published.
+    
+                    Not "First names up.", which the hero says now, and not
+                    "These are speaking.", which was accurate but stepped out
+                    of the electrical vocabulary every other headline here
+                    keeps: current, grid, charge, locked, online. */}
                 <h2 className="mt-3 font-display text-4xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-5xl">
-                  First names up.
+                  Already online.
                 </h2>
                 <p className="mt-4 max-w-xl text-pretty text-white/60">
-                  More go live as they&rsquo;re locked. These are speaking.
+                  More land as they&rsquo;re locked.
                 </p>
               </div>
 
               {/* No wrapper margin — the wall's filter row and grid each
                   carry their own `mt-12`, and stacking another on top of it
                   would double the gap. */}
-              <SpeakerWall speakers={lineup} />
+              {/* Options come from the schedule, not from the lineup — the
+                  wall then narrows them to what its speakers actually cover,
+                  so the labels stay the site's own names for these things
+                  rather than whatever a CMS row happens to hold. */}
+              <SpeakerWall
+                speakers={lineup}
+                activations={activationOptions().map((a) => ({
+                  value: a.slug,
+                  label: a.title,
+                }))}
+                venues={VENUE_OPTIONS.map((v) => ({
+                  value: v.slug,
+                  label: v.name,
+                }))}
+              />
             </>
           ) : (
             <div>

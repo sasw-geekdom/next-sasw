@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { SpeakerCard } from "@/components/site/speaker-card";
+import { SpeakerRoster } from "@/components/site/speaker-roster";
 import { ButtonLink } from "@/components/ui/button";
 import { ARROW_MOTION } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -65,7 +66,17 @@ export function SpeakerLineup({
           </ButtonLink>
         </div>
 
-        <div className="mt-14 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:mt-16 lg:grid-cols-6">
+        {/* lg and up: the roster — an index of names beside one large
+            portrait that follows whichever is active. Six faces in one row
+            came out at 189px each, too small to recognise, which is the only
+            job this section has. See speaker-roster.tsx.
+
+            Below lg the grid stays exactly as it was. That's also what keeps
+            the roster's auto-advance honest: it never has to work on a device
+            without hover. */}
+        <SpeakerRoster speakers={speakers} />
+
+        <div className="mt-14 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:hidden">
           {speakers.map((s, i) => (
             <motion.div
               key={s.id}
@@ -78,14 +89,10 @@ export function SpeakerLineup({
                 ease: [0.22, 1, 0.36, 1],
               }}
             >
-              <SpeakerCard
-                speaker={s}
-                sizes="(min-width: 1024px) 16vw, (min-width: 640px) 30vw, 45vw"
-              />
+              <SpeakerCard speaker={s} sizes="(min-width: 640px) 30vw, 45vw" />
             </motion.div>
           ))}
         </div>
-
       </div>
     </section>
   );

@@ -78,6 +78,16 @@ export interface LineupSession {
 
 export interface LineupSpeaker extends SpeakerRow {
   circuits: TrackName[];
+  /**
+   * Activation slugs this speaker appears in, and venue slugs they appear at.
+   *
+   * Derived from their sessions exactly as `circuits` is — no speaker is ever
+   * tagged with a room or an event by hand. That keeps a speaker's filters
+   * true by construction: move a session to another venue in the CMS and the
+   * speaker moves with it.
+   */
+  activations: string[];
+  venues: string[];
   sessions: LineupSession[];
 }
 
