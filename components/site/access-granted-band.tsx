@@ -221,8 +221,8 @@ export function AccessGrantedBand({
 
           {/* Sized against the copy, not the row. At 26rem the render stood
               629px tall next to a 444px block of text — 1.42x it — and read as
-              the subject with the copy as a caption. 22rem brings it roughly
-              level with the taller of the two arrangements. */}
+              the subject with the copy as a caption. `w-88` — 22rem — brings
+              it roughly level with the taller of the two arrangements. */}
           {/*
             Three layers, so the render sits *in* something rather than on it.
 
@@ -257,10 +257,10 @@ export function AccessGrantedBand({
             in the same space rather than marooned. Its right edge lands on the
             container's content edge, under the navbar's links.
           */}
-          <div className="relative order-4 mx-auto my-10 w-40 sm:w-48 lg:order-none lg:mr-0 lg:ml-auto lg:my-0 lg:w-72 xl:w-[22rem]">
+          <div className="relative order-4 mx-auto my-10 w-40 sm:w-48 lg:order-0 lg:mr-0 lg:ml-auto lg:my-0 lg:w-72 xl:w-88">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -inset-y-[45%] -left-[150%] -right-[45%]"
+              className="pointer-events-none absolute inset-y-[-45%] left-[-150%] right-[-45%]"
               style={{
                 backgroundImage: `linear-gradient(${GRID_LINE} 1px, transparent 1px), linear-gradient(90deg, ${GRID_LINE} 1px, transparent 1px)`,
                 backgroundSize: "34px 34px",
@@ -270,7 +270,7 @@ export function AccessGrantedBand({
             />
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -inset-y-[28%] -left-[110%] -right-[28%] blur-[70px]"
+              className="pointer-events-none absolute inset-y-[-28%] left-[-110%] right-[-28%] blur-[70px]"
               style={{
                 background: `radial-gradient(ellipse 52% 62% at 70% 58%, ${ACCESS_GREEN}4d 0%, transparent 68%)`,
               }}
