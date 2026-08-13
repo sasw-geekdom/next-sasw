@@ -9,7 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
 import { Drawer } from "@/components/ui/drawer";
 import { StatusBadge } from "@/components/admin/status-badge";
-import { updateSubmissionStatus, promoteToSpeaker } from "@/lib/admin/actions";
+import {
+  updateSubmissionStatus,
+  promoteToSpeaker,
+  deleteSpeakerSubmission,
+} from "@/lib/admin/actions";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { toCsv } from "@/lib/admin/csv";
 import { TRACK_NAMES } from "@/lib/tracks";
@@ -84,6 +88,23 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
     URL.revokeObjectURL(url);
   }
 
+  // Two-step, the same as the registrations table: the first click arms it,
+  // the second commits. A pitch is somebody's work, so the destructive action
+  // shouldn't be reachable by one stray click.
+  const [confirmDelete, setConfirmDelete] = React.useState(false);
+
+  function remove(id: string) {
+    const previous = items;
+    setItems((prev) => prev.filter((r) => r.id !== id)); // optimistic
+    setSelected(null);
+    setConfirmDelete(false);
+    startTransition(async () => {
+      const res = await deleteSpeakerSubmission(id);
+      if (!res.ok) setItems(previous); // revert on failure
+      router.refresh();
+    });
+  }
+
   function changeStatus(id: string, status: SubmissionStatus) {
     const previous = items;
     // Optimistic update.
@@ -153,7 +174,10 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-muted-foreground">
+                <td
+                  colSpan={4}
+                  className="px-4 py-10 text-center text-muted-foreground"
+                >
                   No submissions yet.
                 </td>
               </tr>
@@ -166,7 +190,9 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
                 >
                   <td className="px-4 py-3">
                     <div className="font-medium">{r.name}</div>
-                    <div className="text-xs text-muted-foreground">{r.email}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {r.email}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <div>{r.sessionTitle}</div>
@@ -187,7 +213,10 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
 
       <Drawer
         open={selected !== null}
-        onClose={() => setSelected(null)}
+        onClose={() => {
+          setSelected(null);
+          setConfirmDelete(false);
+        }}
         title={selected?.name}
       >
         {selected && (
@@ -269,14 +298,67 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
             <Detail label="Session title" value={selected.sessionTitle} />
             <Detail label="Abstract" value={selected.abstract} multiline />
             <Detail label="Bio" value={selected.bio} multiline />
-            {selected.company && <Detail label="Company" value={selected.company} />}
+            {selected.company && (
+              <Detail label="Company" value={selected.company} />
+            )}
             <Detail label="Email" value={selected.email} />
-            {selected.website && <DetailLink label="Website" href={selected.website} />}
-            {selected.linkedin && <DetailLink label="LinkedIn" href={selected.linkedin} />}
+            {selected.website && (
+              <DetailLink label="Website" href={selected.website} />
+            )}
+            {selected.linkedin && (
+              <DetailLink label="LinkedIn" href={selected.linkedin} />
+            )}
             {selected.availability && (
               <Detail label="Availability" value={selected.availability} />
             )}
-            <Detail label="Submitted" value={formatDateTime(selected.createdAt)} />
+            <Detail
+              label="Submitted"
+              value={formatDateTime(selected.createdAt)}
+            />
+
+            {/* Last, and set apart. Everything above this line is reading a
+                pitch or acting on it; this is the one control that destroys
+                it, so it sits under a rule at the foot rather than beside the
+                status picker where a mis-click lives. */}
+            <div className="mt-1 border-t border-border pt-5">
+              {confirmDelete ? (
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-sm text-muted-foreground">
+                    Delete this pitch permanently?
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => remove(selected.id)}
+                    disabled={pending}
+                    className="text-sm font-medium text-red-600 hover:underline disabled:opacity-50"
+                  >
+                    {pending ? "Deleting…" : "Delete"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(false)}
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-xs text-muted-foreground">
+                    {selected.promotedSpeakerId
+                      ? "Removes the pitch and its headshot. The speaker profile it created stays."
+                      : "Removes the pitch and its headshot. Can't be undone."}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(true)}
+                    className="shrink-0 text-sm font-medium text-red-600 hover:underline"
+                  >
+                    Delete pitch
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </Drawer>
@@ -298,7 +380,11 @@ function Detail({
       <div className="text-xs uppercase tracking-wide text-muted-foreground">
         {label}
       </div>
-      <div className={multiline ? "mt-1 whitespace-pre-wrap text-sm" : "mt-1 text-sm"}>
+      <div
+        className={
+          multiline ? "mt-1 whitespace-pre-wrap text-sm" : "mt-1 text-sm"
+        }
+      >
         {value}
       </div>
     </div>

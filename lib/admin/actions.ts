@@ -5,6 +5,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/admin";
 import { COLLECTIONS } from "@/lib/firebase/collections";
 import { requireAdmin } from "@/lib/auth/session";
+import { deleteImage } from "@/lib/admin/blob";
 import { SUBMISSION_STATUSES, type SubmissionStatus } from "@/lib/admin/types";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
@@ -97,9 +98,10 @@ export async function checkIn(id: string): Promise<ActionResult> {
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error && e.message === "not-found"
-        ? "Registration not found."
-        : "Check-in failed.",
+      error:
+        e instanceof Error && e.message === "not-found"
+          ? "Registration not found."
+          : "Check-in failed.",
     };
   }
 
@@ -117,6 +119,39 @@ export async function deleteRegistration(id: string): Promise<ActionResult> {
 
   revalidatePath("/admin/registrations");
   revalidatePath("/admin/checkin");
+  return { ok: true };
+}
+
+/**
+ * Permanently delete a session pitch (test-data cleanup).
+ *
+ * Unlike the other two deletes, this one has a file attached. A pitch's
+ * headshot lives in Vercel Blob, which is not garbage-collected — deleting
+ * only the document would strand the image and keep paying for it forever,
+ * and the document is the sole record of its URL. So the blob goes first.
+ *
+ * `deleteImage` is best-effort and never throws, so a blob that has already
+ * gone doesn't block removing the row.
+ *
+ * Deliberately does NOT touch a speaker promoted from this pitch. Once
+ * someone is in the lineup they are their own record, edited independently,
+ * and deleting a test pitch should not quietly remove a public profile. Clear
+ * those from Content → Speakers.
+ */
+export async function deleteSpeakerSubmission(
+  id: string,
+): Promise<ActionResult> {
+  await requireAdmin();
+  if (!id) return { ok: false, error: "Missing submission." };
+
+  const ref = adminDb.collection(COLLECTIONS.speakerSubmissions).doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) return { ok: false, error: "Already gone." };
+
+  await deleteImage(snap.get("headshotUrl"));
+  await ref.delete();
+
+  revalidatePath("/admin/speakers");
   return { ok: true };
 }
 
