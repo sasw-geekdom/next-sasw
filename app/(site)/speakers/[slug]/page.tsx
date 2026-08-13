@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { BackLink } from "@/components/site/back-link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { LinkedInMark } from "@/components/site/linkedin-mark";
@@ -96,7 +97,16 @@ export default async function SpeakerPage({
         {/* The label lifts a step in brightness; the arrow is the only thing
             that takes colour. Charge lands on the moving part, not the whole
             control — the page has one loud element and it's the portrait. */}
-        <Link
+        {/* BackLink, not a plain Link to /speakers. A forward navigation
+            pushes a new history entry, so the wall reopens at the top — which
+            for anyone who clicked a face from halfway down the grid means
+            losing their place and scrolling back through everyone. Going back
+            through the router lets the browser restore the scroll position it
+            already holds against that entry. Falls back to the href for
+            someone who arrived from a shared link with no in-app history
+            behind them. The schedule slug pages have used this since they
+            were built; this one was missed. */}
+        <BackLink
           href="/speakers"
           className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:outline-none focus-visible:text-white/70"
         >
@@ -109,7 +119,7 @@ export default async function SpeakerPage({
             aria-hidden="true"
           />
           The lineup
-        </Link>
+        </BackLink>
 
         <article className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-16">
           {/* Grayscale here too, not just on the wall — a portrait that stays
