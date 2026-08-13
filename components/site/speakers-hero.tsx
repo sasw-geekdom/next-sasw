@@ -6,22 +6,44 @@ import { CIRCUIT_COLORS } from "@/lib/tracks";
 // on the grid.
 //
 // Two circuits swept across the bolt rather than blended into one, the same
-// mechanism the homepage uses for all five. Blending these two produced
-// #da64ab, which sat close enough to brand magenta that the page didn't
-// announce itself as somewhere new — the whole point of giving it a charge of
-// its own. Kept apart, the purple and the coral both stay legible.
+// mechanism the homepage uses for all five.
+//
+// Blue into coral. Blue because that is what the lineup is — the confirmed
+// names are almost entirely cyber, AI and dev, and this hero previously rested
+// on Small Business & Solopreneur, one of the two circuits the lineup
+// represents least.
+//
+// Coral rather than the obvious AI teal, for two reasons. Tech x AI is exactly
+// /schedule's charge, so a blue-to-teal sweep would pass through the other
+// page's colour halfway across. And measured across all ten circuit pairs,
+// blue-to-coral has the widest spread of any — ΔE 113 end to end — so the
+// sweep actually reads as a sweep.
+//
+// Blend is #a673ab, ΔE 52 from brand magenta, which clears the test the old
+// pair was chosen to pass and that it scored worst on: purple x coral blends
+// to ΔE 27, the closest to magenta of any pair on the wheel.
+//
+// If the lineup broadens toward founders and capital this goes stale. The
+// version that cannot go stale reads the circuits the lineup actually covers
+// and sweeps those — impossible until sessions exist, since a speaker's
+// circuits are derived from them.
 const SPEAKERS_SWEEP = [
-  CIRCUIT_COLORS["Small Business & Solopreneur"],
+  CIRCUIT_COLORS["Tech & Builders"],
   CIRCUIT_COLORS["Capital"],
 ];
 
-// Resting on the purple, not the midpoint: at rest is how most people see the
-// bolt, and it's the end furthest from magenta.
-const SPEAKERS_REST = CIRCUIT_COLORS["Small Business & Solopreneur"];
+// Resting on the blue, because at rest is how most people see the bolt and
+// blue is the circuit the lineup actually sits in. ΔE 46 from /schedule's
+// #33a2e3 — same family, comfortably distinguishable.
+const SPEAKERS_REST = CIRCUIT_COLORS["Tech & Builders"];
 
 // The flow mixes up from this floor toward whichever end the cursor is over,
-// so the floor sits between them — a violet that neither end fights.
-const BASE: [number, number, number] = [0.06, 0.01, 0.08];
+// so the floor has to sit between a blue and a coral without fighting either
+// — a near-black plum, warm enough for the coral end and dark enough not to
+// wash the blue. Not /schedule's [0.01, 0.05, 0.08]: that floor is tuned to a
+// single cyan current, and under a coral end it read as two lights fighting,
+// which is the exact failure its own comment warns about.
+const BASE: [number, number, number] = [0.05, 0.02, 0.06];
 
 export function SpeakersHero({ hasLineup }: { hasLineup: boolean }) {
   return (
