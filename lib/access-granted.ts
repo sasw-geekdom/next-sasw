@@ -78,16 +78,6 @@ export const ACCESS_GRANTED = {
   lockHeight: 1400,
 } as const;
 
-/**
- * The pill tags, which answer the three questions a security room gets asked
- * before anyone commits an afternoon to it.
- */
-export const ACCESS_BADGES = [
-  "Free · drop-in",
-  "All skill levels",
-  "No sales pitches",
-] as const;
-
 export interface AccessTrack {
   /** Terminal-style label, rendered in mono caps. */
   label: string;

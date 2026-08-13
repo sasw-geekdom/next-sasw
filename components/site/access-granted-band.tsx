@@ -4,7 +4,6 @@ import { OrganizerLogo } from "@/components/site/organizer-logo";
 import { ButtonLink } from "@/components/ui/button";
 import { ARROW_MOTION } from "@/lib/motion";
 import {
-  ACCESS_BADGES,
   ACCESS_GRANTED,
   ACCESS_GREEN,
   ACCESS_ORGANIZERS,
@@ -108,8 +107,17 @@ export function AccessGrantedBand({
               <Prompt>The Rand · Tech &amp; Builders</Prompt>
             </div>
 
+            {/* "Access" in the green, "Granted" in white — the same split the
+                social graphics carry, so the promo art and the page it sends
+                people to lead with the same image of the name.
+
+                Split off `name` rather than hardcoded, so the two can't drift:
+                everything up to the first space takes the colour. */}
             <h2 className="order-2 mt-3 font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl">
-              {ACCESS_GRANTED.name}
+              <span style={{ color: ACCESS_GREEN }}>
+                {ACCESS_GRANTED.name.split(" ")[0]}
+              </span>{" "}
+              {ACCESS_GRANTED.name.split(" ").slice(1).join(" ")}
             </h2>
 
             {/* A rule rather than the spec's filled green panel — a solid
@@ -141,24 +149,6 @@ export function AccessGrantedBand({
                 </div>
               ))}
             </dl>
-
-            {/* Detail, not teaser — like the running order below. */}
-            {masthead && (
-              <ul className="order-6 mt-5 flex flex-wrap gap-2">
-                {ACCESS_BADGES.map((b) => (
-                  <li
-                    key={b}
-                    className="rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-widest"
-                    style={{
-                      borderColor: `${ACCESS_GREEN}59`,
-                      color: ACCESS_GREEN,
-                    }}
-                  >
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            )}
 
             {/* In the column, not below the grid. Below it they were stranded
                 under a much taller art column, which left a ~270px hole once
