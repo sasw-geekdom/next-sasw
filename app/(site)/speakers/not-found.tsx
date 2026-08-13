@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function SpeakerNotFound() {
   return (
     <main className="flex min-h-[60vh] items-center bg-black">
-      <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-28">
+      <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-28">
         <div className="max-w-2xl">
           <p className="font-mono text-xs uppercase tracking-widest text-magenta">
             404 · not on the grid

@@ -39,7 +39,7 @@ export function ActivationDetail({
 
   return (
     <section className="border-t border-white/10 bg-black">
-      <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
+      <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] xl:gap-24">
           {/* `self-start` as well as `sticky`: a grid item stretches to the row
               by default, so its box is already the full height and there is

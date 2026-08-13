@@ -30,7 +30,7 @@ export function SpeakerLineup({
 
   return (
     <section className="bg-black">
-      <div className="mx-auto w-full max-w-7xl border-t border-white/10 px-6 py-24 lg:py-32">
+      <div className="mx-auto w-full max-w-7xl border-t border-white/10 px-6 py-16 lg:py-32">
         {/* Same header mechanics as room-flow: a grid whose source order is
             eyebrow → headline → blurb → button, so mobile stacks with the CTA
             after the copy, while from lg the explicit placement lifts it into

@@ -85,8 +85,8 @@ export function AccessGrantedBand({
     >
       <div
         className={cn(
-          "relative z-20 mx-auto w-full max-w-7xl px-6 pb-20 lg:pb-28",
-          masthead ? "pt-6 lg:pt-7" : "pt-20 lg:pt-28",
+          "relative z-20 mx-auto w-full max-w-7xl px-6 pb-16 lg:pb-28",
+          masthead ? "pt-6 lg:pt-7" : "pt-16 lg:pt-28",
         )}
       >
         {/*
@@ -181,12 +181,18 @@ export function AccessGrantedBand({
             {actions && <div className="order-9 mt-9">{actions}</div>}
 
             {(detailHref || scheduleHref) && (
+              /* Full width below sm. These already stack on a phone — 191px
+                 and 197px inside a 342px container — so stacking isn't the
+                 change; matching their widths is. Six pixels apart reads as a
+                 ragged edge rather than a deliberate difference, and the tap
+                 targets get bigger for free. Same treatment the activation
+                 heroes carry. */
               <div className="order-10 mt-12 flex flex-wrap items-center gap-3">
                 {detailHref && (
                   <ButtonLink
                     href={detailHref}
                     size="md"
-                    className="group bg-white/10 text-white duration-200 hover:bg-white/20"
+                    className="group w-full justify-center bg-white/10 text-white duration-200 hover:bg-white/20 sm:w-auto"
                   >
                     Full event details
                     <ArrowUpRight
@@ -206,7 +212,7 @@ export function AccessGrantedBand({
                   <ButtonLink
                     href={scheduleHref}
                     size="md"
-                    className="group border border-white/20 bg-transparent text-white duration-200 hover:bg-white/10"
+                    className="group w-full justify-center border border-white/20 bg-transparent text-white duration-200 hover:bg-white/10 sm:w-auto"
                   >
                     See the full week
                     <ArrowUpRight

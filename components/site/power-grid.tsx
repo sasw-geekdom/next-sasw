@@ -105,7 +105,7 @@ export function PowerGrid({
         untouched.
       */}
       <section className="overflow-x-clip border-t border-white/10 bg-black">
-        <div className="mx-auto w-full max-w-7xl px-6 py-24 lg:py-32">
+        <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-32">
           <div className="max-w-2xl">
             <p className="font-mono text-xs uppercase tracking-widest text-magenta">
               The power source
@@ -159,7 +159,7 @@ export function PowerGrid({
         eyebrow slot's copy.
       */}
       <section className="border-t border-white/10 bg-black">
-        <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
+        <div className="mx-auto w-full max-w-7xl px-6 py-14 lg:py-24">
           <div className="max-w-2xl">
             <p className="font-mono text-xs uppercase tracking-widest text-magenta">
               Sponsorships are open · Sept 28 – Oct 2

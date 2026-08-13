@@ -383,7 +383,15 @@ export function RoomFlow() {
 
   return (
     <section className="bg-black">
-      <div className="mx-auto w-full max-w-7xl px-6 py-24 lg:py-32">
+      {/* py-16 on phones, py-32 from lg — the mobile step is deliberately
+          half the desktop one rather than three quarters of it.
+    
+          Every homepage section ran py-24 on mobile, which put ~160px of black
+          between each pair of sections and about 800px across the page: a
+          whole extra phone screen of scrolling made of nothing. Desktop keeps
+          its spacing, where the same gaps read as air rather than as distance.
+          Measured either side. */}
+      <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-32">
         {/* A grid rather than nested rows, so the CTA can sit in a different
             place at each size from one piece of markup. Source order is
             eyebrow → headline → blurb → button, which is what stacks on

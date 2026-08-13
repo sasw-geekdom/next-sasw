@@ -209,10 +209,10 @@ export function PysaBand({
         <div
           className={cn(
             "relative z-20 mx-auto w-full max-w-7xl px-6",
-            masthead ? "pt-8 lg:pt-10" : "pt-20 lg:pt-28",
+            masthead ? "pt-8 lg:pt-10" : "pt-16 lg:pt-28",
             // No bottom padding when actions follow — they bring their own,
             // and the band would otherwise carry two floors.
-            actions ? "pb-0" : "pb-20 lg:pb-28",
+            actions ? "pb-0" : "pb-16 lg:pb-28",
           )}
         >
           <div className="max-w-xl xl:max-w-2xl">

@@ -27,7 +27,7 @@ export function ActivationSessions({ sessions }: { sessions: SessionRow[] }) {
 
   return (
     <section className="border-t border-white/10 bg-black">
-      <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
+      <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
         <div className="max-w-2xl">
           <p className="font-mono text-xs uppercase tracking-widest text-magenta">
             The running order

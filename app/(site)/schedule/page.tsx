@@ -78,7 +78,7 @@ export default async function SessionsPage() {
           edge it reads as the wall between two sections, which is the only cue
           available when neighbouring sections share a ground. */}
       <section className="border-t border-white/10 bg-black">
-        <div className="mx-auto w-full max-w-7xl px-6 py-24 lg:py-32">
+        <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-32">
           <div className="max-w-2xl">
             <p className="font-mono text-xs uppercase tracking-widest text-magenta">
               Confirmed
@@ -120,7 +120,7 @@ export default async function SessionsPage() {
         `outline` variant, whose text is `foreground` — black, invisible here.
       */}
       <section className="border-t border-white/10 bg-black">
-        <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
+        <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
           <div className="max-w-2xl">
             <p className="font-mono text-xs uppercase tracking-widest text-magenta">
               Hosting is open · Sept 28 – Oct 2

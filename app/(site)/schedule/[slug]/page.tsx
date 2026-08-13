@@ -350,7 +350,7 @@ function ActivationPage({
             </>
           )}
 
-          <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-16 pt-10 lg:pb-24 lg:pt-14">
+          <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-16 pt-10 lg:pb-16 lg:pt-14">
             <div className="max-w-3xl">
               <p className="font-mono text-xs uppercase tracking-widest text-magenta">
                 {session.venue.name} · {session.circuit}
@@ -545,7 +545,7 @@ function ActivationPage({
           above the fold. */}
       {!session.when && sessions.length === 0 && (
         <section className="border-t border-white/10 bg-black">
-          <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
+          <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
             <div className="max-w-2xl">
               <p className="font-mono text-xs uppercase tracking-widest text-magenta">
                 The running order
@@ -635,7 +635,7 @@ function ActivationPage({
           primary action per page, not the same one twice. */}
       {!session.when && (
         <section className="border-t border-white/10 bg-black">
-          <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
+          <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
             <div className="max-w-2xl">
               <p className="font-mono text-xs uppercase tracking-widest text-magenta">
                 Free registration · Sept 28 – Oct 2
@@ -779,7 +779,7 @@ export default async function VenueSchedulePage({
       </section>
 
       <section className="border-t border-white/10 bg-black">
-        <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
+        <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
           <div className="max-w-2xl">
             <p className="font-mono text-xs uppercase tracking-widest text-magenta">
               Confirmed
@@ -800,7 +800,7 @@ export default async function VenueSchedulePage({
       </section>
 
       <section className="border-t border-white/10 bg-black">
-        <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-24">
+        <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
           <div className="max-w-2xl">
             <p className="font-mono text-xs uppercase tracking-widest text-magenta">
               Hosting is open · Sept 28 – Oct 2

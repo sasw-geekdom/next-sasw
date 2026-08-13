@@ -52,7 +52,7 @@ export default async function SpeakersPage() {
       <SpeakersHero hasLineup={hasLineup} />
 
       <section className="bg-black">
-        <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-28">
+        <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-28">
           {hasLineup ? (
             <>
               {/* The hero's headline is the page's statement; this is the
