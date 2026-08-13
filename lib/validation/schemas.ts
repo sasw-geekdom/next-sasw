@@ -14,13 +14,6 @@ import { BUDGET_RANGES, VENUE_STATUS, HEARD_ABOUT } from "@/lib/get-involved";
 // Shared field pieces.
 const email = z.string().trim().toLowerCase().email("Enter a valid email.");
 const name = z.string().trim().min(2, "Name is required.").max(120);
-const optionalUrl = z
-  .string()
-  .trim()
-  .url("Enter a valid URL.")
-  .max(300)
-  .optional()
-  .or(z.literal("").transform(() => undefined));
 
 // ─── Call for Speakers ──────────────────────────────────────────────────────
 export const speakerSubmissionSchema = z.object({
@@ -41,7 +34,11 @@ export const speakerSubmissionSchema = z.object({
     .trim()
     .min(2, "Let us know your availability.")
     .max(500),
-  website: optionalUrl,
+  // Required, like everything else on this form. It was optional and
+  // normalised an empty field to `undefined` — which Firestore rejects, so a
+  // pitch with no website threw before it could be saved. See the note in
+  // app/api/speakers/route.ts.
+  website: z.string().trim().url("Enter a valid URL.").max(300),
 });
 
 export type SpeakerSubmissionInput = z.infer<typeof speakerSubmissionSchema>;

@@ -55,37 +55,78 @@ export async function POST(request: Request) {
   }
   const data = parsed.data;
 
-  // 3) Optional headshot → Vercel Blob.
-  let headshotUrl: string | undefined;
+  // 3) Headshot → Vercel Blob.
+  //
+  // Required now, like every other field on this form. `required` on the input
+  // is a client hint a direct POST ignores, so the check lives here too, and
+  // it returns an `issues` entry rather than a bare error so the form can put
+  // the message under the field like every other validation failure.
   const headshot = form.get("headshot");
-  if (headshot instanceof File && headshot.size > 0) {
-    // Shared with the admin uploads — the ceiling is Vercel's 4.5 MB request
-    // body, so a 5 MB file 413s at the platform before this route is reached.
-    const problem = imageFileError(headshot, PHOTO_TYPES);
-    if (problem) {
-      return NextResponse.json(
-        { error: problem.replace("Image", "Headshot") },
-        { status: 422 },
-      );
-    }
-    const ext = headshot.name.split(".").pop() ?? "jpg";
-    const blob = await put(
-      `speaker-headshots/${randomUUID()}.${ext}`,
-      headshot,
-      { access: "public", addRandomSuffix: false },
+  if (!(headshot instanceof File) || headshot.size === 0) {
+    return NextResponse.json(
+      { error: "Check the form.", issues: { headshot: ["Add a headshot."] } },
+      { status: 422 },
     );
-    headshotUrl = blob.url;
   }
 
+  // Shared with the admin uploads — the ceiling is Vercel's 4.5 MB request
+  // body, so a 5 MB file 413s at the platform before this route is reached.
+  const problem = imageFileError(headshot, PHOTO_TYPES);
+  if (problem) {
+    return NextResponse.json(
+      { error: problem.replace("Image", "Headshot") },
+      { status: 422 },
+    );
+  }
+  const ext = headshot.name.split(".").pop() ?? "jpg";
+  const blob = await put(`speaker-headshots/${randomUUID()}.${ext}`, headshot, {
+    access: "public",
+    addRandomSuffix: false,
+  });
+  const headshotUrl = blob.url;
+
   // 4) Persist to Firestore (Admin SDK — bypasses client rules).
-  await adminDb.collection(COLLECTIONS.speakerSubmissions).add({
-    ...data,
-    company: data.company || undefined,
-    availability: data.availability || undefined,
+  //
+  // Listed field by field rather than spreading `...data`, the same way
+  // /api/register and /api/get-involved already do.
+  //
+  // Spreading is what broke this route: Firestore rejects `undefined`
+  // outright, `website` was the schema's one optional field, and it
+  // normalises to undefined when left blank — so every pitch without a
+  // website threw before it could be saved. Unhandled, so the reply was a
+  // bare 500 with no JSON body and the form fell through to its generic
+  // "Something went wrong." No field error, nothing in the admin queue, no
+  // email to anyone. Every field is required now, which closes that door as
+  // well, but listing them is what keeps it shut when the next optional field
+  // is added.
+  //
+  // Wrapped too, so a future write failure says so in JSON instead of
+  // surfacing as that same blank 500.
+  const doc: Record<string, unknown> = {
+    name: data.name,
+    email: data.email,
+    company: data.company,
+    track: data.track,
+    sessionTitle: data.sessionTitle,
+    abstract: data.abstract,
+    bio: data.bio,
+    linkedin: data.linkedin,
+    availability: data.availability,
+    website: data.website,
     headshotUrl,
     status: "new",
     createdAt: FieldValue.serverTimestamp(),
-  });
+  };
+
+  try {
+    await adminDb.collection(COLLECTIONS.speakerSubmissions).add(doc);
+  } catch (err) {
+    console.error("Speaker submission write failed:", err);
+    return NextResponse.json(
+      { error: "Couldn't save your pitch. Try again in a moment." },
+      { status: 500 },
+    );
+  }
 
   // 5) Branded confirmation — best-effort, never blocks the submission.
   try {

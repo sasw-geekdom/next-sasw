@@ -55,8 +55,8 @@ export function SpeakerForm() {
           You pitched. We got it.
         </h2>
         <p className="mt-2 text-muted-foreground">
-          Check your inbox for confirmation. We read every one — you&apos;ll hear
-          back as the Circuit lineup takes shape.
+          Check your inbox for confirmation. We read every one — you&apos;ll
+          hear back as the Circuit lineup takes shape.
         </p>
       </div>
     );
@@ -102,7 +102,9 @@ export function SpeakerForm() {
                 key={t.name}
                 onClick={() => selectTrack(t.name)}
                 aria-pressed={selected}
-                style={selected ? { borderColor: CIRCUIT_COLORS[t.name] } : undefined}
+                style={
+                  selected ? { borderColor: CIRCUIT_COLORS[t.name] } : undefined
+                }
                 className={cn(
                   "flex items-start gap-2.5 rounded-md border p-3 text-left transition-colors",
                   selected ? "bg-muted/40" : "border-border hover:bg-muted/50",
@@ -149,8 +151,14 @@ export function SpeakerForm() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <Label htmlFor="website">Website (optional)</Label>
-          <Input id="website" name="website" type="url" placeholder="https://" />
+          <Label htmlFor="website">Website</Label>
+          <Input
+            id="website"
+            name="website"
+            type="url"
+            placeholder="https://"
+            required
+          />
           {err("website") && <FieldError>{err("website")}</FieldError>}
         </div>
         <div>
@@ -178,14 +186,16 @@ export function SpeakerForm() {
       </div>
 
       <div>
-        <Label htmlFor="headshot">Headshot (optional — JPEG/PNG/WebP, 5 MB max)</Label>
+        <Label htmlFor="headshot">Headshot (JPEG/PNG/WebP, 5 MB max)</Label>
         <Input
           id="headshot"
           name="headshot"
           type="file"
           accept="image/jpeg,image/png,image/webp"
           className="pt-2.5"
+          required
         />
+        {err("headshot") && <FieldError>{err("headshot")}</FieldError>}
       </div>
 
       {error && (
