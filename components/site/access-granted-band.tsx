@@ -80,6 +80,14 @@ export function AccessGrantedBand({
         // uses. Not as a mid-page band, where it would shove the rest of
         // /schedule off-screen.
         masthead && "flex min-h-[calc(100vh-4rem)] flex-col justify-center",
+        // And as a mid-page band too, but only where there is screen for it.
+        // Content-height is right on a laptop; on an external monitor it left
+        // this band sharing the screen with the one above and the one below,
+        // so whichever activation you came to read arrived framed by its
+        // competitors. `roomy` is defined in globals.css and gated on viewport
+        // height, which is the real constraint — see the note there.
+        !masthead &&
+          "roomy:flex roomy:min-h-[calc(100vh-4rem)] roomy:flex-col roomy:justify-center",
       )}
     >
       <div

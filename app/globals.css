@@ -109,6 +109,42 @@
   --text-caption: 0.75rem; /* Caption */
 }
 
+/*
+  `roomy` — a display with screen to spare. External monitors and TVs, not
+  laptops.
+
+  The three activation bands on /schedule are content-height when they are
+  sections among others, which is right up to a point: PySanAntonio measures
+  734px, The Model 666px and Access Granted 769px, so on a 1440p monitor two of
+  them share the screen and whichever one you came to read is framed by its
+  neighbours. On a MacBook Air the same markup is exactly right, which is why
+  this is a variant rather than an edit to the bands' own measure.
+
+  Height, not width, because height is the actual constraint — a 2560x1080
+  ultrawide has the same problem as a laptop and should be treated like one.
+  Width is here only to keep tablets in portrait out of it, where a viewport
+  taller than 900px is normal and a full-screen band is not wanted.
+
+  900px viewport height clears the laptops it must not touch (13" Air ~790,
+  15" Air ~870) and catches the displays it should (1080p TV ~970, 1440p
+  monitor ~1300).
+
+  Written as a block with @slot rather than the one-line
+  `@custom-variant roomy (@media (A) and (B))` form, which compiles to nothing:
+  Tailwind accepts a single at-rule in the parenthesised form but drops the
+  variant silently when the query combines two conditions with `and`. Silently
+  is the trouble — the utilities stay in the markup, no build error is raised,
+  and the only symptom is that nothing happens. Nested blocks are equivalent to
+  `and` and do parse.
+*/
+@custom-variant roomy {
+  @media (min-width: 1024px) {
+    @media (min-height: 900px) {
+      @slot;
+    }
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
