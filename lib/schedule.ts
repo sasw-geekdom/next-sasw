@@ -271,6 +271,54 @@ export const ACCESS_GRANTED_SESSION: FeaturedSession = {
     "Every other room this week is people talking about technology. This one is people taking it apart — lockpicking, threat modeling, and zero-pitch technical talks.",
 };
 
+/**
+ * The third, and the reason the schedule intro now says three takeovers.
+ *
+ * Out of FEATURED_SESSIONS for the same reason as the other two: the bento
+ * renders that array, and a banded activation appearing again as a card a
+ * section lower reads as the schedule repeating itself.
+ *
+ * TODO(content): the venue is the one field here that didn't come from the
+ * brief. The Rand is where the other two DEVSA-convened activations run and is
+ * the community floor DEVSA hosts, so it is the reasoned answer rather than a
+ * confirmed one — and it drives the .ics location, the Event markup and the
+ * "Everything else at" link. Worth confirming with the organisers.
+ */
+export const THE_MODEL_SESSION: FeaturedSession = {
+  slug: "the-model",
+  page: "the-model",
+  title: "The Model",
+  room: "the-rand",
+  venueDetail: "3rd Floor",
+  // Generative media and production tooling, not a security or a Python room —
+  // the same circuit 300 Main's creative morning sits on.
+  circuit: "AI & Applied Innovation",
+  when: {
+    start: "2026-09-28T13:00:00-05:00",
+    end: "2026-09-28T18:00:00-05:00",
+  },
+  // The brief's core hook, tightened to card length. What survives is what the
+  // hook has that the tagline doesn't: the three things being put in one room,
+  // and that the talks come from people who actually ship with these tools.
+  //
+  // 146 characters against Access Granted's 161 — close enough to sit level
+  // beside it on /schedule/the-rand, where this once ran to five lines against
+  // that one's four and made the pair look like an accident.
+  //
+  // Event voice, not product voice. Earlier passes borrowed sentence shapes
+  // from elevenlabs.io/creative and runway.com — "turn ideas into finished
+  // image, film and voice" — which is a capability promise. Those sites sell a
+  // tool; this is an invitation to a room, and it cannot promise a reader an
+  // outcome. So this names the two communities, the occasion, and what happens
+  // in it, in that order.
+  //
+  // 151 characters against Access Granted's 161, close enough to sit level
+  // beside it on /schedule/the-rand, where this once ran to five lines against
+  // that one's four and made the pair look like an accident.
+  blurb:
+    "An afternoon that puts San Antonio's creative economy and the DEVSA community in one room — local makers breaking down how the work actually gets made.",
+};
+
 export const FEATURED_SESSIONS: FeaturedSession[] = [
   {
     slug: "mission-pitch",
@@ -722,7 +770,12 @@ export function resolveSession(
 
 /** Every session known to the site, headline included. */
 export function allSessions(): FeaturedSession[] {
-  return [HEADLINE_SESSION, ACCESS_GRANTED_SESSION, ...FEATURED_SESSIONS];
+  return [
+    HEADLINE_SESSION,
+    ACCESS_GRANTED_SESSION,
+    THE_MODEL_SESSION,
+    ...FEATURED_SESSIONS,
+  ];
 }
 
 export interface VenueSchedule {
@@ -820,9 +873,22 @@ export function scheduleSlugs(): string[] {
 export function resolveSchedule(slug: string): Schedule | null {
   const room = ROOMS.find((r) => r.slug === slug);
   if (room) {
+    // Chronological, not declaration order. `allSessions()` returns the two
+    // banded activations first because that is what /schedule wants at the top;
+    // a venue page is a room's week, and a week reads by date. The Rand ran
+    // PySanAntonio (Oct 2) above Access Granted (Sep 30) above The Model
+    // (Sep 28) — exactly backwards.
+    //
+    // Anything without a confirmed slot sorts last rather than to the front,
+    // which is where an empty string would have put it, and holds its relative
+    // order behind the dated ones.
     const sessions = resolveSessions(
       allSessions().filter((s) => s.room === room.slug),
-    );
+    ).sort((a, b) => {
+      if (!a.when) return b.when ? 1 : 0;
+      if (!b.when) return -1;
+      return a.when.start.localeCompare(b.when.start);
+    });
     return sessions.length > 0 ? { kind: "venue", room, sessions } : null;
   }
 

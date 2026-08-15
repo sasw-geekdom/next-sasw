@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SessionsHero } from "@/components/site/schedule-hero";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
+import { ModelBand } from "@/components/site/model-band";
 import { PysaBand } from "@/components/site/pysa-band";
 import {
   SessionBento,
@@ -87,7 +88,7 @@ export default async function SessionsPage() {
               Already on the grid.
             </h2>
             <p className="mt-4 max-w-xl text-pretty text-white/60">
-              Room, time and circuit for each. The two full-day takeovers have
+              Room, time and circuit for each. The three full-day takeovers have
               their own pages below.
             </p>
           </div>
@@ -100,10 +101,25 @@ export default async function SessionsPage() {
 
       <PysaBand detailHref="/schedule/pysanantonio" />
 
-      {/* The second banded activation. Both sit above the bento rather than
-          inside it: a full-day takeover with its own brand reduced to one card
-          in a five-across grid reads as smaller than it is, and it would then
-          appear twice on the same page. */}
+      {/* The second and third banded activations. All three sit below the bento
+          rather than inside it: a full-day takeover with its own brand reduced
+          to one card in a five-across grid reads as smaller than it is, and it
+          would then appear twice on the same page.
+
+          PySanAntonio keeps the top of the stack — it's HEADLINE_SESSION, the
+          one the week leads with — and the other two run by date beneath it:
+          The Model on the 28th, Access Granted on the 30th.
+
+          Headline first, then chronological. Worth stating as a rule because
+          the previous arrangement had no rule at all — it was "the order they
+          landed", which happened to come out reverse-chronological, and which
+          therefore ran these same three activations in the opposite direction
+          from /schedule/the-rand, where all three are hosted and where they are
+          sorted by start time. Two pages, one click apart, disagreeing about
+          the order of the same week. Adding a fourth band? Date, unless it
+          becomes the headline. */}
+      <ModelBand detailHref="/schedule/the-model" />
+
       <AccessGrantedBand detailHref="/schedule/access-granted" />
 
       {/*

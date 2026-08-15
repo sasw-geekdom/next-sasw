@@ -76,6 +76,29 @@
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-oswald);
 
+  /*
+    `font-pixel` — Geist Pixel. CURRENTLY UNUSED: The Model wore it, and now
+    follows its hero artwork instead, which is set in a plain monospace. The
+    token, app/fonts/pixel.ts and its woff2 are all still here and all still
+    dead — safe to delete together whenever that is settled. Nothing loads the
+    font today, because next/font only emits a face for routes that import it.
+
+    Declared for a component rather than for the root layout, which is the part
+    worth keeping if it ever comes back: hung on the layout, next/font preloads
+    the woff2 on every page in the site to serve the one that uses it.
+
+    Which means `--font-model-pixel` is undefined everywhere outside that
+    component — hence the var() fallback rather than a comma-separated list. An
+    undefined custom property with no fallback makes the whole declaration
+    invalid at computed-value time, so `font-family: var(--undefined), <rest>`
+    doesn't fall through to <rest>; it drops the declaration entirely and the
+    element inherits Geist Sans. Nested this way, `font-pixel` outside the band
+    resolves to Geist Mono, which is what a monospaced pixel face should degrade
+    to and is what the upstream package uses as its own fallback.
+  */
+  --font-pixel: var(--font-model-pixel, var(--font-geist-mono)), ui-monospace,
+    monospace;
+
   /* Type scale — from brand hierarchy (px) */
   --text-title: 3.75rem; /* 60pt Title (Oswald Bold) */
   --text-subtitle: 1.5rem; /* 24pt Subtitle */
@@ -116,3 +139,23 @@ h3,
    aren't links, and a hover border reads as one — see room-flow. If they
    ever gain a destination, that's the state to bring back. */
 
+
+/* ─── The Model: a mascot peeling off the Claude Code node ───────────────────
+   Click that node in the hero graph and one of these appears and wanders. The
+   walk itself is a transform written per frame in JS; this is only the arrival,
+   which wants to be a keyframe so it plays once and gets out of the way.
+
+   `scale` here is the standalone property, which the used matrix applies
+   *before* `transform`. Put this on the same element as the walk and it
+   multiplies that element's translation too — see the note in
+   components/site/model-mascots.tsx. It belongs on a child. */
+@keyframes modelPop {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}

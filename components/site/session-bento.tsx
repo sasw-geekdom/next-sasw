@@ -7,6 +7,8 @@ import { ARROW_MOTION } from "@/lib/motion";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { whenShort, type ResolvedSession } from "@/lib/schedule";
+import { ACCESS_GREEN } from "@/lib/access-granted";
+import { MODEL_INK, MODEL_LAVENDER } from "@/lib/the-model";
 
 // The confirmed activations, minus PySanAntonio — that one has its own band
 // above. Three across, then two, so the five don't leave a widowed cell.
@@ -22,7 +24,58 @@ export interface SessionCard extends ResolvedSession {
   logoAlt?: string;
 }
 
-function Lockup({ session }: { session: SessionCard }) {
+/**
+ * The two banded activations wear their own wordmark here, not the house one.
+ *
+ * They only ever reach this component through a venue page — /schedule excludes
+ * them from the bento because each has a full band of its own further down. So
+ * on /schedule/the-rand they were the only two cards showing a brand as plain
+ * white Oswald, sitting directly under PySanAntonio's actual wordmark. Three
+ * activations in one room, one of them typeset like the other two aren't.
+ *
+ * These are the same two lockups their own sections use, at card size: Access
+ * Granted splits its first word into the green, The Model catches its second in
+ * a selection block. Keyed on `page` rather than on the title, because the title
+ * is copy and the page slug is an identifier.
+ *
+ * The font class sits on a span rather than the `h3`, because globals.css sets
+ * `font-family` on bare h1/h2/h3 outside any cascade layer — unlayered rules
+ * beat every Tailwind utility, so `font-mono` on the heading itself would
+ * silently lose to Oswald. Access Granted wants Oswald anyway and needs no span.
+ */
+function BrandLockup({ page }: { page: string }) {
+  if (page === "access-granted") {
+    return (
+      <h3 className="font-display text-2xl font-bold uppercase leading-tight text-white">
+        <span style={{ color: ACCESS_GREEN }}>Access</span> Granted
+      </h3>
+    );
+  }
+  return (
+    <h3 className="text-2xl leading-tight">
+      <span className="font-mono font-medium uppercase tracking-tight text-white/85">
+        The{" "}
+        <span
+          className="box-decoration-clone px-1.5"
+          style={{ backgroundColor: MODEL_LAVENDER, color: MODEL_INK }}
+        >
+          Model
+        </span>
+      </span>
+    </h3>
+  );
+}
+
+function Lockup({
+  session,
+  matchTitleSize = false,
+}: {
+  session: SessionCard;
+  matchTitleSize?: boolean;
+}) {
+  if (session.page === "access-granted" || session.page === "the-model") {
+    return <BrandLockup page={session.page} />;
+  }
   if (session.logoSrc) {
     return (
       // The mark is the card's headline, so the slot is sized to lead rather
@@ -34,7 +87,18 @@ function Lockup({ session }: { session: SessionCard }) {
       // Height-led with the width free, because lockups arrive at wildly
       // different ratios — a letterbox with the mark set left keeps a wide
       // wordmark and a squarer badge on the same baseline.
-      <div className="relative h-16 w-full sm:h-20 lg:h-24">
+      // `matchTitleSize` drops it to roughly the cap height of a `text-2xl`
+      // line. A venue page lists one room's activations as peers, so a wordmark
+      // three times the height of its neighbours' typeset titles reads as a
+      // ranking nobody intended — on The Rand, PySanAntonio's mark towered over
+      // Access Granted and The Model. On /schedule the lockups are the majority
+      // and leading is right, which is why this is a prop and not a rewrite.
+      <div
+        className={cn(
+          "relative w-full",
+          matchTitleSize ? "h-7 sm:h-8" : "h-16 sm:h-20 lg:h-24",
+        )}
+      >
         <Image
           src={session.logoSrc}
           alt={session.logoAlt ?? session.title}
@@ -82,10 +146,12 @@ function Card({
   session,
   index,
   className,
+  matchTitleSize = false,
 }: {
   session: SessionCard;
   index: number;
   className?: string;
+  matchTitleSize?: boolean;
 }) {
   const reduce = useReducedMotion();
 
@@ -130,10 +196,10 @@ function Card({
           href={`/schedule/${session.page}`}
           className="after:absolute after:inset-0 after:z-10 focus-visible:outline-none"
         >
-          <Lockup session={session} />
+          <Lockup session={session} matchTitleSize={matchTitleSize} />
         </Link>
       ) : (
-        <Lockup session={session} />
+        <Lockup session={session} matchTitleSize={matchTitleSize} />
       )}
 
       <div className="mt-3.5">
@@ -179,7 +245,14 @@ function Card({
   );
 }
 
-export function SessionBento({ sessions }: { sessions: SessionCard[] }) {
+export function SessionBento({
+  sessions,
+  matchTitleSize = false,
+}: {
+  sessions: SessionCard[];
+  /** Venue pages: size lockups to their neighbours' titles. See `Lockup`. */
+  matchTitleSize?: boolean;
+}) {
   if (sessions.length === 0) return null;
 
   // Three across, then the remainder spread over the same three columns — with
@@ -191,14 +264,19 @@ export function SessionBento({ sessions }: { sessions: SessionCard[] }) {
     <div className="flex flex-col gap-6">
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {lead.map((s, i) => (
-          <Card key={s.slug} session={s} index={i} />
+          <Card key={s.slug} session={s} index={i} matchTitleSize={matchTitleSize} />
         ))}
       </div>
 
       {rest.length > 0 && (
         <div className="grid gap-6 sm:grid-cols-2">
           {rest.map((s, i) => (
-            <Card key={s.slug} session={s} index={i + lead.length} />
+            <Card
+            key={s.slug}
+            session={s}
+            index={i + lead.length}
+            matchTitleSize={matchTitleSize}
+          />
           ))}
         </div>
       )}

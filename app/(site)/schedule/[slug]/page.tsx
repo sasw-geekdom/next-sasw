@@ -30,6 +30,7 @@ import { PYSA } from "@/lib/pysa";
 import { BackLink } from "@/components/site/back-link";
 import { activationEvent, jsonLd } from "@/lib/structured-data";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
+import { ModelBand } from "@/components/site/model-band";
 import { PysaBand } from "@/components/site/pysa-band";
 import { AddToCalendar } from "@/components/site/add-to-calendar";
 import { cn } from "@/lib/utils";
@@ -154,8 +155,9 @@ function ActivationPage({
 }) {
   const isPysa = session.page === "pysanantonio";
   const isAccessGranted = session.page === "access-granted";
-  /** Both banded activations render the same actions in their band's slot. */
-  const banded = isPysa || isAccessGranted;
+  const isModel = session.page === "the-model";
+  /** Every banded activation renders the same actions in its band's slot. */
+  const banded = isPysa || isAccessGranted || isModel;
   /**
    * "Everything else at X" has to actually be true.
    *
@@ -237,7 +239,12 @@ function ActivationPage({
                   event={{
                     title: session.title,
                     details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
-                    location: `${session.venue.name}, Downtown San Antonio`,
+                    // Same line the .ics route builds, floor included where
+                    // there is one — the two calendar paths for one event
+                    // shouldn't disagree about the address.
+                    location: session.venueDetail
+                      ? `${session.venue.name}, ${session.venueDetail}, Downtown San Antonio`
+                      : `${session.venue.name}, Downtown San Antonio`,
                     start: session.when.start,
                     end: session.when.end,
                   }}
@@ -263,11 +270,9 @@ function ActivationPage({
               )}
             </>
           );
-          return isPysa ? (
-            <PysaBand masthead actions={actions} />
-          ) : (
-            <AccessGrantedBand masthead actions={actions} />
-          );
+          if (isPysa) return <PysaBand masthead actions={actions} />;
+          if (isModel) return <ModelBand masthead actions={actions} />;
+          return <AccessGrantedBand masthead actions={actions} />;
         })()
       ) : (
         /* Type-led, and deliberately not the venue's portrait. Borrowing the
@@ -794,7 +799,7 @@ export default async function VenueSchedulePage({
           </div>
 
           <div className="mt-12 lg:mt-14">
-            <SessionBento sessions={cards} />
+            <SessionBento sessions={cards} matchTitleSize />
           </div>
         </div>
       </section>

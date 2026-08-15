@@ -24,6 +24,14 @@ const oswald = Oswald({
   weight: ["400", "500", "700"],
 });
 
+// Geist Pixel is deliberately NOT here, and is no longer used anywhere — The
+// Model has moved to the monospace its hero artwork is set in. app/fonts/pixel.ts
+// and its woff2 survive unused; see the note in globals.css.
+//
+// The reason it was never hung here is worth keeping if it returns: next/font
+// preloads every face a layout declares, so a face belonging to one activation
+// would sit on the critical path of every page in the site.
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {

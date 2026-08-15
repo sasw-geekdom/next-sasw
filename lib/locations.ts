@@ -153,6 +153,7 @@ export const ROOMS: Room[] = [
 |▒_▒_▒_▒_▒|/`,
     sessions: [
       { title: "Founder Funder Speed Networking", kind: "Founder" },
+      { title: "The Model", kind: "AI & Applied Innovation" },
       { title: "PySanAntonio II", kind: "Tech & Builders" },
       { title: "Access Granted", kind: "Tech & Builders" },
     ],

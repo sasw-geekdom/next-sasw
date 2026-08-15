@@ -258,12 +258,17 @@ export function PysaBand({
               </Detail>
             </dl>
 
-            {/* Activated by — the orgs actually running it, credited in the band
+            {/* Powered by — the orgs actually running it, credited in the band
               rather than folded into SASTW's own partner wall, because they're
-              hosting this one event, not the week. */}
+              hosting this one event, not the week.
+
+              "Activated by" until now, which was nobody's word but this band's:
+              Access Granted and The Model both say "Powered by", and so does
+              the homepage's own wall. Three labels for one idea on one page is
+              three things a reader has to reconcile. */}
             <div className="mt-12 flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-10">
               <p className="shrink-0 font-mono text-[11px] uppercase tracking-widest text-white/55">
-                Activated by
+                Powered by
               </p>
               <ul className="flex flex-wrap items-center gap-x-8 gap-y-5">
                 {PYSA_ORGANIZERS.map((org) => (
@@ -284,11 +289,15 @@ export function PysaBand({
               // their own optical weight, and 40px read as the button
               // belonging to that row rather than being the way out of the
               // band.
+              // Full width below sm, matching Access Granted and The Model. On a
+              // phone this was a ~190px pill sitting alone under a full-width
+              // column while the other two bands' buttons spanned it — the
+              // odd one out in a stack of three that are otherwise identical.
               <div className="mt-14">
                 <ButtonLink
                   href={detailHref}
                   size="md"
-                  className="group bg-white/10 text-white duration-200 hover:bg-white/20"
+                  className="group w-full justify-center bg-white/10 text-white duration-200 hover:bg-white/20 sm:w-auto"
                 >
                   Full event details
                   <ArrowUpRight
