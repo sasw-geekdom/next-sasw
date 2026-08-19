@@ -21,13 +21,20 @@ export async function boltOgImage(opts: {
   tagline?: string;
   titleSize?: number;
 }) {
+  // Both assets are vendored under public/ rather than pulled out of
+  // node_modules at request time. The font is Oswald 700 latin (OFL), lifted
+  // from @fontsource/oswald@5.2.8 — that package was a dependency only to
+  // supply this one file, so it went when the file landed here.
+  //
+  // It used to be read straight out of node_modules, which pnpm makes a
+  // symlink into its store; build tracing records the file behind the link, so
+  // the deployed function shipped the real .woff but not the link the path
+  // walked through. That worked during the build, where the full pnpm tree
+  // exists, and threw ENOENT on every render-on-demand: a speaker added
+  // between deploys got a 500 for their share card instead of an image. The
+  // prerendered cards hid it, because those were built, not rendered.
   const [oswald, bolt] = await Promise.all([
-    readFile(
-      join(
-        process.cwd(),
-        "node_modules/@fontsource/oswald/files/oswald-latin-700-normal.woff",
-      ),
-    ),
+    readFile(join(process.cwd(), "public/brand/oswald-700-latin.woff")),
     readFile(join(process.cwd(), "public/brand/bolt-current-og.png")),
   ]);
   const boltSrc = `data:image/png;base64,${bolt.toString("base64")}`;

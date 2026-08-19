@@ -24,4 +24,14 @@ class or copy change doesn't need one.
   `middleware.ts` gets you a file that silently never runs. `/admin/*` guarding
   lives in [proxy.ts](proxy.ts) *and* is re-verified in every admin route —
   don't treat the proxy as the only gate.
+- **OG cards must not read assets out of `node_modules` at request time.**
+  pnpm makes `node_modules/<pkg>` a symlink into its store and build tracing
+  records the file behind it, so the deployed function ships the real asset but
+  not the link the path went through. A `readFile(join(process.cwd(),
+  "node_modules/…"))` therefore works during the build — where the full pnpm
+  tree exists — and throws `ENOENT` on every render-on-demand. That is invisible
+  until something renders that was not prerendered: a speaker added through the
+  CMS between deploys got a 500 for their share card while every built card kept
+  working. Assets the OG cards need live in `public/brand/` and are read from
+  there ([lib/og.tsx](lib/og.tsx)).
 - **pnpm only.** There's no `package-lock.json` and `packageManager` is pinned.

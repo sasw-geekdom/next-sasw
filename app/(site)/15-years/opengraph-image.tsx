@@ -8,12 +8,9 @@ export const contentType = "image/png";
 
 export default async function OgImage() {
   const [oswald, logoPng] = await Promise.all([
-    readFile(
-      join(
-        process.cwd(),
-        "node_modules/@fontsource/oswald/files/oswald-latin-700-normal.woff",
-      ),
-    ),
+    // Vendored under public/ — see the note in lib/og.tsx: the node_modules
+    // path is a pnpm symlink the deployed function does not get.
+    readFile(join(process.cwd(), "public/brand/oswald-700-latin.woff")),
     readFile(join(process.cwd(), "public/brand/og-geekdom.png")),
   ]);
   const logo = `data:image/png;base64,${logoPng.toString("base64")}`;
