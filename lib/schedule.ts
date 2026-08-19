@@ -104,6 +104,16 @@ export interface FeaturedSession {
    */
   detail?: {
     /**
+     * The section's label, above the headline.
+     *
+     * Defaults to "The morning", which is what this section said for everyone
+     * until there was more than one consumer — it was written for the Creative
+     * Futures Brunch, which genuinely is a morning. Give-a-LOT is a drop-off
+     * window across three days and a workshop on a fourth, and calling that a
+     * morning is simply wrong. Set it when the activation is not a morning.
+     */
+    eyebrow?: string;
+    /**
      * The section's display headline.
      *
      * Required, not optional: every other section on this site runs
@@ -635,6 +645,80 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       width: 784,
       height: 720,
       alt: "",
+    },
+  },
+
+  /**
+   * The week's community-service activation, and the only one that asks the
+   * reader to bring something rather than to turn up.
+   *
+   * Two events under one name: a drop-off window across the first half of the
+   * week, and a workshop and giveaway on the Friday. Filed under the Friday
+   * because that is the part with a room and a time — but `driveLabel` in
+   * lib/give-a-lot.ts leads the band's metadata row, because the drop-off is
+   * the part that needs a reader to act, and it starts first.
+   *
+   * No `when`, deliberately. The organisers have fixed the day and said the
+   * drop-off point and the times follow closer to the week, so there is no
+   * confirmed start and end to publish. That costs the Event rich result and
+   * the .ics download, which is the correct trade: both would be marking up a
+   * guess, and this file's own rule is that absent means genuinely
+   * unconfirmed. Add `when` the moment the organisers name an hour and both
+   * come back with no other change.
+   */
+  {
+    slug: "give-a-lot",
+    page: "give-a-lot",
+    title: "Give-a-LOT Computer Donation Drive",
+    // "Give-a-LOT Computer Donation Drive" is 34 characters and carries a
+    // pun that needs its object; as a filter chip beside "Access Granted" the
+    // full name swamps the row and the wordmark alone is what people say.
+    shortTitle: "Give-a-LOT",
+    room: "central-library",
+    venueDetail: "1st Floor",
+    // Linux and open source software, taught and installed. The room's other
+    // two sessions are Small Business & Solopreneur, but a room is not a
+    // circuit — The Rand carries three between its three activations.
+    circuit: "Tech & Builders",
+    logo: {
+      src: "/give-a-lot/lockup.svg",
+      width: 630,
+      height: 230,
+      alt: "Give-a-LOT Computer Donation Giveaway",
+    },
+    blurb:
+      "DEVSA and learnOPENtech turn donated hardware into fast, private Linux machines, then hand them to students, families and non-profits who need one.",
+    detail: {
+      eyebrow: "The drive",
+      headline: "Nothing here is junk.",
+      lede: [
+        "A working computer stops being supported on the day its vendor decides it does. That is a business decision, not a technical one \u2014 the hardware is usually fine, and most of it ends up as e-waste anyway.",
+        "DEVSA and learnOPENtech spend the week collecting those machines, rebuilding them on Linux and open source software, and putting them back into the community.",
+      ],
+      programme: [
+        {
+          time: "Sept 28 \u2013 30",
+          title: "Curbside drop-off",
+          body: "Bring working laptops, desktops or components to the collection point. The exact location and hours are announced closer to the week. Nothing needs to be wiped first \u2014 drives are erased as part of the rebuild.",
+        },
+        {
+          time: "Friday, Oct 2",
+          title: "Intro to Linux & Open Source Software",
+          body: "A hands-on session at LaunchSA on what open source actually is, how a machine gets rebuilt on it, and why a computer written off by its manufacturer is usually the fastest one somebody in the room has owned.",
+          feature: true,
+        },
+        {
+          time: "Friday, Oct 2",
+          title: "Community computer giveaway",
+          body: "The machines collected across the week go home with students, families and non-profits, set up and ready to use.",
+          feature: true,
+        },
+      ],
+      coda:
+        "Vendor lock-in is the reason a five-year-old laptop feels slow, and open source is the reason it does not have to. Every machine that leaves this room is one that was headed for a landfill and is now somebody's first computer, running software nobody can switch off remotely.",
+      kicker: "Bring a machine. Take one home. Both count.",
+      access:
+        "Free with Startup + Tech Week registration. Donations are welcome from anyone, whether or not you are attending the week.",
     },
   },
 ];

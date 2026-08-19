@@ -47,7 +47,7 @@ export function ActivationDetail({
               with air to spare. */}
           <div className="lg:sticky lg:top-24 lg:self-start">
             <p className="font-mono text-xs uppercase tracking-widest text-magenta">
-              The morning
+              {detail.eyebrow ?? "The morning"}
             </p>
             {/* One block per sentence, so a headline built of several starts
                 each on its own line instead of breaking wherever the column

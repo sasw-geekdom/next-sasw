@@ -30,6 +30,7 @@ import { PYSA } from "@/lib/pysa";
 import { BackLink } from "@/components/site/back-link";
 import { activationEvent, jsonLd } from "@/lib/structured-data";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
+import { GiveALotBand } from "@/components/site/give-a-lot-band";
 import { ModelBand } from "@/components/site/model-band";
 import { PysaBand } from "@/components/site/pysa-band";
 import { AddToCalendar } from "@/components/site/add-to-calendar";
@@ -133,10 +134,14 @@ function heroTitleParts(session: ResolvedSession): [string] | [string, string] {
 /**
  * An activation's own page.
  *
- * PySanAntonio gets the band as its masthead — it already carries the
- * wordmark, the mascot and PySA's blue, so arriving confirms you clicked the
- * right thing, and it renders without its CTA here since that button is what
- * brought you. Every other activation borrows its venue's portrait instead:
+ * Four activations get a band as their masthead — PySanAntonio, Access
+ * Granted, The Model and Give-a-LOT. Each already carries its own wordmark and
+ * palette, so arriving confirms you clicked the right thing, and each renders
+ * without its own CTA here since that button is what brought you. Give-a-LOT
+ * is the one of the four with no band on /schedule: it is a card in the bento
+ * there, and this page is the only place its band appears.
+ *
+ * Every other activation borrows its venue's portrait instead:
  * the same portrait-and-panel grammar as room-flow and the venue pages, using
  * art that already exists rather than leaving these pages type-only.
  *
@@ -156,8 +161,9 @@ function ActivationPage({
   const isPysa = session.page === "pysanantonio";
   const isAccessGranted = session.page === "access-granted";
   const isModel = session.page === "the-model";
+  const isGiveALot = session.page === "give-a-lot";
   /** Every banded activation renders the same actions in its band's slot. */
-  const banded = isPysa || isAccessGranted || isModel;
+  const banded = isPysa || isAccessGranted || isModel || isGiveALot;
   /**
    * "Everything else at X" has to actually be true.
    *
@@ -219,7 +225,19 @@ function ActivationPage({
            No `detailHref` on either — the band is the page here, not a link
            to it. */
         (() => {
-          const actions = session.when && (
+          /*
+           * Register always; the calendar only when there is a date to put in
+           * it.
+           *
+           * This was one `session.when &&` around the pair, which was right
+           * while every banded activation had a confirmed slot. Give-a-LOT
+           * does not — its day is fixed and its hour is not — and the whole
+           * block evaporating took the page's only CTA and its "everything
+           * else at" link with it, leaving a masthead that stated an event and
+           * offered no way in. Registration was never the thing that needed a
+           * timestamp.
+           */
+          const actions = (
             <>
               {/* Full width below sm. These already wrap to two rows on a
                   390px phone — 178px and 238px inside a 342px container — so
@@ -234,6 +252,7 @@ function ActivationPage({
                 >
                   Get on the list.
                 </ButtonLink>
+                {session.when && (
                 <AddToCalendar
                   icsHref={`/schedule/${session.page}/calendar`}
                   event={{
@@ -249,6 +268,7 @@ function ActivationPage({
                     end: session.when.end,
                   }}
                 />
+                )}
               </div>
               {hasMoreAtVenue && (
                 <p className="mt-8">
@@ -272,6 +292,7 @@ function ActivationPage({
           );
           if (isPysa) return <PysaBand masthead actions={actions} />;
           if (isModel) return <ModelBand masthead actions={actions} />;
+          if (isGiveALot) return <GiveALotBand masthead actions={actions} />;
           return <AccessGrantedBand masthead actions={actions} />;
         })()
       ) : (

@@ -200,6 +200,12 @@ export const ROOMS: Room[] = [
         title: "Small Business Speed Networking",
         kind: "Small Business & Solopreneur",
       },
+      // The room's one Tech & Builders session. A room is not a circuit — The
+      // Rand carries three across its three activations — and the short name
+      // is what goes here because room-flow joins these titles with " · " into
+      // a single line, where "Give-a-LOT Computer Donation Drive" runs the row
+      // to two.
+      { title: "Give-a-LOT", kind: "Tech & Builders" },
     ],
   },
   // The two single-activation rooms run in the order they happen — the brunch

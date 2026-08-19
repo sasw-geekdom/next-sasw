@@ -255,10 +255,25 @@ export function SessionBento({
 }) {
   if (sessions.length === 0) return null;
 
-  // Three across, then the remainder spread over the same three columns — with
-  // five that lands 3 + 2, each of the last pair taking a column and a half.
-  const lead = sessions.slice(0, 3);
-  const rest = sessions.slice(3);
+  /*
+   * Three across, then a wider final row — but only when exactly two are left
+   * over, which is the shape that row was designed for. With five that lands
+   * 3 + 2, each of the last pair taking a column and a half.
+   *
+   * The split used to be an unconditional `slice(3)`, which was right for as
+   * long as the array held five. A sixth activation turned the second row into
+   * a half-width pair plus one stranded card on a third row with a column and
+   * a half of black beside it — a layout that reads as a card failing to load
+   * rather than as a grid. Six now runs 3 + 3 in the even grid instead.
+   *
+   * `% 3 === 2` rather than a hardcoded five, so this holds as the schedule
+   * fills: 5 and 8 get the wide row, 6 and 9 get clean thirds. Seven still
+   * strands one, which is what seven does in a grid of three, and is a real
+   * layout question rather than something a slice can decide.
+   */
+  const wideTail = sessions.length % 3 === 2;
+  const lead = wideTail ? sessions.slice(0, -2) : sessions;
+  const rest = wideTail ? sessions.slice(-2) : [];
 
   return (
     <div className="flex flex-col gap-6">
