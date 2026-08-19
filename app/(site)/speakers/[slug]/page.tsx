@@ -19,6 +19,13 @@ export const revalidate = 300;
 // How many other speakers to show at the foot of the page.
 const MORE = 4;
 
+// Roughly where a bio stops fitting the capped column and starts scrolling.
+// Only bios past this get the fade that signals there is more to read — a
+// shorter one never overflows, so hinting at a scroll would be a lie and the
+// padding the hint needs would be dead space. Counted in characters because
+// that is all the server has; it only has to be about right.
+const LONG_BIO = 800;
+
 // The shared door-link motion at this page's size — 14px to sit with the
 // 11px mono labels, where the homepage's door links run 20–24px.
 const ARROW = cn(ARROW_MOTION, "h-3.5 w-3.5");
@@ -176,10 +183,42 @@ export default async function SpeakerPage({
               </div>
             )}
 
+            {/* A bio is whatever the CMS holds, and they run from two lines to
+                a dozen paragraphs. Past a certain length the text column ran
+                far below the portrait and pushed the LinkedIn link off screen,
+                so the column is capped and scrolls inside itself.
+
+                `lg:` only. The cap earns its keep in the two-column layout,
+                where the imbalance shows; on a phone the page is already one
+                column that scrolls as a whole, and a nested scroll box there is
+                something readers have to fight past rather than a convenience.
+
+                A capped bio that simply stops mid-sentence reads as a bug, so
+                a long one also gets a fade at the cut. It is gated on length
+                rather than applied to every bio: the fade needs bottom padding
+                to sit over (otherwise it dims the closing line once you scroll
+                to the end), and spending that padding on a bio that already
+                fits would be 40px of dead space hinting at a scroll that is not
+                there. */}
             {speaker.bio && (
-              <p className="mt-7 max-w-2xl whitespace-pre-line text-pretty text-lg leading-relaxed text-white/70">
-                {speaker.bio}
-              </p>
+              <div
+                // A scrollable region needs a focus stop, or a keyboard user
+                // can tab to the LinkedIn link below but never scroll the bio
+                // to read it. The label gives that stop a name in the a11y tree.
+                tabIndex={0}
+                role="region"
+                aria-label={`About ${speaker.name}`}
+                className={cn(
+                  "mt-7 max-w-2xl lg:max-h-[min(24rem,50vh)] lg:overflow-y-auto lg:pr-4",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta",
+                  speaker.bio.length > LONG_BIO &&
+                    "lg:pb-10 lg:[mask-image:linear-gradient(to_bottom,black_calc(100%-2.5rem),transparent)]",
+                )}
+              >
+                <p className="whitespace-pre-line text-pretty text-lg leading-relaxed text-white/70">
+                  {speaker.bio}
+                </p>
+              </div>
             )}
 
             {speaker.linkedin && (
