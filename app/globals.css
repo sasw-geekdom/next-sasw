@@ -200,6 +200,22 @@ h3,
 */
 
 /* Rises, drifts sideways, fades out. The row clips it. */
+/* PySanAntonio's mascot, breathing rather than performing.
+
+   Three pixels over seven seconds. The bolts drift and the Claude mascots
+   bounce because those two are the flourish; this one is a photograph of a
+   person standing still, and anything with a visible arc would read as a
+   glitch rather than as life. Reduced motion drops it entirely. */
+@keyframes pysaSway {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
 @keyframes boltDrift {
   0% {
     opacity: 0;

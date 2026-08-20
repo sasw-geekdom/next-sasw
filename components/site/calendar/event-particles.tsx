@@ -1,15 +1,17 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { TOOL_MARKS } from "@/lib/tool-marks";
 import { cn } from "@/lib/utils";
 
-// A little life inside two event rows, and only two.
+// A little life inside three event blocks, and only three.
 //
 // Startup Bash is the week's one Social activation and The Model is the one
-// with mascots of its own, so they are the two that earn a flourish. Everything
-// else on the grid stays still, which is what keeps this from reading as a page
-// that fidgets.
+// with mascots of its own, so they are the two that earn a flourish.
+// PySanAntonio has a mascot of its own too, and a five-hour block with a lot
+// of empty middle to put him in. Everything else on the grid stays still,
+// which is what keeps this from reading as a page that fidgets.
 //
 // ── Why not WebGL ───────────────────────────────────────────────────────────
 //
@@ -366,5 +368,57 @@ export function MascotBurst() {
           </span>
         ))}
     </span>
+  );
+}
+
+/**
+ * PySanAntonio's mariachi, standing in the empty middle of his own block.
+ *
+ * A still, not the loop. `PYSA.video` is already on this page for the band, so
+ * a second `<video>` would cost no download — but it would cost a second
+ * decode, of a 1114x720 clip, inside a cell 224px wide. The other two
+ * flourishes are cheap by construction (CSS keyframes, and a handful of
+ * sprites on one RAF), and a decoding video in a calendar cell is a different
+ * order of thing.
+ *
+ * The plate carries its own feathered alpha rather than a CSS mask. The frame
+ * is a studio shot on near-black and the block's ground is PySA blue at 10%
+ * over black — close, but not the same, so an unfeathered rectangle showed its
+ * edge. Baking the fade into the file means it composites the same way
+ * wherever it is drawn, including the day view where the block is twice as
+ * tall.
+ *
+ * Sized as a percentage of the block, not in pixels, for that same reason: the
+ * week draws this block 300px tall and the day view 660.
+ */
+export function PysaMascot() {
+  return (
+    <div
+      aria-hidden="true"
+      data-particles=""
+      // Lifted clear of the meta rows rather than laid behind them. Sitting on
+      // the block's floor, the guitar's body ran under "TECH & BUILDERS" and
+      // the strand lost its contrast against a bright blue soundboard. 36px is
+      // the two rows plus their leading, so the type keeps the plain ground it
+      // is legible on and he stands on top of it.
+      className="pointer-events-none absolute inset-x-0 bottom-9 top-0 flex items-end justify-center overflow-hidden rounded"
+    >
+      <Image
+        src="/pysa/mascot-block.webp"
+        alt=""
+        width={420}
+        height={441}
+        // Sized by height against a capped ceiling, not by the block's width.
+        // Width-led sizing made him a function of the column: 166px in the
+        // week, where that is most of the block, and the same 166 in the day
+        // view where the block is 1175px across and he read as a stamp
+        // floating in it. A height cap draws him the same size in both, which
+        // is the thing a mascot should be.
+        //
+        // Bottom-anchored by the wrapper's flex rather than by his own box, so
+        // he stands on the meta rows whatever height is left above him.
+        className="h-full max-h-[190px] w-auto object-contain opacity-90 motion-safe:animate-[pysaSway_7s_ease-in-out_infinite]"
+      />
+    </div>
   );
 }

@@ -7,6 +7,7 @@ import { CalendarPlus, Check } from "lucide-react";
 import {
   BoltDrift,
   MascotBurst,
+  PysaMascot,
 } from "@/components/site/calendar/event-particles";
 import { cn } from "@/lib/utils";
 import type { CalendarBrand, CalendarItem, CalendarSpan } from "@/lib/schedule";
@@ -545,6 +546,12 @@ export function Block({
           wide flat row without a number changing. */}
       {spare && item.page === "startup-bash" && <BoltDrift />}
       {spare && item.page === "the-model" && <MascotBurst />}
+      {/* Axis only — deliberately not in StackBlock beside the other two.
+          This one is a standing figure that needs vertical room, and it has it
+          here: five hours is a 300px block with an empty middle. An agenda row
+          is 83px of which the mark takes 57, so the same mascot there would be
+          a thumbnail wedged behind the type. */}
+      {spare && item.page === "pysanantonio" && <PysaMascot />}
 
       {/* The link is stretched over the whole block rather than wrapped
           around it: the select button lives inside, and a button inside an
