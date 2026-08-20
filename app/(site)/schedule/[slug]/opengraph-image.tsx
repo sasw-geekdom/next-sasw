@@ -69,7 +69,7 @@ export default async function OgImage({
 
   return boltOgImage({
     eyebrow: "The schedule",
-    lines: [{ text: "Coming online," }, { text: "room by", magenta: "room." }],
+    lines: [{ text: "Five days," }, { text: "one", magenta: "current." }],
     tagline: "Confirmed activations · Sept 28 – Oct 2",
   });
 }

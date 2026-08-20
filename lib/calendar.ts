@@ -57,3 +57,31 @@ export function outlookCalendarUrl(e: CalendarEvent): string {
   if (e.allDay) q.set("allday", "true");
   return `https://outlook.live.com/calendar/0/action/compose?${q}`;
 }
+
+/**
+ * One `KEY:value` iCalendar line — reserved characters escaped, folded to the
+ * 75-octet limit RFC 5545 sets.
+ *
+ * Lives here rather than in a route because there are two producers now: the
+ * per-session file and the multi-event export. They were one implementation
+ * copied twice for about ten minutes, which is exactly how a fix to the
+ * escaping lands in one of them and not the other.
+ */
+export function icsLine(key: string, value: string): string {
+  const escaped = value
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
+    .replace(/\n/g, "\\n");
+  const full = `${key}:${escaped}`;
+  if (full.length <= 75) return full;
+  const parts = [full.slice(0, 75)];
+  let rest = full.slice(75);
+  while (rest.length) {
+    // A continuation line starts with a single space, which counts toward the
+    // 75 — hence 74 of payload.
+    parts.push(` ${rest.slice(0, 74)}`);
+    rest = rest.slice(74);
+  }
+  return parts.join("\r\n");
+}

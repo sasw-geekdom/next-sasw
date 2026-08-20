@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SessionsHero } from "@/components/site/schedule-hero";
+import { WeekCalendar } from "@/components/site/week-calendar";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
 import { ModelBand } from "@/components/site/model-band";
 import { PysaBand } from "@/components/site/pysa-band";
@@ -66,12 +67,15 @@ export default async function SessionsPage() {
     <main>
       <SessionsHero />
 
-      {/* The week strip lives at components/site/week-strip.tsx and is built
-          and working — all five days including the ones still filling, and
-          now the circuit and venue filters too. Only add-to-calendar per row
-          is still outstanding of the three things it was pulled out to grow.
-          Drop `<WeekStrip />` back in here whenever it should ship; nothing
-          else has to change. */}
+      {/* The week on an hour axis, above the deep dives — the page's answer to
+          "what's on Tuesday, and what am I giving up to be there?"
+
+          It replaces week-strip.tsx, which answered the first half of that and
+          not the second: five lists cannot show that four venues run a
+          takeover across the same afternoon, which is the shape of this week.
+          The strip is still in the tree and still works; it is the smaller
+          idea and nothing renders it now. */}
+      <WeekCalendar />
 
       {/* Full-bleed rule on the section, not the inner container — the same
           seam the homepage uses between room-flow and the logo wall. Inset to

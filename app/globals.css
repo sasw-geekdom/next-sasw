@@ -185,6 +185,52 @@ h3,
    *before* `transform`. Put this on the same element as the walk and it
    multiplies that element's translation too — see the note in
    components/site/model-mascots.tsx. It belongs on a child. */
+/*
+  Startup Bash's bolts, and The Model's mascots.
+
+  Both are CSS rather than the RAF simulation ModelMascots runs on /schedule's
+  activation band. That one has to wander a whole section and respond to
+  clicks; these live inside a 90px event row, follow a fixed path and never
+  need to know where anything else is — so a keyframe does it for none of the
+  per-frame cost, and `motion-safe:` gates it without a single line of script.
+
+  Nothing here plays on its own. `boltDrift` runs only while the row is
+  hovered, and `mascotBurst` fires once when the row is first seen. The site's
+  rule that ambient motion is opt-in — stated in model-mascots.tsx — survives.
+*/
+
+/* Rises, drifts sideways, fades out. The row clips it. */
+@keyframes boltDrift {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) rotate(var(--spin-from, -12deg));
+  }
+  18% {
+    opacity: var(--peak, 0.5);
+  }
+  82% {
+    opacity: var(--peak, 0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift, 10px), -28px, 0)
+      rotate(var(--spin-to, 14deg));
+  }
+}
+
+/*
+  `mascotLive` and `mascotBurst` used to live here — a wander and a launch,
+  both keyframes. They are gone because keyframes cannot bounce: a path decided
+  in advance can be shaped to stay inside a box but cannot react to one, so a
+  mascot reaching an edge either stopped short of it or was clipped by it.
+  Turning at a wall needs the wall's position and the current heading, which is
+  a per-frame calculation. See event-particles.tsx, which now runs the same
+  reflection model-mascots.tsx does.
+
+  `boltDrift` stays a keyframe. A bolt rises and fades on a fixed path and
+  never touches a wall.
+*/
+
 @keyframes modelPop {
   from {
     opacity: 0;

@@ -9,7 +9,7 @@ export default function OgImage() {
     eyebrow: "The schedule",
     // Two lines: a `text` + `magenta` row renders as no-shrink spans that
     // can't wrap between them, so a long single line runs into the bolt.
-    lines: [{ text: "Coming online," }, { text: "room by", magenta: "room." }],
+    lines: [{ text: "Five days," }, { text: "one", magenta: "current." }],
     tagline: "Confirmed activations · Sept 28 – Oct 2",
   });
 }
