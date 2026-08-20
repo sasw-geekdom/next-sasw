@@ -63,10 +63,15 @@ export default async function SpeakersPage() {
                 <p className="font-mono text-xs uppercase tracking-widest text-magenta">
                   Confirmed
                 </p>
-                {/* The counterpart to /schedule's "Coming online, room by
-                    room." — the two index pages now rhyme, and "online" is
-                    already the site's word for a thing that has gone from
-                    planned to published.
+                {/* "Online" is the site's word for a thing that has gone
+                    from planned to published, which is what this section is
+                    about.
+
+                    It used to be described here as the counterpart to
+                    /schedule's "Coming online, room by room." That headline is
+                    retired — /schedule's hero took the calendar's own line
+                    when the page stopped having two of them — so the rhyme is
+                    gone and only the reasoning below still holds.
     
                     Not "First names up.", which the hero says now, and not
                     "These are speaking.", which was accurate but stepped out

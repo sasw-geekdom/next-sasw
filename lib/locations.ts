@@ -58,6 +58,19 @@ export type RoomTier = "anchor" | "day" | "single";
 export interface Room {
   slug: string;
   name: string;
+  /**
+   * A name for a cell too narrow to hold the real one.
+   *
+   * Only set where the full name genuinely doesn't fit anywhere it's used.
+   * On the week calendar a venue label sits in a lane that can be a quarter
+   * of a day column, and "Texas Public Radio" truncates there to "TEXAS
+   * PUBLIC …" — which names the wrong thing, since the venue is the one field
+   * that tells two simultaneous 1–6 PM blocks apart.
+   *
+   * Everything else on the site keeps `name`. This is a fallback for one
+   * layout, not a rename.
+   */
+  shortName?: string;
   host: string;
   desc: string;
   tag: string;
@@ -82,6 +95,8 @@ export const ROOMS: Room[] = [
   {
     slug: "tpr",
     name: "Texas Public Radio",
+    // The station's own abbreviation, and already this room's slug.
+    shortName: "TPR",
     place: {
       address: "321 W Commerce St",
       coords: { lat: 29.425941, lon: -98.49713 },

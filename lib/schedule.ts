@@ -1,6 +1,8 @@
 import { EVENT_DAYS } from "@/lib/event";
-import { ASSET, ROOMS, type Room } from "@/lib/locations";
-import { PYSA } from "@/lib/pysa";
+import { ASSET, ROOMS, type Room, type RoomTier } from "@/lib/locations";
+import { ACCESS_GREEN } from "@/lib/access-granted";
+import { PYSA, PYSA_BLUE } from "@/lib/pysa";
+import { MODEL_INK, MODEL_LAVENDER } from "@/lib/the-model";
 import type { TrackName } from "@/lib/tracks";
 
 // The confirmed activations, for /schedule. Curated here for now, like ROOMS —
@@ -218,6 +220,24 @@ export interface FeaturedSession {
    * 2026), so every 2026 session is -05:00.
    */
   when?: { start: string; end: string };
+  /**
+   * A multi-day window for an activation that genuinely has no hour.
+   *
+   * Give-a-LOT's drop-off runs across three days; it is not a two-hour slot
+   * that nobody has pinned down yet, so `when` would be the wrong shape and
+   * inventing a start time would put a fake fact on the grid. Inclusive on
+   * both ends, `YYYY-MM-DD`, in the week's own timezone.
+   *
+   * The calendar renders these on the all-day rail above the hour axis —
+   * where a calendar puts an event that spans days — rather than dropping
+   * them, which is what `scheduleByDay` does and why Give-a-LOT was invisible
+   * on the strip.
+   *
+   * Mutually exclusive with `when` in practice. If an activation ever has
+   * both — a week-long window plus one headline hour — `when` wins on the
+   * grid and this is ignored, because an event drawn twice reads as two.
+   */
+  span?: { from: string; to: string };
   /**
    * A photograph for the page's hero, laid into the right of the frame behind
    * the copy — not a card image and not shown anywhere else.
@@ -676,6 +696,10 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     shortTitle: "Give-a-LOT",
     room: "central-library",
     venueDetail: "1st Floor",
+    // Sept 28 – 30, from the drop-off row in `detail.programme` below. Stated
+    // here as data so the calendar's all-day rail can span it; the programme
+    // row stays the prose version of the same three days.
+    span: { from: "2026-09-28", to: "2026-09-30" },
     // Linux and open source software, taught and installed. The room's other
     // two sessions are Small Business & Solopreneur, but a room is not a
     // circuit — The Rand carries three between its three activations.
@@ -789,6 +813,442 @@ export function scheduleByDay(): DayColumn[] {
       .filter((s) => dayKey(s.when!.start) === d.iso)
       .sort((a, b) => a.when!.start.localeCompare(b.when!.start)),
   }));
+}
+
+// ─── The week as a calendar ─────────────────────────────────────────────────
+//
+// `scheduleByDay` answers "what is on each day" as five lists. This answers
+// "what does the week look like", which is a different question and wants a
+// time axis: the reader's real problem is that four venues run a takeover
+// simultaneously on the same afternoon, and a list cannot show simultaneous.
+//
+// Two things make an hour axis viable here rather than a wall of whitespace:
+//
+//  1. The week is bottom-heavy on purpose. Nearly every activation is a 1–6 PM
+//     takeover, so the axis only has to cover the afternoon and evening — see
+//     `calendarAxis`, which derives the window from the data instead of
+//     assuming a working day. A literal 7 AM – 9 PM grid would be half empty.
+//  2. The genuine outliers — the Thursday brunch, and anything else that has
+//     finished before noon — come off the axis entirely and ride a rail above
+//     it, the same way a calendar treats an all-day event.
+//
+// Lane assignment is deliberately NOT done here. Which activations overlap
+// depends on which ones are currently filtered in, and the filters are client
+// state; computing lanes on the server would lay the grid out for a week the
+// reader isn't looking at. This projects flat, positioned items and the client
+// resolves collisions after filtering.
+
+/** Anything that has ended by noon comes off the hour axis onto the rail. */
+const MORNING_CUTOFF = 12 * 60;
+
+/** Minutes past midnight on the venue's clock, not the reader's. */
+function minutesInTz(iso: string): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    // h23 rather than `hour12: false`, which renders midnight as "24" on some
+    // ICU builds and would sort a 12 AM event to the end of its own day.
+    hourCycle: "h23",
+  }).formatToParts(new Date(iso));
+  const at = (type: string) =>
+    Number(parts.find((part) => part.type === type)!.value);
+  return at("hour") * 60 + at("minute");
+}
+
+/**
+ * "1 – 6 PM", "7:30 – 11:30 AM" — the block label.
+ *
+ * Tighter than `whenLabels`, which spells out "1:00 PM – 6:00 PM" for a page
+ * heading with room for it. A block in a five-across grid does not have that
+ * room, so a redundant `:00` and a repeated meridiem are both dropped.
+ */
+export function compactRange(startMin: number, endMin: number): string {
+  const clock = (min: number, meridiem: boolean) => {
+    const h24 = Math.floor(min / 60);
+    const m = min % 60;
+    const h = h24 % 12 === 0 ? 12 : h24 % 12;
+    return `${h}${m ? `:${String(m).padStart(2, "0")}` : ""}${
+      meridiem ? ` ${h24 < 12 ? "AM" : "PM"}` : ""
+    }`;
+  };
+  const sameHalf = startMin < MORNING_CUTOFF === endMin < MORNING_CUTOFF;
+  return `${clock(startMin, !sameHalf)} – ${clock(endMin, true)}`;
+}
+
+/**
+ * An activation's own brand, flattened for the calendar block that draws it.
+ *
+ * Five of the nine activations have a brand of their own, and they carry it in
+ * two different ways: the three with a band on /schedule have an accent colour
+ * (Access Granted's green, PySanAntonio's blue, The Model's lavender), while
+ * the pitch events have a lockup file and no colour. PySanAntonio has both.
+ * So this is deliberately all-optional — a block takes whichever half exists
+ * and falls back to the house treatment for the rest.
+ *
+ * Flattened to plain strings rather than importing lib/the-model and friends
+ * into the grid: those modules are the bands' full content, and the client
+ * needs four hex values and a file path out of them.
+ */
+export interface CalendarBrand {
+  /**
+   * The keyline colour.
+   *
+   * Deliberately the one signal that survives every block size — a border
+   * needs no room, so an activation stays recognisable in a quarter-width
+   * lane where its lockup cannot be drawn at all.
+   */
+  accent?: string;
+  /** An image lockup, where one exists. */
+  lockup?: { src: string; width: number; height: number; alt: string };
+  /**
+   * A typeset lockup the grid knows how to draw itself.
+   *
+   * Access Granted and The Model have no wordmark file — their marks are set
+   * in type, which is exactly why the question "can the calendar use their
+   * fonts" has a real answer for these two and not for the others. Same two
+   * cases session-bento's `BrandLockup` special-cases, keyed the same way, on
+   * `page` rather than on the title, because the title is copy.
+   */
+  wordmark?: "the-model" | "access-granted" | "startup-bash";
+  /** The ink inside The Model's selection block. */
+  ink?: string;
+}
+
+/**
+ * The brand for an activation, or undefined where it has none.
+ *
+ * Keyed on `page` for the two typeset marks, matching session-bento. The
+ * lockup comes off the session's own `logo`, so an activation that gains one
+ * in the data gains it here with no change.
+ */
+function brandFor(session: ResolvedSession): CalendarBrand | undefined {
+  const accent =
+    session.page === "access-granted"
+      ? ACCESS_GREEN
+      : session.page === "pysanantonio"
+        ? PYSA_BLUE
+        : session.page === "the-model"
+          ? MODEL_LAVENDER
+          : undefined;
+  const wordmark =
+    session.page === "access-granted" ||
+    session.page === "the-model" ||
+    session.page === "startup-bash"
+      ? session.page
+      : undefined;
+  if (!accent && !wordmark && !session.logo) return undefined;
+  return {
+    accent,
+    wordmark,
+    ink: session.page === "the-model" ? MODEL_INK : undefined,
+    lockup: session.logo,
+  };
+}
+
+/** One activation with a confirmed hour, positioned on the axis. */
+export interface CalendarItem {
+  slug: string;
+  /** `shortTitle ?? title` — a block is narrower than a card. */
+  title: string;
+  /**
+   * The full title, for the one surface with room for it.
+   *
+   * `shortTitle` exists because "The Creative Futures™ Brunch powered by The
+   * Down Market" is 54 characters carrying two brands, and in a quarter-width
+   * lane it swamps everything beside it. An agenda row is 500px of clear space
+   * — the place the organisers' full title belongs.
+   */
+  longTitle: string;
+  /**
+   * Where to force the wrap, when the title carries a trailing credit.
+   *
+   * Left to itself the break lands mid-phrase and the partner's name splits
+   * across two lines. Copied from the activation's own `titleBreakBefore`, so
+   * the row breaks where the bento card and the hero already break.
+   */
+  titleBreak?: string;
+  page: string | null;
+  dayIso: string;
+  startMin: number;
+  endMin: number;
+  /**
+   * Pre-formatted; the client has no business re-deriving a timezone.
+   *
+   * Only drawn where the block cannot express its own time: the morning rail,
+   * the mobile stack, and axis blocks too short to hold anything else. A block
+   * sitting on the hour grid already states its hours by where it starts and
+   * how far it runs, which is the entire point of an axis — printing "1 – 6 PM"
+   * inside it spends the block's best line restating its own geometry.
+   */
+  timeLabel: string;
+  /** True when this has finished by noon and belongs on the rail. */
+  morning: boolean;
+  venueSlug: string;
+  venueName: string;
+  /** `shortName ?? name` — what a narrow lane prints instead of truncating. */
+  venueShort: string;
+  /**
+   * The room's tier, carried across so the client can charge a block by it
+   * without importing lib/locations — which is the whole reason this
+   * projection exists (see week-strip.tsx for the same split).
+   *
+   * Circuits deliberately have no colours of their own, so the grid cannot
+   * tint a block by strand. Venue hierarchy is what it charges instead: the
+   * anchor burns hottest, the day rooms sit under it, the one-night rooms
+   * stay unlit. That is also the honest reading of this week — four venues
+   * running simultaneous 1–6 PM takeovers means the axis says almost nothing
+   * and the room says everything.
+   */
+  venueTier: RoomTier;
+  circuit: string;
+  /** The activation's own brand, where it has one. */
+  brand?: CalendarBrand;
+  /** Whether a calendar file can be built for it — drives the export toggle. */
+  exportable: boolean;
+}
+
+/** An activation that spans days and has no hour — the all-day rail. */
+export interface CalendarSpan {
+  slug: string;
+  title: string;
+  page: string | null;
+  /** Indices into `EVENT_DAYS`, inclusive, so the rail can span columns. */
+  fromIndex: number;
+  toIndex: number;
+  dayLabel: string;
+  venueSlug: string;
+  venueName: string;
+  venueTier: RoomTier;
+  circuit: string;
+  brand?: CalendarBrand;
+}
+
+export interface WeekCalendar {
+  days: { iso: string; weekday: string; label: string }[];
+  items: CalendarItem[];
+  spans: CalendarSpan[];
+  /** The hour window the axis covers, in minutes past midnight. */
+  axis: { startMin: number; endMin: number };
+}
+
+/**
+ * The axis window, floored and ceiled to whole hours.
+ *
+ * Derived rather than pinned to 1–8 PM so that the first activation to land
+ * outside today's shape — a noon start, a 9 PM close — grows the grid instead
+ * of being drawn off the top of it. Morning items are excluded from the
+ * derivation by definition: they are the reason the rail exists.
+ *
+ * The fallback matters more than it looks. With every activation on the rail
+ * and none on the axis, `Math.min()` of an empty list is `Infinity` and the
+ * grid would be laid out with a negative height.
+ */
+function calendarAxis(items: CalendarItem[]): { startMin: number; endMin: number } {
+  const onAxis = items.filter((i) => !i.morning);
+  if (onAxis.length === 0) return { startMin: 13 * 60, endMin: 18 * 60 };
+  const first = Math.min(...onAxis.map((i) => i.startMin));
+  const last = Math.max(...onAxis.map((i) => i.endMin));
+  return {
+    startMin: Math.floor(first / 60) * 60,
+    endMin: Math.ceil(last / 60) * 60,
+  };
+}
+
+/** Whether two "Sep 28"-style labels share a month. */
+function sameMonth(a: string, b: string): boolean {
+  return a.split(" ")[0] === b.split(" ")[0];
+}
+
+export function weekCalendar(): WeekCalendar {
+  const resolved = resolveSessions(allSessions());
+
+  const items: CalendarItem[] = resolved
+    .filter((s) => s.when)
+    .map((s) => {
+      const startMin = minutesInTz(s.when!.start);
+      const endMin = minutesInTz(s.when!.end);
+      return {
+        slug: s.slug,
+        title: s.shortTitle ?? s.title,
+        longTitle: s.title,
+        titleBreak: s.titleBreakBefore,
+        page: s.page ?? null,
+        dayIso: dayKey(s.when!.start),
+        startMin,
+        endMin,
+        timeLabel: compactRange(startMin, endMin),
+        morning: endMin <= MORNING_CUTOFF,
+        venueSlug: s.venue.slug,
+        venueName: s.venue.name,
+        venueShort: s.venue.shortName ?? s.venue.name,
+        venueTier: s.venue.tier,
+        circuit: s.circuit,
+        brand: brandFor(s),
+        // Only activations with a page have a per-session .ics route, and only
+        // those with `when` have anything to put in one.
+        exportable: !!s.page,
+      };
+    })
+    // Ordered by start, then by the canonical room order, so lane assignment
+    // downstream is stable: without the tiebreak two activations starting at
+    // the same minute could swap columns between renders.
+    .sort(
+      (a, b) =>
+        a.startMin - b.startMin ||
+        ROOMS.findIndex((r) => r.slug === a.venueSlug) -
+          ROOMS.findIndex((r) => r.slug === b.venueSlug),
+    );
+
+  const dayIndex = new Map(EVENT_DAYS.map((d, i) => [d.iso, i]));
+  const spans: CalendarSpan[] = resolved
+    // `when` wins where an activation somehow carries both — see the note on
+    // `span`. Drawing it on the axis and the rail reads as two events.
+    .filter((s) => s.span && !s.when)
+    .flatMap((s) => {
+      const from = dayIndex.get(s.span!.from);
+      const to = dayIndex.get(s.span!.to);
+      // A span reaching outside the week is dropped rather than clamped: it
+      // means the dates are wrong, and a silently shortened bar hides that.
+      if (from === undefined || to === undefined || to < from) return [];
+      return [
+        {
+          slug: s.slug,
+          title: s.shortTitle ?? s.title,
+          page: s.page ?? null,
+          fromIndex: from,
+          toIndex: to,
+          // "Sep 28 – 30" rather than "Sep 28 – Sep 30" where the month is
+          // the same, which for a five-day week in one month is always. The
+          // second "Sep" is four characters that say nothing, and on a phone
+          // they were the four that pushed the label onto a second line and
+          // broke it as "Sep 28 – Sep / 30".
+          dayLabel:
+            from === to
+              ? EVENT_DAYS[from].label
+              : sameMonth(EVENT_DAYS[from].label, EVENT_DAYS[to].label)
+                ? `${EVENT_DAYS[from].label} – ${EVENT_DAYS[to].label.split(" ")[1]}`
+                : `${EVENT_DAYS[from].label} – ${EVENT_DAYS[to].label}`,
+          venueSlug: s.venue.slug,
+          venueName: s.venue.name,
+          venueTier: s.venue.tier,
+          circuit: s.circuit,
+          brand: brandFor(s),
+        },
+      ];
+    });
+
+  return {
+    days: EVENT_DAYS.map((d) => ({
+      iso: d.iso,
+      weekday: new Date(`${d.iso}T12:00:00-05:00`).toLocaleDateString("en-US", {
+        timeZone: TZ,
+        weekday: "short",
+      }),
+      label: d.label,
+    })),
+    items,
+    spans,
+    axis: calendarAxis(items),
+  };
+}
+
+/** One venue running on a given day — a column in the day view. */
+export interface DayVenue {
+  slug: string;
+  name: string;
+  short: string;
+  tier: RoomTier;
+  count: number;
+}
+
+export interface DayCalendar {
+  day: { iso: string; weekday: string; label: string };
+  /** Only the rooms with something on, in canonical ROOMS order. */
+  venues: DayVenue[];
+  items: CalendarItem[];
+  spans: CalendarSpan[];
+  axis: { startMin: number; endMin: number };
+  /** Where this day sits in the week, for prev/next. */
+  index: number;
+}
+
+/**
+ * One day, with the venues as columns.
+ *
+ * The other half of the answer to a dense week. The week view has to fit five
+ * days across the page, so every venue running at once shares one 240px column
+ * and a thirty-minute slot ends up 80px wide; here a day has the whole width
+ * and TPR gets a column of its own, which is both wider than a day column in
+ * the week view and free of lane collisions — a room cannot overlap itself.
+ *
+ * Two deliberate differences from `weekCalendar`:
+ *
+ *  - No morning rail. The rail exists in the week view so the axis doesn't
+ *    start at 7:30 AM for one brunch across five columns. A day view is the
+ *    detail view and should show the day's true shape, including the fact
+ *    that Thursday has a morning and an evening and nothing between them.
+ *  - The axis is derived from this day alone, so a quiet day draws short.
+ */
+export function dayCalendar(iso: string): DayCalendar | null {
+  const index = EVENT_DAYS.findIndex((d) => d.iso === iso);
+  if (index === -1) return null;
+  const meta = EVENT_DAYS[index];
+
+  const all = weekCalendar();
+  const items = all.items.filter((i) => i.dayIso === iso);
+  const spans = all.spans.filter(
+    (s) => index >= s.fromIndex && index <= s.toIndex,
+  );
+
+  const venues: DayVenue[] = ROOMS.flatMap((room) => {
+    const onDay = [
+      ...items.filter((i) => i.venueSlug === room.slug),
+      ...spans.filter((s) => s.venueSlug === room.slug),
+    ];
+    if (onDay.length === 0) return [];
+    return [
+      {
+        slug: room.slug,
+        name: room.name,
+        short: room.shortName ?? room.name,
+        tier: room.tier,
+        count: onDay.length,
+      },
+    ];
+  });
+
+  // Tight to this day's own extent. `Math.min` of an empty list is Infinity,
+  // which would lay the grid out with a negative height, so an empty day
+  // falls back to the afternoon the rest of the week runs in.
+  const axis =
+    items.length === 0
+      ? { startMin: 13 * 60, endMin: 18 * 60 }
+      : {
+          startMin: Math.floor(Math.min(...items.map((i) => i.startMin)) / 60) * 60,
+          endMin: Math.ceil(Math.max(...items.map((i) => i.endMin)) / 60) * 60,
+        };
+
+  return {
+    day: {
+      iso,
+      weekday: new Date(`${iso}T12:00:00-05:00`).toLocaleDateString("en-US", {
+        timeZone: TZ,
+        weekday: "long",
+      }),
+      label: meta.label,
+    },
+    venues,
+    items,
+    spans,
+    axis,
+    index,
+  };
+}
+
+/** Every activation that can be exported, for the .ics route to validate against. */
+export function exportableSessions(): ResolvedSession[] {
+  return resolveSessions(allSessions()).filter((s) => s.when && s.page);
 }
 
 /**

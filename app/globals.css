@@ -185,6 +185,179 @@ h3,
    *before* `transform`. Put this on the same element as the walk and it
    multiplies that element's translation too — see the note in
    components/site/model-mascots.tsx. It belongs on a child. */
+/*
+  Startup Bash's bolts, and The Model's mascots.
+
+  Both are CSS rather than the RAF simulation ModelMascots runs on /schedule's
+  activation band. That one has to wander a whole section and respond to
+  clicks; these live inside a 90px event row, follow a fixed path and never
+  need to know where anything else is — so a keyframe does it for none of the
+  per-frame cost, and `motion-safe:` gates it without a single line of script.
+
+  Nothing here plays on its own. `boltDrift` runs only while the row is
+  hovered, and `mascotBurst` fires once when the row is first seen. The site's
+  rule that ambient motion is opt-in — stated in model-mascots.tsx — survives.
+*/
+
+/* Rises, drifts sideways, fades out. The row clips it. */
+@keyframes boltDrift {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) rotate(var(--spin-from, -12deg));
+  }
+  18% {
+    opacity: var(--peak, 0.5);
+  }
+  82% {
+    opacity: var(--peak, 0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift, 10px), -28px, 0)
+      rotate(var(--spin-to, 14deg));
+  }
+}
+
+/*
+  `mascotLive` and `mascotBurst` used to live here — a wander and a launch,
+  both keyframes. They are gone because keyframes cannot bounce: a path decided
+  in advance can be shaped to stay inside a box but cannot react to one, so a
+  mascot reaching an edge either stopped short of it or was clipped by it.
+  Turning at a wall needs the wall's position and the current heading, which is
+  a per-frame calculation. See event-particles.tsx, which now runs the same
+  reflection model-mascots.tsx does.
+
+  `boltDrift` stays a keyframe. A bolt rises and fades on a fixed path and
+  never touches a wall.
+*/
+
+/*
+  Agenda ↔ week, borrowed from next-geekdom's navbar logo handoff.
+
+  Four things taken from it, each of which that file records getting wrong
+  first:
+
+  1. Never animate layout. Its LOGO_BOX is pinned because an earlier version
+     animated `width` and reflowed the header's flex row every frame. Ours is
+     worse if ignored — the two views differ by ~700px of height and a section
+     animating that reflows everything below it. So the height is not animated
+     at all; the outgoing view leaves the flow the instant the switch happens
+     and the container takes the new height under the motion.
+
+  2. A relay, not a crossfade. "THE LOCKUP HAS NO OPACITY OF ITS OWN" — its
+     nine glyphs animate themselves, because an earlier version faded the whole
+     <svg> and the stagger ran underneath an already-invisible element. Here
+     the views have no opacity of their own either; their cells do, indexed by
+     `--i`.
+
+  3. The overlap is the bridge. It holds both crowns on screen for 125ms
+     because "kill the overlap and the crown visibly disappears before its
+     replacement shows up". The entry delay below is under the exit's total
+     length for exactly that reason.
+
+  4. Asymmetric, and an animation rather than a transition. Enter is long and
+     eased out, exit is short and eased in — and a transition cannot stagger n
+     elements independently, which is why these are keyframes swapped by class.
+
+  Not taken: CROWN_ENTER_SCALE's 0.55. That number is doing a specific job —
+  the crown genuinely changes size 3.5× and starting it near half reads as the
+  same crown enlarging. Our cells do not persist across the swap, so a scale
+  that deep would read as a zoom. 0.96 reads as re-forming.
+*/
+@keyframes calCellIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+  Lifts away rather than sinking back the way it came — the same reasoning the
+  navbar gives for its letters: leaving along the path you entered reads as an
+  undo, lifting off reads as the thing being absorbed.
+*/
+@keyframes calCellOut {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.94);
+  }
+}
+
+.cal-cell {
+  animation: calCellIn 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  /* 150ms of head start for the exit, then 26ms a step down the week. */
+  animation-delay: calc(var(--i, 0) * 26ms + 150ms);
+}
+
+/*
+  Swapping the animation name is the trigger, exactly as the navbar does it:
+  the class flips, the browser replays from the new keyframes.
+*/
+.cal-view--out .cal-cell {
+  animation: calCellOut 170ms cubic-bezier(0.4, 0, 1, 1) both;
+  animation-delay: calc(var(--i, 0) * 18ms);
+}
+
+/*
+  The exiting copy is a corpse — no observers, no loops.
+
+  `display: none` is deliberate rather than `visibility` or opacity: it is what
+  stops MascotBurst's IntersectionObserver from ever reporting an intersection,
+  so the burst does not re-fire inside a view that is on screen for 300ms and
+  then gone.
+*/
+.cal-view--out [data-particles] {
+  display: none;
+}
+
+/*
+  Only the cells relay. The chrome does not.
+
+  next-geekdom animates the logo and nothing else in its header, and the same
+  restraint applies here: the filters, the caption and the view toggle are the
+  same controls either side of the switch, so animating a second copy of them
+  over the first put two toggles and two select rows on screen at once and made
+  the handoff read as chaos rather than a change of view.
+
+  `visibility`, not `display`: the outgoing copy is absolutely positioned and
+  its controls still hold the shape its cells were laid out against, so
+  collapsing them would shift the very thing that is meant to be leaving
+  quietly.
+*/
+.cal-view--out [data-controls] {
+  visibility: hidden;
+}
+
+/*
+  Reduced motion: no handoff, just the new view.
+
+  `animation: none`, not a zeroed duration. next-geekdom's blanket rule zeroes
+  duration *and* delay together and explains why — kill the duration alone and
+  the delay survives, so a cell holds its `from` frame through 150ms of nothing
+  and then pops. This repo has no blanket rule (it gates per component, with
+  `motion-safe:` and matchMedia), so the guard is stated here. Dropping the
+  animation outright also drops `both`, which is what leaves each cell at its
+  natural, visible state.
+
+  The outgoing copy is not rendered at all in this case — switchView checks the
+  same query — because two fully opaque views stacked for 340ms is worse than
+  the jump this was meant to smooth.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .cal-cell,
+  .cal-view--out .cal-cell {
+    animation: none;
+  }
+}
+
 @keyframes modelPop {
   from {
     opacity: 0;

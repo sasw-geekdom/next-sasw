@@ -50,8 +50,13 @@ export interface HeroShellProps {
      * Small print under the button. "Get on the list." is on-voice but opaque
      * about whether it's a waitlist, a newsletter or the real thing, so the
      * pages pointing at /register disclose it here.
+     *
+     * A node rather than a string since /schedule's hero started pointing at
+     * its own calendar: register had to keep a route out of that hero, and it
+     * is a link now rather than a sentence about one. Strings still pass —
+     * home and /speakers are unchanged.
      */
-    note?: string;
+    note?: React.ReactNode;
   };
   bolt: HeroBolt;
   /**

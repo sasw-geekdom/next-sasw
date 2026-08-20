@@ -1,4 +1,4 @@
-import { icsStamp } from "@/lib/calendar";
+import { icsLine as line, icsStamp } from "@/lib/calendar";
 import { resolveSchedule, scheduleSlugs } from "@/lib/schedule";
 
 // A single activation's calendar entry.
@@ -20,24 +20,6 @@ export function generateStaticParams() {
       return s?.kind === "activation" && !!s.session.when;
     })
     .map((slug) => ({ slug }));
-}
-
-/** Fold to 75 octets per line and escape the characters iCalendar reserves. */
-function line(key: string, value: string): string {
-  const escaped = value
-    .replace(/\\/g, "\\\\")
-    .replace(/;/g, "\\;")
-    .replace(/,/g, "\\,")
-    .replace(/\n/g, "\\n");
-  const full = `${key}:${escaped}`;
-  if (full.length <= 75) return full;
-  const parts = [full.slice(0, 75)];
-  let rest = full.slice(75);
-  while (rest.length) {
-    parts.push(` ${rest.slice(0, 74)}`);
-    rest = rest.slice(74);
-  }
-  return parts.join("\r\n");
 }
 
 export async function GET(

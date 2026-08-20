@@ -125,7 +125,17 @@ export function weekEvent() {
  * Returns null when the activation has no confirmed time.
  */
 export function activationEvent(session: ResolvedSession) {
-  if (!session.when) return null;
+  // A confirmed hour, or a multi-day window. Only `when` used to count, which
+  // meant Give-a-LOT — a three-day drive with a `span` and no single hour —
+  // emitted no structured data at all from its own page. schema.org takes a
+  // plain `YYYY-MM-DD` for an event that occupies whole days, so the shape was
+  // always expressible; nothing here was reading for it.
+  const dates = session.when
+    ? { startDate: session.when.start, endDate: session.when.end }
+    : session.span
+      ? { startDate: session.span.from, endDate: session.span.to }
+      : null;
+  if (!dates) return null;
 
   const url = `${SITE_URL}/schedule/${session.page}`;
   const image = session.hero?.src
@@ -137,10 +147,10 @@ export function activationEvent(session: ResolvedSession) {
     "@type": "Event",
     name: session.title,
     description: session.blurb,
-    // Kept as authored — ISO 8601 with an explicit offset, which is what
-    // schema.org wants and what the .ics and the visible label already use.
-    startDate: session.when.start,
-    endDate: session.when.end,
+    // Kept as authored — ISO 8601 with an explicit offset for a timed
+    // activation, which is what schema.org wants and what the .ics and the
+    // visible label already use; plain dates for one that spans days.
+    ...dates,
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     location: place(session.venue),
@@ -156,6 +166,60 @@ export function activationEvent(session: ResolvedSession) {
     offers: FREE_OFFER,
     url,
     image: [image],
+  };
+}
+
+/**
+ * A node about to sit inside a `@graph`, minus its own `@context`.
+ *
+ * Written as a copy-and-delete rather than the obvious rest-destructure,
+ * because `const { "@context": _, ...rest }` leaves an unused binding and this
+ * repo's eslint has no ignore pattern for a leading underscore.
+ */
+function nested(node: object): Record<string, unknown> {
+  const copy = { ...node } as Record<string, unknown>;
+  delete copy["@context"];
+  return copy;
+}
+
+/**
+ * The whole schedule, for /schedule.
+ *
+ * That page emitted nothing at all — the homepage carried the week and each
+ * activation carried itself, and the one page that *is* the schedule described
+ * none of it. An `ItemList` of `Event`s is what a list-of-events page is
+ * supposed to say, and it is what puts individual activations in a result
+ * rather than only the week.
+ *
+ * A `@graph` rather than two scripts, so the week node is present on the same
+ * page as the activations that point at it: every one carries
+ * `superEvent: { "@id": WEEK_ID }`, and here that reference resolves locally
+ * instead of relying on a crawler having read the homepage.
+ *
+ * Nested nodes drop their own `@context` — it belongs once, at the top.
+ */
+export function scheduleGraph(sessions: ResolvedSession[]) {
+  const events = sessions
+    .map(activationEvent)
+    .filter((e): e is NonNullable<typeof e> => e !== null)
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      nested(weekEvent()),
+      {
+        "@type": "ItemList",
+        name: "San Antonio Startup + Tech Week 2026 — schedule",
+        itemListOrder: "https://schema.org/ItemListOrderAscending",
+        numberOfItems: events.length,
+        itemListElement: events.map((item, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          item: nested(item),
+        })),
+      },
+    ],
   };
 }
 
