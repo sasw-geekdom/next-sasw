@@ -745,6 +745,216 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         "Free with Startup + Tech Week registration. Donations are welcome from anyone, whether or not you are attending the week.",
     },
   },
+
+  // ─── The Rand, Tuesday ────────────────────────────────────────────────────
+  //
+  // The community floor's first stacked day: three groups that already run all
+  // year, an hour each, back to back. They are separate activations rather than
+  // one "community afternoon" block because they are separate organisations
+  // with their own members, their own sites and their own speakers — collapsing
+  // them into one card would credit none of them and give the CMS nothing to
+  // attach a speaker to.
+  //
+  // Three is also exactly EXPAND_MAX, so the week still draws them individually
+  // rather than folding the run into a summary block. A fourth group on this
+  // afternoon tips that over, which is the intended behaviour and worth knowing
+  // before one is added.
+  //
+  // TODO(content): AITX and the .NET user group are each bringing a speaker who
+  // hasn't been named yet. Those belong in the sessions CMS pointed at these
+  // slugs — not here — which is what makes the speaker pages link back. Google
+  // Developer Groups already has one: Hastimal Jangid is in the CMS and needs a
+  // session row with `activation: "google-developer-groups"`.
+  {
+    slug: "aitx",
+    page: "aitx",
+    title: "AITX Community",
+    room: "the-rand",
+    venueDetail: "3rd Floor",
+    circuit: "AI & Applied Innovation",
+    site: { label: "aitxcommunity.com", href: "https://www.aitxcommunity.com/" },
+    // Their own mark, redrawn for a dark ground. AITX publishes no vector and
+    // no light-on-dark cut, so this is traced from their artwork.
+    //
+    // Two things had to be solved. Their wordmark is pure black, so on a dark
+    // card the type vanished and left a floating orange figure; and the first
+    // fix — swapping every achromatic pixel to white, the standard dark-mode
+    // treatment — was wrong, because the orange figure's antialiased edge is
+    // *also* nearly neutral, so the rule outlined the whole mark in a white
+    // fringe. Invisible at card size, obvious at hero size.
+    //
+    // Traced instead, from the largest artwork they publish. Their site ships
+    // a 480x136 PNG whose wordmark is only 228px wide, and at that resolution
+    // a trace ripples: the bowl of the "a" scallops and the dot on the "i" —
+    // 14px across — comes out a visible polygon however the tracer is tuned.
+    // The newsletter's own logo files are 1200px, and the square one carries
+    // the same drawing (measured: 0.99 IoU against the horizontal lockup's
+    // figure, 0.97 against its wordmark) with the wordmark at 755px, 3.3x the
+    // resolution. So the shapes come from there and the horizontal geometry —
+    // wordmark 1.3696x the figure's width, gap 0.4587x, centres aligned —
+    // comes from the landscape lockup, measured off it rather than guessed.
+    //
+    // The orange is #FF4200, taken from the landscape file and matching their
+    // site. The square file fills the same figure #FF6600; the shape is what
+    // was borrowed from it, not the colour.
+    //
+    // TODO(assets): an official vector from AITX would still beat a trace.
+    logo: {
+      src: "/activations/aitx.svg",
+      width: 4703,
+      height: 1277,
+      alt: "AITX Community",
+    },
+    // One of their own rooms, from aitxcommunity.com — a speaker with a mic
+    // and a room listening, which is what a one-hour community activation
+    // actually looks like.
+    //
+    // Chosen over their wider hackathon group photo for how it meets the
+    // frame. This hero is masked into black behind the copy, and the group
+    // shot is bright edge to edge, so the mask handed off at a visible seam.
+    // This room is dark and dissolves into it, and its one lit subject is
+    // still legible after the dimming. The cost is honest: it says "a room",
+    // not "seven thousand members", which is what the blurb beside it claims.
+    //
+    // 4:3, so it crops harder into the letterbox than their one true landscape
+    // would; the speaker sits near the right edge and goes further into the
+    // corner as the viewport widens.
+    hero: {
+      src: "/activations/aitx-hero.jpg",
+      width: 1800,
+      height: 1350,
+      alt: "",
+    },
+    when: {
+      start: "2026-09-29T13:00:00-05:00",
+      end: "2026-09-29T14:00:00-05:00",
+    },
+    // Their stated mission is "to make Texas the best place in the world to
+    // hire technical talent and build technical companies", and the meetups
+    // run in Austin and Houston — San Antonio is not on that list, which is
+    // the actual news here and what the blurb leads on.
+    blurb:
+      "Seven thousand engineers, AI founders and researchers building the Texas AI ecosystem — a group that meets in Austin and Houston, on a San Antonio floor for the week.",
+    detail: {
+      eyebrow: "The hour",
+      headline: "The Texas triangle, one floor up.",
+      lede: [
+        "AITX runs the technical AI community across the Texas triangle \u2014 monthly meetups, hackathons and dinners for the engineers, founders and researchers building on frontier tooling rather than talking about it.",
+        "Their rooms are in Austin and Houston. This hour is the first of them in San Antonio, on the floor DEVSA keeps for exactly this.",
+      ],
+      coda:
+        "Texas keeps being described as an AI hub in the aggregate \u2014 the capital that landed, the companies that moved. AITX is the part of that which is a room with people in it, and the difference between a region with startups and a region with an ecosystem is whether those people ever meet.",
+    },
+  },
+  {
+    slug: "google-developer-groups",
+    page: "google-developer-groups",
+    title: "Google Developer Groups",
+    // "Google Developer Groups" is 23 characters and reads as a sentence in a
+    // filter chip beside "AITX". GDG is what the chapter calls itself anyway.
+    shortTitle: "GDG",
+    room: "the-rand",
+    venueDetail: "3rd Floor",
+    circuit: "Tech & Builders",
+    // The San Antonio chapter, not the global directory. There is a real
+    // chapter page — 343 members, its own organisers and its own events — and
+    // sending a reader to Google's worldwide chapter index to find out about
+    // the local one is the same mistake as pointing the .NET group at
+    // dotnet.microsoft.com.
+    site: {
+      label: "gdg.community.dev/gdg-san-antonio",
+      href: "https://gdg.community.dev/gdg-san-antonio/",
+    },
+    // The one-line lockup in its light-on-dark cut — white type with Google's
+    // four brand colours in the mark, straight from the GDG platform. Nothing
+    // recoloured here; this variant is published.
+    logo: {
+      src: "/activations/google-developer-groups.svg",
+      width: 3003,
+      height: 300,
+      alt: "Google Developer Groups",
+    },
+    when: {
+      start: "2026-09-29T14:00:00-05:00",
+      end: "2026-09-29T15:00:00-05:00",
+    },
+    blurb:
+      "The local chapter of Google's developer community \u2014 a featured talk from Hastimal Jangid, and the room that runs it the rest of the year.",
+    detail: {
+      eyebrow: "The hour",
+      headline: "Local chapter, open door.",
+      lede: [
+        "Google Developer Groups are local communities where developers build skills together, in person and online \u2014 open to anyone interested in the technology, at any level of experience.",
+        "The chapter brings its featured speaker to The Rand for the hour: Hastimal Jangid, co-founder of RankRabbit AI, on cloud, data and AI engineering at platform scale.",
+      ],
+      coda:
+        "A chapter is not a conference track. It is the same people, in the same city, month after month \u2014 which is why the useful thing this hour offers is not the talk but the group still being there in November.",
+    },
+  },
+  {
+    slug: "dotnet-user-group",
+    page: "dotnet-user-group",
+    title: "San Antonio .NET User Group",
+    shortTitle: ".NET User Group",
+    room: "the-rand",
+    venueDetail: "3rd Floor",
+    circuit: "Tech & Builders",
+    // The group's own home is the Meetup, not dotnet.microsoft.com — that is
+    // the platform's site, and pointing a reader at Microsoft to find out when
+    // a San Antonio user group meets sends them to the wrong place.
+    site: { label: "meetup.com/sadnug", href: "https://www.meetup.com/sadnug/" },
+    // The official text-only mark in white, from github.com/dotnet/brand
+    // The box comes from the glyphs' real ink bounds, not from the cap line.
+    // Matching cap heights puts the caps exactly on y=0, and round capitals
+    // overshoot the cap line — Geist's "G" reaches 726 against a cap height of
+    // 710 — so the top of the G in "Group" sat 2.73 units outside the viewBox
+    // and was clipped. Measuring the union of both halves and padding it is
+    // the fix; a cap-height box is wrong for any face, not just this one.
+    //
+    // (CC0), set beside "User Group" in Geist 500 at the same cap height —
+    // the two share a baseline and a cap line, so they read as one line of
+    // type rather than a logo with a caption parked beside it. Same rule the
+    // Startup Bash mark follows against the SASTW logo's own wordmark.
+    //
+    // A composed asset rather than a composed component, unlike Startup Bash.
+    // Both would draw the same thing, but a typeset mark leaves the lockup
+    // sizing path — the width-led `lockupHeight` and the `axisMarkCap` that
+    // keeps a one-hour block from clipping — and would need its own sizing at
+    // three block scales, on the page hero, and anywhere else a mark is drawn.
+    // Baked into the file, it stays an ordinary lockup and every one of those
+    // call sites keeps working untouched.
+    //
+    // It also fixes the size complaint by itself. ".NET" alone is 2.67:1, and
+    // width-led sizing gives anything that square the tallest draw on the
+    // grid — 84px in the agenda against Google Developer Groups' 23. With the
+    // words attached the lockup is 7.9:1 and lands at 28, which is where it
+    // belongs next to the other two.
+    logo: {
+      src: "/activations/dotnet-user-group.svg",
+      width: 12768,
+      height: 1573,
+      alt: "San Antonio .NET User Group",
+    },
+    when: {
+      start: "2026-09-29T15:00:00-05:00",
+      end: "2026-09-29T16:00:00-05:00",
+    },
+    // Their own description is "for anyone interested in a wide range of .NET
+    // topics around the San Antonio, Texas area" — deliberately broad, and the
+    // recent run of talks bears it out.
+    blurb:
+      "San Antonio's .NET group, running since long before this week existed \u2014 C#, cloud, and lately agentic AI, for anyone who writes on the platform.",
+    detail: {
+      eyebrow: "The hour",
+      headline: "Still meeting, thirty-one events in.",
+      lede: [
+        "The San Antonio .NET User Group is for anyone interested in a wide range of .NET topics around the San Antonio area \u2014 their words, and the back catalogue holds them to it: serverless, cross-platform builds, testing, CI/CD, and a recent run on C# with agentic AI.",
+        "Most of the last year ran online. This hour is the group back in a room.",
+      ],
+      coda:
+        "Platform user groups are the least fashionable and most durable thing in a tech scene. They were meeting before the week was announced and they will be meeting after it \u2014 which is the whole argument for giving the community floor to the groups that already do the work.",
+    },
+  },
 ];
 
 /** The week's timezone. Every label and calendar stamp is resolved in it. */

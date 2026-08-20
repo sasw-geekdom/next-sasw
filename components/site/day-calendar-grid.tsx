@@ -12,6 +12,7 @@ import {
   SpanBar,
   StackBlock,
   StackSpanBar,
+  axisMarkCap,
   hasSpareRows,
   placeLanes,
 } from "@/components/site/calendar/blocks";
@@ -139,6 +140,7 @@ export function DayCalendarGrid({
             dense={item.lanes >= 2}
             lanes={item.lanes}
             spare={hasSpareRows(item.startMin, item.endMin, hourPx)}
+            markMax={axisMarkCap(item.startMin, item.endMin, hourPx)}
             fill
           />
         ),

@@ -71,8 +71,9 @@ export function WeekCalendar() {
             work: it put the calendar in the document outline and gave this
             section the name that makes it a landmark. Without it a screen
             reader user navigating by heading went straight from the hero to
-            "PySanAntonio II", with the nine activations, five days, filters
-            and day toggles in between announced as nothing at all.
+            "PySanAntonio II", with every activation, all five days, the
+            filters and the day toggles in between announced as nothing at
+            all.
 
             Dated rather than just "The week", because headings are read out of
             context in a list, where "The week" alone says very little. */}

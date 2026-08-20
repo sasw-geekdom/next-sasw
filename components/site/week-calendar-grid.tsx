@@ -15,6 +15,7 @@ import {
   StackBlock,
   StackSpanBar,
   SummaryBlock,
+  axisMarkCap,
   hasSpareRows,
   placeLanes,
 } from "@/components/site/calendar/blocks";
@@ -302,6 +303,7 @@ export function WeekCalendarGrid({
             dense={cell.lanes >= 3}
             lanes={cell.lanes}
             spare={hasSpareRows(cell.startMin, cell.endMin, HOUR_PX)}
+            markMax={axisMarkCap(cell.startMin, cell.endMin, HOUR_PX)}
             showAction={false}
             fill
           />

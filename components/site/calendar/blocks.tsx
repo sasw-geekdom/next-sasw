@@ -99,6 +99,51 @@ export function hasSpareRows(
 }
 
 /**
+ * The tallest a lockup may draw inside an axis block, or undefined for no
+ * extra limit beyond the size cap.
+ *
+ * Width-led sizing is right while height is the plentiful axis, which it was
+ * for as long as the shortest thing on the grid ran two hours — 120px, and a
+ * 44px mark sat in it with room underneath. The Rand's Tuesday introduced the
+ * first one-hour blocks: 60px, 52px of content box, and the same 44px mark
+ * left 8px for two rows of meta that need about 26. Nothing reported an error,
+ * because the rows were not dropped — they were drawn and clipped, so two of
+ * the three blocks silently lost their time and venue while the third, whose
+ * mark happens to be a 10:1 lockup that draws 15px tall, kept both.
+ *
+ * So height becomes the binding constraint below a certain block, and the cap
+ * has to come off the block rather than off a size bucket. `lockupHeight`
+ * already takes a max and mins against it, which means passing a smaller one
+ * turns the same call height-led exactly where it needs to be.
+ */
+export function axisMarkCap(
+  startMin: number,
+  endMin: number,
+  hourPx: number,
+): number | undefined {
+  // Blocks with room to spare keep the size-bucket cap they always had; this
+  // is only about the short ones.
+  if (hasSpareRows(startMin, endMin, hourPx)) return undefined;
+  const height = ((endMin - startMin) / 60) * hourPx;
+  // 20px of chrome — 6 of wrapper padding, 2 of border, 12 of the block's own
+  // — then 20 for the single meta row: 9px mono on a 13.5px line, plus the 6px
+  // that separates it from the mark. A 60px block is left 40px of content box,
+  // and 20 of that is mark.
+  //
+  // The gap was 2px on the first pass, which is what was left over rather than
+  // what the mark needed. At that distance a lockup and the time under it read
+  // as one smudged object; the mark gives up 4px and the block becomes legible.
+  //
+  // Measured, and worth keeping that way. These rows are flex children with
+  // the default `flex: 0 1 auto`, so a cap that is over budget does not push
+  // them out of the block where it would be obvious — it *shrinks* them, to
+  // 6px against a 13.5px line, and the glyphs spill back over the mark. Two
+  // attempts sized against 52px and 54px did exactly that before the content
+  // box turned out to be 40.
+  return Math.max(14, height - 20 - 20);
+}
+
+/**
  * How tall to draw a lockup, so marks of different shapes carry equal weight.
  *
  * Height-led sizing — one fixed height for every mark, which is what
@@ -160,12 +205,19 @@ function BrandMark({
   brand,
   title,
   dense,
+  markMax,
   size = "sm",
 }: {
   brand: CalendarBrand;
   title: string;
   /** A lane too narrow to draw an image lockup in. */
   dense: boolean;
+  /**
+   * A hard ceiling from the block's own height, where it has one.
+   *
+   * Overrides the size bucket when it is smaller. See `axisMarkCap`.
+   */
+  markMax?: number;
   /**
    * How much room the mark has.
    *
@@ -311,7 +363,11 @@ function BrandMark({
             //
             // Typeset marks still switch on `size`; they wrap rather than
             // clamp, so a narrow lane genuinely needs the smaller cut.
-            "--mark-h": `${lockupHeight(brand.lockup, 150, lg ? 56 : roomy ? 50 : 44)}px`,
+            "--mark-h": `${lockupHeight(
+              brand.lockup,
+              150,
+              Math.min(lg ? 56 : roomy ? 50 : 44, markMax ?? Infinity),
+            )}px`,
           } as React.CSSProperties
         }
         // Half again on a wide screen. The agenda row is the full width of the
@@ -353,6 +409,7 @@ export function Block({
   spare = false,
   showVenue = true,
   lanes = 1,
+  markMax,
   showAction = true,
 }: {
   item: CalendarItem;
@@ -387,6 +444,8 @@ export function Block({
    * lane any block might ever get.
    */
   lanes?: number;
+  /** A mark ceiling from the block's own height — see `axisMarkCap`. */
+  markMax?: number;
   /**
    * Whether the block carries its own add-to-calendar control.
    *
@@ -421,6 +480,7 @@ export function Block({
       brand={brand!}
       title={item.title}
       dense={dense}
+      markMax={markMax}
       size={markSize}
     />
   ) : (
@@ -519,10 +579,24 @@ export function Block({
 
       {/* The time, only where the block is too short to say anything else.
           Everywhere else the axis has already stated it by position, and the
-          rows below carry the strand and the room instead. */}
+          rows below carry the strand and the room instead.
+
+          It carries the room too, on one line. An hour block has 40px of
+          content box; a mark worth drawing and two stacked 13.5px rows do not
+          fit in it, and the version that tried squashed both rows to 6px and
+          drew the type back over the mark. One row costs 16px instead of 29
+          and leaves the mark 24, which is the difference between a lockup and
+          a smudge.
+
+          `shrink-0` so this can never be the thing that gives. If the budget
+          is ever wrong again the mark clips — visible, and obviously a bug —
+          rather than the text compressing into itself. */}
       {!spare && (
-        <p className="mt-0.5 truncate font-mono text-[9px] uppercase tracking-widest text-white/60">
+        <p className="mt-1.5 shrink-0 truncate font-mono text-[9px] uppercase tracking-widest text-white/60">
           {item.timeLabel}
+          {showVenue && (
+            <span className="text-white/45"> · {item.venueShort}</span>
+          )}
         </p>
       )}
 
@@ -538,7 +612,9 @@ export function Block({
       <p
         className={cn(
           "truncate font-mono text-[9px] uppercase tracking-widest text-white/45",
-          !showVenue && "hidden",
+          // Hidden without height to spare — the time row above has already
+          // said the room, inline, because that is all one line affords.
+          (!showVenue || !spare) && "hidden",
           // Anchored to the foot rather than left under the blurb: a
           // five-hour takeover is 360px tall and its copy rarely fills that,
           // so the venue was stranded mid-block above a void. The circuit
