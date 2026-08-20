@@ -199,7 +199,6 @@ h3,
   rule that ambient motion is opt-in — stated in model-mascots.tsx — survives.
 */
 
-/* Rises, drifts sideways, fades out. The row clips it. */
 /* PySanAntonio's mascot, breathing rather than performing.
 
    Three pixels over seven seconds. The bolts drift and the Claude mascots
@@ -216,6 +215,7 @@ h3,
   }
 }
 
+/* Rises, drifts sideways, fades out. The row clips it. */
 @keyframes boltDrift {
   0% {
     opacity: 0;
