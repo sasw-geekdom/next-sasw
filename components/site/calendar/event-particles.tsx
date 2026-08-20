@@ -175,7 +175,6 @@ interface Mascot {
   /** Current speed, px/sec — starts at BURST and decays toward WALK. */
   v: number;
   phase: number;
-  el: HTMLSpanElement | null;
 }
 
 /**
@@ -201,6 +200,25 @@ interface Mascot {
 export function MascotBurst() {
   const layer = React.useRef<HTMLSpanElement>(null);
   const mascots = React.useRef<Mascot[]>([]);
+  /**
+   * The sprite nodes, kept beside the simulation rather than inside it.
+   *
+   * They used to be a field on each Mascot, and the ref callback looked the
+   * mascot up to assign it: `const m = mascots.current[i]; if (m) m.el = node`.
+   * That runs during commit, and `mascots.current` is not built until the
+   * effect below — which runs *after* commit. So on the pass where `fired`
+   * flips true every lookup missed, the effect then created five mascots with
+   * `el: null`, and the loop skipped all five forever. The sprites sat on
+   * their initial inline transform at the layer's top-left.
+   *
+   * It only ever worked by accident: any later re-render re-runs these inline
+   * ref callbacks, and by then the array exists. React's StrictMode gives you
+   * that extra render in development for free, which is exactly why this was
+   * invisible until it hit production.
+   *
+   * Indexed by position, so the callback needs nothing to exist first.
+   */
+  const els = React.useRef<(HTMLSpanElement | null)[]>([]);
   const raf = React.useRef(0);
   const [fired, setFired] = React.useState(false);
   const done = React.useRef(false);
@@ -243,14 +261,15 @@ export function MascotBurst() {
       a: seed.a,
       v: BURST,
       phase: seed.phase,
-      el: mascots.current[MASCOTS.indexOf(seed)]?.el ?? null,
     }));
 
     // Placed once and left alone. The loop below never starts.
     if (still) {
-      for (const m of mascots.current) {
-        if (m.el) m.el.style.transform = `translate(-50%,-50%) translate(${m.x}px,${m.y}px)`;
-      }
+      mascots.current.forEach((m, i) => {
+        const el = els.current[i];
+        if (el)
+          el.style.transform = `translate(-50%,-50%) translate(${m.x}px,${m.y}px)`;
+      });
       return () => window.removeEventListener("resize", remeasure);
     }
 
@@ -274,8 +293,10 @@ export function MascotBurst() {
       last = now;
       if (!visible) return;
 
-      for (const m of mascots.current) {
-        if (!m.el) continue;
+      for (let i = 0; i < mascots.current.length; i++) {
+        const m = mascots.current[i];
+        const el = els.current[i];
+        if (!el) continue;
         // Ease the launch down to a drift rather than cutting to it.
         m.v += (WALK - m.v) * Math.min(DRAG * dt, 1);
         // A small random turn each frame, so the path meanders instead of
@@ -312,7 +333,7 @@ export function MascotBurst() {
         m.phase += dt * 7;
         const bob = Math.sin(m.phase) * 1.6;
         const facing = Math.cos(m.a) < 0 ? -1 : 1;
-        m.el.style.transform = `translate(-50%,-50%) translate(${m.x.toFixed(1)}px,${(m.y + bob).toFixed(1)}px) scaleX(${facing})`;
+        el.style.transform = `translate(-50%,-50%) translate(${m.x.toFixed(1)}px,${(m.y + bob).toFixed(1)}px) scaleX(${facing})`;
       }
     };
     raf.current = requestAnimationFrame(tick);
@@ -338,8 +359,7 @@ export function MascotBurst() {
           <span
             key={i}
             ref={(node) => {
-              const m = mascots.current[i];
-              if (m) m.el = node;
+              els.current[i] = node;
             }}
             style={{
               width: seed.size,
