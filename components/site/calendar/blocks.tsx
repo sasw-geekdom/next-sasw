@@ -749,6 +749,21 @@ export function SummaryBlock({
  * right where they read as a column of data rather than as an afterthought.
  * The circuit is new here; the axis has no room for it and the row does.
  */
+/**
+ * The tallest a lockup draws in an agenda row, before the `lg` step-up.
+ *
+ * 38 here is 57 at `lg`, where the mark is drawn at 1.5x. That is deliberately
+ * the size the row already treated as normal — Mission Pitch drew 56, Latin
+ * Tech 59, PySanAntonio 53 — so this pulls in the two that sat outside it and
+ * leaves everything else exactly where it was.
+ *
+ * It does cost width on a squarer mark: 1 Million Cups is stacked at 2:1, so
+ * bounding its height bounds its width too, and it draws narrower than it did.
+ * That is the trade the row's own geometry forces — a mark cannot be both as
+ * wide as a 10:1 lockup and no taller than one.
+ */
+const STACK_MARK_MAX = 38;
+
 export function StackBlock({
   item,
   picked,
@@ -793,7 +808,22 @@ export function StackBlock({
         // has to be the thing that gets the width.
         // `overflow-hidden` so a drifting bolt or a launched mascot is clipped
         // by the row's own border rather than escaping across the schedule.
-        "group relative flex items-center gap-2 overflow-hidden rounded border px-3 py-3 transition-colors duration-200",
+        // A floor under the row, and STACK_MARK_MAX as the ceiling over the
+        // mark. Together they are what makes every row in the agenda the same
+        // height.
+        //
+        // A row is `max(mark, meta) + 26`, and the two halves disagreed about
+        // which one won. Marks are sized width-led, so height follows the
+        // lockup's ratio: AITX at 3.7:1 drew 62px and 1 Million Cups, stacked
+        // at 2:1, drew 84, while Google Developer Groups at 10:1 drew 23 and
+        // left its row on the meta column's floor of 68. Same component, rows
+        // from 68 to 110, and the reader sees three Tuesday activations in
+        // three different sized boxes.
+        //
+        // Capping alone would not have fixed it — that pulls the tall ones
+        // down but leaves the short-mark rows sitting on the meta floor. The
+        // floor is what lifts those to meet them.
+        "group relative flex min-h-[75px] items-center gap-2 overflow-hidden rounded border px-3 py-3 transition-colors duration-200 lg:min-h-[83px]",
         !accent && (TIER_CHARGE[item.venueTier] ?? TIER_CHARGE.single),
         // A ring, not a fill. On the axis a picked block flooding magenta is
         // right — it has to survive a glance across five columns. Here, where
@@ -849,6 +879,7 @@ export function StackBlock({
                 brand={brand!}
                 title={item.longTitle}
                 dense={false}
+                markMax={STACK_MARK_MAX}
                 size="lg"
               />
             ) : (
@@ -860,6 +891,7 @@ export function StackBlock({
             brand={brand!}
             title={item.longTitle}
             dense={false}
+            markMax={STACK_MARK_MAX}
             size="lg"
           />
         ) : (
