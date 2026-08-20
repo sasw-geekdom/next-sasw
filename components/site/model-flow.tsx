@@ -122,6 +122,22 @@ function port(box: Box, side: Side) {
  * own end's `y` — which is what produces the flat-then-turn curve every
  * node editor draws, rather than a symmetrical arc.
  */
+/**
+ * The glow's mask, as two layers intersected.
+ *
+ * Down: transparent at both ends, so the light dies before the seams with the
+ * plain-black sections above and below.
+ * Right: transparent at the left end, so the light dies into the copy column
+ * instead of ending on a line. It reaches full strength at 20% — just short of
+ * the artwork's own left edge, which sits at roughly 19% of this box.
+ *
+ * See the note at the layer itself for why the horizontal one is load-bearing.
+ */
+const GLOW_MASK = [
+  "linear-gradient(to bottom, transparent 0%, black 26%, black 74%, transparent 100%)",
+  "linear-gradient(to right, transparent 0%, black 20%)",
+].join(", ");
+
 const VB_W = 160;
 const VB_H = 100;
 /** Percent of the canvas into the edge layer's own 16:9 coordinate space. */
@@ -423,15 +439,27 @@ export function ModelFlow({ className }: { className?: string }) {
         Masking after the blur, not instead of it: `filter` is applied to the
         element and `mask` clips the result, so the fade lands on the finished
         glow rather than on the gradients that feed it.
+
+        That ordering is also why the mask has to fade left as well as down.
+        A mask is sized to the border box, so whatever the blur spread past
+        that box gets cut off flat at its edges. Vertically it never showed —
+        the gradient is already transparent there. Horizontally the mask was
+        solid to the edge, so the spill was sliced into a hard vertical line
+        sitting in the middle of the copy column: on a laptop panel it read as
+        nothing, on a bright external monitor it read as the artwork having a
+        rectangular grey background that stopped dead beside the wordmark.
+
+        Left only. The right edge runs off the screen on the bleed, so fading
+        it would dim the light exactly where the graph needs it.
       */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-[-6%] left-[-35%] right-[-45%] blur-[100px]"
         style={{
-          maskImage:
-            "linear-gradient(to bottom, transparent 0%, black 26%, black 74%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, transparent 0%, black 26%, black 74%, transparent 100%)",
+          maskImage: GLOW_MASK,
+          WebkitMaskImage: GLOW_MASK,
+          maskComposite: "intersect",
+          WebkitMaskComposite: "source-in",
           background: [
             // One under each spotlight, so the light marks the two models the
             // afternoon leads with rather than the middle of the box.
