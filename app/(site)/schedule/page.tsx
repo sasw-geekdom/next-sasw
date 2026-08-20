@@ -4,16 +4,18 @@ import { WeekCalendar } from "@/components/site/week-calendar";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
 import { ModelBand } from "@/components/site/model-band";
 import { PysaBand } from "@/components/site/pysa-band";
-import {
-  SessionBento,
-  type SessionCard,
-} from "@/components/site/session-bento";
 import { ButtonLink } from "@/components/ui/button";
-import { listPartners } from "@/lib/admin/cms-queries";
-import { FEATURED_SESSIONS, resolveSessions } from "@/lib/schedule";
+import { allSessions, resolveSessions } from "@/lib/schedule";
+import { jsonLd, scheduleGraph } from "@/lib/structured-data";
 
-// Partner logos come from the CMS, so this page carries the same ISR window as
-// the homepage and /speakers.
+// ISR, and still needed after the bento went: `ModelBand` reads the partner
+// wall from Firestore for its own organiser logos, so this page has a CMS
+// dependency even though nothing in it fetches directly any more.
+//
+// The bento was why this comment used to say "partner logos" — it resolved
+// `logoFromPartner` here so a card's borrowed lockup tracked whatever the
+// admin uploaded. That resolution still exists on the venue pages, which are
+// where SessionBento now lives.
 export const revalidate = 300;
 
 const DESCRIPTION =
@@ -35,36 +37,20 @@ export const metadata: Metadata = {
   },
 };
 
-async function safeList<T>(promise: Promise<T[]>): Promise<T[]> {
-  try {
-    return await promise;
-  } catch {
-    return [];
-  }
-}
-
 export default async function SessionsPage() {
-  const partners = await safeList(listPartners());
-
-  // Sessions that borrow a partner's lockup are matched here rather than in
-  // the data file, so the logo tracks whatever the admin has uploaded. A miss
-  // is silent by design — the card typesets its title instead.
-  const cards: SessionCard[] = resolveSessions(FEATURED_SESSIONS).map((s) => {
-    if (s.logo) {
-      return { ...s, logoSrc: s.logo.src, logoAlt: s.logo.alt };
-    }
-    if (s.logoFromPartner) {
-      const needle = s.logoFromPartner.toLowerCase();
-      const match = partners.find((p) => p.name.toLowerCase().includes(needle));
-      if (match?.imageUrl) {
-        return { ...s, logoSrc: match.imageUrl, logoAlt: match.name };
-      }
-    }
-    return s;
-  });
-
   return (
-    <main>
+    <>
+      {/* The week and every confirmed activation, as an ItemList. This page had
+          no structured data of any kind — the homepage described the week and
+          each activation described itself, and the one page that *is* the
+          schedule described none of it. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLd(scheduleGraph(resolveSessions(allSessions()))),
+        }}
+      />
+      <main>
       <SessionsHero />
 
       {/* The week on an hour axis, above the deep dives — the page's answer to
@@ -77,38 +63,16 @@ export default async function SessionsPage() {
           idea and nothing renders it now. */}
       <WeekCalendar />
 
-      {/* Full-bleed rule on the section, not the inner container — the same
-          seam the homepage uses between room-flow and the logo wall. Inset to
-          max-w-7xl it reads as a divider inside one long black column; edge to
-          edge it reads as the wall between two sections, which is the only cue
-          available when neighbouring sections share a ground. */}
-      <section className="border-t border-white/10 bg-black">
-        <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-32">
-          <div className="max-w-2xl">
-            <p className="font-mono text-xs uppercase tracking-widest text-magenta">
-              Confirmed
-            </p>
-            <h2 className="mt-3 font-display text-4xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-5xl">
-              Already on the grid.
-            </h2>
-            <p className="mt-4 max-w-xl text-pretty text-white/60">
-              Room, time and circuit for each. The three full-day takeovers have
-              their own pages below.
-            </p>
-          </div>
-
-          <div className="mt-14 lg:mt-16">
-            <SessionBento sessions={cards} />
-          </div>
-        </div>
-      </section>
-
       <PysaBand detailHref="/schedule/pysanantonio" />
 
-      {/* The second and third banded activations. All three sit below the bento
-          rather than inside it: a full-day takeover with its own brand reduced
-          to one card in a five-across grid reads as smaller than it is, and it
-          would then appear twice on the same page.
+      {/* The second and third banded activations. They used to sit below a
+          bento of the other six, and the reason they were never *in* it still
+          holds for the calendar above: a full-day takeover with its own brand
+          reduced to one cell reads as smaller than it is. The difference is
+          that the calendar has to carry them anyway — a week with a hole where
+          PySanAntonio runs is not a week — so they now appear twice on this
+          page by design, once as a block on Friday afternoon and once at
+          length down here.
 
           PySanAntonio keeps the top of the stack — it's HEADLINE_SESSION, the
           one the week leads with — and the other two run by date beneath it:
@@ -128,7 +92,7 @@ export default async function SessionsPage() {
 
       {/*
         The way onto the schedule, as its own band rather than a tail on the
-        bento — the same move the homepage's sponsor ask needed. Tucked inside
+        section above — the same move the homepage's sponsor ask needed. Tucked inside
         that container it was centred on a page that is left-aligned
         everywhere else, and small enough to scan as footer furniture.
 
@@ -159,6 +123,7 @@ export default async function SessionsPage() {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }

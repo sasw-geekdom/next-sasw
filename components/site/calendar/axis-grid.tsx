@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // The chrome both calendar views share: a gutter of hour labels, a row of
@@ -171,18 +171,32 @@ export function AxisGrid({
                   {col.label}
                 </span>
                 {col.sublabel && (
-                  // Dropped below xl, where the pill beside it needs the
-                  // room more than the date does.
-                  <span className="hidden text-white/45 xl:inline">
+                  // Dropped below xl *only where an action shares the row* —
+                  // the week's day heads carry "Add day", and at lg a 184px
+                  // column cannot hold both. The day view's heads have no
+                  // control and three wide columns, so hiding their session
+                  // count there was paying a cost the constraint never
+                  // imposed.
+                  <span
+                    className={cn(
+                      "text-white/45",
+                      col.action ? "hidden xl:inline" : "inline",
+                    )}
+                  >
                     {col.sublabel}
                   </span>
                 )}
                 {/* The head was a link that only announced itself on hover,
                     which was survivable while the rail carried the same five
-                    destinations and is not now that it doesn't. Same "→" the
-                    summary block uses for the same promise. */}
-                <ArrowRight
-                  className="size-3 shrink-0 text-white/30 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-magenta"
+                    destinations and is not now that it doesn't.
+
+                    `ArrowUpRight` with the up-and-right hop, which is the
+                    house treatment for "this goes somewhere" — room-flow,
+                    model-band and speaker-lineup all use exactly this. A plain
+                    right arrow that only slid sideways was a fourth variant of
+                    a thing the site had already settled. */}
+                <ArrowUpRight
+                  className="size-3.5 shrink-0 text-white/30 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-magenta"
                   aria-hidden="true"
                 />
               </Link>
@@ -190,7 +204,12 @@ export function AxisGrid({
               <p className="truncate font-mono text-[11px] uppercase tracking-widest">
                 <span className="text-white">{col.label}</span>
                 {col.sublabel && (
-                  <span className="hidden text-white/45 xl:inline">
+                  <span
+                    className={cn(
+                      "text-white/45",
+                      col.action ? "hidden xl:inline" : "inline",
+                    )}
+                  >
                     {" "}
                     {col.sublabel}
                   </span>
@@ -203,14 +222,18 @@ export function AxisGrid({
 
         {rails.map((rail) => (
           <React.Fragment key={rail.label}>
-            <div className="border-b border-white/10 py-2 pr-3 text-right">
+            <div className="border-b border-white/10 py-1.5 pr-3 text-right">
               <span className="font-mono text-[9px] uppercase tracking-widest text-white/40">
                 {rail.label}
               </span>
             </div>
             {rail.span ? (
               <div
-                className="grid border-b border-white/10 py-2"
+                // `py-1.5`, not `py-2`. The rail's own padding is one of the
+                // few places left to give the grid height back, and its bars
+                // already carry their own border and background — the extra
+                // 4px was framing a frame.
+                className="grid border-b border-white/10 py-1.5"
                 style={{
                   gridColumn: `span ${columns.length}`,
                   gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))`,
@@ -247,12 +270,31 @@ export function AxisGrid({
               </span>
             </div>
           ))}
+          {/* The closing hour.
+          
+              The loop labels the top of each row and stops before `endMin`,
+              because the end is a boundary rather than a row — so a 1–8 PM
+              axis printed 1 through 7 and left its own last line unnamed.
+              That is fine while nothing reaches it and wrong the moment
+              something does: Startup Bash ends at 8, and its bottom edge was
+              sitting on an hour the gutter never mentioned.
+
+              Absolute, so it adds no height, and centred on the boundary the
+              same way `-translate-y-1/2` centres the others on theirs. */}
+          <span className="absolute inset-x-0 bottom-0 translate-y-1/2 pr-3 text-right font-mono text-[10px] uppercase tracking-widest text-white/35">
+            {hourLabel(axis.endMin / 60)}
+          </span>
         </div>
 
-        {columns.map((col) => {
+        {columns.map((col, colIndex) => {
           const placed = placements[col.key] ?? [];
           return (
-            <div key={col.key} className="relative border-l border-white/10">
+            // `border-b` closes the axis. Rows carry a top border, so the
+            // final hour had a label and no rule to belong to.
+            <div
+              key={col.key}
+              className="relative border-b border-l border-white/10"
+            >
               {/* The rules, as a layer behind the blocks. Drawing them as real
                   boxes is what gives the column its height, so the grid can't
                   disagree with the axis it was built from. */}
@@ -272,13 +314,20 @@ export function AxisGrid({
                   // `bg-black` so the hour rules stop at the block rather than
                   // running through it: every block fill is a tint, and a rule
                   // behind a 12% wash reads straight through it.
-                  className="absolute bg-black p-[3px]"
-                  style={{
-                    top: `calc(${p.startMin - axis.startMin} / 60 * var(--hour))`,
-                    height: `calc(${p.endMin - p.startMin} / 60 * var(--hour))`,
-                    left: `${(p.lane / p.lanes) * 100}%`,
-                    width: `${(1 / p.lanes) * 100}%`,
-                  }}
+                  //
+                  // `cal-cell` and `--i` are the view transition's handles —
+                  // the wrapper decides in or out, the index staggers left to
+                  // right across the week. See globals.css.
+                  className="cal-cell absolute bg-black p-[3px]"
+                  style={
+                    {
+                      "--i": colIndex,
+                      top: `calc(${p.startMin - axis.startMin} / 60 * var(--hour))`,
+                      height: `calc(${p.endMin - p.startMin} / 60 * var(--hour))`,
+                      left: `${(p.lane / p.lanes) * 100}%`,
+                      width: `${(1 / p.lanes) * 100}%`,
+                    } as React.CSSProperties
+                  }
                 >
                   {p.node}
                 </div>

@@ -137,7 +137,7 @@ export function DayCalendarGrid({
             onToggle={toggle}
             showVenue={false}
             dense={item.lanes >= 2}
-            wide={item.lanes === 1}
+            lanes={item.lanes}
             spare={hasSpareRows(item.startMin, item.endMin, hourPx)}
             fill
           />

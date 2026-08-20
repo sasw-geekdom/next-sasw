@@ -203,8 +203,32 @@ export function Filters({
    * nowhere to go. So the selects run at every size there, one above the
    * other rather than side by side.
    */
-  layout?: "auto" | "stacked";
+  layout?: "auto" | "stacked" | "compact";
 }) {
+  // One row of selects at every width. The week view has the horizontal room
+  // for chips and spends 70px of vertical on them — which it does not have,
+  // since the grid below is the thing that has to fit on screen. Having the
+  // width is not the same as it being worth the height.
+  if (layout === "compact") {
+    return (
+      <div className="flex max-w-md gap-2">
+        <FilterSelect
+          label="Circuit"
+          placeholder="All circuits"
+          options={circuits}
+          value={circuit}
+          onChange={onCircuit}
+        />
+        <FilterSelect
+          label="Venue"
+          placeholder="All rooms"
+          options={venues}
+          value={venue}
+          onChange={onVenue}
+        />
+      </div>
+    );
+  }
   if (layout === "stacked") {
     return (
       <div className="flex flex-col gap-2">
@@ -315,57 +339,53 @@ function FilterSelect({
 
 export type WeekView = "agenda" | "week";
 
-const VIEW_KEY = "sastw:week-view";
+/*
+  The view is NOT persisted, and that is a fix rather than an omission.
 
-// The remembered view, read the same way the picks are — through
-// useSyncExternalStore rather than an effect, so there is no render with the
-// wrong answer and no setState inside an effect for the lint rule to object to.
-let viewCache: WeekView | null = null;
-let viewRead = false;
-const viewListeners = new Set<() => void>();
+  It was, in localStorage, read through useSyncExternalStore the way the picks
+  are. That works for the picks and cannot work for this: /schedule is
+  prerendered, so the server writes HTML for whichever view the default names,
+  and the server has no way to know what a particular browser last chose. The
+  client then reads storage and corrects it — measured at six frames, roughly
+  360ms of the week visibly rendering before it flipped to the agenda, on every
+  single load.
 
-function readStoredView(): WeekView | null {
-  if (!viewRead) {
-    viewRead = true;
-    try {
-      const raw = window.localStorage.getItem(VIEW_KEY);
-      viewCache = raw === "week" || raw === "agenda" ? raw : null;
-    } catch {
-      viewCache = null;
-    }
-  }
-  return viewCache;
-}
+  No pre-paint script fixes it either, which is the part worth recording. The
+  theme-flicker trick works because a theme is entirely expressible in CSS: set
+  a class on <html> before paint and the same markup renders either way. A view
+  is a different *branch* — only one is ever in the DOM — so hiding the
+  mismatch would mean rendering both calendars on every request and letting CSS
+  pick, paying for a whole second grid to avoid one frame.
 
-function writeStoredView(next: WeekView) {
-  viewCache = next;
-  viewRead = true;
-  try {
-    window.localStorage.setItem(VIEW_KEY, next);
-  } catch {
-    // Blocked storage. The choice still holds for this page, and the URL
-    // carries it anyway.
-  }
-  for (const listener of viewListeners) listener();
-}
+  So the URL is the only override. It survives sharing, which is the case that
+  actually mattered ("here's the whole week laid out"), and it can never
+  disagree with the server. What it gives up is a returning reader's standing
+  preference — acceptable now the default is the right view for a first visit
+  rather than a guess.
 
-function subscribeView(onChange: () => void) {
-  viewListeners.add(onChange);
-  window.addEventListener("storage", onChange);
-  return () => {
-    viewListeners.delete(onChange);
-    window.removeEventListener("storage", onChange);
-  };
-}
+  The alternative, if that preference is wanted back, is a cookie: readable on
+  the server, so the correct view is prerendered and nothing flashes. It costs
+  this page its static rendering, which is why it is not the choice here.
+*/
 
 /**
  * Which rendering of the week is on screen.
  *
- * Three sources, in order: the query string, then what this browser last
- * chose, then the agenda. The URL wins so a shared link always shows the
- * sender what they saw — "here's the whole week laid out" is the thing the
- * grid is for, and it has to be sendable. Storage catches the rest, so a
- * reader who prefers the grid gets it on the next visit without a link.
+ * The query string, or the week. See the note above for why there is no third
+ * source any more.
+ *
+ * The week is the default, and the agenda was first. That choice was made when
+ * the grid did not fit — its bottom edge sat 321px below the fold on a
+ * MacBook Air, so the one view that can show four venues running at once could
+ * not show it without scrolling. It fits now, and three things followed: the
+ * hero took the headline "Five days, one current." and a CTA reading "See the
+ * week", the grid gained the marks and flourishes the rows had, and the bento
+ * below it went, leaving the calendar as the page. Landing on a day-by-day
+ * list after all that was the section answering a question the hero had not
+ * asked.
+ *
+ * The default only shapes a first visit — storage remembers every one after —
+ * so it should be the view that keeps the promise made above it.
  *
  * A toggle rather than a drawer, and rather than a second route. A drawer
  * would trap the grid behind an overlay whose links navigate away from it,
@@ -375,22 +395,17 @@ function subscribeView(onChange: () => void) {
 export function useWeekView(): [WeekView, (next: WeekView) => void] {
   const params = useSearchParams();
   const fromUrl = params.get("view");
-  const stored = React.useSyncExternalStore(
-    subscribeView,
-    readStoredView,
-    () => null,
-  );
-
   const view: WeekView =
-    fromUrl === "week" || fromUrl === "agenda" ? fromUrl : (stored ?? "agenda");
+    fromUrl === "week" || fromUrl === "agenda" ? fromUrl : "week";
 
   const set = React.useCallback((next: WeekView) => {
-    writeStoredView(next);
     const p = new URLSearchParams(window.location.search);
     // The default view leaves no trace in the URL — a bare /schedule and
-    // /schedule?view=agenda are the same page, and only one of them should be
-    // the address people copy.
-    if (next === "agenda") p.delete("view");
+    // /schedule?view=week are the same page, and only one of them should be
+    // the address people copy. Inverted along with the default: the week is
+    // now what a bare /schedule shows, so the agenda is the one that has to
+    // say so.
+    if (next === "week") p.delete("view");
     else p.set("view", next);
     const qs = p.toString();
     window.history.replaceState(

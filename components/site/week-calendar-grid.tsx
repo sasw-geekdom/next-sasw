@@ -27,6 +27,7 @@ import {
   useUrlFilter,
   usePicked,
   type Option,
+  type WeekView,
 } from "@/components/site/calendar/controls";
 
 // The week at a glance — five columns, Monday to Friday.
@@ -67,10 +68,21 @@ const EXPAND_MAX = 3;
  * The week runs coarse — its blocks are afternoons, not talks. The day view
  * runs roughly double, because that is where the thirty-minute slots are read.
  */
-const HOUR_PX = 72;
-
-/** The same axis on a display with height to spare — see AxisGrid.roomyHourPx. */
-const ROOMY_HOUR_PX = 96;
+/**
+ * Pixels per hour, and deliberately coarse.
+ *
+ * The week's shortest block is two hours. It never has to draw a thirty-minute
+ * slot — the summary rule collapses a venue's dozen speaker sessions into one
+ * block, and talks are read in the day view — so the fine scale the day view
+ * needs is spent here on nothing. At 96 the axis was 672px for seven hours;
+ * at 60 it is 420, and no block loses a line of type.
+ *
+ * That 252px is most of why the grid did not fit: on a 900px MacBook Air its
+ * bottom edge sat 321px below the fold, so a view whose entire purpose is
+ * showing that four venues collide on one afternoon could not show it without
+ * scrolling.
+ */
+const HOUR_PX = 60;
 
 export interface CalendarDay {
   iso: string;
@@ -178,6 +190,45 @@ export function WeekCalendarGrid({
   venues: Option[];
 }) {
   const [view, setView] = useWeekView();
+  /**
+   * The view on its way out, held only for the length of its exit.
+   *
+   * Both are in the DOM at once and that is the point — next-geekdom's navbar
+   * keeps both crowns on screen for 125ms because "kill the overlap and the
+   * crown visibly disappears before its replacement shows up". The outgoing
+   * copy is absolutely positioned, so the container takes the incoming view's
+   * height the instant the switch happens rather than animating ~700px of it
+   * and reflowing the whole page every frame.
+   */
+  const [leaving, setLeaving] = React.useState<WeekView | null>(null);
+  const exitTimer = React.useRef<number | undefined>(undefined);
+
+  React.useEffect(() => () => window.clearTimeout(exitTimer.current), []);
+
+  const switchView = React.useCallback(
+    (next: WeekView) => {
+      if (next === view) return;
+      // No handoff for a reader who asked for less motion — two opaque views
+      // stacked for 340ms is worse than the jump. The CSS zeroes the cell
+      // animations to match; see globals.css.
+      const still = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      if (!still) {
+        setLeaving(view);
+        window.clearTimeout(exitTimer.current);
+        // Long enough for the last cell's exit — 170ms plus the widest stagger.
+        exitTimer.current = window.setTimeout(() => setLeaving(null), 340);
+      }
+      setView(next);
+      // Re-anchor. Switching from the agenda to the shorter grid while scrolled
+      // down otherwise leaves the reader below a section that just lost 700px.
+      document
+        .getElementById("the-week")
+        ?.scrollIntoView({ block: "start", behavior: "auto" });
+    },
+    [view, setView],
+  );
   const [circuit, setCircuit] = useUrlFilter("circuit");
   const [venue, setVenue] = useUrlFilter("venue");
   const { picked, toggle, clear } = usePicked();
@@ -249,7 +300,7 @@ export function WeekCalendarGrid({
             picked={picked.includes(cell.item.slug)}
             onToggle={toggle}
             dense={cell.lanes >= 3}
-            wide={cell.lanes === 1}
+            lanes={cell.lanes}
             spare={hasSpareRows(cell.startMin, cell.endMin, HOUR_PX)}
             showAction={false}
             fill
@@ -360,10 +411,12 @@ export function WeekCalendarGrid({
       days.map((day) => ({
         key: day.iso,
         label: day.weekday,
-        // The number alone — "Mon 28", the rail's format. `day.label` carries
-        // "Sep 28", and the month is a word every column repeats under an
-        // eyebrow that already gave the range.
-        sublabel: String(Number(day.iso.slice(8, 10))),
+        // "Mon Sep 28", matching the agenda's day headings. This was cut to
+        // the bare number when the head became one row, on the assumption the
+        // month would not fit beside "Add day" — measured, it costs 23px, and
+        // every width from xl up has at least 33 to spare. Below xl the
+        // sublabel drops entirely, which is where the constraint was real.
+        sublabel: day.label,
         // Every head is a way into that day at full resolution — the other
         // half of the answer to a dense week.
         href: `/schedule/day/${day.iso}`,
@@ -392,7 +445,10 @@ export function WeekCalendarGrid({
   const agenda = (
     <>
       {shownSpans.length > 0 && (
-        <div className="mt-8 flex flex-col gap-2">
+        <div
+          className="cal-cell mt-8 flex flex-col gap-2"
+          style={{ "--i": 0 } as React.CSSProperties}
+        >
           <p className="font-mono text-[10px] uppercase tracking-widest text-white/40">
             All week
           </p>
@@ -403,14 +459,16 @@ export function WeekCalendarGrid({
       )}
 
       <div className="mt-8 flex flex-col">
-        {days.map((day) => {
+        {days.map((day, dayIndex) => {
           const dayItems = shownItems.filter((i) => i.dayIso === day.iso);
           const runs = runsFor(dayItems, circuitOrder);
           return (
             <div
               key={day.iso}
+              // `+1` so the banner above it leads. See globals.css.
+              style={{ "--i": dayIndex + 1 } as React.CSSProperties}
               className={cn(
-                "flex flex-col gap-3",
+                "cal-cell flex flex-col gap-3",
                 // A rule between days instead of the container's hairline gap,
                 // which only existed to separate panels. `max-sm:` so none of
                 // it survives into the card layout, where `p-5` would fight
@@ -475,33 +533,51 @@ export function WeekCalendarGrid({
     </>
   );
 
-  // A caption, not a standfirst. With the section header gone this is the only
-  // thing telling the reader the grid is navigable, and the half worth saying
-  // is the half that isn't self-evident: the selects are labelled and sit
-  // right there, but nothing announces that a day opens on its own.
-  //
-  // Filtered, it names the filters instead. That is more use than a count of
-  // what was hidden, and it keeps a scoped "Add day" honest — see DayToggle.
-  const caption = filtering
-    ? [circuit, venues.find((v) => v.value === venue)?.label]
-        .filter(Boolean)
-        .join(" · ")
-    : "Open any day to read it hour by hour.";
+  /**
+   * The section's only intro copy, and it says something different in each
+   * view — because what is worth pointing at differs.
+   *
+   * From the grid, "open a day to read it hour by hour" would be describing
+   * what the reader is already looking at. What a day actually adds there is
+   * the *rooms*: its columns are venues rather than days, so TPR gets one of
+   * its own and nothing shares a lane. That is the line worth spending.
+   *
+   * From the agenda there are no hours on screen at all, so the original
+   * phrasing is still the honest one.
+   *
+   * Filtered, it names the filters instead. That is more use than a count of
+   * what was hidden, and it keeps a scoped "Add day" honest — see DayToggle.
+   */
+  const captionFor = (which: WeekView) =>
+    filtering
+      ? [circuit, venues.find((v) => v.value === venue)?.label]
+          .filter(Boolean)
+          .join(" · ")
+      : which === "week"
+        ? "Open a day to see it room by room."
+        : "Open any day to read it hour by hour.";
 
-  return (
-    <>
-      {view === "week" ? (
+  const renderView = (which: WeekView) =>
+    which === "week" ? (
         <>
           {/* Grid view keeps the full width, so its controls run across the
               top the way they always did. */}
-          <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
-            <p className="text-sm text-white/55">{caption}</p>
-            <ViewToggle view={view} onChange={setView} />
+          <div
+            data-controls=""
+            className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4"
+          >
+            <p className="text-sm text-white/55">{captionFor(which)}</p>
+            <ViewToggle view={which} onChange={switchView} />
           </div>
 
-          <div className="mt-6 flex flex-col gap-3 lg:mt-8">
+          {/* Tighter than the agenda's control block, and one row of selects
+              rather than two of chips — see Filters' "compact". Between them
+              the caption, the filters and these margins were 203px of the
+              267px standing between the section top and the first hour. */}
+          <div data-controls="" className="mt-4 flex flex-col gap-3">
             <DayRail active="week" className="lg:hidden" />
             <Filters
+              layout="compact"
               circuits={circuits}
               venues={venues}
               circuit={circuit}
@@ -517,11 +593,16 @@ export function WeekCalendarGrid({
               unreadable one. Which is also why ViewToggle is desktop-only:
               there is no phone rendering of this view to offer. */}
           <AxisGrid
-            className="mt-10 hidden lg:block"
+            className="mt-5 hidden lg:block"
             columns={columns}
             axis={axis}
             hourPx={HOUR_PX}
-            roomyHourPx={ROOMY_HOUR_PX}
+            // No `roomyHourPx`. `roomy` is min-width 1024 *and* min-height
+            // 900, and a MacBook Air is exactly 900 tall — so it fired at
+            // precisely the viewport where the grid stopped fitting and made
+            // it 168px taller. That variant exists for the activation bands,
+            // which want to fill a screen; a grid wants to fit one. Same
+            // query, opposite goal.
             placements={placements}
             rails={rails}
             emptyLabel={filtering ? "Nothing matching" : "Still landing"}
@@ -529,7 +610,8 @@ export function WeekCalendarGrid({
 
           <div className="lg:hidden">{agenda}</div>
         </>
-      ) : (
+    ) : (
+
         /* The agenda: context pinned on the left, the week scrolling past it
            on the right. Same two-column shape as ActivationDetail, down to
            `self-start` alongside `sticky` — a grid item stretches to its row
@@ -540,7 +622,7 @@ export function WeekCalendarGrid({
            scroller. Nested scroll areas trap the wheel, double the scrollbars,
            and break the browser's own find-on-page. */
         <div className="lg:grid lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] xl:gap-20">
-          <div className="lg:sticky lg:top-24 lg:self-start">
+          <div data-controls="" className="lg:sticky lg:top-24 lg:self-start">
             <p className="font-mono text-xs uppercase tracking-widest text-magenta">
               Every room
             </p>
@@ -552,7 +634,7 @@ export function WeekCalendarGrid({
             <h2 className="mt-3 font-display text-2xl font-bold uppercase leading-[0.95] tracking-tight text-white">
               Day by day.
             </h2>
-            <p className="mt-3 text-sm text-white/55">{caption}</p>
+            <p className="mt-3 text-sm text-white/55">{captionFor(which)}</p>
 
             <div className="mt-6 flex flex-col gap-3">
               <DayRail active="week" className="lg:hidden" />
@@ -569,8 +651,8 @@ export function WeekCalendarGrid({
                 onVenue={setVenue}
               />
               <ViewToggle
-                view={view}
-                onChange={setView}
+                view={which}
+                onChange={switchView}
                 className="self-start"
               />
             </div>
@@ -578,7 +660,24 @@ export function WeekCalendarGrid({
 
           <div className="max-lg:mt-8">{agenda}</div>
         </div>
-      )}
+    );
+
+  return (
+    <>
+      {/* Both views render during the handoff. The outgoing one is out of
+          flow and inert — see the note on `leaving`, and the exit rules in
+          globals.css that stop its particle layers ever starting. */}
+      <div className="relative">
+        {leaving && (
+          <div
+            aria-hidden="true"
+            className="cal-view--out pointer-events-none absolute inset-x-0 top-0"
+          >
+            {renderView(leaving)}
+          </div>
+        )}
+        <div>{renderView(view)}</div>
+      </div>
 
       <ExportBar picked={picked} onClear={clear} hidden={hidden} />
     </>

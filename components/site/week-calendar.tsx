@@ -41,6 +41,11 @@ export function WeekCalendar() {
       // bands — which reads as having been thrown out of the schedule rather
       // than returned to it.
       id="the-week"
+      // Named by the hidden heading below, which is what makes this a `region`
+      // in the accessibility tree. A <section> without an accessible name is
+      // generic — it does not appear in a screen reader's landmark list at
+      // all.
+      aria-labelledby="the-week-heading"
       // The navbar is `sticky top-0` at h-16, so an anchor scrolled flush to
       // the viewport top sits underneath it. 5rem clears the 4rem bar and
       // leaves the section's own eyebrow visible rather than tucked against
@@ -58,7 +63,24 @@ export function WeekCalendar() {
             A deliberate break from the page's measure rather than a free win:
             this section is now the one that runs wider than its neighbours. */}
         <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-20 2xl:max-w-[110rem]">
-        {/* No header. This section used to open on its own eyebrow, headline
+        {/* The heading the visible design does without.
+
+            Removing the visible h2 was right — the hero carries the message
+            now, and a second display headline one viewport under it was the
+            page reading as two heroes. But the h2 was also doing invisible
+            work: it put the calendar in the document outline and gave this
+            section the name that makes it a landmark. Without it a screen
+            reader user navigating by heading went straight from the hero to
+            "PySanAntonio II", with the nine activations, five days, filters
+            and day toggles in between announced as nothing at all.
+
+            Dated rather than just "The week", because headings are read out of
+            context in a list, where "The week" alone says very little. */}
+        <h2 id="the-week-heading" className="sr-only">
+          The week, Sept 28 – Oct 2
+        </h2>
+
+        {/* No visible header. This section used to open on its own eyebrow, headline
             and standfirst, one viewport under a hero doing the same thing in
             the same shape — same date range in the eyebrow, same claim about
             what was confirmed, and the reader performing the identical

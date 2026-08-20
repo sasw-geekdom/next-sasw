@@ -147,10 +147,10 @@ export function lockupHeight(
 export function markKind(
   brand: CalendarBrand | undefined,
   dense: boolean,
-  size: "sm" | "lg",
+  size: "sm" | "md" | "lg",
 ): "wordmark" | "lockup" | null {
   if (!brand) return null;
-  if (brand.wordmark === "startup-bash") return size === "lg" ? "wordmark" : null;
+  if (brand.wordmark === "startup-bash") return size === "sm" ? null : "wordmark";
   if (brand.wordmark) return "wordmark";
   if (brand.lockup && !dense) return "lockup";
   return null;
@@ -167,13 +167,21 @@ function BrandMark({
   /** A lane too narrow to draw an image lockup in. */
   dense: boolean;
   /**
-   * "sm" is the hour axis, where a block's height is its duration and the mark
-   * shares the space with a blurb. "lg" is the mobile stack, where a row has
-   * no height budget at all and the mark is the row — see StackBlock.
+   * How much room the mark has.
+   *
+   * "lg" is the mobile stack and a block with a lane to itself. "md" is a lane
+   * shared with one other — the common case on Monday and Wednesday, and
+   * previously lumped in with "sm", which sized every mark for the worst case
+   * a quarter-width lane presents. "sm" is that genuine worst case.
+   *
+   * Only the typeset marks really need the distinction: they wrap, so an
+   * oversized cut spills out of a narrow lane. Image lockups clamp instead,
+   * and only take the step up in their height cap.
    */
-  size?: "sm" | "lg";
+  size?: "sm" | "md" | "lg";
 }) {
   const lg = size === "lg";
+  const roomy = size !== "sm";
   if (brand.wordmark === "access-granted") {
     return (
       // The same split the band and the social graphics carry: the first word
@@ -181,7 +189,7 @@ function BrandMark({
       <span
         className={cn(
           "font-display font-bold uppercase leading-tight tracking-tight text-white",
-          lg ? "text-2xl lg:text-3xl" : "text-sm",
+          lg ? "text-2xl lg:text-3xl" : roomy ? "text-lg" : "text-sm",
         )}
       >
         <span style={{ color: brand.accent }}>Access</span> Granted
@@ -292,7 +300,18 @@ function BrandMark({
         // dead on the element for a whole pass.
         style={
           {
-            "--mark-h": `${lockupHeight(brand.lockup, lg ? 150 : 96, lg ? 56 : 40)}px`,
+            // One target at every size, and `max-w-full` below does the
+            // rest. The 96px small target was a second, quieter cap on top of
+            // the lane's own: on a two-lane Monday the marks came out 60–80px
+            // inside a ~111px lane, so mark size tracked lane *count* rather
+            // than lane width, and PySanAntonio — alone on Friday — was three
+            // times the size of Latin Tech for no reason a reader could see.
+            // Aiming high and letting the lane clamp makes every mark as wide
+            // as its lane allows, which is the honest invariant.
+            //
+            // Typeset marks still switch on `size`; they wrap rather than
+            // clamp, so a narrow lane genuinely needs the smaller cut.
+            "--mark-h": `${lockupHeight(brand.lockup, 150, lg ? 56 : roomy ? 50 : 44)}px`,
           } as React.CSSProperties
         }
         // Half again on a wide screen. The agenda row is the full width of the
@@ -333,7 +352,7 @@ export function Block({
   fill = false,
   spare = false,
   showVenue = true,
-  wide = false,
+  lanes = 1,
   showAction = true,
 }: {
   item: CalendarItem;
@@ -360,16 +379,14 @@ export function Block({
    */
   spare?: boolean;
   /**
-   * The block has a lane to itself.
+   * How many lanes the block's cluster splits into.
    *
-   * Marks were locked to the small size on the axis — sized for the worst
-   * case, a quarter-width lane, and drawn that way everywhere. So a five-hour
-   * takeover alone in a 340px column carried a 96px wordmark while the same
-   * activation on a phone carried 150. A block with no lane to share has the
-   * width; combined with `lines`, which stands in for having the height, it
-   * gets the mark the mobile row already uses.
+   * Drives the mark scale, because lane count is what actually decides a
+   * block's width. One lane is the full column, two is half of it, and the
+   * mark should be cut for the lane it is in rather than for the narrowest
+   * lane any block might ever get.
    */
-  wide?: boolean;
+  lanes?: number;
   /**
    * Whether the block carries its own add-to-calendar control.
    *
@@ -384,11 +401,21 @@ export function Block({
   const accent = brand?.accent;
   // Whether `BrandMark` will draw something. Computed rather than inferred
   // from a null return, because the title has to take the slot when it won't.
-  const markSize = wide && spare ? "lg" : "sm";
+  // No height, no mark worth drawing. Otherwise scale to the lane.
+  const markSize = !spare ? "sm" : lanes === 1 ? "lg" : lanes === 2 ? "md" : "sm";
   const hasMark = markKind(brand, dense, markSize) !== null;
   // Where there's height for a description there's height for the strand.
   const showCircuit = spare && !dense;
 
+  /**
+   * The full title off the axis, the short one on it.
+   *
+   * `fill` means the block is sized by its own duration inside a lane, where
+   * "The Creative Futures™ Brunch powered by The Down Market" would clamp to a
+   * fragment. The rail has no such constraint — it is a full column and grows
+   * to its content — so that is where the organisers' whole title belongs, and
+   * it is where the brunch actually sits.
+   */
   const label = hasMark ? (
     <BrandMark
       brand={brand!}
@@ -397,8 +424,12 @@ export function Block({
       size={markSize}
     />
   ) : (
-    <span className={dense ? "line-clamp-1" : "line-clamp-2"}>
-      {item.title}
+    <span
+      className={cn(
+        dense ? "line-clamp-1" : fill ? "line-clamp-2" : "line-clamp-4",
+      )}
+    >
+      {dense || fill ? item.title : item.longTitle}
     </span>
   );
 
@@ -446,6 +477,15 @@ export function Block({
         />
       )}
 
+      {/* The same two flourishes the agenda rows carry. They were StackBlock's
+          alone, which meant the week — the view meant to be the spotlight —
+          was the one place Startup Bash and The Model rendered as plain
+          rectangles. The bolts position by percentage and the mascots bounce
+          off measured walls, so both fit a tall narrow block as readily as a
+          wide flat row without a number changing. */}
+      {spare && item.page === "startup-bash" && <BoltDrift />}
+      {spare && item.page === "the-model" && <MascotBurst />}
+
       {/* The link is stretched over the whole block rather than wrapped
           around it: the select button lives inside, and a button inside an
           anchor is invalid markup that browsers resolve by dropping one of
@@ -457,7 +497,11 @@ export function Block({
             "text-pretty text-[13px] font-medium leading-tight text-white after:absolute after:inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70",
             // Clear of the select button in the corner, or a title long
             // enough to reach the edge runs under the control.
-            item.exportable && "pr-5",
+            // Only when the control is really rendered. Keyed on `exportable`
+            // alone it reserved 20px in every week-view block — where
+            // `showAction` is false — which is a fifth of a two-lane lane's
+            // width given to a button that is not there.
+            item.exportable && showAction && "pr-5",
           )}
         >
           {label}
@@ -466,7 +510,7 @@ export function Block({
         <p
           className={cn(
             "text-pretty text-[13px] font-medium leading-tight text-white",
-            item.exportable && "pr-5",
+            item.exportable && showAction && "pr-5",
           )}
         >
           {label}
@@ -985,32 +1029,45 @@ export function StackSpanBar({
 
 export function SpanBar({ span }: { span: CalendarSpan }) {
   const lockup = span.brand?.lockup;
+  // Three parts across the bar: the mark, the days it runs, the room it runs
+  // in. The rail spans every column the activation covers — Give-a-LOT holds
+  // Monday to Wednesday, some seven hundred pixels — and the old layout put a
+  // 60px logo and one run-on caption at the left end of it, leaving most of
+  // the bar empty. Spread out, each fact has a place to be looked for.
   const body = (
     <>
-      {/* Give-a-LOT's wordmark carries the pun its short title only half
-          states, and the rail is a full-width bar — the one place on this
-          grid with room for a lockup at its natural ratio. */}
       {lockup ? (
         <Image
           src={lockup.src}
           alt={lockup.alt || span.title}
           width={lockup.width}
           height={lockup.height}
-          style={{ height: lockupHeight(lockup, 64, 22) }}
-          className="w-auto shrink-0 object-contain object-left"
+          // 40px of height against the old 22. The bar is a horizontal strip,
+          // so height is the only axis the mark can grow along.
+          style={
+            {
+              "--mark-h": `${lockupHeight(lockup, 150, 40)}px`,
+            } as React.CSSProperties
+          }
+          className="h-[var(--mark-h)] w-auto shrink-0 object-contain object-left"
         />
       ) : (
-        <span className="truncate text-[12px] font-medium text-white">
+        <span className="truncate text-[13px] font-medium text-white">
           {span.title}
         </span>
       )}
-      <span className="truncate font-mono text-[9px] uppercase tracking-widest text-white/50">
-        {span.dayLabel} · {span.venueName}
+      {/* Centred in what the mark and the room leave, so it reads as the middle
+          column of three rather than as text trailing the logo. */}
+      <span className="flex-1 truncate text-center font-mono text-[10px] uppercase tracking-widest text-white/70">
+        {span.dayLabel}
+      </span>
+      <span className="shrink-0 truncate font-mono text-[10px] uppercase tracking-widest text-white/50">
+        {span.venueName}
       </span>
     </>
   );
   const className =
-    "flex items-center gap-2 rounded border border-white/25 bg-white/[0.06] px-2 py-1 transition-colors duration-200 hover:bg-white/[0.11]";
+    "flex items-center gap-4 rounded border border-white/25 bg-white/[0.06] px-3 py-1.5 transition-colors duration-200 hover:bg-white/[0.11]";
   return span.page ? (
     <Link
       href={`/schedule/${span.page}`}

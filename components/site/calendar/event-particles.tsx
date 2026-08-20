@@ -73,6 +73,7 @@ export function BoltDrift() {
   return (
     <span
       aria-hidden="true"
+      data-particles=""
       className="pointer-events-none absolute inset-0 overflow-hidden rounded"
     >
       {BOLTS.map((bolt, i) => (
@@ -327,6 +328,7 @@ export function MascotBurst() {
     <span
       ref={layer}
       aria-hidden="true"
+      data-particles=""
       className="pointer-events-none absolute inset-0 overflow-hidden rounded"
     >
       {fired &&
