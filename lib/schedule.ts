@@ -70,6 +70,18 @@ export interface FeaturedSession {
    * isn't found, so editing a title can't break the card.
    */
   /**
+   * A run inside the title to set in magenta, on the page hero.
+   *
+   * The calendar draws College Night through `BrandMark`, which knows to put
+   * the accent on the second word; the activation page draws the plain title
+   * and knew nothing about it, so the same event wore two different marks
+   * depending on which page you were on. This is how the page is told.
+   *
+   * Matched as a substring, and ignored when it is not found — so editing a
+   * title can dull the accent but can never break the heading.
+   */
+  titleAccent?: string;
+  /**
    * A short name for lists that can't take the full one — filter chips, the
    * admin's activation picker.
    *
@@ -165,6 +177,29 @@ export interface FeaturedSession {
        * ones are actually why someone comes.
        */
       feature?: boolean;
+    }[];
+    /**
+     * Marks to put in front of the reader, where an activation is a room
+     * rather than a running order.
+     *
+     * College Night is a social: nothing is scheduled between the doors
+     * opening and closing, so `programme` would be inventing an agenda that
+     * does not exist. What it does have is two groups it is built around, and
+     * a logo each says that faster than a paragraph does.
+     *
+     * Rendered in the column `programme` would have used, so the two are
+     * alternatives rather than a stack.
+     */
+    spotlight?: readonly {
+      src: string;
+      width: number;
+      height: number;
+      /** Names the mark for anything that cannot draw it. */
+      alt: string;
+      name: string;
+      /** One line on who they are and why they are here. */
+      note: string;
+      href?: string;
     }[];
     /**
      * The paragraph the section closes on, full width under the programme.
@@ -892,47 +927,66 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     },
   },
   {
-    slug: "acm-utsa",
-    page: "acm-utsa",
-    title: "ACM UTSA",
+    slug: "college-night",
+    page: "college-night",
+    title: "College Night",
+    titleAccent: "Night",
     room: "the-rand",
     venueDetail: "3rd Floor",
-    circuit: "Tech & Builders",
-    site: { label: "acmutsa.org", href: "https://acmutsa.org/" },
-    // Two circular marks side by side, composed into one file the way the
-    // .NET lockup is — the grid draws a single `logo` per activation, and a
-    // component that drew two would leave the sizing path that `lockupHeight`
-    // and `axisMarkCap` control.
-    //
-    // The RowdyHacks mark is the one from Downloads, not the one on
-    // acmutsa.org: theirs is a dark outline cut that disappears on a black
-    // card, where this one is a cream disc that reads at any size. The
-    // separator is drawn rather than typeset, so it needs no font and stays
-    // crisp wherever the mark is scaled.
-    logo: {
-      src: "/activations/acm-utsa.webp",
-      width: 1226,
-      height: 504,
-      alt: "ACM UTSA and RowdyHacks",
-    },
+    // Social, not Tech & Builders. Nothing is programmed between the doors
+    // opening and closing — the point is the room, and the week already has a
+    // circuit for that.
+    circuit: "Social",
     when: {
       start: "2026-09-29T16:00:00-05:00",
       end: "2026-09-29T18:00:00-05:00",
     },
     blurb:
-      "UTSA's student computing chapter, in the room with Geekdom and the DEVSA community — and an open call for help before RowdyHacks opens on Saturday.",
+      "Every computing student in San Antonio, community college and university alike — two hours on Geekdom's third floor with the DEVSA community, and the RowdyHacks team asking for hands before Saturday.",
     detail: {
-      // Not "The hour", which the three activations before it use and earn:
-      // this one runs 4\u20136pm.
-      eyebrow: "The introduction",
-      headline: "The students, before the hackathon.",
+      eyebrow: "The night",
+      headline: "Bring the whole cohort.",
       lede: [
-        "ACM UTSA is the university's Association for Computing Machinery chapter, there to give students the chance to \u201cgain experience, network, socialize, learn, and grow outside of the classroom\u201d \u2014 their words. Six groups run under it, among them ACM-W, Coding in Color, the ICPC programming team and RowdyHacks.",
-        "This is the introduction: the chapter in a room with Geekdom staff and the DEVSA community, days ahead of its own hackathon.",
+        "Computer science, AI, cybersecurity, data engineering, electrical engineering \u2014 if you are studying any of it anywhere in San Antonio, this is the room. The Alamo Colleges, UTSA, St. Mary's, Trinity, Texas A&M-San Antonio, UIW. There is no home campus for this one, and no one is checking which logo is on your student ID.",
+        "The fall semester is still young, which is the point: clubs are recruiting, teams are forming, and nobody has picked their year yet. DEVSA describes itself as the bridge across San Antonio's tech ecosystem, and is careful about how \u2014 it does not replace the communities doing the work, it hosts them and connects them. There are more than twenty of those groups behind this one room.",
+      ],
+      spotlight: [
+        {
+          src: "/activations/acm-utsa.webp",
+          width: 320,
+          height: 320,
+          alt: "ACM UTSA",
+          name: "ACM UTSA",
+          note: "UTSA's Association for Computing Machinery chapter, and the six groups under it \u2014 ACM-W, Coding in Color, the ICPC team and more.",
+          href: "https://acmutsa.org/",
+        },
+        {
+          src: "/activations/rowdyhacks.webp",
+          width: 320,
+          height: 320,
+          alt: "RowdyHacks",
+          name: "RowdyHacks XII",
+          note: "Saturday's 24-hour hackathon. The team is here to say what it still needs \u2014 volunteers, mentors and judges \u2014 before the doors open.",
+          href: "https://rowdyhacks.org/",
+        },
       ],
       coda:
-        "RowdyHacks XII runs 24 hours from 9am on Saturday, October 3, across UTSA Main Campus and San Pedro 1 \u2014 the day after this week ends, with registration closing the Friday night. It is still looking for volunteers, mentors and judges, and this is the last time that ask can be made to a room this size before the doors open.",
-      kicker: "The week ends Friday. Theirs starts Saturday morning.",
+        "Geekdom's pitch to founders is that people are the unfair advantage \u2014 that a hard problem gets easier with the right person across the table, and that person is hard to find on your own, so they built the room where they already are. That room is the third floor of the Rand, which is the floor you would be standing on. A student who finds it in their first semester has four years of it, and that is the whole reason the community floor gives an evening to people who cannot yet put Geekdom on a r\u00e9sum\u00e9. Nobody has to join anything to talk to anyone.",
+      // Two hosts, two borrowed registers, and both are deliberate. The coda
+      // above is Geekdom's own argument in Geekdom's words — HOOK and MISSION
+      // in next-geekdom's lib/site.ts are "make people your unfair advantage"
+      // and "that person is hard to find on your own, so we built the room
+      // where they already are". This kicker is DEVSA's tagline.
+      //
+      // DEVSA's own tagline, and used deliberately rather than paraphrased.
+      // lib/locations.ts drops this same line from The Rand's description,
+      // because there it was the event borrowing a partner's brand voice to
+      // describe a venue. Here DEVSA hosts the night, the coda above names
+      // them twice and hands the line over, so it reads as the host talking
+      // rather than as marketing lifted from someone else.
+      kicker: "Find your people. Build your future.",
+      access:
+        "Free, and free of the usual conditions \u2014 no badge, no pitch, no year requirement, and no need to be enrolled anywhere in particular.",
     },
   },
   {
@@ -1164,7 +1218,11 @@ export interface CalendarBrand {
    * cases session-bento's `BrandLockup` special-cases, keyed the same way, on
    * `page` rather than on the title, because the title is copy.
    */
-  wordmark?: "the-model" | "access-granted" | "startup-bash";
+  wordmark?:
+    | "the-model"
+    | "access-granted"
+    | "startup-bash"
+    | "college-night";
   /** The ink inside The Model's selection block. */
   ink?: string;
 }
@@ -1188,7 +1246,8 @@ function brandFor(session: ResolvedSession): CalendarBrand | undefined {
   const wordmark =
     session.page === "access-granted" ||
     session.page === "the-model" ||
-    session.page === "startup-bash"
+    session.page === "startup-bash" ||
+    session.page === "college-night"
       ? session.page
       : undefined;
   if (!accent && !wordmark && !session.logo) return undefined;
@@ -1654,11 +1713,28 @@ export const ACTIVATION_SLUGS = allSessions()
   .filter((s) => s.page)
   .map((s) => s.page as string) as [string, ...string[]];
 
+/**
+ * Activation URLs that shipped and then moved.
+ *
+ * /schedule/acm-utsa was live for one deploy before the hour was reframed from
+ * a chapter introduction into College Night, a social for every computing
+ * student in the city. That deploy put the old URL in the sitemap, so it 308s
+ * to the new one rather than 404ing.
+ *
+ * These have to be in `scheduleSlugs` as well as here: `dynamicParams` is
+ * false on the route, so a slug with no static param never reaches the page
+ * and the redirect below it never runs.
+ */
+export const RETIRED_PAGES: Record<string, string> = {
+  "acm-utsa": "college-night",
+};
+
 export function scheduleSlugs(): string[] {
   const withSessions = new Set(allSessions().map((s) => s.room));
   return [
     ...ROOMS.filter((r) => withSessions.has(r.slug)).map((r) => r.slug),
     ...activations().keys(),
+    ...Object.keys(RETIRED_PAGES),
   ];
 }
 

@@ -23,6 +23,7 @@ import {
   resolveSchedule,
   scheduleSlugs,
   venueRedirect,
+  RETIRED_PAGES,
   whenLabels,
   type ResolvedSession,
 } from "@/lib/schedule";
@@ -122,6 +123,27 @@ export async function generateMetadata({
  * The hero title, split at `heroBreakBefore` — or whole, when there's no break
  * or the substring isn't found. Editing a title can't break the page.
  */
+/**
+ * The title with its accent run in magenta — see `titleAccent`.
+ *
+ * Returns the plain string when there is no accent or the run is not found, so
+ * the heading is never worse off for this.
+ */
+function accented(text: string, accent: string | undefined) {
+  if (!accent) return text;
+  const at = text.indexOf(accent);
+  if (at === -1) return text;
+  return (
+    <>
+      {text.slice(0, at)}
+      <span className="text-magenta">
+        {text.slice(at, at + accent.length)}
+      </span>
+      {text.slice(at + accent.length)}
+    </>
+  );
+}
+
 function heroTitleParts(session: ResolvedSession): [string] | [string, string] {
   const at = session.heroBreakBefore;
   if (!at) return [session.title];
@@ -426,11 +448,13 @@ function ActivationPage({
                       leaves the phone alone. The h1's text content is
                       unchanged either way, so the outline and anything reading
                       the page still see one clean string. */}
-                  {heroTitle[0]}
+                  {accented(heroTitle[0], session.titleAccent)}
                   {heroTitle[1] && (
                     <>
                       {" "}
-                      <span className="lg:block">{heroTitle[1]}</span>
+                      <span className="lg:block">
+                        {accented(heroTitle[1], session.titleAccent)}
+                      </span>
                     </>
                   )}
                 </h1>
@@ -693,6 +717,12 @@ export default async function VenueSchedulePage({
 }) {
   const { slug } = await params;
   const schedule = resolveSchedule(slug);
+  // A URL that shipped and then moved — see RETIRED_PAGES. Checked before the
+  // 404, and 308 for the same reason the venue redirect is: the ranking moves
+  // across rather than both being held.
+  const moved = RETIRED_PAGES[slug];
+  if (moved) permanentRedirect(`/schedule/${moved}`);
+
   if (!schedule) notFound();
 
   if (schedule.kind === "activation") {

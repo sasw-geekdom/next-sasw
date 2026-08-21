@@ -1,4 +1,5 @@
 import type { FeaturedSession } from "@/lib/schedule";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 // An organiser's own account of their activation, from lib/schedule.
@@ -97,6 +98,51 @@ export function ActivationDetail({
               </p>
             )}
           </div>
+
+          {/* A room's guests, where there is no running order to list. See
+              `detail.spotlight` — the two are alternatives, and a social gets
+              this one. */}
+          {detail.spotlight && detail.spotlight.length > 0 && (
+            <ul className="space-y-8">
+              {detail.spotlight.map((mark) => {
+                const body = (
+                  <>
+                    <Image
+                      src={mark.src}
+                      alt={mark.alt}
+                      width={mark.width}
+                      height={mark.height}
+                      className="size-16 shrink-0 rounded-full object-contain sm:size-20"
+                    />
+                    <span className="min-w-0">
+                      <span className="block text-pretty font-display text-xl font-bold uppercase leading-[1.05] tracking-tight text-white sm:text-2xl">
+                        {mark.name}
+                      </span>
+                      <span className="mt-2 block text-pretty text-white/60">
+                        {mark.note}
+                      </span>
+                    </span>
+                  </>
+                );
+                return (
+                  <li key={mark.name}>
+                    {mark.href ? (
+                      <a
+                        href={mark.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group flex items-start gap-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
+                      >
+                        {body}
+                      </a>
+                    ) : (
+                      <div className="flex items-start gap-5">{body}</div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
 
           {detail.programme && detail.programme.length > 0 && (
             <ol className="relative">

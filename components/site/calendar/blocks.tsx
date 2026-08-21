@@ -261,6 +261,31 @@ function BrandMark({
     );
   }
 
+  if (brand.wordmark === "college-night") {
+    return (
+      // Set in type, like Access Granted, and for the same reason: this is a
+      // house night rather than a partner's event, so there is no logo to
+      // defer to and the mark is the house display face.
+      //
+      // Magenta on the second word, following Startup Bash rather than Access
+      // Granted's green-on-the-first. Both are ours, both are Social, and the
+      // accent belongs on the word that says what the evening is.
+      //
+      // One line at every size. "COLLEGE NIGHT" wrapped is two lines of
+      // display type in a block that also has to hold a time and a room, and
+      // the cut steps down instead — a wrapped mark costs more height than the
+      // larger type wins.
+      <span
+        className={cn(
+          "whitespace-nowrap font-display font-bold uppercase leading-tight tracking-tight text-white",
+          lg ? "text-xl lg:text-2xl" : roomy ? "text-base" : "text-sm",
+        )}
+      >
+        College <span className="text-magenta">Night</span>
+      </span>
+    );
+  }
+
   if (brand.wordmark === "startup-bash") {
     return (
       // The week's own logo and the word that makes it a party. Startup Bash
