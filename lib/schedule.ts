@@ -861,8 +861,8 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       alt: "",
     },
     when: {
-      start: "2026-09-29T13:00:00-05:00",
-      end: "2026-09-29T14:00:00-05:00",
+      start: "2026-09-29T15:00:00-05:00",
+      end: "2026-09-29T16:00:00-05:00",
     },
     // Their stated mission is "to make Texas the best place in the world to
     // hire technical talent and build technical companies", and the meetups
@@ -1034,8 +1034,8 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       alt: "San Antonio .NET User Group",
     },
     when: {
-      start: "2026-09-29T15:00:00-05:00",
-      end: "2026-09-29T16:00:00-05:00",
+      start: "2026-09-29T13:00:00-05:00",
+      end: "2026-09-29T14:00:00-05:00",
     },
     // Their own description is "for anyone interested in a wide range of .NET
     // topics around the San Antonio, Texas area" — deliberately broad, and the
