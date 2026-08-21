@@ -990,6 +990,55 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     },
   },
   {
+    slug: "txlf",
+    page: "txlf",
+    // The full name, not the initialism, because this is what the sr-only
+    // heading, the share card and the Event markup carry — "TXLF" is four
+    // letters nobody searches. The card draws the logo either way, and
+    // `shortTitle` puts the initialism back in the filter chips.
+    title: "Texas Linux Fest",
+    shortTitle: "TXLF",
+    room: "the-rand",
+    venueDetail: "3rd Floor",
+    circuit: "Tech & Builders",
+    site: {
+      label: "texaslinuxfest.org",
+      href: "https://2026.texaslinuxfest.org/",
+    },
+    // Their footer cut, which is the light-on-dark one: white wordmark and a
+    // white badge on transparent, 3255px before it was scaled. The header logo
+    // is blue-on-orange at 279px and would have needed both a recolour and a
+    // trace to survive this ground.
+    logo: {
+      src: "/activations/txlf.webp",
+      width: 1600,
+      height: 356,
+      alt: "Texas Linux Fest",
+    },
+    when: {
+      start: "2026-10-01T13:00:00-05:00",
+      end: "2026-10-01T16:00:00-05:00",
+    },
+    // TODO(content): speakers are being announced. When they land they belong
+    // in the sessions CMS pointed at this slug, not here — that is what makes
+    // the speaker pages link back, and it supersedes `detail` on the page.
+    blurb:
+      "The team behind Texas's Linux and open source conference, down from Austin for the afternoon — three hours on the community floor, and discount codes for November.",
+    detail: {
+      eyebrow: "The afternoon",
+      headline: "Open source, all afternoon.",
+      lede: [
+        "Texas Linux Fest calls itself \u201cthe first state-wide annual community-run conference for Linux and open source software users and enthusiasts from around the Lone Star State\u201d \u2014 running since 2010, non-profit, and built on the model SCALE and Ohio Linux Fest set: a weekend priced for a person rather than a department.",
+        "The team brings that room to The Rand for three hours. They are a DEVSA partner, which is how they land on the community floor rather than a stage.",
+      ],
+      coda:
+        "The festival itself is November 6\u20137 at UT Commons in Austin \u2014 two days, forty speakers, five hundred seats, and a ticket tier called Starving Hacker, which tells you most of what you need to know about who it is for. This afternoon is the shortcut to it, and the week already has the other half of the argument: Give-a-LOT spends Monday to Wednesday rebuilding donated machines on the same software.",
+      kicker: "Bring a laptop. Or don\u2019t \u2014 bring a question.",
+      access:
+        "Free with Startup + Tech Week registration, and discount codes for November\u2019s festival are being handed out in the room.",
+    },
+  },
+  {
     slug: "dotnet-user-group",
     page: "dotnet-user-group",
     title: "San Antonio .NET User Group",
