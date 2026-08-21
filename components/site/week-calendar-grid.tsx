@@ -62,8 +62,25 @@ import {
 // The venue chip forces expansion outright, since one venue in a column has no
 // lane to share and every block is full width.
 
-/** Above this many sessions in one venue's run, the run draws as one block. */
-const EXPAND_MAX = 3;
+/**
+ * Above this many sessions in one venue's run, the run draws as one block.
+ *
+ * The threshold is about density, not count. It exists so a Tuesday of twelve
+ * thirty-minute TPR slots stays readable, and at 3 it also caught The Rand's
+ * community afternoon — four activations of an hour or two, laid end to end
+ * across five hours, which is exactly the case the grid can draw. The whole
+ * run collapsed into one summary and every one of those marks disappeared
+ * from both views.
+ *
+ * 4 is where the real content sits today. The blocks it admits are 60px and
+ * up, which the one-hour layout is already tuned for; twelve half-hour slots
+ * still fold, which is the case this was written for.
+ *
+ * If this needs raising again, the honest fix is to key on the height the run
+ * would draw at rather than on how many things are in it — a count is a proxy
+ * for density and it is wrong the moment the blocks are not the same size.
+ */
+const EXPAND_MAX = 4;
 
 /**
  * The week runs coarse — its blocks are afternoons, not talks. The day view

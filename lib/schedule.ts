@@ -892,6 +892,50 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     },
   },
   {
+    slug: "acm-utsa",
+    page: "acm-utsa",
+    title: "ACM UTSA",
+    room: "the-rand",
+    venueDetail: "3rd Floor",
+    circuit: "Tech & Builders",
+    site: { label: "acmutsa.org", href: "https://acmutsa.org/" },
+    // Two circular marks side by side, composed into one file the way the
+    // .NET lockup is — the grid draws a single `logo` per activation, and a
+    // component that drew two would leave the sizing path that `lockupHeight`
+    // and `axisMarkCap` control.
+    //
+    // The RowdyHacks mark is the one from Downloads, not the one on
+    // acmutsa.org: theirs is a dark outline cut that disappears on a black
+    // card, where this one is a cream disc that reads at any size. The
+    // separator is drawn rather than typeset, so it needs no font and stays
+    // crisp wherever the mark is scaled.
+    logo: {
+      src: "/activations/acm-utsa.webp",
+      width: 1226,
+      height: 504,
+      alt: "ACM UTSA and RowdyHacks",
+    },
+    when: {
+      start: "2026-09-29T16:00:00-05:00",
+      end: "2026-09-29T18:00:00-05:00",
+    },
+    blurb:
+      "UTSA's student computing chapter, in the room with Geekdom and the DEVSA community — and an open call for help before RowdyHacks opens on Saturday.",
+    detail: {
+      // Not "The hour", which the three activations before it use and earn:
+      // this one runs 4\u20136pm.
+      eyebrow: "The introduction",
+      headline: "The students, before the hackathon.",
+      lede: [
+        "ACM UTSA is the university's Association for Computing Machinery chapter, there to give students the chance to \u201cgain experience, network, socialize, learn, and grow outside of the classroom\u201d \u2014 their words. Six groups run under it, among them ACM-W, Coding in Color, the ICPC programming team and RowdyHacks.",
+        "This is the introduction: the chapter in a room with Geekdom staff and the DEVSA community, days ahead of its own hackathon.",
+      ],
+      coda:
+        "RowdyHacks XII runs 24 hours from 9am on Saturday, October 3, across UTSA Main Campus and San Pedro 1 \u2014 the day after this week ends, with registration closing the Friday night. It is still looking for volunteers, mentors and judges, and this is the last time that ask can be made to a room this size before the doors open.",
+      kicker: "The week ends Friday. Theirs starts Saturday morning.",
+    },
+  },
+  {
     slug: "dotnet-user-group",
     page: "dotnet-user-group",
     title: "San Antonio .NET User Group",

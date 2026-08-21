@@ -122,10 +122,21 @@ export function axisMarkCap(
   endMin: number,
   hourPx: number,
 ): number | undefined {
-  // Blocks with room to spare keep the size-bucket cap they always had; this
-  // is only about the short ones.
-  if (hasSpareRows(startMin, endMin, hourPx)) return undefined;
   const height = ((endMin - startMin) / 60) * hourPx;
+
+  // A block with room to spare still has a ceiling — it is just a higher one.
+  // Two meta rows and their gaps cost about 36, and at `lg` the mark is drawn
+  // at 1.5x the value returned here, so the budget is divided back out.
+  //
+  // This case went uncovered until a two-hour block met a squarish mark. Every
+  // lockup on the grid until then was 3.8:1 or wider, and width-led sizing
+  // keeps a wide mark short by construction, so the size bucket alone was
+  // always enough. ACM UTSA's is 2.43:1 — two circles side by side — which the
+  // same 150px target draws 84px tall, and in a 120px block that squeezed the
+  // venue row to nothing.
+  if (hasSpareRows(startMin, endMin, hourPx)) {
+    return Math.max(14, (height - 20 - 36) / 1.5);
+  }
   // 20px of chrome — 6 of wrapper padding, 2 of border, 12 of the block's own
   // — then 20 for the single meta row: 9px mono on a 13.5px line, plus the 6px
   // that separates it from the mark. A 60px block is left 40px of content box,
