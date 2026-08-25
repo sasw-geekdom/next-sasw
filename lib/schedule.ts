@@ -179,6 +179,25 @@ export interface FeaturedSession {
       feature?: boolean;
     }[];
     /**
+     * A "powered by" wall, for an activation several orgs run together.
+     *
+     * The same shape `OrganizerLogo` takes, and the same treatment the banded
+     * activations give it — a mono label over a row of marks. Bands carry
+     * their own wall in their own component; this is how an activation without
+     * a band gets one.
+     *
+     * `heightClass` normalises the marks optically rather than mechanically: a
+     * square badge needs more height than a 10:1 wordmark to read as its
+     * equal, which is why these are not one number. Same reasoning, and in two
+     * cases the same files, as ACCESS_ORGANIZERS and GIVE_A_LOT_ORGANIZERS.
+     */
+    poweredBy?: readonly {
+      name: string;
+      logo: string;
+      heightClass: string;
+      href?: string;
+    }[];
+    /**
      * Marks to put in front of the reader, where an activation is a room
      * rather than a running order.
      *
@@ -990,6 +1009,93 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     },
   },
   {
+    slug: "linux-satx",
+    page: "linux-satx",
+    title: "Linux San Antonio",
+    room: "the-rand",
+    venueDetail: "3rd Floor",
+    circuit: "Tech & Builders",
+    // Tux, and the name set in Geist Pixel Square beside him.
+    //
+    // The pixel face was vendored for The Model, retired when that band moved
+    // to monospace, and turned down for Startup Bash because it read as a
+    // borrowed voice — it belonged to an activation's brand sheet rather than
+    // to SASTW. None of that applies here: the mark is a pixel-art penguin, so
+    // a square-grid pixel face is the subject's own logic rather than someone
+    // else's. The two share a grid and read as one lockup.
+    //
+    // Baked into the file rather than set at runtime, which is what keeps
+    // app/fonts/pixel.ts dead code. Reviving it would put a 28KB woff2 preload
+    // on every page in the site for one activation's wordmark; the glyph
+    // outlines cost nothing here and work in the OG cards too. Same reason the
+    // .NET lockup carries its "User Group" as paths.
+    //
+    // "SAN ANTONIO" is #FFC336, sampled from Tux's beak rather than picked.
+    //
+    // LINUX is set large enough to finish on SAN ANTONIO's width by itself
+    // rather than being tracked out to reach it. Both give the type block a
+    // straight right edge, which the first cut did not have — LINUX ended at
+    // 40% of the line below and the silhouette was ragged — but tracking a
+    // five-letter word that far apart stops it reading as a word at block
+    // size, where "L I N U X" is five glyphs with gaps. Sizing keeps it one
+    // word and buys a hierarchy for free: the platform is the headline and
+    // the city qualifies it.
+    logo: {
+      src: "/activations/linux-satx.webp",
+      width: 1600,
+      height: 482,
+      alt: "Linux San Antonio",
+    },
+    when: {
+      start: "2026-10-01T13:00:00-05:00",
+      end: "2026-10-01T16:00:00-05:00",
+    },
+    // TODO(content): speakers are being announced. They belong in the sessions
+    // CMS pointed at this slug — that is what links the speaker pages back, and
+    // CMS rows supersede `detail` on the page.
+    blurb:
+      "Three hours on the community floor for the people who actually run Linux \u2014 the environment, the tooling, the config you keep tuning. Part of the week, and free with it.",
+    detail: {
+      eyebrow: "The afternoon",
+      headline: "Linux, on purpose.",
+      lede: [
+        "If you run Linux you already know why. The distro you settled on, the window manager you rebuilt twice, the dotfiles you will not stop tuning \u2014 this is three hours for the part of your setup nobody at work wants to hear about.",
+        "Programming, mostly: the environment, the tooling, and the defaults you spend the day inside. Speakers are being announced. No booth, no vendor deck, and nobody refereeing a distro argument.",
+      ],
+      poweredBy: [
+        {
+          name: "learnOPENtech",
+          href: "https://learnopentech.com/",
+          logo: "/give-a-lot/learnopentech.svg",
+          // A 10:1 wordmark, so height buys width ten times over — the same
+          // h-5/h-6 Give-a-LOT's wall settled on for exactly this reason.
+          heightClass: "h-5 sm:h-6",
+        },
+        {
+          name: "Texas Linux Fest",
+          href: "https://2026.texaslinuxfest.org/",
+          logo: "/activations/txlf.webp",
+          // 4.5:1, between the other two, and sized to land near
+          // learnOPENtech's drawn width rather than its drawn height.
+          heightClass: "h-8 sm:h-10",
+        },
+        {
+          name: "DEVSA",
+          href: "https://www.devsa.community/",
+          // The same file Access Granted and Give-a-LOT use. Shared, not
+          // copied, so a new mark lands everywhere at once.
+          logo: "/access-granted/orgs/devsa.png",
+          heightClass: "h-11 sm:h-13",
+        },
+      ],
+      coda:
+        "Every other room this week is about something being built \u2014 a company, a pitch, a product. This one is about the thing underneath it, which is the least glamorous and most load-bearing subject on the schedule. It runs because the people behind it already do this work here, and would rather spend a Thursday on it than a slide.",
+      kicker: "Bring the laptop you actually use. Opinions come standard.",
+      access:
+        "Free with Startup + Tech Week registration. Discount codes for November\u2019s Texas Linux Fest are being handed out in the room.",
+    },
+  },
+  {
     slug: "dotnet-user-group",
     page: "dotnet-user-group",
     title: "San Antonio .NET User Group",
@@ -1727,14 +1833,10 @@ export const ACTIVATION_SLUGS = allSessions()
  */
 export const RETIRED_PAGES: Record<string, string> = {
   "acm-utsa": "college-night",
-  // Thursday's Linux afternoon shipped as /schedule/txlf and is being renamed
-  // — it runs powered by Texas Linux Fest and DEVSA rather than as TXLF
-  // itself. The activation is out of FEATURED_SESSIONS until that name lands,
-  // so this points at the room in the meantime rather than leaving a URL that
-  // was live in a deploy to 404.
-  //
-  // TODO(content): repoint at the new activation the moment it has a page.
-  txlf: "the-rand",
+  // Thursday's Linux afternoon shipped as /schedule/txlf for one deploy before
+  // it was renamed: it runs powered by learnOPENtech, Texas Linux Fest and
+  // DEVSA rather than as TXLF itself.
+  txlf: "linux-satx",
 };
 
 export function scheduleSlugs(): string[] {

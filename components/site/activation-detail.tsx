@@ -1,5 +1,6 @@
 import type { FeaturedSession } from "@/lib/schedule";
 import Image from "next/image";
+import { OrganizerLogo } from "@/components/site/organizer-logo";
 import { cn } from "@/lib/utils";
 
 // An organiser's own account of their activation, from lib/schedule.
@@ -92,7 +93,25 @@ export function ActivationDetail({
                 Measured before moving: the column runs 384x393 and this adds
                 ~150px, which still clears the pin on a 1280x800 laptop with
                 150px to spare. */}
-            {detail.access && (
+            {/* The orgs behind it, in the pinned column under the lede — the
+              same label-over-a-row the bands use, so an activation without a
+              band credits its partners the same way one with a band does. */}
+          {detail.poweredBy && detail.poweredBy.length > 0 && (
+            <div className="mt-9">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
+                Powered by
+              </p>
+              <ul className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-6 sm:gap-x-10">
+                {detail.poweredBy.map((o) => (
+                  <li key={o.name}>
+                    <OrganizerLogo org={o} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {detail.access && (
               <p className="mt-8 border-t border-white/10 pt-6 text-pretty text-sm text-white/55">
                 {detail.access}
               </p>
