@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useReducedMotion } from "motion/react";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
 const VERT = `
@@ -124,6 +124,7 @@ export function ShaderCanvas({
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const reduce = useReducedMotion();
   const [failed, setFailed] = React.useState(false);
+  const showFallback = reduce || failed;
   const activeRef = React.useRef(active);
   React.useEffect(() => {
     activeRef.current = active;
@@ -157,7 +158,9 @@ export function ShaderCanvas({
     let gl: WebGLRenderingContext | null = null;
     try {
       gl = (canvas.getContext("webgl") ||
-        canvas.getContext("experimental-webgl")) as WebGLRenderingContext | null;
+        canvas.getContext(
+          "experimental-webgl",
+        )) as WebGLRenderingContext | null;
       if (!gl) throw new Error("no webgl");
 
       const prog = gl.createProgram()!;
@@ -184,7 +187,12 @@ export function ShaderCanvas({
       const uMouse = gl.getUniformLocation(prog, "u_mouse");
       const uColor = gl.getUniformLocation(prog, "u_color");
       const uBase = gl.getUniformLocation(prog, "u_base");
-      gl.uniform3f(uBase, baseRef.current[0], baseRef.current[1], baseRef.current[2]);
+      gl.uniform3f(
+        uBase,
+        baseRef.current[0],
+        baseRef.current[1],
+        baseRef.current[2],
+      );
 
       const start = performance.now();
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -260,7 +268,7 @@ export function ShaderCanvas({
 
   return (
     <div className={cn("relative select-none", className)}>
-      {reduce || failed ? (
+      {showFallback ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={fallbackSrc}

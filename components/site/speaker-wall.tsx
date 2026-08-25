@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { SpeakerCard } from "@/components/site/speaker-card";
 import { TRACK_NAMES, type TrackName } from "@/lib/tracks";
 import { cn } from "@/lib/utils";

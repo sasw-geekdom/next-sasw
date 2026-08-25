@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { ARROW_MOTION } from "@/lib/motion";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
 import { whenShort, type ResolvedSession } from "@/lib/schedule";
 import { ACCESS_GREEN } from "@/lib/access-granted";
@@ -279,7 +280,12 @@ export function SessionBento({
     <div className="flex flex-col gap-6">
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {lead.map((s, i) => (
-          <Card key={s.slug} session={s} index={i} matchTitleSize={matchTitleSize} />
+          <Card
+            key={s.slug}
+            session={s}
+            index={i}
+            matchTitleSize={matchTitleSize}
+          />
         ))}
       </div>
 
@@ -287,11 +293,11 @@ export function SessionBento({
         <div className="grid gap-6 sm:grid-cols-2">
           {rest.map((s, i) => (
             <Card
-            key={s.slug}
-            session={s}
-            index={i + lead.length}
-            matchTitleSize={matchTitleSize}
-          />
+              key={s.slug}
+              session={s}
+              index={i + lead.length}
+              matchTitleSize={matchTitleSize}
+            />
           ))}
         </div>
       )}

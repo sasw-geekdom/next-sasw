@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useReducedMotion } from "motion/react";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { ArrowUpRight, CalendarDays, Clock, MapPin } from "lucide-react";
 import { OrganizerLogo } from "@/components/site/organizer-logo";
 import { ButtonLink } from "@/components/ui/button";

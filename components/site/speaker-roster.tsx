@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { LinkedInMark } from "@/components/site/linkedin-mark";
@@ -31,18 +32,12 @@ export function SpeakerRoster({ speakers }: { speakers: CardSpeaker[] }) {
   const [stopped, setStopped] = React.useState(false);
   const root = React.useRef<HTMLDivElement>(null);
 
-  // `useReducedMotion` from motion/react is a hook on a media query; this is
-  // the same query read directly, because this component doesn't otherwise
-  // pull motion/react in and an auto-advancing portrait is exactly the kind of
-  // thing that query exists to switch off.
-  const [reduceMotion, setReduceMotion] = React.useState(false);
-  React.useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduceMotion(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
+  // An auto-advancing portrait is exactly the kind of thing this query exists
+  // to switch off. This was the same query read inline, written that way to
+  // avoid pulling motion/react into a component that wanted nothing else from
+  // it; lib/use-reduced-motion.ts is now that read, shared and without the
+  // hydration hazard motion's own hook carries.
+  const reduceMotion = useReducedMotion();
 
   // Only cycle while the section is actually on screen, so a visitor sees it
   // from the first name rather than arriving mid-lap — and so the timer isn't

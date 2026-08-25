@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { ArrowUpRight } from "lucide-react";
 import { SpeakerCard } from "@/components/site/speaker-card";
 import { SpeakerRoster } from "@/components/site/speaker-roster";
