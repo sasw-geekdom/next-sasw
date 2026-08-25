@@ -1017,6 +1017,131 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         "Free, and free of the usual conditions \u2014 no badge, no pitch, no year requirement, and no need to be enrolled anywhere in particular.",
     },
   },
+  // Thursday afternoon on the community floor, in time order: the AWS user
+  // group's hour, then Linux San Antonio's two. Two activations in one venue's
+  // run, well under EXPAND_MAX, so the week draws them as themselves — see the
+  // note on The Rand's Tuesday, where the count is the thing to watch.
+  {
+    slug: "aws-user-group",
+    page: "aws-user-group",
+    // This group answers to three names and all of them are real: Meetup has
+    // it as "San Antonio AWS Users", their own site brands as "AWS Community
+    // San Antonio", and the Meetup URL is /san-antonio-aws-users-group. The
+    // mark beside the title reads "User Group" because that is the programme
+    // they belong to — their site's own footer badge is "Part of the AWS User
+    // Groups program" — so the title is set to match the mark rather than
+    // leaving the page saying one thing and the lockup another.
+    title: "San Antonio AWS User Group",
+    shortTitle: "AWS User Group",
+    room: "the-rand",
+    venueDetail: "3rd Floor",
+    circuit: "Tech & Builders",
+    // Their own site, not the Meetup. The .NET group's home genuinely is its
+    // Meetup page, so that is where that entry points; this group runs a real
+    // site with their events, resources and a job board on it, and the Meetup
+    // is the RSVP form for one of those things.
+    site: { label: "sanantonioaws.com", href: "https://sanantonioaws.com/" },
+    // The official AWS logo in white, with "User Group" set beside it in Geist
+    // 500 at the same cap height — the same lockup rule the .NET mark follows,
+    // and for the same reason: the two share a baseline and a cap line, so
+    // they read as one line of type rather than a logo with a caption.
+    //
+    // The logo is the light-mode wordmark from builder.aws.com, taken as
+    // outlines rather than recoloured art. It arrives as one path of six
+    // subpaths, which measure into two groups — the "aws" letters at y 0-94
+    // and the smile at y 112-180 — and that split is what sets the type. Cap
+    // height is matched to the *letters* (94), not to the whole mark (180),
+    // so the smile hangs below the line like a rule under the lockup. Matching
+    // the full height instead was drawn and rejected: "User Group" came out
+    // nearly twice the height of "aws" and read as the headline, with the
+    // logo demoted to a bullet in front of it.
+    //
+    // The gap is 0.366 of the cap height, which is the .NET lockup's gap
+    // expressed as a ratio, measured off the mark's ink edge. Here that edge
+    // is the smile's right tip rather than the "s", so the type clears the
+    // arrow by a few units instead of sitting on it.
+    //
+    // Baked into the file for the same reason the .NET one is: a typeset mark
+    // built as a component leaves the lockup sizing path — the width-led
+    // `lockupHeight`, the `axisMarkCap` that stops a one-hour block clipping —
+    // and would need its own sizing at three block scales plus the page hero.
+    // As a file it is an ordinary lockup and every call site keeps working.
+    //
+    // 5.49:1, which is mid-table here: wider than AITX (3.68) and ACM UTSA
+    // (2.43), narrower than GDG (10.01) and the .NET lockup (8.12). The AWS
+    // mark alone is 1.67:1, and width-led sizing draws anything that square
+    // the tallest thing on the grid — the same trap ".NET" on its own fell
+    // into. The words fix it as a side effect of saying who this is.
+    logo: {
+      src: "/activations/aws-user-group.svg",
+      width: 1044,
+      height: 190,
+      alt: "San Antonio AWS User Group",
+    },
+    when: {
+      start: "2026-10-01T13:00:00-05:00",
+      end: "2026-10-01T14:00:00-05:00",
+    },
+    // TODO(content): a speaker has not been named yet. That belongs in the
+    // sessions CMS pointed at this slug — not here — which is what makes the
+    // speaker page link back, and CMS rows supersede `detail` on the page.
+    //
+    // ─── Why this reads forward rather than backward ─────────────────────────
+    //
+    // The first cut of this page led on their record: founded 2018, twelve
+    // hundred members, the run of recent events, and which floor of which
+    // building each one was on. Every fact in it was true and the whole thing
+    // was still wrong, because a reader deciding whether to spend an hour here
+    // does not need the group's CV — they need to know whether the room is for
+    // them. History answers "are they real"; nobody was asking that.
+    //
+    // So it leads on what they are building and who it serves. The four
+    // audiences named in the lede are the week's own: The Model brings
+    // creatives, the pitch events bring founders, College Night brings
+    // students, and this floor runs on developers. Cloud is the one thing
+    // underneath all four, which is the argument for putting this hour where
+    // the rest of the city can walk into it.
+    //
+    // ─── Where the claims come from ──────────────────────────────────────────
+    //
+    // Their own resources feed, not a press page. AWS Educate is listed there
+    // as "requiring no credit card or AWS account to get started" and Skill
+    // Builder as "over 1,000 free learning resources"; the same shelf carries
+    // Google Cloud training, Microsoft Learn, freeCodeCamp, GitHub Skills and
+    // Cisco NetAcad — and DEVSA. An AWS user group sending people to Azure and
+    // GCP is the single most useful thing on that site, and it is what makes
+    // "resource" a description rather than a compliment, so the coda spends
+    // its close on it.
+    //
+    // What did not survive the rewrite, and why, so it is not re-added: the
+    // job board is 152 roles and almost all of them are remote postings from
+    // partner companies rather than San Antonio work, so calling it a local
+    // board would have been the one false note on the page.
+    blurb:
+      "San Antonio\u2019s AWS group, and a year-round cloud resource \u2014 hands-on labs, a curated shelf of free training, and answers for whatever you\u2019re trying to ship.",
+    detail: {
+      eyebrow: "The hour",
+      // Their own about page is "A meetup, not a conference", and this is the
+      // same move in this site's voice: say what the room is for by saying
+      // what to do with it. Every headline that claimed the word "resource"
+      // outright read like a brochure; an instruction reads like an open door,
+      // and it is the one line on the page that works identically for a
+      // student and for someone with production on AWS.
+      headline: "Bring the thing you\u2019re stuck on.",
+      lede: [
+        "What they are building is a resource, not a run of events \u2014 hands-on labs you leave with the thing actually working, and a curated shelf of free training that starts at AWS Educate, takes no credit card, and points at Google Cloud, Microsoft Learn and freeCodeCamp as readily as at AWS.",
+        "Which makes the hour wider than the people already writing YAML. A creative pricing a render pipeline, a founder who wants the bill before the raise, a student after a first Lambda, a developer with an architecture argument to settle \u2014 four questions, one room, the same infrastructure underneath all of them.",
+      ],
+      coda:
+        "Most of what a week like this hands you expires when the week does. This does not. The group meets all year, charges nothing, is run by people who work here, and its own resources page sends you to Microsoft Learn and Google Cloud as happily as to AWS \u2014 which is how you tell a community from a channel. The hour is the introduction. The resource was already yours.",
+      // Their tagline, and used as theirs rather than paraphrased — the same
+      // move College Night makes with DEVSA’s. It is the group’s line about
+      // the group, so it reads as them talking.
+      kicker: "Where San Antonio builds the cloud.",
+      access:
+        "Free with Startup + Tech Week registration. All levels, in their own words \u2014 from \u201cjust deployed my first Lambda\u201d to \u201cI architect multi-region systems for fun.\u201d",
+    },
+  },
   {
     slug: "linux-satx",
     page: "linux-satx",
@@ -1056,19 +1181,19 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       alt: "Linux San Antonio",
     },
     when: {
-      start: "2026-10-01T13:00:00-05:00",
+      start: "2026-10-01T14:00:00-05:00",
       end: "2026-10-01T16:00:00-05:00",
     },
     // TODO(content): speakers are being announced. They belong in the sessions
     // CMS pointed at this slug — that is what links the speaker pages back, and
     // CMS rows supersede `detail` on the page.
     blurb:
-      "Three hours on the community floor for the people who actually run Linux \u2014 the environment, the tooling, the config you keep tuning. Part of the week, and free with it.",
+      "Two hours on the community floor for the people who actually run Linux \u2014 the environment, the tooling, the config you keep tuning. Part of the week, and free with it.",
     detail: {
       eyebrow: "The afternoon",
       headline: "Linux, on purpose.",
       lede: [
-        "If you run Linux you already know why. The distro you settled on, the window manager you rebuilt twice, the dotfiles you will not stop tuning \u2014 this is three hours for the part of your setup nobody at work wants to hear about.",
+        "If you run Linux you already know why. The distro you settled on, the window manager you rebuilt twice, the dotfiles you will not stop tuning \u2014 this is two hours for the part of your setup nobody at work wants to hear about.",
         "Programming, mostly: the environment, the tooling, and the defaults you spend the day inside. Speakers are being announced. No booth, no vendor deck, and nobody refereeing a distro argument.",
       ],
       poweredBy: [
