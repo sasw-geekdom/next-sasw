@@ -1017,18 +1017,132 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         "Free, and free of the usual conditions \u2014 no badge, no pitch, no year requirement, and no need to be enrolled anywhere in particular.",
     },
   },
-  // Thursday on the community floor, in time order: the AWS user group at two,
-  // Linux San Antonio's two hours at three, then Open Circuit's hour at five,
-  // which hands the room straight over to the Bash a block west at six. Three
-  // activations in one venue's run, one under EXPAND_MAX — the same ceiling
-  // The Rand's Tuesday is already sitting on, and the note there says what
-  // tips over when a fourth arrives.
+  // Thursday on the community floor, in time order: SATX Datanauts at one, the
+  // AWS user group at two, Linux San Antonio's two hours at three, then Open
+  // Circuit's hour at five, which hands the room straight over to the Bash a
+  // block west at six.
   //
-  // The afternoon has been re-timed once already and the copy has to move with
-  // it: an activation that calls itself "two hours" in its blurb, its lede or
-  // its coda is wrong the moment its slot changes, and nothing here will catch
+  // Four activations in one venue's run, which is EXPAND_MAX exactly. Thursday
+  // now sits on the same ceiling Tuesday does, so there are two days one
+  // activation away from folding into a summary block — and the note on
+  // EXPAND_MAX says what that costs: every mark on the run disappears from
+  // both views at once. A fifth here needs that threshold raised on purpose,
+  // not discovered.
+  //
+  // The afternoon has been re-timed twice and the copy has to move with it: an
+  // activation that calls itself "two hours" in its blurb, its lede or its
+  // coda is wrong the moment its slot changes, and nothing here will catch
   // that. Open Circuit lost a "two hours" this way; Linux keeps its two, and
   // College Night on Tuesday keeps its own.
+  {
+    slug: "datanauts",
+    page: "datanauts",
+    // "Datanauts", and the mark says the same. They answer to three names —
+    // "SATX Datanauts" in their own site header, "San Antonio Data Analytics
+    // and AI — Datanauts" in its footer, and plain /datanauts on Meetup — and
+    // this is the one that survives being drawn 75px wide in a one-hour block.
+    // Dropping SATX costs nothing a reader needs: they are already looking at
+    // a San Antonio schedule, on the San Antonio floor of it. The full name
+    // appears once, in the lede, which is where a full name belongs.
+    //
+    // `title` rather than only the artwork, so the share card, the page
+    // metadata, the calendar file and the screen-reader heading all say what
+    // the mark says. A lockup reading "Datanauts" over an OG card reading
+    // "SATX DATANAUTS" is the kind of split nobody notices until it is shared.
+    title: "Datanauts",
+    room: "the-rand",
+    venueDetail: "3rd Floor",
+    // Tech & Builders rather than AI & Applied Innovation, and it is a real
+    // choice: their legal name carries "AI" and half their topic list is
+    // MLOps and machine learning. But the group leads with data engineering,
+    // BI and analytics, and AITX already holds the AI strand on this same
+    // floor two days earlier — filing both there would blur the one useful
+    // distinction between them.
+    circuit: "Tech & Builders",
+    site: { label: "satxdatanauts.com", href: "https://satxdatanauts.com/" },
+    // Their helmet, with the name set beside it — a composed lockup, like the
+    // .NET and AWS marks and for the same reason. Theirs is a symbol only:
+    // 0.92:1, the squarest thing that has ever come near this grid, and at
+    // that ratio no block on the schedule can draw it. A one-hour week block
+    // caps a mark at 20px tall, which is 18px wide for a square, and
+    // `markKind` would have thrown it out on sight.
+    //
+    // With the name attached it is 4.93:1 and lands at 99px wide in that same
+    // block — clear of the 56px floor everywhere it is drawn, and well over
+    // the 3:1 line that decides which width cap the page hero gives it. If
+    // this ever gains words again, 3:1 is the number to watch, because
+    // crossing it silently halves the mark on the activation page.
+    //
+    // The wordmark is ours, not theirs, which is the honest difference from
+    // the .NET and AWS lockups — those attached words to a mark that already
+    // had a wordmark. Datanauts publishes no lockup at all, and sets its own
+    // name in a grotesque on its own site, so this is that arrangement in the
+    // face this site already loads. Replace it the moment they publish one.
+    //
+    // Geist 500 at a cap height 58% of the helmet, gap 20% of it. 500 because
+    // 600 read heavier than the helmet's line weight everywhere but the very
+    // smallest draw, and because it is what the other two composed marks in
+    // this directory use.
+    //
+    // 58 rather than the 40 this started at, and the difference is worth
+    // stating because the two surfaces reward it very differently. The block
+    // is height-capped, so a bigger cap ratio buys text directly: 8px of cap
+    // at 40, 11.6px at 58, which is the 45% that made the name readable in a
+    // one-hour slot. The hero is width-capped, so the whole lockup shortens as
+    // it widens and the same change buys only 54.6px of cap against 60.3 —
+    // the mark gets shorter while its type gets bigger. Both were measured at
+    // those two sizes rather than judged at full resolution, where every
+    // setting looks fine.
+    //
+    // Past about 66 the helmet stops reading as a companion mark and starts
+    // reading as a bullet in front of a word. That is the ceiling, not a
+    // target.
+    //
+    // Raster rather than vector because the helmet is raster. 1800px wide
+    // against a 1024px largest real draw — the hero's 512 CSS pixels on a 2x
+    // screen — WebP q92, 81KB, inside this directory's range.
+    //
+    // Overwriting this file at the same path does not update what the page
+    // draws: Next's image optimiser caches by URL, so after a swap the block
+    // kept measuring at the old ratio until `.next/cache/images` was cleared.
+    // Worth knowing before concluding the new artwork is wrong.
+    logo: {
+      src: "/activations/datanauts.webp",
+      width: 1800,
+      height: 365,
+      alt: "Datanauts",
+    },
+    when: {
+      start: "2026-10-01T13:00:00-05:00",
+      end: "2026-10-01T14:00:00-05:00",
+    },
+    // TODO(content): a speaker has not been named. That belongs in the
+    // sessions CMS pointed at this slug — not here — which is what makes the
+    // speaker page link back, and CMS rows supersede `detail` on the page.
+    blurb:
+      "San Antonio\u2019s grassroots gang of data people \u2014 pipelines, dashboards, models, and a mentorship programme that graduates you by putting you on stage.",
+    detail: {
+      eyebrow: "The hour",
+      // Theirs, trimmed. The full line is "Because nobody gets into tech — or
+      // survives it — alone", and the second half is the sharper one: plenty
+      // of groups help people in, and the number that keep them there is much
+      // smaller. The lede below carries the sentence whole.
+      headline: "Nobody survives tech alone.",
+      lede: [
+        "SATX Datanauts is San Antonio\u2019s grassroots gang of data people \u2014 engineers, analysts, scientists and the plainly curious \u2014 across business intelligence, pipelines, machine learning and every buzzword in between. Their own reason for existing is one sentence: nobody gets into tech, or survives it, alone.",
+        "The mentorship programme is the part worth knowing. You are paired with a mentor, you build a real portfolio on a track you pick \u2014 analytics, data engineering, ML or AI \u2014 and you graduate by giving a live talk at The Drop, their monthly night. Rolling admissions. In their words: no fluff, just ships.",
+      ],
+      coda:
+        "Every city has people who can build a pipeline. What is rarer is a group that treats teaching one as the point rather than the overflow, and rarer still one whose graduation is a talk \u2014 so the person who was mentored last year is the one at the front this year. That is a mechanism rather than a mission statement, and it is the whole argument for giving this hour to them.",
+      // Their three-part line, verbatim. It is the only place on this page
+      // where the register is entirely theirs, and it is better than anything
+      // this site would have written to summarise them.
+      kicker:
+        "Mentorship is our mission. Community is our power. Fun is non-negotiable.",
+      access:
+        "Free with Startup + Tech Week registration. Beginners and veterans both \u2014 their standing rule is no gatekeeping and no dense decks.",
+    },
+  },
   {
     slug: "aws-user-group",
     page: "aws-user-group",
