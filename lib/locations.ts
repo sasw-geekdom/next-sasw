@@ -180,18 +180,18 @@ export const ROOMS: Room[] = [
       address: "600 Soledad St",
       coords: { lat: 29.432316, lon: -98.492844 },
     },
-    host: "LaunchSA · Small Business",
+    host: "Launch SA · Small Business",
     // From launchsa.org: "San Antonio's Resource Center for Small Business
     // Owners and Entrepreneurs", "a partnership between City of San Antonio
     // and Geekdom", and its help is explicitly no-cost — advising, workshops
     // and networking. It also sits at 600 Soledad St, 1st floor, *inside*
     // Central Library, which is why this room carries the library's name and
-    // LaunchSA's host line.
+    // Launch SA's host line.
     //
     // "No-cost" is the fact worth surfacing: it's the site's own framing, and
     // it tells a small-business owner scanning the section whether the room
     // is for them.
-    desc: "LaunchSA HQ — the City of San Antonio and Geekdom's no-cost resource center for small business. Programming built for owners and solopreneurs.",
+    desc: "Launch SA HQ — the City of San Antonio and Geekdom's no-cost resource center for small business. Programming built for owners and solopreneurs.",
     tag: "Small Business & Solopreneur",
     port: "p3",
     tier: "day",

@@ -31,7 +31,7 @@ export const HEARD_ABOUT = [
   "LinkedIn",
   "Instagram",
   "Geekdom",
-  "LaunchSA",
+  "Launch SA",
   "Other partner",
   "Press",
   "Other",

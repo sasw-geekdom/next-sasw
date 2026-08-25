@@ -1,5 +1,5 @@
 // The Give-a-LOT Computer Donation Drive — DEVSA with learnOPENtech, at
-// LaunchSA. Constants for the band and its page, kept out of lib/schedule.ts
+// Launch SA. Constants for the band and its page, kept out of lib/schedule.ts
 // the way lib/the-model.ts and lib/pysa.ts are: the schedule holds where this
 // sits in the week, and this holds what it looks and sounds like.
 //
@@ -88,7 +88,7 @@ export const GIVE_A_LOT = {
   lockupWidth: 630,
   lockupHeight: 230,
 
-  venue: "LaunchSA",
+  venue: "Launch SA",
   venueDetail: "Central Library, 1st Floor",
 
   /**

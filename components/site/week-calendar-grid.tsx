@@ -37,7 +37,7 @@ import {
 //
 // At nine activations a block could be a session. That stops working the
 // moment TPR runs a dozen thirty-minute speaker slots on a Tuesday afternoon
-// while The Rand runs four community hours beside it and LaunchSA runs its own
+// while The Rand runs four community hours beside it and Launch SA runs its own
 // programme: three concurrent venues split a 240px day column into 80px lanes,
 // and a 30-minute slot is 36px tall. Twelve unreadable rectangles stacked in a
 // lane is not a denser version of this grid, it's a broken one.

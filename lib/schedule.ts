@@ -512,7 +512,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     room: "central-library",
     circuit: "Small Business & Solopreneur",
     blurb:
-      "The weekly founder format, run at LaunchSA HQ: present, take questions, leave with answers.",
+      "The weekly founder format, run at Launch SA HQ: present, take questions, leave with answers.",
     when: {
       start: "2026-09-30T09:00:00-05:00",
       end: "2026-09-30T11:00:00-05:00",
@@ -530,7 +530,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     },
     // From launchsa.org, and shot at an actual 1 Million Cups morning there —
     // the venue's own branding is on the glass, which is worth more than a
-    // generic room given the blurb names LaunchSA HQ. Deliberately quieter
+    // generic room given the blurb names Launch SA HQ. Deliberately quieter
     // than the other two: a cheque handover and a full auditorium already
     // carry the week's big moments, and this one is a weekly working session.
     hero: {
@@ -782,7 +782,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         {
           time: "Friday, Oct 2",
           title: "Intro to Linux & Open Source Software",
-          body: "A hands-on session at LaunchSA on what open source actually is, how a machine gets rebuilt on it, and why a computer written off by its manufacturer is usually the fastest one somebody in the room has owned.",
+          body: "A hands-on session at Launch SA on what open source actually is, how a machine gets rebuilt on it, and why a computer written off by its manufacturer is usually the fastest one somebody in the room has owned.",
           feature: true,
         },
         {
