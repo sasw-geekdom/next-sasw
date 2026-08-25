@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArrowUpRight, CalendarDays, Clock, MapPin } from "lucide-react";
+import { AccessCipherField } from "@/components/site/access-cipher-field";
 import { OrganizerLogo } from "@/components/site/organizer-logo";
 import { ButtonLink } from "@/components/ui/button";
 import { ARROW_MOTION } from "@/lib/motion";
@@ -265,10 +266,16 @@ export function AccessGrantedBand({
             in the same space rather than marooned. Its right edge lands on the
             container's content edge, under the navbar's links.
           */}
-          <div className="relative order-4 mx-auto my-10 w-40 sm:w-48 lg:order-0 lg:mr-0 lg:ml-auto lg:my-0 lg:w-72 xl:w-88">
+          <div className="group/art relative order-4 mx-auto my-10 w-40 sm:w-48 lg:order-0 lg:mr-0 lg:ml-auto lg:my-0 lg:w-72 xl:w-88">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-y-[-45%] left-[-150%] right-[-45%]"
+              // Steps back while the cipher field is lit, so the two are never
+              // competing for the same surface — the grid is what the
+              // ciphertext is written on, not something beside it. Plain CSS
+              // hover rather than state lifted out of AccessCipherField: the
+              // hover target is this same container, so the two states change
+              // together without making this band a client component.
+              className="pointer-events-none absolute inset-y-[-45%] left-[-150%] right-[-45%] transition-opacity duration-500 group-hover/art:opacity-60"
               style={{
                 backgroundImage: `linear-gradient(${GRID_LINE} 1px, transparent 1px), linear-gradient(90deg, ${GRID_LINE} 1px, transparent 1px)`,
                 backgroundSize: "34px 34px",
@@ -288,12 +295,31 @@ export function AccessGrantedBand({
               className="pointer-events-none absolute inset-x-[12%] bottom-[3%] h-8 rounded-[50%] blur-[26px]"
               style={{ background: `${ACCESS_GREEN}33` }}
             />
+            {/* Before the Image, and that placement is the whole point: both
+                are positioned, so within one stacking context DOM order is
+                paint order and the field would otherwise lie across the lock's
+                face. Behind it, the ciphertext only shows where the glow and
+                the grid are — which is the surface it is meant to be written
+                on. Its own hit area still lands on top, because a positive
+                z-index beats the Image's `auto` whatever the order. */}
+            <AccessCipherField />
             <Image
               src={ACCESS_GRANTED.lock}
               alt=""
               width={ACCESS_GRANTED.lockWidth}
               height={ACCESS_GRANTED.lockHeight}
-              priority={masthead}
+              // `loading`, not `priority`. Next 16 deprecated `priority` in
+              // favour of `preload`, and its own guidance is that
+              // `loading="eager"` or `fetchPriority` is what you usually want
+              // instead — see node_modules/next/dist/docs, Image reference.
+              //
+              // Eager only as a masthead, which is the one place this is the
+              // hero and genuinely above the fold. As a band on /schedule or
+              // the homepage it sits well down the page, and eager-loading a
+              // 350px render nobody has scrolled to yet spends bandwidth on
+              // the wrong thing.
+              loading={masthead ? "eager" : "lazy"}
+              fetchPriority={masthead ? "high" : "auto"}
               sizes="(min-width: 1280px) 352px, (min-width: 1024px) 288px, 192px"
               className="relative h-auto w-full"
             />
