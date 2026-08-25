@@ -179,7 +179,7 @@ export function AxisGrid({
                   // imposed.
                   <span
                     className={cn(
-                      "text-white/45",
+                      "text-white/55",
                       col.action ? "hidden xl:inline" : "inline",
                     )}
                   >
@@ -206,7 +206,7 @@ export function AxisGrid({
                 {col.sublabel && (
                   <span
                     className={cn(
-                      "text-white/45",
+                      "text-white/55",
                       col.action ? "hidden xl:inline" : "inline",
                     )}
                   >

@@ -35,6 +35,7 @@ import { GiveALotBand } from "@/components/site/give-a-lot-band";
 import { ModelBand } from "@/components/site/model-band";
 import { PysaBand } from "@/components/site/pysa-band";
 import { AddToCalendar } from "@/components/site/add-to-calendar";
+import { OpenCircuitGlow } from "@/components/site/open-circuit-glow";
 import { cn } from "@/lib/utils";
 
 // A venue's own week. /schedule is the whole grid; this is one room's slice of
@@ -136,9 +137,7 @@ function accented(text: string, accent: string | undefined) {
   return (
     <>
       {text.slice(0, at)}
-      <span className="text-magenta">
-        {text.slice(at, at + accent.length)}
-      </span>
+      <span className="text-magenta">{text.slice(at, at + accent.length)}</span>
       {text.slice(at + accent.length)}
     </>
   );
@@ -184,6 +183,12 @@ function ActivationPage({
   const isAccessGranted = session.page === "access-granted";
   const isModel = session.page === "the-model";
   const isGiveALot = session.page === "give-a-lot";
+  /**
+   * Not a band — this one keeps the shared hero and only lights what is behind
+   * the mark, which is why it is a flag here rather than a fifth entry in the
+   * list above.
+   */
+  const isOpenCircuit = session.page === "open-circuit";
   /** Every banded activation renders the same actions in its band's slot. */
   const banded = isPysa || isAccessGranted || isModel || isGiveALot;
   /**
@@ -275,21 +280,21 @@ function ActivationPage({
                   Get on the list.
                 </ButtonLink>
                 {session.when && (
-                <AddToCalendar
-                  icsHref={`/schedule/${session.page}/calendar`}
-                  event={{
-                    title: session.title,
-                    details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
-                    // Same line the .ics route builds, floor included where
-                    // there is one — the two calendar paths for one event
-                    // shouldn't disagree about the address.
-                    location: session.venueDetail
-                      ? `${session.venue.name}, ${session.venueDetail}, Downtown San Antonio`
-                      : `${session.venue.name}, Downtown San Antonio`,
-                    start: session.when.start,
-                    end: session.when.end,
-                  }}
-                />
+                  <AddToCalendar
+                    icsHref={`/schedule/${session.page}/calendar`}
+                    event={{
+                      title: session.title,
+                      details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
+                      // Same line the .ics route builds, floor included where
+                      // there is one — the two calendar paths for one event
+                      // shouldn't disagree about the address.
+                      location: session.venueDetail
+                        ? `${session.venue.name}, ${session.venueDetail}, Downtown San Antonio`
+                        : `${session.venue.name}, Downtown San Antonio`,
+                      start: session.when.start,
+                      end: session.when.end,
+                    }}
+                  />
                 )}
               </div>
               {hasMoreAtVenue && (
@@ -411,19 +416,19 @@ function ActivationPage({
               {session.logo ? (
                 <>
                   <h1 className="sr-only">{session.title}</h1>
-                  <Image
-                    src={session.logo.src}
-                    // Decorative here, deliberately: the sr-only h1 above
-                    // already announces the name, so alt text on the mark
-                    // would say it twice. `logo.alt` still carries a real name
-                    // for the bento card, where the mark is the only content
-                    // inside the link and has to name it.
-                    alt=""
-                    width={session.logo.width}
-                    height={session.logo.height}
-                    priority
+                  {/* The mark gets a positioned box of its own so an
+                      activation can put something behind it — Open Circuit
+                      does, and its glow has to be anchored to the lockup
+                      rather than to the viewport. The width caps moved here
+                      from the image, which now simply fills this; the drawn
+                      size is identical either way.
+                      `group/mark` is named rather than bare: the hero already
+                      sits inside other groups, and an unnamed one here would
+                      be claimed by whichever ancestor Tailwind resolved
+                      last. */}
+                  <div
                     className={cn(
-                      "mt-6 h-auto w-full",
+                      "group/mark relative mt-6",
                       // Capped by width, a stacked mark comes out about twice
                       // the height of a wide one — 1 Million Cups rendered
                       // 512x256 against Mission Pitch's 512x125, and pushed
@@ -437,7 +442,25 @@ function ActivationPage({
                         ? "max-w-sm sm:max-w-md lg:max-w-lg"
                         : "max-w-56 sm:max-w-64 lg:max-w-xs",
                     )}
-                  />
+                  >
+                    {isOpenCircuit && <OpenCircuitGlow />}
+                    <Image
+                      src={session.logo.src}
+                      // Decorative here, deliberately: the sr-only h1 above
+                      // already announces the name, so alt text on the mark
+                      // would say it twice. `logo.alt` still carries a real name
+                      // for the bento card, where the mark is the only content
+                      // inside the link and has to name it.
+                      alt=""
+                      width={session.logo.width}
+                      height={session.logo.height}
+                      priority
+                      // Above the board behind it. Without a stacking context of
+                      // its own the mark would paint in DOM order, which puts it
+                      // under the bright layer the cursor drags around.
+                      className="relative z-10 h-auto w-full"
+                    />
+                  </div>
                 </>
               ) : (
                 <h1 className="mt-4 font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl xl:text-7xl">

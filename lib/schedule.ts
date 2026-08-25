@@ -1017,10 +1017,18 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         "Free, and free of the usual conditions \u2014 no badge, no pitch, no year requirement, and no need to be enrolled anywhere in particular.",
     },
   },
-  // Thursday afternoon on the community floor, in time order: the AWS user
-  // group's hour, then Linux San Antonio's two. Two activations in one venue's
-  // run, well under EXPAND_MAX, so the week draws them as themselves — see the
-  // note on The Rand's Tuesday, where the count is the thing to watch.
+  // Thursday on the community floor, in time order: the AWS user group at two,
+  // Linux San Antonio's two hours at three, then Open Circuit's hour at five,
+  // which hands the room straight over to the Bash a block west at six. Three
+  // activations in one venue's run, one under EXPAND_MAX — the same ceiling
+  // The Rand's Tuesday is already sitting on, and the note there says what
+  // tips over when a fourth arrives.
+  //
+  // The afternoon has been re-timed once already and the copy has to move with
+  // it: an activation that calls itself "two hours" in its blurb, its lede or
+  // its coda is wrong the moment its slot changes, and nothing here will catch
+  // that. Open Circuit lost a "two hours" this way; Linux keeps its two, and
+  // College Night on Tuesday keeps its own.
   {
     slug: "aws-user-group",
     page: "aws-user-group",
@@ -1079,8 +1087,8 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       alt: "San Antonio AWS User Group",
     },
     when: {
-      start: "2026-10-01T13:00:00-05:00",
-      end: "2026-10-01T14:00:00-05:00",
+      start: "2026-10-01T14:00:00-05:00",
+      end: "2026-10-01T15:00:00-05:00",
     },
     // TODO(content): a speaker has not been named yet. That belongs in the
     // sessions CMS pointed at this slug — not here — which is what makes the
@@ -1181,8 +1189,8 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       alt: "Linux San Antonio",
     },
     when: {
-      start: "2026-10-01T14:00:00-05:00",
-      end: "2026-10-01T16:00:00-05:00",
+      start: "2026-10-01T15:00:00-05:00",
+      end: "2026-10-01T17:00:00-05:00",
     },
     // TODO(content): speakers are being announced. They belong in the sessions
     // CMS pointed at this slug — that is what links the speaker pages back, and
@@ -1227,6 +1235,86 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       kicker: "Bring the laptop you actually use. Opinions come standard.",
       access:
         "Free with Startup + Tech Week registration. Discount codes for November\u2019s Texas Linux Fest are being handed out in the room.",
+    },
+  },
+  {
+    slug: "open-circuit",
+    page: "open-circuit",
+    title: "Open Circuit",
+    room: "the-rand",
+    venueDetail: "3rd Floor",
+    // Social, deliberately, and the one place on this floor where that is not
+    // the venue's own tag. The Rand runs Tech & Builders and every other
+    // activation here follows it, which is the argument that was made for
+    // filing this there too — a demo night is programme, not a room with
+    // drinks in it, and the chip a builder presses is the one they would find
+    // it under.
+    //
+    // It goes here instead because `circuit` is a single value and this event
+    // is explicitly all five: the mark's own line is "5 Circuits. 1 Stage.",
+    // TRACK_NAMES has exactly five, and the demo slot is five minutes to
+    // match. Filing it under any one of them would be the page contradicting
+    // its own headline. Social is the only value that does not pick a winner,
+    // and it puts Open Circuit beside College Night and the Bash — which is
+    // what the last hour of Thursday actually is, the week handing itself
+    // over to the party a block west.
+    circuit: "Social",
+    // Their mark, cropped to its ink and nothing else touched. The file
+    // arrives 1024 square with the artwork sitting in the middle of it; drawn
+    // as delivered, every sizing path here would have measured the transparent
+    // margin as part of the lockup and drawn the mark about half the size it
+    // should be, in a box that looked mysteriously off-centre.
+    //
+    // 1.65:1 cropped, which makes it the squarest thing on the grid — squarer
+    // than 1 Million Cups (2.00) and ACM UTSA (2.43), the mark that forced
+    // `axisMarkCap` to grow its spare-rows branch in the first place. The
+    // machinery handles it: a two-hour block returns a 42px cap, the lockup
+    // takes it height-led, and the meta rows keep their room. Worth knowing
+    // before anything about that sizing is "simplified".
+    //
+    // WebP at q95 rather than the source PNG: the mark is a gradient over
+    // transparency, so it is 164KB as PNG and 48KB here, which is where the
+    // rest of this directory lives. Measured on the composited result rather
+    // than the raw channels — RGB under a zero alpha is undefined and will
+    // report a difference of 255 that nothing can see — the worst pixel moves
+    // by 21/255 inside a gradient, at a mark that draws 42px tall.
+    logo: {
+      src: "/activations/open-circuit.webp",
+      width: 760,
+      height: 462,
+      alt: "Open Circuit",
+    },
+    when: {
+      start: "2026-10-01T17:00:00-05:00",
+      end: "2026-10-01T18:00:00-05:00",
+    },
+    // Five minutes, not the three the brief opened with, and not a rounding of
+    // the conventional demo slot either — the mark says "5 Circuits. 1 Stage."
+    // and the slot now says five too, so the number a reader meets twice on
+    // this page is the same number both times. Anyone "fixing" it back to the
+    // usual three would be breaking a rhyme, not a typo.
+    blurb:
+      "Five minutes, one screen, and whatever you actually built \u2014 an open-stage showcase across all five circuits, running straight into the week\u2019s closing bash.",
+    detail: {
+      // Not "The hour", which is what the other single-hour activations on
+      // this floor use. Those are meetings that happen to run an hour; this
+      // one is a format, and the format is the reason to come.
+      eyebrow: "The showcase",
+      // The organisers' own headline, kept whole. The hero sets it in Oswald
+      // caps, which is exactly the register it was written in.
+      headline: "5 Circuits. 1 Stage. Show What You Built.",
+      lede: [
+        "Before the week unplugs at the Bash, the stage and the screen go to whoever spent it building. Five minutes, one screen, unfiltered output \u2014 no pitch deck, no corporate template, and nothing that needs a slide to explain it.",
+        "Shipped code this week, designed an interface, wired up an agent, deployed open-source hardware, cut something in a media app: all of it plugs in. Developers, designers, founders, students, and anyone who came to see what the city is actually making.",
+      ],
+      coda:
+        "A demo is the one claim in tech that cannot be faked in the telling \u2014 it either runs in front of the room or it does not. The five circuits spend the week in separate rooms explaining their work to their own people. This is the hour they do it to each other, on one stage, with the thing running, before the whole floor walks a block west to the Bash.",
+      // The organisers' tagline, trimmed of the name the reader is already on
+      // the site of — "kick off the San Antonio Startup + Tech Week Bash" is
+      // three words of branding inside a five-word instruction.
+      kicker: "Plug in, show your work, and kick off the Bash.",
+      access:
+        "Free with Startup + Tech Week registration. Bring the build and whatever it runs on \u2014 laptop, phone, board, or a recording of the thing working.",
     },
   },
   {
@@ -1457,12 +1545,16 @@ export interface CalendarBrand {
    * fonts" has a real answer for these two and not for the others. Same two
    * cases session-bento's `BrandLockup` special-cases, keyed the same way, on
    * `page` rather than on the title, because the title is copy.
+   *
+   * Open Circuit joins them from the other direction: it has a file, and the
+   * file is too square to survive a one-hour block. See `brandFor` below.
    */
   wordmark?:
     | "the-model"
     | "access-granted"
     | "startup-bash"
-    | "college-night";
+    | "college-night"
+    | "open-circuit";
   /** The ink inside The Model's selection block. */
   ink?: string;
 }
@@ -1483,11 +1575,17 @@ function brandFor(session: ResolvedSession): CalendarBrand | undefined {
         : session.page === "the-model"
           ? MODEL_LAVENDER
           : undefined;
+  // Open Circuit is the one brand here that carries both, and the two are not
+  // alternatives — `markKind` prefers the file wherever it can draw it big
+  // enough and takes this as the fallback. Its 1.65:1 lockup is 33px wide in a
+  // one-hour week block, where a typeset mark in the activation's own register
+  // beats both an unreadable logo and a plain sentence-case title.
   const wordmark =
     session.page === "access-granted" ||
     session.page === "the-model" ||
     session.page === "startup-bash" ||
-    session.page === "college-night"
+    session.page === "college-night" ||
+    session.page === "open-circuit"
       ? session.page
       : undefined;
   if (!accent && !wordmark && !session.logo) return undefined;

@@ -52,14 +52,70 @@ import { cn } from "@/lib/utils";
  * sides of hydration.
  */
 const BOLTS = [
-  { left: "6%", size: 11, delay: "0ms", dur: "2600ms", drift: "14px", peak: 0.55 },
-  { left: "19%", size: 8, delay: "420ms", dur: "3100ms", drift: "-10px", peak: 0.4 },
-  { left: "31%", size: 13, delay: "180ms", dur: "2400ms", drift: "8px", peak: 0.6 },
-  { left: "44%", size: 9, delay: "700ms", dur: "2900ms", drift: "-16px", peak: 0.45 },
-  { left: "57%", size: 12, delay: "300ms", dur: "3300ms", drift: "12px", peak: 0.5 },
-  { left: "69%", size: 8, delay: "900ms", dur: "2500ms", drift: "-8px", peak: 0.38 },
-  { left: "81%", size: 14, delay: "540ms", dur: "2800ms", drift: "16px", peak: 0.58 },
-  { left: "92%", size: 10, delay: "120ms", dur: "3000ms", drift: "-12px", peak: 0.42 },
+  {
+    left: "6%",
+    size: 11,
+    delay: "0ms",
+    dur: "2600ms",
+    drift: "14px",
+    peak: 0.55,
+  },
+  {
+    left: "19%",
+    size: 8,
+    delay: "420ms",
+    dur: "3100ms",
+    drift: "-10px",
+    peak: 0.4,
+  },
+  {
+    left: "31%",
+    size: 13,
+    delay: "180ms",
+    dur: "2400ms",
+    drift: "8px",
+    peak: 0.6,
+  },
+  {
+    left: "44%",
+    size: 9,
+    delay: "700ms",
+    dur: "2900ms",
+    drift: "-16px",
+    peak: 0.45,
+  },
+  {
+    left: "57%",
+    size: 12,
+    delay: "300ms",
+    dur: "3300ms",
+    drift: "12px",
+    peak: 0.5,
+  },
+  {
+    left: "69%",
+    size: 8,
+    delay: "900ms",
+    dur: "2500ms",
+    drift: "-8px",
+    peak: 0.38,
+  },
+  {
+    left: "81%",
+    size: 14,
+    delay: "540ms",
+    dur: "2800ms",
+    drift: "16px",
+    peak: 0.58,
+  },
+  {
+    left: "92%",
+    size: 10,
+    delay: "120ms",
+    dur: "3000ms",
+    drift: "-12px",
+    peak: 0.42,
+  },
 ] as const;
 
 /**
@@ -440,5 +496,158 @@ export function PysaMascot() {
         className="h-full max-h-[190px] w-auto object-contain opacity-90 motion-safe:animate-[pysaSway_7s_ease-in-out_infinite]"
       />
     </div>
+  );
+}
+
+/**
+ * The board inside Open Circuit's block, in a 320×120 space that gets sliced.
+ *
+ * Short runs with 45° elbows and pads, which is the vocabulary of the
+ * activation's own mark. Every one enters off the right edge on purpose: a
+ * trace that starts and stops inside the box reads as a squiggle, one that
+ * runs off the edge reads as a board the block is a window onto.
+ *
+ * All of it lives in the right half. The first cut ran the routing across the
+ * full width, which put copper behind the mark and behind the time row and
+ * made the block busy — the type is the content, and a board underneath it is
+ * texture competing with the thing it is supposed to be decorating. Here the
+ * traces stop before they reach the type, and the mask below dissolves
+ * anything that gets close, so the left half of every block stays clean
+ * ground for "OPEN CIRCUIT" and "5 – 6 PM · THE RAND" to sit on.
+ *
+ * `pathLength={100}` normalises every path to 100 units, so `lit` below is a
+ * literal [start, length] percentage of its trace regardless of how long the
+ * trace actually is.
+ */
+/** Keeps the board off the type, at any lane width. */
+const MASK =
+  "linear-gradient(90deg, transparent 0%, transparent 30%, rgba(0,0,0,0.55) 52%, #000 72%, #000 100%)";
+
+const CIRCUIT = [
+  { d: "M 340 24 H 268 l -22 22 H 186", lit: [8, 16] },
+  { d: "M 340 60 H 262 l -22 -22 H 224", lit: [55, 18] },
+  { d: "M 340 96 H 292 l -22 -22 H 236 l -22 22 H 196", lit: [26, 14] },
+  { d: "M 300 -12 V 32 l 22 22 V 132", lit: [62, 15] },
+] as const;
+
+/** Terminals, off the runs above. Filled pads and one hollow via. */
+const PADS = [
+  { x: 186, y: 46, r: 3.4, fill: true },
+  { x: 224, y: 38, r: 3, fill: false },
+  { x: 196, y: 96, r: 3.4, fill: true },
+] as const;
+
+/**
+ * A circuit under Open Circuit's block, with current in it.
+ *
+ * The one activation on the grid whose mark cannot be drawn in a one-hour
+ * block — 1.65:1 against a 20px height cap is 33px of unreadable smudge — so
+ * the block falls back to type, and type alone left it the flattest rectangle
+ * on a Thursday that has a penguin and a bolt storm on it. This gives it the
+ * subject of its own name instead.
+ *
+ * Drawn only where the lockup is *not*, which the caller decides and passes
+ * in. That restriction is the whole lesson from the version of this that went
+ * behind the hero mark and was thrown away: the logo already contains circuit
+ * traces, and a second set around it at a different weight reads as the logo
+ * being blurred. There is no such clash here, because in these blocks the logo
+ * is not on screen at all.
+ *
+ * Keyframes, like BoltDrift and for the same reasons — three paths the
+ * compositor runs off the main thread, no state, no listener, nothing to
+ * hydrate. The block's own `overflow-hidden` is what clips them.
+ */
+export function CircuitTrace() {
+  return (
+    <span
+      aria-hidden="true"
+      data-particles=""
+      className="pointer-events-none absolute inset-0 overflow-hidden rounded text-magenta"
+      // Dissolves the board toward the type rather than ending it on a cut.
+      // The routing already stops short, but a block narrower than Thursday's
+      // lane crops differently, and this guarantees the left side stays clear
+      // whatever width the lane turns out to be.
+      style={{
+        maskImage: MASK,
+        WebkitMaskImage: MASK,
+      }}
+    >
+      <svg
+        viewBox="0 0 320 120"
+        // Sliced, so the routing keeps its 45° angles at any block shape and
+        // the box crops it. `none` would stretch the elbows to whatever the
+        // block's aspect happens to be, and a 45° elbow drawn at 20° is not a
+        // circuit trace, it is a wobble.
+        preserveAspectRatio="xMidYMid slice"
+        className="absolute inset-0 h-full w-full"
+      >
+        <g
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.4}
+          strokeOpacity={0.22}
+          strokeLinejoin="round"
+        >
+          {CIRCUIT.map((t) => (
+            <path key={t.d} d={t.d} />
+          ))}
+        </g>
+
+        <g stroke="currentColor" strokeWidth={1.4}>
+          {PADS.map((p) => (
+            <circle
+              key={`${p.x},${p.y}`}
+              cx={p.x}
+              cy={p.y}
+              r={p.r}
+              fill={p.fill ? "currentColor" : "none"}
+              fillOpacity={0.3}
+              strokeOpacity={p.fill ? 0 : 0.28}
+            />
+          ))}
+        </g>
+
+        {/* A lit run on each trace, and it does not move.
+          
+          It used to: a pulse travelling each trace on its own duration, which
+          is what "current" wants to be. It came out at the wrong volume. The
+          note at the top of this file sets the grid's rule — two rows carry
+          motion and the other seven are still — and a third moving block on a
+          Thursday that already has Startup Bash's bolts and The Model's
+          mascots on it made the schedule busy rather than alive. Three moving
+          things is not one more than two; it is the point where a reader stops
+          being drawn to any of them.
+
+          Still, the lit run is still worth having: it is what stops the board
+          reading as a texture and makes it read as a circuit with something in
+          it. `lit` is [start, length] as a percentage of the trace, which is
+          what `pathLength={100}` buys — offsets chosen so the three do not
+          line up in a column, since a still highlight that repeats at the same
+          x on every row reads as a rendering artefact rather than as design.
+
+          Kept inside the visible band as well as the visible half. The viewBox
+          is sliced, so a 60px block shows roughly y 15-105 of the 120 authored
+          — an offset that lands a highlight at y 4 is not subtle, it is
+          absent. */}
+        <g
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+          strokeOpacity={0.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          {CIRCUIT.map((t) => (
+            <path
+              key={t.d}
+              d={t.d}
+              pathLength={100}
+              strokeDasharray={`${t.lit[1]} 100`}
+              strokeDashoffset={-t.lit[0]}
+            />
+          ))}
+        </g>
+      </svg>
+    </span>
   );
 }

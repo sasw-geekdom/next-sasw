@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CalendarPlus, Check } from "lucide-react";
 import {
   BoltDrift,
+  CircuitTrace,
   MascotBurst,
   PysaMascot,
 } from "@/components/site/calendar/event-particles";
@@ -192,24 +193,67 @@ export function lockupHeight(
  * plain title instead.
  */
 /**
+ * The narrowest a lockup can draw and still be a lockup.
+ *
+ * A wordmark needs width, and width is what a squarish mark runs out of first:
+ * height-capped by its block and then multiplied by its own ratio, Open
+ * Circuit's 1.65:1 mark comes out 33px wide in a one-hour week block. At that
+ * size it is a coloured smudge — not a small logo, an unreadable one — and the
+ * activation's name, which the typeset fallback would have shown, is gone.
+ *
+ * 56 rather than something tighter because the number has to have margin in
+ * it. AITX is the next-squarest mark that lives in a one-hour block and lands
+ * at 74; a floor set just under Open Circuit's failure point would sit a few
+ * pixels from flipping AITX to type on a rounding change nobody would connect
+ * to this.
+ */
+const MARK_MIN_W = 56;
+
+/**
  * Which mark this brand can draw here, or null for none.
  *
  * Computed rather than inferred from a null render, because the caller has to
  * typeset the title in the same slot when there is nothing to draw — and the
- * answer now depends on size, not just on what the brand owns. Startup Bash's
- * mark is set in Geist Pixel, which model-band measured as only resolving as a
+ * answer depends on size, not just on what the brand owns. Startup Bash's mark
+ * is set in Geist Pixel, which model-band measured as only resolving as a
  * pixel face above ~22px; below that it is a mono wearing a display face's
  * costs. So it draws at row scale and nowhere else.
+ *
+ * Image lockups have the same problem for a different reason, which is why
+ * `markMax` is threaded in here as well as into `BrandMark`. Both have to
+ * agree: this decides whether a mark is drawn, that decides how big, and if
+ * only one of them knows the block's height cap the caller can commit to a
+ * lockup the block cannot actually show.
  */
 export function markKind(
   brand: CalendarBrand | undefined,
   dense: boolean,
   size: "sm" | "md" | "lg",
+  /** The block's own height cap, where it has one. See `axisMarkCap`. */
+  markMax?: number,
 ): "wordmark" | "lockup" | null {
   if (!brand) return null;
-  if (brand.wordmark === "startup-bash") return size === "sm" ? null : "wordmark";
+  if (brand.wordmark === "startup-bash")
+    return size === "sm" ? null : "wordmark";
+  // The file first, and the typeset mark as its fallback — an order that only
+  // means anything for Open Circuit, the one brand that owns both. Every other
+  // wordmark here belongs to an activation with no logo file at all, so they
+  // fall straight through. Reversing the two would take the agenda's perfectly
+  // legible 94px lockup away in order to show type instead.
+  if (brand.lockup && !dense) {
+    const lg = size === "lg";
+    // The same call `BrandMark` makes, including the 1.5x it takes at `lg` —
+    // predicting a different number here is how the two would disagree.
+    const h =
+      lockupHeight(
+        brand.lockup,
+        150,
+        Math.min(lg ? 56 : size !== "sm" ? 50 : 44, markMax ?? Infinity),
+      ) * (lg ? 1.5 : 1);
+    const ratio = brand.lockup.width / brand.lockup.height;
+    if (h * ratio >= MARK_MIN_W) return "lockup";
+  }
   if (brand.wordmark) return "wordmark";
-  if (brand.lockup && !dense) return "lockup";
   return null;
 }
 
@@ -219,6 +263,7 @@ function BrandMark({
   dense,
   markMax,
   size = "sm",
+  kind,
 }: {
   brand: CalendarBrand;
   title: string;
@@ -243,6 +288,21 @@ function BrandMark({
    * and only take the step up in their height cap.
    */
   size?: "sm" | "md" | "lg";
+  /**
+   * Which mark to draw, from `markKind`.
+   *
+   * Passed in rather than worked out again here, and that is not tidiness. The
+   * branches below are ordered wordmark-first, so a brand holding both — Open
+   * Circuit is the only one — drew its typeset mark even in the rows where
+   * `markKind` had already decided the file fits and the caller had reserved
+   * room for it. The two have to answer to one decision, and `markKind` is
+   * where it is made, because the caller needs the same answer to know whether
+   * to typeset the title instead.
+   *
+   * Optional so the call sites that only ever have one kind stay unchanged;
+   * absent, the old order applies.
+   */
+  kind?: "wordmark" | "lockup" | null;
 }) {
   const lg = size === "lg";
   const roomy = size !== "sm";
@@ -282,6 +342,44 @@ function BrandMark({
         )}
       >
         College <span className="text-magenta">Night</span>
+      </span>
+    );
+  }
+
+  // Guarded on `kind`, alone among the branches here, because Open Circuit is
+  // alone in owning both a wordmark and a file. The branches run
+  // wordmark-first, so without this it drew type even in the rows where
+  // `markKind` had already chosen the lockup and the caller had sized the slot
+  // for it.
+  if (kind !== "lockup" && brand.wordmark === "open-circuit") {
+    return (
+      // The logo's wordmark, redrawn in type for the blocks the logo cannot
+      // fit in. All caps and magenta because that is what the file is — this
+      // is not a house mark like Access Granted's or College Night's, where
+      // the type *is* the brand and the register was a free choice; here there
+      // is a real logo one click away, and the job is to be recognisably the
+      // same thing when the reader gets there.
+      //
+      // Oswald over Geist for the same reason. The mark is set in a heavy
+      // condensed grotesque, and the display face is the only condensed thing
+      // this site loads; Geist bold at block size reads as a different logo
+      // rather than as a smaller one.
+      //
+      // No split colour. Access Granted and College Night each put one word in
+      // an accent because their two words do different work — "Open Circuit"
+      // is one object in the file, and picking a word to highlight would
+      // invent a hierarchy the brand does not have.
+      //
+      // `whitespace-nowrap` with a step-down cut rather than a wrap, following
+      // College Night: two lines of display type in a block that also has to
+      // hold a time and a room cost more height than the larger face wins.
+      <span
+        className={cn(
+          "whitespace-nowrap font-display font-bold uppercase leading-tight tracking-tight text-magenta",
+          lg ? "text-xl lg:text-2xl" : roomy ? "text-base" : "text-sm",
+        )}
+      >
+        Open Circuit
       </span>
     );
   }
@@ -432,7 +530,7 @@ function BrandMark({
  * unlit until they're hovered.
  */
 export const TIER_CHARGE: Record<string, string> = {
-  anchor: "border-magenta/70 bg-magenta/20 hover:bg-magenta/30",
+  anchor: "border-magenta/70 bg-magenta/20 hover:bg-magenta/25",
   day: "border-magenta/40 bg-magenta/[0.12] hover:bg-magenta/20",
   single: "border-white/25 bg-white/[0.06] hover:bg-white/[0.11]",
 };
@@ -498,8 +596,15 @@ export function Block({
   // Whether `BrandMark` will draw something. Computed rather than inferred
   // from a null return, because the title has to take the slot when it won't.
   // No height, no mark worth drawing. Otherwise scale to the lane.
-  const markSize = !spare ? "sm" : lanes === 1 ? "lg" : lanes === 2 ? "md" : "sm";
-  const hasMark = markKind(brand, dense, markSize) !== null;
+  const markSize = !spare
+    ? "sm"
+    : lanes === 1
+      ? "lg"
+      : lanes === 2
+        ? "md"
+        : "sm";
+  const kind = markKind(brand, dense, markSize, markMax);
+  const hasMark = kind !== null;
   // Where there's height for a description there's height for the strand.
   const showCircuit = spare && !dense;
 
@@ -519,6 +624,7 @@ export function Block({
       dense={dense}
       markMax={markMax}
       size={markSize}
+      kind={kind}
     />
   ) : (
     <span
@@ -542,7 +648,20 @@ export function Block({
         // the overlay below instead.
         !accent && (TIER_CHARGE[item.venueTier] ?? TIER_CHARGE.single),
         // Selection outranks tier and brand alike.
-        picked && "border-magenta bg-magenta/30 ring-1 ring-magenta",
+        //
+        // 25, not 30. At /30 the fill is rgb(76,15,48) and magenta type on it
+        // measures 4.37:1 — under AA for the 9px circuit label and for Open
+        // Circuit's 14px mark, both of which are magenta. /25 is rgb(64,12,40)
+        // and puts them at 4.77:1. The same five points came off the anchor
+        // tier's hover above, which shared the value and the problem: TPR is
+        // anchor tier, its activations carry no accent of their own, so their
+        // strand label is magenta on exactly this fill.
+        //
+        // Nothing else moves. The fill still reads as selected against its
+        // neighbours (1.19:1 against The Rand's, against 1.30 before), and the
+        // border, the ring, the Check icon and `aria-pressed` all carry the
+        // state regardless — colour was never the only signal here.
+        picked && "border-magenta bg-magenta/25 ring-1 ring-magenta",
       )}
       style={
         accent && !picked
@@ -582,6 +701,13 @@ export function Block({
           wide flat row without a number changing. */}
       {spare && item.page === "startup-bash" && <BoltDrift />}
       {spare && item.page === "the-model" && <MascotBurst />}
+      {/* Not gated on `spare`, unlike the three around it. Those are figures
+          that need somewhere to stand; this is a background the type sits on,
+          and the block it exists for is the one-hour one — precisely the case
+          `spare` is false for. Gated on the mark instead: it draws only where
+          the lockup could not, so it can never end up competing with the
+          circuit traces already inside the logo. */}
+      {kind === "wordmark" && item.page === "open-circuit" && <CircuitTrace />}
       {/* Axis only — deliberately not in StackBlock beside the other two.
           This one is a standing figure that needs vertical room, and it has it
           here: five hours is a 300px block with an empty middle. An agenda row
@@ -638,7 +764,7 @@ export function Block({
         <p className="mt-1.5 shrink-0 truncate font-mono text-[9px] uppercase tracking-widest text-white/60">
           {item.timeLabel}
           {showVenue && (
-            <span className="text-white/45"> · {item.venueShort}</span>
+            <span className="text-white/55"> · {item.venueShort}</span>
           )}
         </p>
       )}
@@ -654,7 +780,7 @@ export function Block({
       )}
       <p
         className={cn(
-          "truncate font-mono text-[9px] uppercase tracking-widest text-white/45",
+          "truncate font-mono text-[9px] uppercase tracking-widest text-white/55",
           // Hidden without height to spare — the time row above has already
           // said the room, inline, because that is all one line affords.
           (!showVenue || !spare) && "hidden",
@@ -769,7 +895,7 @@ export function SummaryBlock({
         </span>
       )}
 
-      <span className="mt-auto pt-1.5 font-mono text-[9px] uppercase tracking-widest text-white/45 transition-colors group-hover:text-magenta">
+      <span className="mt-auto pt-1.5 font-mono text-[9px] uppercase tracking-widest text-white/55 transition-colors group-hover:text-magenta">
         Open →
       </span>
     </button>
@@ -829,7 +955,11 @@ export function StackBlock({
 }) {
   const brand = item.brand;
   const accent = brand?.accent;
-  const hasMark = markKind(brand, false, "lg") !== null;
+  // STACK_MARK_MAX, not a bare call: the two `BrandMark`s below pass it, and a
+  // markKind that did not know the row's ceiling could commit to a lockup the
+  // row then draws too small to read.
+  const kind = markKind(brand, false, "lg", STACK_MARK_MAX);
+  const hasMark = kind !== null;
 
   // The organisers' full title, broken where the activation says to break it.
   // Left alone the wrap lands mid-phrase and a partner's name splits over two
@@ -902,6 +1032,7 @@ export function StackBlock({
           shader or the simulation. */}
       {item.page === "startup-bash" && <BoltDrift />}
       {item.page === "the-model" && <MascotBurst />}
+      {kind === "wordmark" && item.page === "open-circuit" && <CircuitTrace />}
 
       {/* The mark, and the link over the whole row.
       
@@ -924,6 +1055,7 @@ export function StackBlock({
                 dense={false}
                 markMax={STACK_MARK_MAX}
                 size="lg"
+                kind={kind}
               />
             ) : (
               <RowTitle head={titleHead} tail={titleTail} />
@@ -936,6 +1068,7 @@ export function StackBlock({
             dense={false}
             markMax={STACK_MARK_MAX}
             size="lg"
+            kind={kind}
           />
         ) : (
           <RowTitle head={titleHead} tail={titleTail} />
@@ -966,33 +1099,33 @@ export function StackBlock({
           right than its neighbours' — every row in the stack disagreeing
           about where the right-hand edge is. */}
       {showAction && (
-      <div className="relative w-8 shrink-0">
-        {item.exportable && (
-          <button
-            type="button"
-            onClick={() => onToggle(item.slug)}
-            aria-pressed={picked}
-            aria-label={`${picked ? "Remove" : "Add"} ${item.title} to your calendar selection`}
-            className={cn(
-              // Always visible, unlike the axis block's. That one appears on
-              // hover, which on a touch screen means it appears never — the
-              // control was unreachable on exactly the surface this row
-              // serves.
-              "relative z-10 grid size-8 place-items-center rounded-full border transition",
-              picked
-                ? "border-magenta bg-magenta text-black"
-                : "border-white/30 bg-black/40 text-white/70",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
-            )}
-          >
-            {picked ? (
-              <Check className="size-3.5" strokeWidth={3} />
-            ) : (
-              <CalendarPlus className="size-3.5" />
-            )}
-          </button>
-        )}
-      </div>
+        <div className="relative w-8 shrink-0">
+          {item.exportable && (
+            <button
+              type="button"
+              onClick={() => onToggle(item.slug)}
+              aria-pressed={picked}
+              aria-label={`${picked ? "Remove" : "Add"} ${item.title} to your calendar selection`}
+              className={cn(
+                // Always visible, unlike the axis block's. That one appears on
+                // hover, which on a touch screen means it appears never — the
+                // control was unreachable on exactly the surface this row
+                // serves.
+                "relative z-10 grid size-8 place-items-center rounded-full border transition",
+                picked
+                  ? "border-magenta bg-magenta text-black"
+                  : "border-white/30 bg-black/40 text-white/70",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
+              )}
+            >
+              {picked ? (
+                <Check className="size-3.5" strokeWidth={3} />
+              ) : (
+                <CalendarPlus className="size-3.5" />
+              )}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

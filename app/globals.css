@@ -96,8 +96,8 @@
     resolves to Geist Mono, which is what a monospaced pixel face should degrade
     to and is what the upstream package uses as its own fallback.
   */
-  --font-pixel: var(--font-model-pixel, var(--font-geist-mono)), ui-monospace,
-    monospace;
+  --font-pixel:
+    var(--font-model-pixel, var(--font-geist-mono)), ui-monospace, monospace;
 
   /* Type scale — from brand hierarchy (px) */
   --text-title: 3.75rem; /* 60pt Title (Oswald Bold) */
@@ -174,7 +174,6 @@ h3,
 /* Removed: `.node-glow` warmed each room card's border on hover. The cards
    aren't links, and a hover border reads as one — see room-flow. If they
    ever gain a destination, that's the state to bring back. */
-
 
 /* ─── The Model: a mascot peeling off the Claude Code node ───────────────────
    Click that node in the hero graph and one of these appears and wanders. The
@@ -382,5 +381,45 @@ h3,
   to {
     opacity: 1;
     scale: 1;
+  }
+}
+
+/* Open Circuit's glow — the mark, switched on.
+
+   Scale, not opacity, and that is not a style preference. The hover lift on
+   this bloom is a transition on `opacity`; an animation on the same property
+   wins over a transition outright, so a breathe written in opacity would have
+   silently eaten the interaction. Splitting them — animation on scale here,
+   transition on opacity in the component — lets both run.
+
+   Slow and shallow on purpose. This sits behind a lockup, and a glow with a
+   visible arc reads as a pulsing alert rather than as something switched on;
+   nine seconds and six percent is the same restraint `pysaSway` settles on for
+   a standing figure. It is also the only part of this a touch device ever
+   gets, which is why it does not depend on a pointer.
+
+   What was here before, so it is not rebuilt by accident: a field of circuit
+   traces with current travelling along them, and a cursor-tracked spotlight
+   over it. Both are gone at the client's call. The traces lost because the
+   mark already contains circuit traces of its own and drawing more around
+   them left two competing sets at slightly different scales — the artwork was
+   arguing with itself. The spotlight lost on its own merits. */
+@keyframes ocBloom {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.oc-bloom {
+  animation: ocBloom 9s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oc-bloom {
+    animation: none;
   }
 }
