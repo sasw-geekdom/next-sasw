@@ -139,6 +139,14 @@ export const THE_MODEL = {
    * phrasing tried here that argues the same thing the first line does: a room,
    * mutual, nobody presenting at anybody.
    *
+   * The turn closed on "how it gets made" until the programme was set. That
+   * described the format correctly and the subject backwards: the afternoon
+   * opens with a thirty-minute keynote on what is coming and then runs talks on
+   * virtual reality, audio, Claude, and image and video models. "What comes
+   * next" is the day. Everything else about the line is deliberately untouched
+   * — same shape, same absent subject, same "each other" — because the reason
+   * it took four passes to arrive at was never the last three words.
+   *
    * Both halves are 52 characters — over the ~48 the older two-noun setup was
    * held to, and measured rather than assumed: each still holds its own line
    * from `lg` up. Treat it as the ceiling. One more word either side and the
@@ -147,15 +155,29 @@ export const THE_MODEL = {
    */
   tagline: {
     setup: "Creatives, founders and developers in the same room.",
-    turn: "An afternoon of showing each other how it gets made.",
+    turn: "An afternoon of showing each other what comes next.",
   },
 
 
-  // The opening talk — "State of the Creative Economy in 2026" — used to live
-  // here and render as a selected line on the masthead. Taken off the page by
-  // request. The fact still reaches readers through `blurb` in lib/schedule.ts,
-  // which feeds the page metadata, the .ics and the Event markup, so nothing
-  // was lost from the record; only the hero stopped naming a session.
+  // The opening talk used to live here and render as a selected line on the
+  // masthead. Taken off the page by request — the fact still reaches readers
+  // through `blurb` in lib/schedule.ts, which feeds the page metadata, the .ics
+  // and the Event markup, so nothing was lost from the record; only the hero
+  // stopped naming a session.
+  //
+  // It was "State of the Creative Economy in 2026". It is now a thirty-minute
+  // keynote, "The Next Era of the Creator Economy", and the afternoon behind it
+  // is talks on virtual reality, audio, Claude, and image and video models.
+  //
+  // Creator, not creative, and that is deliberate rather than a slip — worth
+  // knowing because everything else on this activation says creative economy,
+  // twice, in the organisers' own words. The two are different: the sector
+  // this room convenes, and the subject that keynote takes. Do not "fix" one
+  // into the other.
+  //
+  // The keynote and every talk under it belong in the sessions CMS pointed at
+  // `the-model`, not in this file. CMS rows supersede anything hardcoded, so a
+  // title added here would only have to be removed again.
 } as const;
 
 // ── Option A: two columns that meet ────────────────────────────────────────

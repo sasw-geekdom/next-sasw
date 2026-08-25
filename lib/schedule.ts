@@ -385,10 +385,6 @@ export const THE_MODEL_SESSION: FeaturedSession = {
   // hook has that the tagline doesn't: the three things being put in one room,
   // and that the talks come from people who actually ship with these tools.
   //
-  // 146 characters against Access Granted's 161 — close enough to sit level
-  // beside it on /schedule/the-rand, where this once ran to five lines against
-  // that one's four and made the pair look like an accident.
-  //
   // Event voice, not product voice. Earlier passes borrowed sentence shapes
   // from elevenlabs.io/creative and runway.com — "turn ideas into finished
   // image, film and voice" — which is a capability promise. Those sites sell a
@@ -396,11 +392,24 @@ export const THE_MODEL_SESSION: FeaturedSession = {
   // outcome. So this names the two communities, the occasion, and what happens
   // in it, in that order.
   //
-  // 151 characters against Access Granted's 161, close enough to sit level
+  // 150 characters against Access Granted's 161, close enough to sit level
   // beside it on /schedule/the-rand, where this once ran to five lines against
-  // that one's four and made the pair look like an accident.
+  // that one's four and made the pair look like an accident. Treat that as the
+  // ceiling for any rewrite.
+  //
+  // It closed on "local makers breaking down how the work actually gets made"
+  // until the programme was set. The afternoon is a thirty-minute keynote on
+  // what is coming, then talks on virtual reality, audio, Claude, and image and
+  // video models — so the old line described the format accurately and the
+  // subject backwards. "What comes next" is the day; "already building it" is
+  // the part of the brief's hook worth keeping, that the talks come from people
+  // who actually ship rather than from a panel.
+  //
+  // The lineup itself is deliberately not listed here. It belongs to the
+  // sessions CMS, which renders it on the page, and a blurb that named five
+  // topics would be 182 characters and out of step with the card beside it.
   blurb:
-    "An afternoon that puts San Antonio's creative economy and the DEVSA community in one room — local makers breaking down how the work actually gets made.",
+    "An afternoon that puts San Antonio's creative economy and the DEVSA community in one room — what comes next, and the local makers already building it.",
 };
 
 export const FEATURED_SESSIONS: FeaturedSession[] = [
