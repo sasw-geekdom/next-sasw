@@ -801,8 +801,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
           feature: true,
         },
       ],
-      coda:
-        "Vendor lock-in is the reason a five-year-old laptop feels slow, and open source is the reason it does not have to. Every machine that leaves this room is one that was headed for a landfill and is now somebody's first computer, running software nobody can switch off remotely.",
+      coda: "Vendor lock-in is the reason a five-year-old laptop feels slow, and open source is the reason it does not have to. Every machine that leaves this room is one that was headed for a landfill and is now somebody's first computer, running software nobody can switch off remotely.",
       kicker: "Bring a machine. Take one home. Both count.",
       access:
         "Free with Startup + Tech Week registration. Donations are welcome from anyone, whether or not you are attending the week.",
@@ -835,7 +834,10 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     room: "the-rand",
     venueDetail: "3rd Floor",
     circuit: "AI & Applied Innovation",
-    site: { label: "aitxcommunity.com", href: "https://www.aitxcommunity.com/" },
+    site: {
+      label: "aitxcommunity.com",
+      href: "https://www.aitxcommunity.com/",
+    },
     // Their own mark, redrawn for a dark ground. AITX publishes no vector and
     // no light-on-dark cut, so this is traced from their artwork.
     //
@@ -905,8 +907,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         "AITX runs the technical AI community across the Texas triangle \u2014 monthly meetups, hackathons and dinners for the engineers, founders and researchers building on frontier tooling rather than talking about it.",
         "Their rooms are in Austin and Houston. This hour is the first of them in San Antonio, on the floor DEVSA keeps for exactly this.",
       ],
-      coda:
-        "Texas keeps being described as an AI hub in the aggregate \u2014 the capital that landed, the companies that moved. AITX is the part of that which is a room with people in it, and the difference between a region with startups and a region with an ecosystem is whether those people ever meet.",
+      coda: "Texas keeps being described as an AI hub in the aggregate \u2014 the capital that landed, the companies that moved. AITX is the part of that which is a room with people in it, and the difference between a region with startups and a region with an ecosystem is whether those people ever meet.",
     },
   },
   {
@@ -950,8 +951,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         "Google Developer Groups are local communities where developers build skills together, in person and online \u2014 open to anyone interested in the technology, at any level of experience.",
         "The chapter brings its featured speaker to The Rand for the hour: Hastimal Jangid, co-founder of RankRabbit AI, on cloud, data and AI engineering at platform scale.",
       ],
-      coda:
-        "A chapter is not a conference track. It is the same people, in the same city, month after month \u2014 which is why the useful thing this hour offers is not the talk but the group still being there in November.",
+      coda: "A chapter is not a conference track. It is the same people, in the same city, month after month \u2014 which is why the useful thing this hour offers is not the talk but the group still being there in November.",
     },
   },
   {
@@ -998,8 +998,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
           href: "https://rowdyhacks.org/",
         },
       ],
-      coda:
-        "Geekdom's pitch to founders is that people are the unfair advantage \u2014 that a hard problem gets easier with the right person across the table, and that person is hard to find on your own, so they built the room where they already are. That room is the third floor of the Rand, which is the floor you would be standing on. A student who finds it in their first semester has four years of it, and that is the whole reason the community floor gives an evening to people who cannot yet put Geekdom on a r\u00e9sum\u00e9. Nobody has to join anything to talk to anyone.",
+      coda: "Geekdom's pitch to founders is that people are the unfair advantage \u2014 that a hard problem gets easier with the right person across the table, and that person is hard to find on your own, so they built the room where they already are. That room is the third floor of the Rand, which is the floor you would be standing on. A student who finds it in their first semester has four years of it, and that is the whole reason the community floor gives an evening to people who cannot yet put Geekdom on a r\u00e9sum\u00e9. Nobody has to join anything to talk to anyone.",
       // Two hosts, two borrowed registers, and both are deliberate. The coda
       // above is Geekdom's own argument in Geekdom's words — HOOK and MISSION
       // in next-geekdom's lib/site.ts are "make people your unfair advantage"
@@ -1132,8 +1131,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         "SATX Datanauts is San Antonio\u2019s grassroots gang of data people \u2014 engineers, analysts, scientists and the plainly curious \u2014 across business intelligence, pipelines, machine learning and every buzzword in between. Their own reason for existing is one sentence: nobody gets into tech, or survives it, alone.",
         "The mentorship programme is the part worth knowing. You are paired with a mentor, you build a real portfolio on a track you pick \u2014 analytics, data engineering, ML or AI \u2014 and you graduate by giving a live talk at The Drop, their monthly night. Rolling admissions. In their words: no fluff, just ships.",
       ],
-      coda:
-        "Every city has people who can build a pipeline. What is rarer is a group that treats teaching one as the point rather than the overflow, and rarer still one whose graduation is a talk \u2014 so the person who was mentored last year is the one at the front this year. That is a mechanism rather than a mission statement, and it is the whole argument for giving this hour to them.",
+      coda: "Every city has people who can build a pipeline. What is rarer is a group that treats teaching one as the point rather than the overflow, and rarer still one whose graduation is a talk \u2014 so the person who was mentored last year is the one at the front this year. That is a mechanism rather than a mission statement, and it is the whole argument for giving this hour to them.",
       // Their three-part line, verbatim. It is the only place on this page
       // where the register is entirely theirs, and it is better than anything
       // this site would have written to summarise them.
@@ -1204,64 +1202,65 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       start: "2026-10-01T14:00:00-05:00",
       end: "2026-10-01T15:00:00-05:00",
     },
-    // TODO(content): a speaker has not been named yet. That belongs in the
-    // sessions CMS pointed at this slug — not here — which is what makes the
-    // speaker page link back, and CMS rows supersede `detail` on the page.
+    // TODO(content): the hour has one confirmed talk — "The Autonomous Hacker:
+    // Zero-Trust AI Pentesting on AWS", on building an open-source autonomous
+    // pentesting platform that orchestrates 65+ security tools over MCP under
+    // a zero-trust architecture. It goes in the sessions CMS pointed at this
+    // slug, with its speaker, and not in this file.
     //
-    // ─── Why this reads forward rather than backward ─────────────────────────
+    // That is not filing: a CMS row *replaces* everything under `detail`
+    // below. Writing the talk here as well would put the same hour on the page
+    // in two formats, one of which nobody can edit without a deploy, and the
+    // hardcoded one would be the copy left standing if the row were ever
+    // removed. The title is recorded in this comment so whoever enters it has
+    // it to hand — comments do not render.
     //
-    // The first cut of this page led on their record: founded 2018, twelve
-    // hundred members, the run of recent events, and which floor of which
-    // building each one was on. Every fact in it was true and the whole thing
-    // was still wrong, because a reader deciding whether to spend an hour here
-    // does not need the group's CV — they need to know whether the room is for
-    // them. History answers "are they real"; nobody was asking that.
+    // ─── The hour, not the group ────────────────────────────────────────
     //
-    // So it leads on what they are building and who it serves. The four
-    // audiences named in the lede are the week's own: The Model brings
-    // creatives, the pitch events bring founders, College Night brings
-    // students, and this floor runs on developers. Cloud is the one thing
-    // underneath all four, which is the argument for putting this hour where
-    // the rest of the city can walk into it.
+    // Two drafts of this page sold the host. The first led on their record —
+    // founded 2018, twelve hundred members, which floor of which building
+    // each past meetup was on. The second led on their virtues — a year-round
+    // resource, hands-on labs, a curated shelf of free training, and the fact
+    // that the shelf points at Azure and GCP as readily as at AWS. Every fact
+    // in both was true and both were the wrong page: a reader deciding
+    // whether to give up an hour is asking what happens in it.
     //
-    // ─── Where the claims come from ──────────────────────────────────────────
+    // What happens in it is one technical talk, so that is what the copy
+    // leads on now. The group is named and credited and that is the whole of
+    // its billing; the reason to come is the subject.
     //
-    // Their own resources feed, not a press page. AWS Educate is listed there
-    // as "requiring no credit card or AWS account to get started" and Skill
-    // Builder as "over 1,000 free learning resources"; the same shelf carries
-    // Google Cloud training, Microsoft Learn, freeCodeCamp, GitHub Skills and
-    // Cisco NetAcad — and DEVSA. An AWS user group sending people to Azure and
-    // GCP is the single most useful thing on that site, and it is what makes
-    // "resource" a description rather than a compliment, so the coda spends
-    // its close on it.
-    //
-    // What did not survive the rewrite, and why, so it is not re-added: the
-    // job board is 152 roles and almost all of them are remote postings from
-    // partner companies rather than San Antonio work, so calling it a local
-    // board would have been the one false note on the page.
+    // What went, so it is not reached for again: the Microsoft Learn and
+    // Google Cloud line, which was a good argument that this room is not a
+    // vendor channel and was still an argument about the host. And the job
+    // board, which is 152 roles almost all of them remote postings from
+    // partner companies rather than San Antonio work — it would have been the
+    // one false note on the page.
     blurb:
-      "San Antonio\u2019s AWS group, and a year-round cloud resource \u2014 hands-on labs, a curated shelf of free training, and answers for whatever you\u2019re trying to ship.",
+      "San Antonio\u2019s AWS group, with an hour on offensive security run by an agent \u2014 red team work that used to take weeks, driven from a plain-language brief.",
     detail: {
       eyebrow: "The hour",
-      // Their own about page is "A meetup, not a conference", and this is the
-      // same move in this site's voice: say what the room is for by saying
-      // what to do with it. Every headline that claimed the word "resource"
-      // outright read like a brochure; an instruction reads like an open door,
-      // and it is the one line on the page that works identically for a
-      // student and for someone with production on AWS.
-      headline: "Bring the thing you\u2019re stuck on.",
+      // ─── Short, and about the talk ─────────────────────────────────────
+      //
+      // Two rules shaped what is left. It does not sell the host — see the
+      // note above the blurb — and it does not reproduce the talk, because a
+      // CMS row replaces this whole block the moment one is entered, and the
+      // abstract belongs in the row where an organiser can edit it without a
+      // deploy. So this describes the *kind* of hour and stops.
+      //
+      // Which is also why nothing here names the platform, the protocol or
+      // the tool count. Those are the talk's own details, they sit in the
+      // TODO above for whoever enters the row, and a page that printed them
+      // would be carrying the abstract twice over — once editable, once not.
+      //
+      // The headline is the talk's premise rather than its title: a red team
+      // engagement described in plain language, then executed. Two sentences,
+      // which `ActivationDetail` sets one per line.
+      headline: "Describe the test. Let it run.",
       lede: [
-        "What they are building is a resource, not a run of events \u2014 hands-on labs you leave with the thing actually working, and a curated shelf of free training that starts at AWS Educate, takes no credit card, and points at Google Cloud, Microsoft Learn and freeCodeCamp as readily as at AWS.",
-        "Which makes the hour wider than the people already writing YAML. A creative pricing a render pipeline, a founder who wants the bill before the raise, a student after a first Lambda, a developer with an architecture argument to settle \u2014 four questions, one room, the same infrastructure underneath all of them.",
+        "One talk, and a technical one. The subject is offensive security with an agent doing the work \u2014 red team engagements that have always meant weeks of manual setup, tool wrangling and write-up, driven instead from a plain-language description of what to test. Come with an opinion about how far that should be trusted.",
       ],
-      coda:
-        "Most of what a week like this hands you expires when the week does. This does not. The group meets all year, charges nothing, is run by people who work here, and its own resources page sends you to Microsoft Learn and Google Cloud as happily as to AWS \u2014 which is how you tell a community from a channel. The hour is the introduction. The resource was already yours.",
-      // Their tagline, and used as theirs rather than paraphrased — the same
-      // move College Night makes with DEVSA’s. It is the group’s line about
-      // the group, so it reads as them talking.
-      kicker: "Where San Antonio builds the cloud.",
       access:
-        "Free with Startup + Tech Week registration. All levels, in their own words \u2014 from \u201cjust deployed my first Lambda\u201d to \u201cI architect multi-region systems for fun.\u201d",
+        "Free with Startup + Tech Week registration. All levels, which is the group\u2019s standing rule rather than a note about this talk.",
     },
   },
   {
@@ -1344,8 +1343,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
           heightClass: "h-11 sm:h-13",
         },
       ],
-      coda:
-        "Every other room this week is about something being built \u2014 a company, a pitch, a product. This one is about the thing underneath it, which is the least glamorous and most load-bearing subject on the schedule. It runs because the people behind it already do this work here, and would rather spend a Thursday on it than a slide.",
+      coda: "Every other room this week is about something being built \u2014 a company, a pitch, a product. This one is about the thing underneath it, which is the least glamorous and most load-bearing subject on the schedule. It runs because the people behind it already do this work here, and would rather spend a Thursday on it than a slide.",
       kicker: "Bring the laptop you actually use. Opinions come standard.",
       access:
         "Free with Startup + Tech Week registration. Discount codes for November\u2019s Texas Linux Fest are being handed out in the room.",
@@ -1414,21 +1412,42 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       // this floor use. Those are meetings that happen to run an hour; this
       // one is a format, and the format is the reason to come.
       eyebrow: "The showcase",
-      // The organisers' own headline, kept whole. The hero sets it in Oswald
-      // caps, which is exactly the register it was written in.
+      // ─── Why this section is three lines long ──────────────────────────
+      //
+      // It was twice this, and most of it was the hero again. The blurb above
+      // already carries the format, the five circuits and the handoff to the
+      // Bash; a lede that opened on "five minutes, one screen" and a kicker
+      // that closed on "plug in, show your work" were the same sentence a
+      // second and third time, and the coda between them was an argument about
+      // demos being unfakeable that nobody came to this page to read.
+      //
+      // Nothing replaces it, because this page has nothing else to hold. The
+      // right-hand column of this section draws `programme` or `spotlight`,
+      // and Open Circuit will never have either: no running order, no named
+      // demos, and sign-ups taken in the room on the day. Five activations
+      // here already ship with no `detail` at all, and the note on the hero
+      // calls that the normal shape for a confirmed session.
+      //
+      // What survived is the part the hero cannot carry: whether a reader
+      // qualifies, and what to walk in with. On an event whose entire
+      // mechanic is turning up with a thing, those are worth a section on
+      // their own — and cutting to them is what stops the page reading as
+      // padding around a date.
+      //
+      // The organisers' headline stays whole. The hero draws the lockup
+      // rather than the title, so this is the first time those words appear
+      // anywhere on the page, and Oswald caps is the register they were
+      // written in.
       headline: "5 Circuits. 1 Stage. Show What You Built.",
       lede: [
-        "Before the week unplugs at the Bash, the stage and the screen go to whoever spent it building. Five minutes, one screen, unfiltered output \u2014 no pitch deck, no corporate template, and nothing that needs a slide to explain it.",
-        "Shipped code this week, designed an interface, wired up an agent, deployed open-source hardware, cut something in a media app: all of it plugs in. Developers, designers, founders, students, and anyone who came to see what the city is actually making.",
+        "Shipped code this week, designed an interface, wired up an agent, deployed open-source hardware, cut something in a media app \u2014 all of it plugs in. No pitch deck, no slide, nothing that needs explaining before it runs. Come to show something, or come to see what the city is actually making.",
       ],
-      coda:
-        "A demo is the one claim in tech that cannot be faked in the telling \u2014 it either runs in front of the room or it does not. The five circuits spend the week in separate rooms explaining their work to their own people. This is the hour they do it to each other, on one stage, with the thing running, before the whole floor walks a block west to the Bash.",
-      // The organisers' tagline, trimmed of the name the reader is already on
-      // the site of — "kick off the San Antonio Startup + Tech Week Bash" is
-      // three words of branding inside a five-word instruction.
-      kicker: "Plug in, show your work, and kick off the Bash.",
+      // The one fact that was missing rather than repeated. There is no form
+      // and no list: slots are taken in the room, in the order people arrive,
+      // which a reader has no way to guess from a page with two buttons on it
+      // that both do something else.
       access:
-        "Free with Startup + Tech Week registration. Bring the build and whatever it runs on \u2014 laptop, phone, board, or a recording of the thing working.",
+        "Free with Startup + Tech Week registration. Slots are claimed in the room on the day, in the order people turn up \u2014 so bring the build and whatever it runs on: laptop, phone, board, or a recording of the thing working.",
     },
   },
   {
@@ -1442,7 +1461,10 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // The group's own home is the Meetup, not dotnet.microsoft.com — that is
     // the platform's site, and pointing a reader at Microsoft to find out when
     // a San Antonio user group meets sends them to the wrong place.
-    site: { label: "meetup.com/sadnug", href: "https://www.meetup.com/sadnug/" },
+    site: {
+      label: "meetup.com/sadnug",
+      href: "https://www.meetup.com/sadnug/",
+    },
     // The official text-only mark in white, from github.com/dotnet/brand
     // The box comes from the glyphs' real ink bounds, not from the cap line.
     // Matching cap heights puts the caps exactly on y=0, and round capitals
@@ -1491,8 +1513,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         "The San Antonio .NET User Group is for anyone interested in a wide range of .NET topics around the San Antonio area \u2014 their words, and the back catalogue holds them to it: serverless, cross-platform builds, testing, CI/CD, and a recent run on C# with agentic AI.",
         "Most of the last year ran online. This hour is the group back in a room.",
       ],
-      coda:
-        "Platform user groups are the least fashionable and most durable thing in a tech scene. They were meeting before the week was announced and they will be meeting after it \u2014 which is the whole argument for giving the community floor to the groups that already do the work.",
+      coda: "Platform user groups are the least fashionable and most durable thing in a tech scene. They were meeting before the week was announced and they will be meeting after it \u2014 which is the whole argument for giving the community floor to the groups that already do the work.",
     },
   },
 ];
@@ -1809,7 +1830,10 @@ export interface WeekCalendar {
  * and none on the axis, `Math.min()` of an empty list is `Infinity` and the
  * grid would be laid out with a negative height.
  */
-function calendarAxis(items: CalendarItem[]): { startMin: number; endMin: number } {
+function calendarAxis(items: CalendarItem[]): {
+  startMin: number;
+  endMin: number;
+} {
   const onAxis = items.filter((i) => !i.morning);
   if (onAxis.length === 0) return { startMin: 13 * 60, endMin: 18 * 60 };
   const first = Math.min(...onAxis.map((i) => i.startMin));
@@ -1990,7 +2014,8 @@ export function dayCalendar(iso: string): DayCalendar | null {
     items.length === 0
       ? { startMin: 13 * 60, endMin: 18 * 60 }
       : {
-          startMin: Math.floor(Math.min(...items.map((i) => i.startMin)) / 60) * 60,
+          startMin:
+            Math.floor(Math.min(...items.map((i) => i.startMin)) / 60) * 60,
           endMin: Math.ceil(Math.max(...items.map((i) => i.endMin)) / 60) * 60,
         };
 
