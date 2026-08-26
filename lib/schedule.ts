@@ -111,6 +111,21 @@ export interface FeaturedSession {
    * the schedule.
    */
   shortTitle?: string;
+  /**
+   * The name on the share card, where the full title is more than it should
+   * carry.
+   *
+   * Distinct from `shortTitle`, which is cut for a filter chip and an admin
+   * picker and goes too far for a 1200x630 card — Google Developer Groups
+   * would be reduced to "GDG" there, which is the abbreviation rather than the
+   * name. This is the middle setting, and only Trinity has needed it: the
+   * competition is formally the Louis H. Stumberg, the page and its heading
+   * say so, and the card is the one surface where the benefactor's name costs
+   * a whole line of display type to tell a stranger something they did not ask.
+   *
+   * Falls back to `title`, which is what every other activation uses.
+   */
+  ogTitle?: string;
   titleBreakBefore?: string;
   /**
    * The same idea for the hero's `h1`, and a separate field because the two
@@ -1655,6 +1670,9 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // the blurb says — and a title has to survive being the alt text on a
     // lockup and the heading a screen reader announces. That one does not.
     title: "Louis H. Stumberg Venture Competition",
+    // The share card drops the benefactor too, for its own reason — see
+    // `ogTitle`.
+    ogTitle: "Stumberg Venture Competition",
     // The name without the benefactor, which is what fits.
     //
     // "Stumberg" alone was here first and it is too short — on its own the

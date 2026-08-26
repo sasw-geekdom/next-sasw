@@ -35,18 +35,20 @@ export default async function OgImage({
     const s = schedule.session;
     const when = s.when ? whenLabels(s.when) : null;
 
+    // `ogTitle` where the activation sets one — the card is the surface with
+    // the least room for a formal name and the most to lose to an extra line
+    // of display type. Everything else falls through to its own title.
+    const name = s.ogTitle ?? s.title;
+
     // Split on the same word the card and the page break on, so a long title
     // lays out as two readable lines rather than one that runs into the bolt.
     // `lines` renders each entry as a no-shrink span, so the split has to
     // happen here rather than being left to wrapping.
-    const at = s.titleBreakBefore ? s.title.indexOf(s.titleBreakBefore) : -1;
+    const at = s.titleBreakBefore ? name.indexOf(s.titleBreakBefore) : -1;
     const lines =
       at > 0
-        ? [
-            { text: s.title.slice(0, at).trimEnd() },
-            { text: s.title.slice(at) },
-          ]
-        : [{ text: s.title }];
+        ? [{ text: name.slice(0, at).trimEnd() }, { text: name.slice(at) }]
+        : [{ text: name }];
 
     return boltOgImage({
       eyebrow: s.venue.name,

@@ -28,6 +28,10 @@ const ORGANIZER = {
  * Free to attend, which is a fact worth stating in the markup — Google shows
  * price in the listing, and "Free" is the strongest thing this event can say
  * there.
+ *
+ * `url` is where the offer is taken up, and Google renders it as the link on
+ * the rich result. For the week and for everything it covers that is our own
+ * registration; an activation entered somewhere else overrides it below.
  */
 const FREE_OFFER = {
   "@type": "Offer",
@@ -164,7 +168,17 @@ export function activationEvent(session: ResolvedSession) {
         }
       : ORGANIZER,
     superEvent: { "@id": WEEK_ID },
-    offers: FREE_OFFER,
+    // Still free, but not always ours to give. An activation with `register`
+    // set is ticketed by its host — Trinity's competition is the only one —
+    // and the offer has to point where the ticket actually is. Left on the
+    // default, the "Free · Register" link on a search result would have sent
+    // someone to a Startup + Tech Week signup that does not admit them to
+    // this event, which is the same wrong promise the page's own button was
+    // carrying until `register` fixed it. The markup has to say what the page
+    // says.
+    offers: session.register
+      ? { ...FREE_OFFER, url: session.register.href }
+      : FREE_OFFER,
     url,
     image: [image],
   };
