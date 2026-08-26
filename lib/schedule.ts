@@ -942,8 +942,34 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       start: "2026-09-29T14:00:00-05:00",
       end: "2026-09-29T15:00:00-05:00",
     },
+    // What the group does, and nothing about who is speaking.
+    //
+    // It used to name the speaker — "a featured talk from Hastimal Jangid" —
+    // which was the right call when the hero was all this page had. It is not
+    // now: the talk card sits immediately to the right with his name, his
+    // role, his photograph and the whole abstract, so the blurb was
+    // introducing someone the reader could already see. The card carries the
+    // talk; this carries the room.
+    //
+    // Most of this is theirs, from the chapter page rather than the GDG
+    // programme: independently run — their own disclaimer is that the group's
+    // activities should not be linked to Google the corporation — and a recent
+    // calendar that is Build Nights and jams rather than talks, March, April,
+    // a Juneteenth Civic Build Jam in June. Leading on that rather than on
+    // "developer community" is what makes this the chapter and not the
+    // directory entry.
+    //
+    // AI Studio is the exception and comes from an organiser rather than the
+    // page, so it will not be found by checking the source the rest came from.
+    // It replaced "on a keyboard", which was true of any build night anywhere;
+    // naming the tool is the difference between a group that meets and a group
+    // that meets to do something specific.
+    //
+    // The member count went. It was the most quotable fact on the chapter page
+    // and the least useful one here — a number that dates itself, on a line
+    // that has to say what the room is for.
     blurb:
-      "The local chapter of Google's developer community \u2014 a featured talk from Hastimal Jangid, and the room that runs it the rest of the year.",
+      "The San Antonio chapter of Google Developer Groups: independently run, and a year of build nights where the learning happens in AI Studio.",
     detail: {
       eyebrow: "The hour",
       headline: "Local chapter, open door.",
@@ -1225,9 +1251,21 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // in both was true and both were the wrong page: a reader deciding
     // whether to give up an hour is asking what happens in it.
     //
-    // What happens in it is one technical talk, so that is what the copy
-    // leads on now. The group is named and credited and that is the whole of
-    // its billing; the reason to come is the subject.
+    // A third draft, and the reason is the layout rather than the words. The
+    // second one led on the talk — "an hour on offensive security run by an
+    // agent, red team work that used to take weeks" — which was right while
+    // the talk lived in a section below the fold and the hero was all a reader
+    // saw. It is not right now: the talk card sits immediately to the right
+    // with the abstract, whose own opening line is "red team engagements
+    // traditionally take weeks of manual setup". The blurb was paraphrasing a
+    // paragraph the reader can see.
+    //
+    // So the card carries the talk and this carries the room, the same split
+    // Google Developer Groups makes two entries up. "A meetup, not a
+    // conference" is their own about page; the hands-on labs are their own
+    // recent calendar. Naming the console is what stops it being a sentence
+    // that would fit any user group in any city — the same job "AI Studio"
+    // does for GDG.
     //
     // What went, so it is not reached for again: the Microsoft Learn and
     // Google Cloud line, which was a good argument that this room is not a
@@ -1236,7 +1274,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // partner companies rather than San Antonio work — it would have been the
     // one false note on the page.
     blurb:
-      "San Antonio\u2019s AWS group, with an hour on offensive security run by an agent \u2014 red team work that used to take weeks, driven from a plain-language brief.",
+      "San Antonio\u2019s AWS user group: a meetup rather than a conference, and a run of hands-on labs where the work happens in the console.",
     detail: {
       eyebrow: "The hour",
       // ─── Short, and about the talk ─────────────────────────────────────
@@ -1548,6 +1586,61 @@ export function whenShort(when: { start: string; end: string }) {
 }
 
 /** Which of the week's days a confirmed slot falls on, as `YYYY-MM-DD`. */
+/**
+ * The date range of a multi-day activation, as "Sep 28 – 30".
+ *
+ * Give-a-LOT's drop-off runs across three days: it has a `span` and no `when`,
+ * which is exactly right in the data and reads as missing everywhere that only
+ * knows about `when`. The venue card said "Time still landing" for it and the
+ * day grouping filed it under "slot to be confirmed" — both stating the
+ * opposite of the truth for the one activation whose dates have been fixed
+ * longest.
+ *
+ * Drops the second month name where both ends share one, which for a five-day
+ * week in one month is always. See the same rule on the calendar's spans.
+ */
+export function spanLabel(span: { from: string; to: string }): string {
+  const meta = (iso: string) => EVENT_DAYS.find((d) => d.iso === iso)?.label;
+  const from = meta(span.from);
+  const to = meta(span.to);
+  if (!from || !to) return "";
+  if (from === to) return from;
+  return sameMonth(from, to)
+    ? `${from} – ${to.split(" ")[1]}`
+    : `${from} – ${to}`;
+}
+
+/**
+ * The day an activation belongs to, and its heading, for grouping a list.
+ *
+ * Venue pages showed a room's whole week as one flat grid of cards ordered by
+ * date, with the day printed small on each. That reads as a pile: nothing tells
+ * you The Rand runs four things on Tuesday and one on Friday without checking
+ * five cards. Grouping is what turns the same data into a schedule.
+ *
+ * Returns null for a session with no confirmed slot and for a `span`, both of
+ * which belong outside the per-day grouping rather than under a day they do
+ * not have.
+ */
+export function sessionDay(
+  session: ResolvedSession,
+): { iso: string; weekday: string; label: string } | null {
+  if (!session.when) return null;
+  const iso = dayKey(session.when.start);
+  const meta = EVENT_DAYS.find((d) => d.iso === iso);
+  if (!meta) return null;
+  return {
+    iso,
+    // Parsed with the week's own offset, so the weekday cannot slip a day for
+    // a reader in another timezone — the same reason `dayKey` exists.
+    weekday: new Date(`${iso}T12:00:00-05:00`).toLocaleDateString("en-US", {
+      timeZone: TZ,
+      weekday: "long",
+    }),
+    label: meta.label,
+  };
+}
+
 function dayKey(iso: string): string {
   // en-CA gives ISO order; bucketing on the venue's clock rather than the
   // reader's is what stops a 6pm Thursday event showing up on Friday for

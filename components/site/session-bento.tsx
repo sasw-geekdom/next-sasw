@@ -7,7 +7,7 @@ import { ARROW_MOTION } from "@/lib/motion";
 import { motion } from "motion/react";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { cn } from "@/lib/utils";
-import { whenShort, type ResolvedSession } from "@/lib/schedule";
+import { spanLabel, whenShort, type ResolvedSession } from "@/lib/schedule";
 import { ACCESS_GREEN } from "@/lib/access-granted";
 import { MODEL_INK, MODEL_LAVENDER } from "@/lib/the-model";
 
@@ -148,11 +148,14 @@ function Card({
   index,
   className,
   matchTitleSize = false,
+  inContext = false,
 }: {
   session: SessionCard;
   index: number;
   className?: string;
   matchTitleSize?: boolean;
+  /** The page already says the venue and the day. See `SessionBento`. */
+  inContext?: boolean;
 }) {
   const reduce = useReducedMotion();
 
@@ -174,9 +177,14 @@ function Card({
         className,
       )}
     >
-      <p className="mb-4 truncate font-mono text-[11px] uppercase tracking-widest text-white/55">
-        {session.venue.name}
-      </p>
+      {/* Dropped where the page is the venue: on /schedule/the-rand this
+          line said "The Rand" on every card under a masthead reading THE
+          RAND. On /schedule it is the card's only statement of where. */}
+      {!inContext && (
+        <p className="mb-4 truncate font-mono text-[11px] uppercase tracking-widest text-white/55">
+          {session.venue.name}
+        </p>
+      )}
 
       {/* A logo replaces the heading, so the card still needs an accessible
           name — the visually-hidden one carries it when art is present. */}
@@ -223,10 +231,29 @@ function Card({
           is the card's job on this page, and gating it on the link would drop
           it for anything not yet given a page of its own. */}
       <p className="mt-auto flex items-center justify-between gap-3 border-t border-white/10 pt-4 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 group-hover:text-magenta">
+        {/* A span has dates — it just has no single day. Falling through to
+            "Time still landing" told the reader the opposite of the truth for
+            Give-a-LOT, whose three-day window has been fixed longer than
+            anything else on the schedule. */}
+        {/* In context the heading above already carries the date, so this
+            keeps only the part it does not have: the time. A span has no time,
+            so in context it says nothing at all and the row is just the way
+            in — which is correct, not empty.
+        
+            Out of context a span still needs its dates. Falling through to
+            "Time still landing" told the reader the opposite of the truth for
+            Give-a-LOT, whose three-day window has been fixed longer than
+            anything else on the schedule. */}
         <span className="text-white/75">
           {session.when
-            ? `${whenShort(session.when).day} · ${whenShort(session.when).time}`
-            : "Time still landing"}
+            ? inContext
+              ? whenShort(session.when).time
+              : `${whenShort(session.when).day} · ${whenShort(session.when).time}`
+            : inContext
+              ? ""
+              : session.span
+                ? spanLabel(session.span)
+                : "Time still landing"}
         </span>
         {session.page && (
           <span className="inline-flex items-center gap-1.5">
@@ -249,10 +276,21 @@ function Card({
 export function SessionBento({
   sessions,
   matchTitleSize = false,
+  inContext = false,
 }: {
   sessions: SessionCard[];
   /** Venue pages: size lockups to their neighbours' titles. See `Lockup`. */
   matchTitleSize?: boolean;
+  /**
+   * Whether the surrounding page already states the venue and the day.
+   *
+   * True on a venue page grouped by day, where every card in a group is the
+   * same room on the same date. The card's own eyebrow then repeats the page's
+   * title and its footer repeats the heading directly above it — "TUE, SEP 29"
+   * printed four times under a "TUESDAY · SEP 29" rule. The time is the only
+   * part still doing work, so that is the part that stays.
+   */
+  inContext?: boolean;
 }) {
   if (sessions.length === 0) return null;
 
@@ -285,6 +323,7 @@ export function SessionBento({
             session={s}
             index={i}
             matchTitleSize={matchTitleSize}
+            inContext={inContext}
           />
         ))}
       </div>
@@ -297,6 +336,7 @@ export function SessionBento({
               session={s}
               index={i + lead.length}
               matchTitleSize={matchTitleSize}
+              inContext={inContext}
             />
           ))}
         </div>

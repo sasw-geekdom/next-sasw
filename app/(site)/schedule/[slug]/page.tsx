@@ -16,7 +16,10 @@ import {
 import { ButtonLink } from "@/components/ui/button";
 import { ARROW_MOTION } from "@/lib/motion";
 import { ActivationDetail } from "@/components/site/activation-detail";
-import { ActivationSessions } from "@/components/site/activation-sessions";
+import {
+  ActivationSessions,
+  HeroTalk,
+} from "@/components/site/activation-sessions";
 import type { CardSpeaker } from "@/components/site/speaker-card";
 import {
   listPartners,
@@ -27,6 +30,8 @@ import type { SessionRow } from "@/lib/admin/cms-types";
 import {
   resolveSchedule,
   scheduleSlugs,
+  sessionDay,
+  spanLabel,
   venueRedirect,
   RETIRED_PAGES,
   whenLabels,
@@ -199,6 +204,18 @@ function ActivationPage({
   const isOpenCircuit = session.page === "open-circuit";
   /** Every banded activation renders the same actions in its band's slot. */
   const banded = isPysa || isAccessGranted || isModel || isGiveALot;
+  /**
+   * The one talk that goes in the hero instead of a section below it.
+   *
+   * Exactly one, and only where the hero has room: an activation with a
+   * `hero` photograph already fills its right half, and a band-led one
+   * (PySA, Access Granted, The Model, Give-a-LOT) does not use this hero at
+   * all. Two or more sessions stay a running order — that is a list, and a
+   * list does not belong in a masthead.
+   */
+  const heroTalk =
+    !banded && !session.hero && sessions.length === 1 ? sessions[0] : null;
+
   /**
    * "Everything else at X" has to actually be true.
    *
@@ -412,19 +429,28 @@ function ActivationPage({
           )}
 
           <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-16 pt-10 lg:pb-16 lg:pt-14">
-            <div className="max-w-3xl">
-              <p className="font-mono text-xs uppercase tracking-widest text-magenta">
-                {session.venue.name} · {session.circuit}
-              </p>
-              {/* The lockup replaces the typeset title where one exists, so
+            {/* Two columns only when there is a talk to put in the second one.
+                Without it the copy keeps its own `max-w-3xl` and the hero is
+                unchanged for every other activation. */}
+            <div
+              className={cn(
+                heroTalk &&
+                  "grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start lg:gap-14 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]",
+              )}
+            >
+              <div className="max-w-3xl">
+                <p className="font-mono text-xs uppercase tracking-widest text-magenta">
+                  {session.venue.name} · {session.circuit}
+                </p>
+                {/* The lockup replaces the typeset title where one exists, so
                   the page wears the event's own mark. The heading still has to
                   exist for the document outline and for anything that can't
                   render the image, so it goes visually-hidden rather than
                   away. */}
-              {session.logo ? (
-                <>
-                  <h1 className="sr-only">{session.title}</h1>
-                  {/* The mark gets a positioned box of its own so an
+                {session.logo ? (
+                  <>
+                    <h1 className="sr-only">{session.title}</h1>
+                    {/* The mark gets a positioned box of its own so an
                       activation can put something behind it — Open Circuit
                       does, and its glow has to be anchored to the lockup
                       rather than to the viewport. The width caps moved here
@@ -434,139 +460,161 @@ function ActivationPage({
                       sits inside other groups, and an unnamed one here would
                       be claimed by whichever ancestor Tailwind resolved
                       last. */}
-                  <div
-                    className={cn(
-                      "group/mark relative mt-6",
-                      // Capped by width, a stacked mark comes out about twice
-                      // the height of a wide one — 1 Million Cups rendered
-                      // 512x256 against Mission Pitch's 512x125, and pushed
-                      // the copy block from 430px to 557px. The bento cards
-                      // already normalise on height; this does the same by
-                      // giving anything squarer than 3:1 a narrower ceiling,
-                      // which lands every mark near the same optical size
-                      // without the distortion `max-height` would cause on an
-                      // element whose width is already fixed.
-                      session.logo.width / session.logo.height >= 3
-                        ? "max-w-sm sm:max-w-md lg:max-w-lg"
-                        : "max-w-56 sm:max-w-64 lg:max-w-xs",
-                    )}
-                  >
-                    {isOpenCircuit && <OpenCircuitGlow />}
-                    <Image
-                      src={session.logo.src}
-                      // Decorative here, deliberately: the sr-only h1 above
-                      // already announces the name, so alt text on the mark
-                      // would say it twice. `logo.alt` still carries a real name
-                      // for the bento card, where the mark is the only content
-                      // inside the link and has to name it.
-                      alt=""
-                      width={session.logo.width}
-                      height={session.logo.height}
-                      priority
-                      // Above the board behind it. Without a stacking context of
-                      // its own the mark would paint in DOM order, which puts it
-                      // under the bright layer the cursor drags around.
-                      className="relative z-10 h-auto w-full"
-                    />
-                  </div>
-                </>
-              ) : (
-                <h1 className="mt-4 font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl xl:text-7xl">
-                  {/* `lg:block` on a span rather than a `<br>`: a break element
+                    <div
+                      className={cn(
+                        "group/mark relative mt-6",
+                        // Capped by width, a stacked mark comes out about twice
+                        // the height of a wide one — 1 Million Cups rendered
+                        // 512x256 against Mission Pitch's 512x125, and pushed
+                        // the copy block from 430px to 557px. The bento cards
+                        // already normalise on height; this does the same by
+                        // giving anything squarer than 3:1 a narrower ceiling,
+                        // which lands every mark near the same optical size
+                        // without the distortion `max-height` would cause on an
+                        // element whose width is already fixed.
+                        session.logo.width / session.logo.height >= 3
+                          ? "max-w-sm sm:max-w-md lg:max-w-lg"
+                          : "max-w-56 sm:max-w-64 lg:max-w-xs",
+                      )}
+                    >
+                      {isOpenCircuit && <OpenCircuitGlow />}
+                      <Image
+                        src={session.logo.src}
+                        // Decorative here, deliberately: the sr-only h1 above
+                        // already announces the name, so alt text on the mark
+                        // would say it twice. `logo.alt` still carries a real name
+                        // for the bento card, where the mark is the only content
+                        // inside the link and has to name it.
+                        alt=""
+                        width={session.logo.width}
+                        height={session.logo.height}
+                        priority
+                        // Above the board behind it. Without a stacking context of
+                        // its own the mark would paint in DOM order, which puts it
+                        // under the bright layer the cursor drags around.
+                        className="relative z-10 h-auto w-full"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <h1 className="mt-4 font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl xl:text-7xl">
+                    {/* `lg:block` on a span rather than a `<br>`: a break element
                       is unconditional, and below lg this has to fall back to
                       wrapping wherever the narrow column runs out. Going block
                       only at lg gives the tail its own line on desktop and
                       leaves the phone alone. The h1's text content is
                       unchanged either way, so the outline and anything reading
                       the page still see one clean string. */}
-                  {accented(heroTitle[0], session.titleAccent)}
-                  {heroTitle[1] && (
-                    <>
-                      {" "}
-                      <span className="lg:block">
-                        {accented(heroTitle[1], session.titleAccent)}
-                      </span>
-                    </>
-                  )}
-                </h1>
-              )}
-              <p className="mt-6 max-w-xl text-pretty text-lg text-white/60">
-                {session.blurb}
-              </p>
-              {/* A locked slot belongs in the hero, not filed under a
+                    {accented(heroTitle[0], session.titleAccent)}
+                    {heroTitle[1] && (
+                      <>
+                        {" "}
+                        <span className="lg:block">
+                          {accented(heroTitle[1], session.titleAccent)}
+                        </span>
+                      </>
+                    )}
+                  </h1>
+                )}
+                <p className="mt-6 max-w-xl text-pretty text-lg text-white/60">
+                  {session.blurb}
+                </p>
+                {/* A locked slot belongs in the hero, not filed under a
                   "running order" heading further down — once the date, the
                   hour and the room are all fixed, that IS the headline detail
                   and the page can go straight to the two things a reader
                   wants to do with it. */}
-              {session.when ? (
-                <>
-                  <dl className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
-                    <div className="inline-flex items-center gap-2">
-                      <CalendarDays
-                        className="h-4 w-4 shrink-0 text-magenta"
-                        aria-hidden="true"
-                      />
-                      <dt className="sr-only">Date</dt>
-                      <dd>{whenLabels(session.when).date}</dd>
-                    </div>
-                    <div className="inline-flex items-center gap-2">
-                      <Clock
-                        className="h-4 w-4 shrink-0 text-magenta"
-                        aria-hidden="true"
-                      />
-                      <dt className="sr-only">Time</dt>
-                      <dd>{whenLabels(session.when).time}</dd>
-                    </div>
-                    <div className="inline-flex items-center gap-2">
-                      <MapPin
-                        className="h-4 w-4 shrink-0 text-magenta"
-                        aria-hidden="true"
-                      />
-                      <dt className="sr-only">Location</dt>
-                      <dd>
-                        {session.venue.name}
-                        {session.venueDetail ? `, ${session.venueDetail}` : ""}
-                      </dd>
-                    </div>
-                  </dl>
+                {session.when ? (
+                  <>
+                    <dl className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
+                      <div className="inline-flex items-center gap-2">
+                        <CalendarDays
+                          className="h-4 w-4 shrink-0 text-magenta"
+                          aria-hidden="true"
+                        />
+                        <dt className="sr-only">Date</dt>
+                        <dd>{whenLabels(session.when).date}</dd>
+                      </div>
+                      <div className="inline-flex items-center gap-2">
+                        <Clock
+                          className="h-4 w-4 shrink-0 text-magenta"
+                          aria-hidden="true"
+                        />
+                        <dt className="sr-only">Time</dt>
+                        <dd>{whenLabels(session.when).time}</dd>
+                      </div>
+                      <div className="inline-flex items-center gap-2">
+                        <MapPin
+                          className="h-4 w-4 shrink-0 text-magenta"
+                          aria-hidden="true"
+                        />
+                        <dt className="sr-only">Location</dt>
+                        <dd>
+                          {session.venue.name}
+                          {session.venueDetail
+                            ? `, ${session.venueDetail}`
+                            : ""}
+                        </dd>
+                      </div>
+                    </dl>
 
-                  {/* Full width below sm — see the note on the banded row. */}
-                  <div className="mt-8 flex flex-wrap items-center gap-3">
-                    <ButtonLink
-                      href="/register"
-                      size="lg"
-                      className="w-full sm:w-auto"
-                    >
-                      Get on the list.
-                    </ButtonLink>
-                    <AddToCalendar
-                      icsHref={`/schedule/${session.page}/calendar`}
-                      event={{
-                        title: session.title,
-                        details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
-                        location: session.venueDetail
-                          ? `${session.venue.name}, ${session.venueDetail}, Downtown San Antonio`
-                          : `${session.venue.name}, Downtown San Antonio`,
-                        start: session.when.start,
-                        end: session.when.end,
-                      }}
-                    />
-                  </div>
+                    {/* Full width below sm — see the note on the banded row. */}
+                    <div className="mt-8 flex flex-wrap items-center gap-3">
+                      <ButtonLink
+                        href="/register"
+                        size="lg"
+                        className="w-full sm:w-auto"
+                      >
+                        Get on the list.
+                      </ButtonLink>
+                      <AddToCalendar
+                        icsHref={`/schedule/${session.page}/calendar`}
+                        event={{
+                          title: session.title,
+                          details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
+                          location: session.venueDetail
+                            ? `${session.venue.name}, ${session.venueDetail}, Downtown San Antonio`
+                            : `${session.venue.name}, Downtown San Antonio`,
+                          start: session.when.start,
+                          end: session.when.end,
+                        }}
+                      />
+                    </div>
 
-                  {/* The organiser and the room, kept in the hero rather than
+                    {/* The organiser and the room, kept in the hero rather than
                       given a section of their own — with the slot locked
                       there's nothing else to say, and a whole band under this
                       one to hold two links was padding. */}
-                  <p className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
-                    {session.site &&
-                      (session.site.href ? (
-                        <a
-                          href={session.site.href}
-                          target="_blank"
-                          rel="noreferrer"
+                    <p className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
+                      {session.site &&
+                        (session.site.href ? (
+                          <a
+                            href={session.site.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-magenta"
+                          >
+                            Run by {session.site.label}
+                            <ArrowUpRight
+                              className={cn(
+                                ARROW_MOTION,
+                                "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+                              )}
+                              strokeWidth={2.5}
+                              aria-hidden="true"
+                            />
+                          </a>
+                        ) : (
+                          // No arrow and no link: an arrow promises somewhere to
+                          // go, and this one is us.
+                          <span>Run by {session.site.label}</span>
+                        ))}
+                      {hasMoreAtVenue && (
+                        <Link
+                          href={`/schedule/${session.venue.slug}`}
                           className="group inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-magenta"
                         >
-                          Run by {session.site.label}
+                          Everything else at {session.venue.name}
                           <ArrowUpRight
                             className={cn(
                               ARROW_MOTION,
@@ -575,34 +623,28 @@ function ActivationPage({
                             strokeWidth={2.5}
                             aria-hidden="true"
                           />
-                        </a>
-                      ) : (
-                        // No arrow and no link: an arrow promises somewhere to
-                        // go, and this one is us.
-                        <span>Run by {session.site.label}</span>
-                      ))}
-                    {hasMoreAtVenue && (
-                      <Link
-                        href={`/schedule/${session.venue.slug}`}
-                        className="group inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-magenta"
-                      >
-                        Everything else at {session.venue.name}
-                        <ArrowUpRight
-                          className={cn(
-                            ARROW_MOTION,
-                            "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
-                          )}
-                          strokeWidth={2.5}
-                          aria-hidden="true"
-                        />
-                      </Link>
-                    )}
+                        </Link>
+                      )}
+                    </p>
+                  </>
+                ) : (
+                  <p className="mt-8 font-mono text-[11px] uppercase tracking-widest text-white/55">
+                    Sept 28 – Oct 2 · Downtown San Antonio
                   </p>
-                </>
-              ) : (
-                <p className="mt-8 font-mono text-[11px] uppercase tracking-widest text-white/55">
-                  Sept 28 – Oct 2 · Downtown San Antonio
-                </p>
+                )}
+              </div>
+              {heroTalk && (
+                <HeroTalk
+                  session={heroTalk}
+                  speakers={speakers}
+                  // Only where the talk does not simply fill the activation.
+                  showTime={
+                    !session.when ||
+                    new Date(session.when.start).getTime() !==
+                      heroTalk.startsAt ||
+                    new Date(session.when.end).getTime() !== heroTalk.endsAt
+                  }
+                />
               )}
             </div>
           </div>
@@ -614,7 +656,12 @@ function ActivationPage({
           organiser can change them without a deploy. The prose version is what
           an organiser sent over before any of that was entered. */}
       {sessions.length > 0 ? (
-        <ActivationSessions sessions={sessions} speakers={speakers} />
+        // Suppressed when the hero already carries it — see `heroTalk`. The
+        // same talk in a masthead and again under a rule is the collision this
+        // page has avoided everywhere else.
+        heroTalk ? null : (
+          <ActivationSessions sessions={sessions} speakers={speakers} />
+        )
       ) : (
         <ActivationDetail detail={session.detail} />
       )}
@@ -798,6 +845,30 @@ export default async function VenueSchedulePage({
     return s;
   });
 
+  // One bucket per day this room actually runs, in week order, plus whatever
+  // has no slot yet. `sessions` already arrives in date order, so pushing into
+  // an insertion-ordered Map keeps the days in order without a second sort.
+  const groups = new Map<
+    string,
+    { iso: string; weekday: string; label: string; cards: SessionCard[] }
+  >();
+  // A span is not undated — it runs across days rather than on one. Filing it
+  // under "slot to be confirmed" said the opposite of the truth for the one
+  // activation whose dates were settled first.
+  const spanned: SessionCard[] = [];
+  const undated: SessionCard[] = [];
+  for (const card of cards) {
+    const day = sessionDay(card);
+    if (!day) {
+      (card.span ? spanned : undated).push(card);
+      continue;
+    }
+    const bucket = groups.get(day.iso) ?? { ...day, cards: [] };
+    bucket.cards.push(card);
+    groups.set(day.iso, bucket);
+  }
+  const dayGroups = [...groups.values()];
+
   return (
     <main>
       {/* The venue's own masthead — the same portrait-and-panel grammar as
@@ -890,9 +961,64 @@ export default async function VenueSchedulePage({
             </p>
           </div>
 
-          <div className="mt-12 lg:mt-14">
-            <SessionBento sessions={cards} matchTitleSize />
-          </div>
+          {/* Grouped by day, not one flat grid.
+          
+              A room's week arrived as cards ordered by date with the day
+              printed small on each, which reads as a pile: nothing told you The
+              Rand runs four things on Tuesday and one on Friday without
+              checking five cards. The same data under day headings is a
+              schedule — and it is the "this location, this day" view the grid
+              pages cannot give, because they are one day or one week and never
+              one room across both.
+          
+              Anything without a confirmed slot keeps the old ungrouped grid at
+              the foot. A day heading over a session that has no day would be
+              inventing one. */}
+          {dayGroups.map((group) => (
+            <div key={group.iso} className="mt-12 lg:mt-14">
+              <div className="flex items-baseline gap-3 border-b border-white/10 pb-3">
+                <h3 className="font-display text-xl font-bold uppercase leading-none tracking-tight text-white sm:text-2xl">
+                  {group.weekday}
+                </h3>
+                <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
+                  {group.label} · {group.cards.length}{" "}
+                  {group.cards.length === 1 ? "session" : "sessions"}
+                </p>
+              </div>
+              <div className="mt-6 lg:mt-8">
+                <SessionBento sessions={group.cards} matchTitleSize inContext />
+              </div>
+            </div>
+          ))}
+
+          {spanned.map((card) => (
+            <div key={card.slug} className="mt-12 lg:mt-14">
+              <div className="flex items-baseline gap-3 border-b border-white/10 pb-3">
+                <h3 className="font-display text-xl font-bold uppercase leading-none tracking-tight text-white sm:text-2xl">
+                  All week
+                </h3>
+                <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
+                  {card.span ? spanLabel(card.span) : ""}
+                </p>
+              </div>
+              <div className="mt-6 lg:mt-8">
+                <SessionBento sessions={[card]} matchTitleSize inContext />
+              </div>
+            </div>
+          ))}
+
+          {undated.length > 0 && (
+            <div className="mt-12 lg:mt-14">
+              {dayGroups.length > 0 && (
+                <p className="border-b border-white/10 pb-3 font-mono text-[11px] uppercase tracking-widest text-white/45">
+                  Slot to be confirmed
+                </p>
+              )}
+              <div className={dayGroups.length > 0 ? "mt-6 lg:mt-8" : ""}>
+                <SessionBento sessions={undated} matchTitleSize />
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
