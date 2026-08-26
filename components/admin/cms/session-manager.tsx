@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Combobox } from "@/components/ui/combobox";
 import { saveSession, deleteSession } from "@/lib/admin/cms-actions";
 import { formatDateTime } from "@/lib/format";
+import { EVENT_DAYS } from "@/lib/event";
 import { VENUE_OPTIONS, roomSlugFromLegacy, venueLabel } from "@/lib/locations";
 import { activationOptions } from "@/lib/schedule";
 import { TRACKS } from "@/lib/tracks";
@@ -21,13 +22,109 @@ import type {
   ParticipantRole,
 } from "@/lib/admin/cms-types";
 
-function toLocalInput(ms: number | null): string {
-  if (!ms) return "";
-  const d = new Date(ms);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-    d.getHours(),
-  )}:${pad(d.getMinutes())}`;
+/**
+ * The week's timezone, and the reason this file does its own date maths.
+ *
+ * Sessions used to be entered with two <input type="datetime-local">, which
+ * submits a bare "2026-09-29T14:00" — no offset. `z.coerce.date()` hands that
+ * to `new Date()`, and a date-time with no offset is parsed *in the runtime's
+ * timezone*. Vercel runs UTC. So an organiser typing 2:00 PM stored 14:00Z,
+ * and every public surface — which all render in America/Chicago — showed it
+ * as 9:00 AM. It went unnoticed because locally the dev server runs in the
+ * machine's own timezone, where the same input round-trips correctly.
+ *
+ * The GDG session was entered that way and was live on the site reading five
+ * hours early. Re-saving a row through this form corrects it.
+ *
+ * Everything below therefore works in explicit Chicago wall-clock time and
+ * submits an explicit offset, so nothing depends on where the server or the
+ * browser happens to be.
+ */
+const TZ = "America/Chicago";
+
+/**
+ * -05:00 for the whole week, and safe to hardcode: the event is Sept 28 – Oct
+ * 2 2026 and US DST does not end until Nov 1, so every session is CDT. A week
+ * that ever straddles the change needs a real zoned conversion here, not a
+ * different constant.
+ */
+const OFFSET = "-05:00";
+
+const PARTS = new Intl.DateTimeFormat("en-US", {
+  timeZone: TZ,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
+/** An instant, as the day and wall-clock time it lands on in San Antonio. */
+function toParts(ms: number | null): { day: string; time: string } {
+  if (!ms) return { day: "", time: "" };
+  const got: Record<string, string> = {};
+  for (const part of PARTS.formatToParts(new Date(ms))) {
+    got[part.type] = part.value;
+  }
+  // `hour12: false` yields "24" for midnight in some engines rather than "00".
+  const hour = got.hour === "24" ? "00" : got.hour;
+  return {
+    day: `${got.year}-${got.month}-${got.day}`,
+    time: `${hour}:${got.minute}`,
+  };
+}
+
+const LABEL = new Intl.DateTimeFormat("en-US", {
+  timeZone: TZ,
+  weekday: "long",
+  month: "short",
+  day: "numeric",
+});
+
+const DAY_OPTIONS = EVENT_DAYS.map((d) => ({
+  value: d.iso,
+  // Parsed at noon UTC so the label cannot land on the previous day when it is
+  // rendered back in Chicago.
+  label: LABEL.format(new Date(`${d.iso}T12:00:00Z`)),
+}));
+
+/**
+ * Every quarter hour from 7am to 10pm.
+ *
+ * The week's real span is the 7:30 brunch to the 8pm bash, so this covers it
+ * with room either side. Quarter hours because nothing on this schedule starts
+ * at 2:07, and a list of 61 is one the Combobox gives a search box to.
+ */
+const TIME_OPTIONS = Array.from({ length: 61 }, (_, i) => {
+  const mins = 7 * 60 + i * 15;
+  const h24 = Math.floor(mins / 60);
+  const m = mins % 60;
+  const value = `${String(h24).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  return {
+    value,
+    label: `${h12}:${String(m).padStart(2, "0")} ${h24 < 12 ? "AM" : "PM"}`,
+  };
+});
+
+/**
+ * The grid, plus whatever a row already holds.
+ *
+ * A stored time off the quarter-hour — or outside 7am–10pm — would otherwise
+ * match no option, the picker would show its placeholder, and saving an
+ * untouched row would silently move the session. The venue picker deliberately
+ * blanks on an unmatched legacy value because a human should re-choose it;
+ * a time is not ambiguous, it is just unusual, so it is kept.
+ */
+function timeOptions(current: string) {
+  if (!current || TIME_OPTIONS.some((o) => o.value === current)) {
+    return TIME_OPTIONS;
+  }
+  const [h, m] = current.split(":").map(Number);
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  const label = `${h12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+  return [{ value: current, label }, ...TIME_OPTIONS];
 }
 
 export function SessionManager({
@@ -45,6 +142,9 @@ export function SessionManager({
   const [track, setTrack] = React.useState("");
   const [venue, setVenue] = React.useState("");
   const [activation, setActivation] = React.useState("");
+  const [day, setDay] = React.useState("");
+  const [startTime, setStartTime] = React.useState("");
+  const [endTime, setEndTime] = React.useState("");
   const [pickerValue, setPickerValue] = React.useState("");
   const [pending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
@@ -75,6 +175,14 @@ export function SessionManager({
     // ones get chosen rather than guessed.
     setVenue(row === "new" ? "" : (roomSlugFromLegacy(row.location) ?? ""));
     setActivation(row === "new" ? "" : (row.activation ?? ""));
+    const start = toParts(row === "new" ? null : row.startsAt);
+    const end = toParts(row === "new" ? null : (row.endsAt ?? null));
+    // A session's day comes off its start. An end is a time only — nothing on
+    // this schedule runs past midnight, and offering a second day picker for a
+    // case that does not exist is a field to get wrong.
+    setDay(start.day);
+    setStartTime(start.time);
+    setEndTime(end.time);
     setPickerValue("");
     setEditing(row);
   }
@@ -108,6 +216,14 @@ export function SessionManager({
     form.set("track", track);
     form.set("location", venue);
     form.set("activation", activation);
+    // Explicit offset, which is the whole point of this picker: an ISO string
+    // carrying -05:00 means the same instant whether it is parsed on a UTC
+    // server, a Chicago laptop or anywhere else.
+    form.set(
+      "startsAt",
+      day && startTime ? `${day}T${startTime}:00${OFFSET}` : "",
+    );
+    form.set("endsAt", day && endTime ? `${day}T${endTime}:00${OFFSET}` : "");
     startTransition(async () => {
       const res = await saveSession(form);
       if (!res.ok) {
@@ -245,30 +361,64 @@ export function SessionManager({
               )}
             </div>
 
+            {/* Day, then start, then end — three short lists instead of two
+                free-text datetimes.
+            
+                The old pair asked for a full date every time, on an event
+                whose every session falls on one of five known days, and asked
+                for it in the browser's timezone while the site renders in San
+                Antonio's. This cannot express a date outside the week, cannot
+                express a time nobody would schedule, and cannot mean two
+                different instants on two different machines. */}
+            <div>
+              <Label>Day</Label>
+              <Combobox
+                value={day}
+                onChange={setDay}
+                placeholder="Pick a day"
+                options={DAY_OPTIONS}
+              />
+              {issues.startsAt?.[0] && (
+                <FieldError>{issues.startsAt[0]}</FieldError>
+              )}
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <Label htmlFor="startsAt">Starts</Label>
-                <Input
-                  id="startsAt"
-                  name="startsAt"
-                  type="datetime-local"
-                  defaultValue={toLocalInput(current?.startsAt ?? null)}
-                  required
+                <Label>Starts</Label>
+                <Combobox
+                  value={startTime}
+                  onChange={(v) => {
+                    setStartTime(v);
+                    // An end that now sits before the start is worse than no
+                    // end: it renders as a negative slot on the activation
+                    // page. Clearing it makes the admin re-pick rather than
+                    // silently shipping it.
+                    if (endTime && v && endTime <= v) setEndTime("");
+                  }}
+                  placeholder="Start time"
+                  options={timeOptions(startTime)}
                 />
-                {issues.startsAt?.[0] && (
-                  <FieldError>{issues.startsAt[0]}</FieldError>
-                )}
               </div>
               <div>
-                <Label htmlFor="endsAt">Ends (optional)</Label>
-                <Input
-                  id="endsAt"
-                  name="endsAt"
-                  type="datetime-local"
-                  defaultValue={toLocalInput(current?.endsAt ?? null)}
+                <Label>Ends (optional)</Label>
+                <Combobox
+                  value={endTime}
+                  onChange={setEndTime}
+                  placeholder="End time"
+                  // Only times after the start, so the pair cannot be inverted
+                  // in the first place. Before a start is chosen the whole
+                  // grid is offered rather than nothing, so the two can be
+                  // filled in either order.
+                  options={timeOptions(endTime).filter(
+                    (o) => !startTime || o.value > startTime,
+                  )}
                 />
               </div>
             </div>
+            <p className="-mt-2 font-mono text-[11px] uppercase tracking-widest text-white/40">
+              All times San Antonio (CDT)
+            </p>
 
             <div>
               <Label>Venue</Label>
