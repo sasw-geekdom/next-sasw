@@ -169,6 +169,15 @@ export function axisMarkCap(
  * the height follow its ratio, bounded at both ends so a very tall mark can't
  * push the block's copy out and a very wide one can't shrink to a hairline.
  */
+/**
+ * The width every lockup is drawn toward, before its own ratio sets the height.
+ *
+ * One number for the axis blocks, where a lane is 100–300px and the mark is
+ * competing with a strand label and a room. The agenda overrides it — see
+ * `STACK_MARK_TARGET`.
+ */
+export const MARK_TARGET = 150;
+
 export function lockupHeight(
   lockup: { width: number; height: number },
   targetWidth: number,
@@ -231,6 +240,8 @@ export function markKind(
   size: "sm" | "md" | "lg",
   /** The block's own height cap, where it has one. See `axisMarkCap`. */
   markMax?: number,
+  /** The width the mark aims for. See `MARK_TARGET`. */
+  markTarget: number = MARK_TARGET,
 ): "wordmark" | "lockup" | null {
   if (!brand) return null;
   if (brand.wordmark === "startup-bash")
@@ -247,7 +258,7 @@ export function markKind(
     const h =
       lockupHeight(
         brand.lockup,
-        150,
+        markTarget,
         Math.min(lg ? 56 : size !== "sm" ? 50 : 44, markMax ?? Infinity),
       ) * (lg ? 1.5 : 1);
     const ratio = brand.lockup.width / brand.lockup.height;
@@ -262,13 +273,32 @@ function BrandMark({
   title,
   dense,
   markMax,
+  markTarget = MARK_TARGET,
   size = "sm",
   kind,
+  canWrap = false,
 }: {
   brand: CalendarBrand;
   title: string;
   /** A lane too narrow to draw an image lockup in. */
   dense: boolean;
+  /**
+   * Whether the block has vertical room for a typeset mark to take two lines.
+   *
+   * Only the axis blocks set it, and only the ones with a balanced middle —
+   * see `TALL_BLOCK_MIN` in `Block`. An agenda row is a fixed 83px with the
+   * mark and the meta side by side, so a wrapped mark there costs the row's
+   * height rather than filling space it already has.
+   */
+  canWrap?: boolean;
+  /**
+   * The width the mark aims for, before its ratio sets the height.
+   *
+   * Has to match whatever `markKind` was given, for the same reason `markMax`
+   * does: one decides that a lockup fits, the other decides how big, and a
+   * disagreement puts a mark in a slot sized for something else.
+   */
+  markTarget?: number;
   /**
    * A hard ceiling from the block's own height, where it has one.
    *
@@ -331,17 +361,52 @@ function BrandMark({
       // Granted's green-on-the-first. Both are ours, both are Social, and the
       // accent belongs on the word that says what the evening is.
       //
-      // One line at every size. "COLLEGE NIGHT" wrapped is two lines of
-      // display type in a block that also has to hold a time and a room, and
-      // the cut steps down instead — a wrapped mark costs more height than the
-      // larger type wins.
+      // Two lines where the block has the height for them, one line
+      // everywhere else.
+      //
+      // It used to be one line at every size, on the reasoning that a wrapped
+      // mark costs more height than the larger type wins — true while the mark
+      // sat at the top of the block with the whole middle empty beneath it.
+      // Now that a balanced block centres its mark, the height is already
+      // spent: the two lines land in space that was doing nothing, and the
+      // word that names the evening gets a line of its own instead of trailing
+      // the one that qualifies it.
+      //
+      // Still one line in an agenda row and in a block too short to earn the
+      // room — see `canWrap`.
+      //
+      // The break is forced rather than allowed. Left to wrap on its own the
+      // mark stayed on one line, because at this cut "COLLEGE NIGHT" fits the
+      // lane it is in — the two lines are the point here, not a consequence of
+      // running out of width, so each word is given its own block.
+      //
+      // A step up in size comes with them. The one-line cut was sized to fit
+      // the lane's width; split, the constraint moves to the block's height,
+      // which a centred mark has to spare.
       <span
         className={cn(
-          "whitespace-nowrap font-display font-bold uppercase leading-tight tracking-tight text-white",
-          lg ? "text-xl lg:text-2xl" : roomy ? "text-base" : "text-sm",
+          "font-display font-bold uppercase leading-tight tracking-tight text-white",
+          canWrap
+            ? lg
+              ? "text-2xl lg:text-3xl"
+              : roomy
+                ? "text-xl"
+                : "text-base"
+            : lg
+              ? "text-xl lg:text-2xl"
+              : roomy
+                ? "text-base"
+                : "text-sm",
         )}
       >
-        College <span className="text-magenta">Night</span>
+        <span className={cn("whitespace-nowrap", canWrap && "block")}>
+          College
+        </span>{" "}
+        <span
+          className={cn("whitespace-nowrap text-magenta", canWrap && "block")}
+        >
+          Night
+        </span>
       </span>
     );
   }
@@ -500,7 +565,7 @@ function BrandMark({
             // clamp, so a narrow lane genuinely needs the smaller cut.
             "--mark-h": `${lockupHeight(
               brand.lockup,
-              150,
+              markTarget,
               Math.min(lg ? 56 : roomy ? 50 : 44, markMax ?? Infinity),
             )}px`,
           } as React.CSSProperties
@@ -545,6 +610,7 @@ export function Block({
   showVenue = true,
   lanes = 1,
   markMax,
+  splitArt = false,
   showAction = true,
 }: {
   item: CalendarItem;
@@ -582,6 +648,17 @@ export function Block({
   /** A mark ceiling from the block's own height — see `axisMarkCap`. */
   markMax?: number;
   /**
+   * Whether this block may draw an activation's `blockArt` apart from its
+   * title. See `splitMark` below.
+   *
+   * The week axis sets it and nothing else does. A day column is three times
+   * the width of a week lane and its hours are taller, so the same layout
+   * there hands the drawing a 341x264 box — the artwork stops being a mark and
+   * becomes a poster with a caption. The week lane is the size this was asked
+   * for and the size it was measured at.
+   */
+  splitArt?: boolean;
+  /**
    * Whether the block carries its own add-to-calendar control.
    *
    * False in the week view, where selection lives on the day — the same split
@@ -603,10 +680,43 @@ export function Block({
       : lanes === 2
         ? "md"
         : "sm";
-  const kind = markKind(brand, dense, markSize, markMax);
-  const hasMark = kind !== null;
   // Where there's height for a description there's height for the strand.
   const showCircuit = spare && !dense;
+
+  const kind = markKind(brand, dense, markSize, markMax);
+  const hasMark = kind !== null;
+
+  /**
+   * The block sets the name in type and draws the mark on its own beneath it.
+   *
+   * Every other block pins one object to the top edge — a lockup where the
+   * activation has one, the title where it does not — which is what this
+   * component has always done and what the rest of the schedule expects. This
+   * is the exception, and it is data-driven rather than named: an activation
+   * gets it by supplying `blockArt`, its mark cut away from its wordmark. Only
+   * Stumberg has one, because only a pictorial mark stands up without its
+   * words.
+   *
+   * Which is also why the split is not a general layout. A lockup is a
+   * letterbox: drawn across the top of a two-hour block it leaves the middle
+   * empty, and moved into the middle it is still a wordmark, so the block
+   * would print the name twice. Separate art solves both — the words go where
+   * a heading belongs and the artwork gets the space, at a size a reader
+   * actually sees it at rather than as a 24px strip.
+   *
+   * `spare` gates it, and so does `splitArt`. A block too short to hold more
+   * than a name has no middle to move anything into, and a surface wider than
+   * a week lane draws the artwork far larger than it was ever measured at.
+   */
+  const splitMark = spare && splitArt && !!brand?.art;
+
+  /**
+   * College Night takes two lines where it stands — see the note in
+   * `BrandMark`. It does not move off the top; the line break is the whole of
+   * what was asked for, and its mark is typeset rather than a file, so there
+   * is no wordmark to separate from the artwork in the first place.
+   */
+  const wrapWordmark = spare && item.page === "college-night";
 
   /**
    * The full title off the axis, the short one on it.
@@ -617,24 +727,40 @@ export function Block({
    * to its content — so that is where the organisers' whole title belongs, and
    * it is where the brunch actually sits.
    */
-  const label = hasMark ? (
-    <BrandMark
-      brand={brand!}
-      title={item.title}
-      dense={dense}
-      markMax={markMax}
-      size={markSize}
-      kind={kind}
-    />
-  ) : (
-    <span
-      className={cn(
-        dense ? "line-clamp-1" : fill ? "line-clamp-2" : "line-clamp-4",
-      )}
-    >
-      {dense || fill ? item.title : item.longTitle}
-    </span>
-  );
+  const label =
+    hasMark && !splitMark ? (
+      <BrandMark
+        brand={brand!}
+        title={item.title}
+        dense={dense}
+        markMax={markMax}
+        size={markSize}
+        kind={kind}
+        canWrap={wrapWordmark}
+      />
+    ) : (
+      <span
+        className={cn(
+          // The short form, and three lines to be sure of it.
+          //
+          // A split block has no wordmark to carry the name — the artwork
+          // below is a drawing with no words in it — so this line is the only
+          // place the activation is named, and it must not be the line that
+          // gets cut. The full title ran to three lines in the narrowest lane
+          // and left nothing for the drawing; `shortTitle` is the version cut
+          // to fit, and it lands in two with the third line as headroom.
+          splitMark
+            ? "line-clamp-3"
+            : dense
+              ? "line-clamp-1"
+              : fill
+                ? "line-clamp-2"
+                : "line-clamp-4",
+        )}
+      >
+        {dense || fill || splitMark ? item.title : item.longTitle}
+      </span>
+    );
 
   return (
     <div
@@ -744,6 +870,52 @@ export function Block({
         >
           {label}
         </p>
+      )}
+
+      {/* The lockup, given the middle of the block to itself. `aria-hidden`
+          because the title above has already named the activation and the
+          mark's own alt text would say it again — here it is artwork rather
+          than a label. The link's stretched ::after still covers it, so it
+          stays part of the same click target.
+
+          `min-h-0` so the mark is what gives when a block is tighter than its
+          budget allowed. Without it a flex item refuses to shrink below its
+          content and the mark pushes the strand and room out of the bottom
+          instead — the same failure the note on `axisMarkCap` describes, in
+          the other direction. */}
+      {splitMark && brand?.art && (
+        <div
+          aria-hidden="true"
+          className="flex min-h-0 flex-1 items-center justify-center py-1"
+        >
+          <Image
+            src={brand.art.src}
+            alt=""
+            width={brand.art.width}
+            height={brand.art.height}
+            // Sized by the height it is given rather than by a width target,
+            // which is the opposite of every other mark here and the reason
+            // this is drawn directly instead of through `BrandMark`. Those are
+            // wordmarks, where width is what makes them readable and the
+            // height follows; this is a near-square drawing with nothing to
+            // read, so what it needs is whatever vertical room the block has
+            // left after the title and the meta rows have taken theirs.
+            //
+            // `object-contain` is what keeps that safe in a narrow lane:
+            // `max-w-full` can clamp the width below what `h-full` implies,
+            // and without it the drawing would stretch rather than fit.
+            //
+            // Height is the whole budget here and it is not generous. In the
+            // narrowest lane the block is 143x144, the three-line title takes
+            // 49 of it and the strand and room another 31, which leaves the
+            // drawing about 43 — 55px wide at its 1.29:1. The padding is 4px a
+            // side rather than 6 for that reason: at this size every pixel
+            // taken off the gap goes straight into the artwork. Widening it is
+            // not the lever it looks like, since the mark runs out of height
+            // long before it runs out of the lane's 125px.
+            className="h-full w-auto max-w-full object-contain"
+          />
+        </div>
       )}
 
       {/* The time, only where the block is too short to say anything else.
@@ -933,6 +1105,32 @@ export function SummaryBlock({
  */
 const STACK_MARK_MAX = 38;
 
+/**
+ * The agenda aims its marks wider than the axis does.
+ *
+ * Width-led sizing converges every mark on roughly one drawn width, which is
+ * what makes a column of them look deliberate. The cost is paid entirely by
+ * the wide ones: height is width over ratio, so at the axis's 150 a 10:1
+ * wordmark gets 23px of height on a wide screen and a 6.26:1 two-line lockup
+ * gets 36 — split across two lines, so each line of type is half of that
+ * again. Beside AITX at 3.68:1, which hits the height cap and draws its name
+ * at full size, they read as the marks that were shrunk.
+ *
+ * An agenda row is not the axis. It is the full width of the right-hand
+ * column — around 600–770px — where a 225px mark leaves most of the row empty,
+ * so the width was there to give.
+ *
+ * 220 rather than more because of the cap above it: everything squarer than
+ * about 3.9:1 is already pinned at STACK_MARK_MAX and does not move at all,
+ * so this only lifts the marks the ratio was penalising. Raising it further
+ * would start pushing wide marks past half the row without helping the ones
+ * that are already capped.
+ *
+ * Row heights do not change. The tallest mark is still the cap, which AITX and
+ * four others already draw at today.
+ */
+const STACK_MARK_TARGET = 220;
+
 export function StackBlock({
   item,
   picked,
@@ -958,7 +1156,7 @@ export function StackBlock({
   // STACK_MARK_MAX, not a bare call: the two `BrandMark`s below pass it, and a
   // markKind that did not know the row's ceiling could commit to a lockup the
   // row then draws too small to read.
-  const kind = markKind(brand, false, "lg", STACK_MARK_MAX);
+  const kind = markKind(brand, false, "lg", STACK_MARK_MAX, STACK_MARK_TARGET);
   const hasMark = kind !== null;
 
   // The organisers' full title, broken where the activation says to break it.
@@ -1054,6 +1252,7 @@ export function StackBlock({
                 title={item.longTitle}
                 dense={false}
                 markMax={STACK_MARK_MAX}
+                markTarget={STACK_MARK_TARGET}
                 size="lg"
                 kind={kind}
               />
@@ -1067,6 +1266,7 @@ export function StackBlock({
             title={item.longTitle}
             dense={false}
             markMax={STACK_MARK_MAX}
+            markTarget={STACK_MARK_TARGET}
             size="lg"
             kind={kind}
           />

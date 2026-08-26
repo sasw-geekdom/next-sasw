@@ -1,4 +1,4 @@
-import { icsLine as line, icsStamp } from "@/lib/calendar";
+import { eventLocation, icsLine as line, icsStamp } from "@/lib/calendar";
 import { exportableSessions } from "@/lib/schedule";
 
 // The week a reader actually picked, as one calendar file.
@@ -59,12 +59,7 @@ export async function GET(request: Request): Promise<Response> {
       "DESCRIPTION",
       `${session.blurb} Part of San Antonio Startup + Tech Week.`,
     ),
-    line(
-      "LOCATION",
-      session.venueDetail
-        ? `${session.venue.name}, ${session.venueDetail}, Downtown San Antonio, TX`
-        : `${session.venue.name}, Downtown San Antonio, TX`,
-    ),
+    line("LOCATION", eventLocation(session)),
     "END:VEVENT",
   ]);
 

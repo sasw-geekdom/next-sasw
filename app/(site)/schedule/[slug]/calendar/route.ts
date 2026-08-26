@@ -1,4 +1,4 @@
-import { icsLine as line, icsStamp } from "@/lib/calendar";
+import { eventLocation, icsLine as line, icsStamp } from "@/lib/calendar";
 import { resolveSchedule, scheduleSlugs } from "@/lib/schedule";
 
 // A single activation's calendar entry.
@@ -56,15 +56,7 @@ export async function GET(
       "DESCRIPTION",
       `${session.blurb} Part of San Antonio Startup + Tech Week.`,
     ),
-    // Includes the floor or room where the organisers named one — this is the
-    // line a phone shows on the lock screen when the reminder fires, and
-    // "300 Main" alone is a twenty-five-storey building.
-    line(
-      "LOCATION",
-      session.venueDetail
-        ? `${session.venue.name}, ${session.venueDetail}, Downtown San Antonio, TX`
-        : `${session.venue.name}, Downtown San Antonio, TX`,
-    ),
+    line("LOCATION", eventLocation(session)),
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");

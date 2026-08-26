@@ -47,7 +47,7 @@ export function SpeakerLineup({
 
           <p className="mt-4 max-w-xl text-pretty text-white/60 lg:col-start-1 lg:row-start-3">
             The founders, builders, and operators taking the stage — five
-            circuits, five downtown rooms.
+            circuits, six rooms.
           </p>
 
           <ButtonLink

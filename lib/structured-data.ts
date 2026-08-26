@@ -40,13 +40,14 @@ const FREE_OFFER = {
 /**
  * A venue as a Place.
  *
- * `address` is required for an offline event. Four of the five rooms now carry
- * a street address and real coordinates, so those emit `streetAddress` and
- * `geo` — the difference between "somewhere in San Antonio" and a pin.
+ * `address` is required for an offline event, and all six rooms carry a street
+ * address, so every one emits `streetAddress` — the difference between
+ * "somewhere in San Antonio" and a pin.
  *
- * All five rooms now carry a street address. Four also carry coordinates and
- * so emit `geo`; 300 Main arrived from a different source, with a postal code
- * instead — each venue publishes exactly what has been confirmed for it and
+ * Four also carry coordinates and so emit `geo`. The other two do not: 300
+ * Main arrived from a different source with a postal code instead, and Trinity
+ * is a 117-acre campus where a single pin would be a guess about which
+ * building. Each venue publishes exactly what has been confirmed for it and
  * nothing inferred.
  */
 function place(room: {
@@ -90,7 +91,7 @@ export function weekEvent() {
     "@id": WEEK_ID,
     name: "San Antonio Startup + Tech Week 2026",
     description:
-      "Year 11. Five days, five circuits, one current — keynotes, pitch stages, workshops and the nights after, across downtown San Antonio.",
+      "Year 11. Five days, five circuits, one current — keynotes, pitch stages, workshops and the nights after, across San Antonio.",
     // All-day across the week, so plain dates rather than timestamps.
     startDate: "2026-09-28",
     endDate: "2026-10-02",

@@ -401,7 +401,7 @@ export function RoomFlow() {
             was otherwise ~45% empty black. */}
         <div className="grid gap-x-16 lg:grid-cols-[1fr_auto]">
           <p className="font-mono text-xs uppercase tracking-widest text-magenta lg:col-start-1 lg:row-start-1">
-            Downtown San Antonio · Sept 28 – Oct 2
+            San Antonio · Sept 28 – Oct 2
           </p>
 
           <h2 className="mt-3 font-display text-4xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-5xl lg:col-start-1 lg:row-start-2">

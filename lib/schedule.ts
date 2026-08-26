@@ -50,6 +50,26 @@ export interface FeaturedSession {
    */
   logo?: { src: string; width: number; height: number; alt: string };
   /**
+   * The mark on its own, without the wordmark beside it.
+   *
+   * A week block is the one surface with height to spare and no room for a
+   * wide lockup to use it: `logo` is a letterbox, so it draws across the top
+   * and leaves the middle of a two-hour card empty. Given the mark alone, the
+   * block can put the name in type where a heading belongs and hand the
+   * artwork the middle at a size a reader actually sees it at.
+   *
+   * Only worth setting where the mark stands up without its words — a
+   * pictorial mark, not a wordmark with a symbol tacked on. Stumberg's is two
+   * heads and their gears, which is why it is the one activation that has one.
+   * Everywhere else, and everywhere but the week block, `logo` is still the
+   * mark: an agenda row is 83px with the meta beside it, and a lockup is
+   * exactly the right shape for that.
+   *
+   * No `alt`. It is drawn `aria-hidden` under a title that has already named
+   * the activation, so alt text here would say the same thing twice.
+   */
+  blockArt?: { src: string; width: number; height: number };
+  /**
    * Borrow the lockup from a CMS partner instead of a file in the repo, by
    * case-insensitive substring of the partner's name. Use this when the org
    * running the activation is already on the partner wall — the logo then
@@ -305,6 +325,26 @@ export interface FeaturedSession {
      */
     href?: string;
   };
+  /**
+   * Where this activation is actually entered, when it is not the week's own
+   * list.
+   *
+   * Every page here offers "Get on the list." pointing at `/register`, on the
+   * premise the whole site is built around: one free registration covers the
+   * week, and every room honours it. That premise holds for the five downtown
+   * rooms and breaks at Trinity, whose venture competition is a Trinity event
+   * the week is a guest at. It has its own free ticket on Eventbrite, and a
+   * Startup + Tech Week badge does not open that door.
+   *
+   * So the CTA is overridable rather than absolute. Left unset — which is
+   * every other activation — the button stays exactly as it was.
+   *
+   * Rendered as an external link, because that is the only reason to set it.
+   * `label` replaces the button's own words too: "Get on the list." names the
+   * week's list specifically, and it would be the wrong promise on a button
+   * that leaves the site.
+   */
+  register?: { label: string; href: string };
   /**
    * Confirmed start and end, once the organiser has fixed them.
    *
@@ -1602,6 +1642,149 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       coda: "Platform user groups are the least fashionable and most durable thing in a tech scene. They were meeting before the week was announced and they will be meeting after it \u2014 which is the whole argument for giving the community floor to the groups that already do the work.",
     },
   },
+  {
+    slug: "stumberg-venture-competition",
+    page: "stumberg-venture-competition",
+    // The full name, which is how Trinity bills it: their own banner in the
+    // hall reads "LOUIS H. STUMBERG / VENTURE COMPETITION", and the lockup
+    // beside this is set to match it word for word.
+    //
+    // Still not "2026 Stumberg Venture Competition, Final Round", which is the
+    // Eventbrite listing's title and carries two facts this site states
+    // elsewhere. The year is the whole site, and the round is the first thing
+    // the blurb says — and a title has to survive being the alt text on a
+    // lockup and the heading a screen reader announces. That one does not.
+    title: "Louis H. Stumberg Venture Competition",
+    // The name without the benefactor, which is what fits.
+    //
+    // "Stumberg" alone was here first and it is too short — on its own the
+    // word names a man rather than a competition, and it is what the block's
+    // aria-label and the admin's picker read out. The full title is too long
+    // the other way: at 13px in the narrowest week lane it runs to three lines
+    // and takes a third of the card off the artwork underneath it.
+    //
+    // This is the middle, and it is not a new idea — the brunch's short form
+    // is "The Creative Futures Brunch" at 27 characters, one shy of this.
+    shortTitle: "Stumberg Venture Competition",
+    room: "trinity",
+    venueDetail: "Ruth Taylor Recital Hall",
+    // Capital, with Mission Pitch and Latin Tech Pitch — the week's other two
+    // rooms where money is decided in front of an audience rather than
+    // discussed. That the founders are students is a fact about who pitches
+    // rather than about what the hour is.
+    circuit: "Capital",
+    site: {
+      label: "trinity.edu/entrepreneurship",
+      href: "https://trinity.edu/entrepreneurship",
+    },
+    // The one activation on the site that is entered somewhere other than
+    // the week's own list — see `register` in the interface above. Trinity
+    // ticket it themselves and it is free; what a Startup + Tech Week badge
+    // does not do is get you through this door, and the default CTA would
+    // have said otherwise on the one page where it is not true.
+    register: {
+      label: "Get a ticket.",
+      href: "https://www.eventbrite.com/e/2026-stumberg-venture-competition-final-round-tickets-1985586357245",
+    },
+    // The event's own mark — Trinity's, the two heads and their gears — set
+    // beside the competition name in Geist 500 over two lines. The same
+    // lockup rule the .NET and AWS marks follow, and here it is doing more
+    // work than either: the illustration carries no name at all, so on its own
+    // it identifies nothing, and the drawing is line art whose strokes measure
+    // 12px at 1024 wide. Scaled to a week block that is roughly one physical
+    // pixel, which is the width at which a thin outline stops being a drawing
+    // and becomes a grey smudge. The type is what survives the small sizes;
+    // the mark is what makes it Trinity's at the large ones.
+    //
+    // Two lines rather than one for the ratio. Set on a single line the
+    // lockup runs 7.9:1 and the type inside a block is drawn tiny to fit;
+    // stacked it is 6.26:1, between AWS (5.49) and the .NET lockup (8.12),
+    // and every word comes out twice the height for the same block width.
+    //
+    // The strokes were also tried dilated, so they would hold at block scale
+    // without the type carrying them. Rejected: it closes the gear teeth and
+    // the pupils, and at hero size the heads read as two blobs. Thin and
+    // honest at the top end beats thick and wrong at both.
+    logo: {
+      src: "/activations/stumberg.webp",
+      width: 2915,
+      height: 466,
+      alt: "Louis H. Stumberg Venture Competition",
+    },
+    // The same two heads, cut out of the lockup above and drawn on their own
+    // in the week block. See `blockArt`.
+    blockArt: {
+      src: "/activations/stumberg-mark.webp",
+      width: 1024,
+      height: 791,
+    },
+    // 5:00 to 7:30, which is the pitches and the reception together — the
+    // whole of what someone is committing an evening to. Doors are 4:30 and
+    // are in the programme below rather than here, for the same reason the
+    // brunch's 7:30 doors are not its start time: an hour on the grid is what
+    // is programmed, and a calendar entry that begins when the room unlocks
+    // makes every reader half an hour early.
+    when: {
+      start: "2026-09-29T17:00:00-05:00",
+      end: "2026-09-29T19:30:00-05:00",
+    },
+    // Trinity's own photograph of the competition in this hall — the raked
+    // seating full, two founders on the boards with microphones, and their
+    // banner against the wood at the left. It is the one image that says what
+    // this evening is without a caption, which is the whole test for a picture
+    // that gets masked and dimmed behind the copy.
+    //
+    // It is a seed round, not a final: the banner's third line reads "Seed
+    // Round" at full size. Nothing is cropped to hide that — the hero lays the
+    // whole frame in and masks it, and the banner happens to sit in the half
+    // the scrim takes, so the line is not legible on the page either way. The
+    // room and the format are identical, and a photograph of the actual final
+    // will not exist until the night itself. Swap it for one afterwards.
+    hero: {
+      src: "/activations/stumberg-hero.jpg",
+      width: 1800,
+      height: 1200,
+      alt: "Two Trinity students pitching to a full recital hall at the Louis H. Stumberg Venture Competition",
+    },
+    blurb:
+      "The final round of Trinity\u2019s student venture competition: five teams already funded once, back on stage for a $50,000 prize decided the same night.",
+    detail: {
+      eyebrow: "The evening",
+      // The format, in two sentences, which is the whole of what makes this
+      // different from a demo night: something is actually decided.
+      headline: "Five teams pitch. One leaves funded.",
+      lede: [
+        "Five student ventures pitch live for a $50,000 grand prize. Every one of them has been funded once already \u2014 $7,000 and a place in Trinity\u2019s incubator, won in the seed round earlier in the year \u2014 so this is not a room of first drafts. It is five teams who have had money and the time to spend it, back to show what it bought.",
+        "The 2026 finalists are Gratzi, MEQ for You, PassItOn, SofraWise and The Recharge Pod. The decision happens in the room, and the hour after it is where you meet the founders.",
+      ],
+      // Three rows, and the only reason this activation has a programme at all
+      // is that its hour splits. "5:00 – 7:30 PM" in the hero is accurate
+      // and tells a reader nothing about which half is the pitches, or that
+      // the last hour is a reception they can arrive at the end of.
+      programme: [
+        {
+          time: "4:30 PM",
+          title: "Doors",
+          body: "The recital hall opens. Free parking in the Alamo Stadium lot, a short walk from the building.",
+        },
+        {
+          time: "5:00 \u2013 6:30 PM",
+          title: "The pitches",
+          body: "Five ventures, live, in front of the judges and the room. This is the whole competition \u2014 there is no second sitting.",
+        },
+        {
+          time: "6:30 \u2013 7:30 PM",
+          title: "Reception",
+          body: "The result, and then an hour with the founders and the people who backed them.",
+        },
+      ],
+      // Said plainly, because it is the one thing on this site that is not
+      // covered by the week's registration and a reader who assumes otherwise
+      // finds out at the door.
+      access:
+        "Free, and ticketed by Trinity on Eventbrite rather than covered by your Startup + Tech Week registration \u2014 this is Trinity\u2019s competition, on their campus, and the week is on the guest list rather than the host. Three miles north of downtown; free parking in the Alamo Stadium lot.",
+    },
+  },
 ];
 
 /** The week's timezone. Every label and calendar stamp is resolved in it. */
@@ -1814,6 +1997,13 @@ export interface CalendarBrand {
   /** An image lockup, where one exists. */
   lockup?: { src: string; width: number; height: number; alt: string };
   /**
+   * The mark without its wordmark, for a block that draws the two apart.
+   *
+   * See `blockArt` on FeaturedSession. Only the week and day blocks use it;
+   * everything else takes `lockup`.
+   */
+  art?: { src: string; width: number; height: number };
+  /**
    * A typeset lockup the grid knows how to draw itself.
    *
    * Access Granted and The Model have no wordmark file — their marks are set
@@ -1870,6 +2060,7 @@ function brandFor(session: ResolvedSession): CalendarBrand | undefined {
     wordmark,
     ink: session.page === "the-model" ? MODEL_INK : undefined,
     lockup: session.logo,
+    art: session.blockArt,
   };
 }
 

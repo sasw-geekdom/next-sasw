@@ -1,4 +1,4 @@
-// The five venues active during Startup + Tech Week, and the sessions each
+// The six venues active during Startup + Tech Week, and the sessions each
 // spotlights. Sessions are curated here for now; they can later be pulled from
 // the sessions CMS. `image` is the building portrait (magenta-on-black);
 // until those assets land, the flow renders the `ascii` placeholder.
@@ -223,10 +223,46 @@ export const ROOMS: Room[] = [
       { title: "Give-a-LOT", kind: "Tech & Builders" },
     ],
   },
-  // The two single-activation rooms run in the order they happen — the brunch
-  // in the morning, the bash at night. Array order is display order, so this
-  // is what puts 300 Main ahead of Legacy Park in the bottom row, and it
-  // matches the order the section intro lists them in.
+  // The single-activation rooms run in the order they happen — Trinity on
+  // Tuesday, then the brunch and the bash, which share Thursday morning and
+  // Thursday night. Array order is display order, so this is what sets the
+  // bottom row.
+  {
+    slug: "trinity",
+    name: "Trinity University",
+    // "Trinity University" is 18 characters, the same length as "Texas Public
+    // Radio", and it truncates in a week-calendar lane for the same reason.
+    // The campus is the fact that tells this block apart from the four
+    // downtown rooms, so the short form keeps the word that does that work.
+    shortName: "Trinity",
+    place: {
+      // Off-campus visitors are directed to the Alamo Stadium lot rather than
+      // to this address, which is the campus itself — but the address is what
+      // a map app resolves, and the room is one building inside it. The hall
+      // is named in the activation's `venueDetail`.
+      address: "1 Trinity Place",
+      postalCode: "78212",
+      // No coordinates. Every other room's came from a map provider or a
+      // published source; a pin dropped on a 117-acre campus would be a guess
+      // about which building, and 300 Main already sets the precedent for
+      // publishing the postal code alone rather than inferring the rest.
+    },
+    host: "Trinity University · Capital",
+    // The one room on this list that is not downtown, which is why the
+    // distance is in the copy rather than left for someone to discover in a
+    // map app. Three miles north, and it is the only room of the six that
+    // nobody walks to from the others.
+    desc: "One evening, three miles north of downtown — five Trinity student ventures pitching for a $50,000 prize.",
+    tag: "One evening · capital",
+    port: "p6",
+    tier: "single",
+    ascii: `    _________
+   /‖ ‖ ‖ ‖ ‖\\
+  | ‖ ‖ ⚡‖ ‖ |
+  |_‖_‖_‖_‖_‖_|
+  ==============`,
+    sessions: [{ title: "Stumberg Venture Competition", kind: "Capital" }],
+  },
   {
     // TODO(content): host, desc and tag below are placeholders — no brief was
     // given for 300 Main beyond the Creative Futures Brunch. There's also no

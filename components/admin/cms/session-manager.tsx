@@ -422,7 +422,7 @@ export function SessionManager({
 
             <div>
               <Label>Venue</Label>
-              {/* One of the five rooms, stored as a slug. Free text let "The
+              {/* One of the six rooms, stored as a slug. Free text let "The
                   Rand", "the rand" and "Geekdom 3rd floor" all coexist, so
                   sessions could not be grouped by venue or linked to a venue
                   page. Rows saved before this show an empty picker when their

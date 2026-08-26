@@ -322,6 +322,7 @@ export function WeekCalendarGrid({
             spare={hasSpareRows(cell.startMin, cell.endMin, HOUR_PX)}
             markMax={axisMarkCap(cell.startMin, cell.endMin, HOUR_PX)}
             showAction={false}
+            splitArt
             fill
           />
         ) : (

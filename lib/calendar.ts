@@ -23,7 +23,10 @@ export interface CalendarEvent {
 
 /** `2026-09-28T17:00:00-05:00` → `20260928T220000Z`, the stamp both formats want. */
 export function icsStamp(iso: string): string {
-  return new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  return new Date(iso)
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
 }
 
 /**
@@ -84,4 +87,42 @@ export function icsLine(key: string, value: string): string {
     rest = rest.slice(74);
   }
   return parts.join("\r\n");
+}
+
+/**
+ * The address line for one session, as a calendar should hold it.
+ *
+ * Four places built this string — the two `.ics` routes and the two
+ * add-to-calendar buttons on the activation page — and all four ended it with
+ * a hardcoded "Downtown San Antonio". That was true of every room the site had
+ * and stopped being true the moment Trinity joined, which is three miles north
+ * of downtown and the one venue on the list nobody walks to. A reminder that
+ * fires with the wrong district in it sends someone to the wrong side of the
+ * city at 4:30 on a Tuesday.
+ *
+ * So the district is gone and the street address is in, which is strictly
+ * better everywhere: all six rooms carry one, a geocoder resolves "321 W
+ * Commerce St" more precisely than a neighbourhood name, and there is nothing
+ * left in the line that can be true of one venue and false of another.
+ *
+ * The floor or hall stays where the organisers named one. This is the line a
+ * phone shows on the lock screen when the reminder fires, and "300 Main" alone
+ * is a twenty-five-storey building.
+ *
+ * Takes the shape rather than `ResolvedSession` so this file keeps its one
+ * useful property: no imports, and therefore usable from the email templates
+ * and the client menu alike.
+ */
+export function eventLocation(session: {
+  venue: { name: string; place?: { address?: string } };
+  venueDetail?: string;
+}): string {
+  return [
+    session.venue.name,
+    session.venueDetail,
+    session.venue.place?.address,
+    "San Antonio, TX",
+  ]
+    .filter(Boolean)
+    .join(", ");
 }

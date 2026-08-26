@@ -70,7 +70,7 @@ export function SpeakersHero({ hasLineup }: { hasLineup: boolean }) {
       blurb={
         hasLineup
           ? "The founders, builders, and operators taking the stage. Sessions, times and rooms go up as they're locked."
-          : "Five circuits, five rooms, five days. The names go up as they're confirmed."
+          : "Five circuits, six rooms, five days. The names go up as they're confirmed."
       }
       // Follows the lineup, like the blurb does.
       //

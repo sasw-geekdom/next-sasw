@@ -14,6 +14,7 @@ import {
   type SessionCard,
 } from "@/components/site/session-bento";
 import { ButtonLink } from "@/components/ui/button";
+import { eventLocation } from "@/lib/calendar";
 import { ARROW_MOTION } from "@/lib/motion";
 import { ActivationDetail } from "@/components/site/activation-detail";
 import {
@@ -302,12 +303,18 @@ function ActivationPage({
                   right edges on two stacked buttons read as a mistake, and the
                   tap targets get bigger for free. */}
               <div className="flex flex-wrap items-center gap-3">
+                {/* `register` where the activation is entered somewhere else
+                    — see the field in lib/schedule. Unset everywhere but
+                    Trinity, where it is the week's list as usual. */}
                 <ButtonLink
-                  href="/register"
+                  href={session.register?.href ?? "/register"}
                   size="lg"
                   className="w-full sm:w-auto"
+                  {...(session.register
+                    ? { target: "_blank", rel: "noreferrer" }
+                    : {})}
                 >
-                  Get on the list.
+                  {session.register?.label ?? "Get on the list."}
                 </ButtonLink>
                 {session.when && (
                   <AddToCalendar
@@ -315,12 +322,10 @@ function ActivationPage({
                     event={{
                       title: session.title,
                       details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
-                      // Same line the .ics route builds, floor included where
-                      // there is one — the two calendar paths for one event
-                      // shouldn't disagree about the address.
-                      location: session.venueDetail
-                        ? `${session.venue.name}, ${session.venueDetail}, Downtown San Antonio`
-                        : `${session.venue.name}, Downtown San Antonio`,
+                      // Same builder the .ics routes use — the two calendar
+                      // paths for one event must not disagree about where it
+                      // is, and neither may assume the district.
+                      location: eventLocation(session),
                       start: session.when.start,
                       end: session.when.end,
                     }}
@@ -584,21 +589,24 @@ function ActivationPage({
 
                     {/* Full width below sm — see the note on the banded row. */}
                     <div className="mt-8 flex flex-wrap items-center gap-3">
+                      {/* See the banded row above — same override, same
+                          reason. */}
                       <ButtonLink
-                        href="/register"
+                        href={session.register?.href ?? "/register"}
                         size="lg"
                         className="w-full sm:w-auto"
+                        {...(session.register
+                          ? { target: "_blank", rel: "noreferrer" }
+                          : {})}
                       >
-                        Get on the list.
+                        {session.register?.label ?? "Get on the list."}
                       </ButtonLink>
                       <AddToCalendar
                         icsHref={`/schedule/${session.page}/calendar`}
                         event={{
                           title: session.title,
                           details: `${session.blurb} Part of San Antonio Startup + Tech Week.`,
-                          location: session.venueDetail
-                            ? `${session.venue.name}, ${session.venueDetail}, Downtown San Antonio`
-                            : `${session.venue.name}, Downtown San Antonio`,
+                          location: eventLocation(session),
                           start: session.when.start,
                           end: session.when.end,
                         }}
@@ -653,7 +661,7 @@ function ActivationPage({
                   </>
                 ) : (
                   <p className="mt-8 font-mono text-[11px] uppercase tracking-widest text-white/55">
-                    Sept 28 – Oct 2 · Downtown San Antonio
+                    Sept 28 – Oct 2 · San Antonio
                   </p>
                 )}
               </div>
@@ -973,7 +981,7 @@ export default async function VenueSchedulePage({
               </div>
               <p className="mt-4 text-pretty text-white/60">{room.desc}</p>
               <p className="mt-auto pt-6 font-mono text-[11px] uppercase tracking-widest text-white/55">
-                Sept 28 – Oct 2 · Downtown San Antonio
+                Sept 28 – Oct 2 · San Antonio
               </p>
             </div>
           </div>
