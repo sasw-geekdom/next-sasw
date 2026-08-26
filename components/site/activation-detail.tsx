@@ -1,6 +1,9 @@
 import type { FeaturedSession } from "@/lib/schedule";
 import Image from "next/image";
 import { OrganizerLogo } from "@/components/site/organizer-logo";
+import type { CardSpeaker } from "@/components/site/speaker-card";
+import { SpeakerPeek } from "@/components/site/speaker-peek";
+import { SPEAKERS_ANNOUNCED } from "@/lib/speakers";
 import { cn } from "@/lib/utils";
 
 // An organiser's own account of their activation, from lib/schedule.
@@ -34,10 +37,21 @@ type Item = NonNullable<Detail["programme"]>[number];
 
 export function ActivationDetail({
   detail,
+  speakers = [],
 }: {
   detail: FeaturedSession["detail"];
+  /**
+   * The roster, so a name in the programme can show the face behind it.
+   *
+   * Keyed by slug rather than by name, for the same reason the link is: the
+   * brunch bills one of its two as "Nic McGinnis" and his page is "Nicholas
+   * McGinnis".
+   */
+  speakers?: CardSpeaker[];
 }) {
   if (!detail) return null;
+
+  const bySlug = new Map(speakers.map((s) => [s.slug, s]));
 
   return (
     <section className="border-t border-white/10 bg-black">
@@ -96,22 +110,22 @@ export function ActivationDetail({
             {/* The orgs behind it, in the pinned column under the lede — the
               same label-over-a-row the bands use, so an activation without a
               band credits its partners the same way one with a band does. */}
-          {detail.poweredBy && detail.poweredBy.length > 0 && (
-            <div className="mt-9">
-              <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
-                Powered by
-              </p>
-              <ul className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-6 sm:gap-x-10">
-                {detail.poweredBy.map((o) => (
-                  <li key={o.name}>
-                    <OrganizerLogo org={o} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+            {detail.poweredBy && detail.poweredBy.length > 0 && (
+              <div className="mt-9">
+                <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
+                  Powered by
+                </p>
+                <ul className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-6 sm:gap-x-10">
+                  {detail.poweredBy.map((o) => (
+                    <li key={o.name}>
+                      <OrganizerLogo org={o} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-          {detail.access && (
+            {detail.access && (
               <p className="mt-8 border-t border-white/10 pt-6 text-pretty text-sm text-white/55">
                 {detail.access}
               </p>
@@ -170,6 +184,7 @@ export function ActivationDetail({
                   key={item.time + item.title}
                   item={item}
                   last={i === detail.programme!.length - 1}
+                  bySlug={bySlug}
                 />
               ))}
             </ol>
@@ -212,7 +227,15 @@ function sentences(text: string): string[] {
   return parts.length > 0 ? parts : [text];
 }
 
-function Row({ item, last }: { item: Item; last: boolean }) {
+function Row({
+  item,
+  last,
+  bySlug,
+}: {
+  item: Item;
+  last: boolean;
+  bySlug: Map<string, CardSpeaker>;
+}) {
   const feature = item.feature === true;
 
   return (
@@ -279,8 +302,34 @@ function Row({ item, last }: { item: Item; last: boolean }) {
         <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
           {item.people.map((person) => (
             <li key={person.name} className="min-w-0">
+              {/* Linked where the person has a page, and only once the lineup
+                  is public — the speaker pages are behind that switch, and a
+                  link to a hidden one is worse than plain text. Everyone else
+                  in a programme stays exactly as they were: a caterer and a DJ
+                  are billed here and have no page to send anyone to. */}
+              {/* The face lives with the name, on hover and on focus. See
+                  SpeakerPeek — it owns the trigger because the spring and the
+                  cursor tilt both need state a stylesheet cannot hold.
+              
+                  Hidden by default, which is only defensible because it is not
+                  the information: the name and the role are on the page
+                  already, and this is recognition on top of them. A portrait a
+                  reader *needs* has no business behind an interaction — which
+                  is why the CMS-driven sessions on other pages show theirs
+                  inline and this does not copy them. The rest is a running
+                  order; a portrait beside every name turns a schedule into a
+                  cast list, and the compact name-and-role pair is what lets the
+                  morning read as a sequence. */}
               <p className="text-pretty font-medium text-white">
-                {person.name}
+                {SPEAKERS_ANNOUNCED && person.speaker ? (
+                  <SpeakerPeek
+                    name={person.name}
+                    slug={person.speaker}
+                    imageUrl={bySlug.get(person.speaker)?.imageUrl}
+                  />
+                ) : (
+                  person.name
+                )}
               </p>
               <p className="text-pretty font-mono text-[10px] uppercase tracking-widest text-white/45">
                 {person.role}

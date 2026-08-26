@@ -167,7 +167,24 @@ export interface FeaturedSession {
        * The draw, pulled out of the prose so it can be read rather than
        * scanned for. Names buried mid-paragraph are names nobody sees.
        */
-      people?: readonly { name: string; role: string }[];
+      people?: readonly {
+        name: string;
+        role: string;
+        /**
+         * Their `/speakers` slug, where they have a page.
+         *
+         * Written down rather than matched on `name`, and the brunch is the
+         * reason. It bills one of its two as "Nic McGinnis"; his page is
+         * "Nicholas McGinnis". A name match would have linked one of them and
+         * silently skipped the other, which is worse than linking neither —
+         * nothing would look broken. The billing stays as the organiser wrote
+         * it; people go by short forms, and the link is what resolves it.
+         *
+         * Slugs are safe to hardcode here: a speaker's is stable by design and
+         * `previousSlugs` keeps the old one redirecting after a rename.
+         */
+        speaker?: string;
+      }[];
       /**
        * Headline content rather than texture.
        *
@@ -228,6 +245,32 @@ export interface FeaturedSession {
      * then — and it keeps the intro column short enough to pin.
      */
     coda?: string;
+    /**
+     * Keep this programme even when CMS sessions point at the activation.
+     *
+     * The default is that CMS rows replace `detail` outright, on the reasoning
+     * that a row is strictly richer: it carries speakers, it links back from
+     * their pages, and an organiser can change it without a deploy. That holds
+     * right up until the prose is the fuller account.
+     *
+     * The Creative Futures Brunch is that case. Its programme is a four-hour
+     * morning in five acts — doors and espresso, two live conversations, a
+     * reveal, a closing set — with series names, running order and a narrative
+     * the organisers wrote. One CMS row was entered for the headline
+     * conversation and the whole morning vanished behind it: no Pulp Coffee,
+     * no Wake-Up, no second conversation, no Coffeehouse Set, on a page whose
+     * own blurb promises "two live conversations".
+     *
+     * Deleting the row is not the fix. It is what puts that conversation on
+     * Dirk Elmendorf's and Nicholas McGinnis's speaker pages, and those read
+     * sessions directly rather than through this page. So the row stays and
+     * does its job there; this says the activation page keeps its own account.
+     *
+     * Set it only where the prose genuinely is the fuller programme. An
+     * activation that gains a real CMS running order should lose this rather
+     * than carry two.
+     */
+    ownProgramme?: boolean;
     /** The line the morning closes on. */
     kicker?: string;
     /** How to get in, when that isn't simply "register". */
@@ -591,6 +634,9 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // site cannot refer to itself by a name it doesn't use anywhere else, so
     // those read "Startup + Tech Week" here.
     detail: {
+      // The morning below is the real running order; a CMS row for one of its
+      // conversations must not replace it. See `ownProgramme`.
+      ownProgramme: true,
       // Their closing line, promoted to lead the section, and cut from three
       // sentences to two.
       //
@@ -628,10 +674,12 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
             {
               name: "Dirk Elmendorf",
               role: "Co-founder, Rackspace · Product design · Engineering · Data + AI",
+              speaker: "dirk-elmendorf",
             },
             {
               name: "Nic McGinnis",
               role: "Family office advisor · Product design + Data + AI",
+              speaker: "nicholas-mcginnis",
             },
           ],
           body: "Will and Nate of The Fifth Degree podcast host a conversation at the intersection of AI, product design and engineering \u2014 and what it takes to build what comes next.",

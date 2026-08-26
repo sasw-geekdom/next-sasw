@@ -214,7 +214,12 @@ function ActivationPage({
    * list does not belong in a masthead.
    */
   const heroTalk =
-    !banded && !session.hero && sessions.length === 1 ? sessions[0] : null;
+    !banded &&
+    !session.hero &&
+    !session.detail?.ownProgramme &&
+    sessions.length === 1
+      ? sessions[0]
+      : null;
 
   /**
    * "Everything else at X" has to actually be true.
@@ -389,23 +394,42 @@ function ActivationPage({
                   fill
                   sizes="54vw"
                   // Neither `priority` nor `loading="eager"`, which is why Next
-                  // logs this as the LCP and asks for one on every build.
+                  // logs this as the LCP and asks for one on every build. The
+                  // warning is expected. It is not a bug and it is not new.
                   //
                   // Both defeat the `hidden lg:block` wrapper: a hidden image
                   // is only skipped because the default is lazy, so anything
-                  // that turns lazy off makes phones fetch a picture they never
-                  // render. Re-measured on this photograph — 390px phone and
-                  // 820px tablet request nothing at all as it stands; with
-                  // `loading="eager"` the phone pulls 30KB. (An earlier note
-                  // here claimed 217KB. That was wrong: `sizes="54vw"` means a
-                  // narrow viewport picks a narrow variant, so the waste is far
-                  // smaller than recorded — it just isn't zero.)
+                  // that turns lazy off makes narrow viewports fetch a picture
+                  // they never render.
                   //
-                  // So this is a live trade, not a closed one. 30KB of unused
-                  // mobile transfer per activation page buys a real desktop LCP
-                  // improvement, and if that's the call, `loading="eager"` is
-                  // the one to add — `priority` also emits a preload link and
-                  // costs more.
+                  // Measured on this photograph, per activation page:
+                  //
+                  //                          390px    820px    1440px
+                  //   as it stands            0 KB     0 KB    60.6 KB
+                  //   loading="eager"      17.9 KB  42.1 KB    60.6 KB
+                  //   eager + narrow sizes 17.9 KB  17.9 KB    60.6 KB
+                  //
+                  // Two corrections to what this comment used to say. The
+                  // phone figure was recorded as 30KB and is 17.9; and the
+                  // tablet was never costed at all, which mattered, because at
+                  // `sizes="54vw"` an 820px viewport pulls 42KB — more than
+                  // twice the phone and the worst number on the table.
+                  //
+                  // That last row is why the tablet number is not an argument
+                  // on its own: `sizes="(min-width: 1024px) 54vw, 1px"` drops
+                  // it to the phone's. It does not go lower, and 1px is not a
+                  // typo — Next serves a fixed ladder of widths, so anything
+                  // below the smallest configured one resolves to the same
+                  // 17.9KB variant. There is a floor, and eager loading pays
+                  // it on every device that will never draw the image.
+                  //
+                  // So this stays a live trade rather than a closed one. ~18KB
+                  // of unused transfer on every narrow viewport buys a real
+                  // desktop LCP improvement on a photograph that is decorative
+                  // and sits behind a scrim. If that call is ever taken,
+                  // `loading="eager"` plus the narrow `sizes` above is the
+                  // cheapest version of it — `priority` also emits a preload
+                  // link and costs more.
                   //
                   // The wider the screen, the more `cover` has to crop off the
                   // vertical — 470px of a 1200px frame on a 2560px monitor.
@@ -654,8 +678,14 @@ function ActivationPage({
       {/* One programme or the other, never both. CMS rows win when they exist:
           they carry speakers, they link back from the speaker pages, and an
           organiser can change them without a deploy. The prose version is what
-          an organiser sent over before any of that was entered. */}
-      {sessions.length > 0 ? (
+          an organiser sent over before any of that was entered.
+      
+          Unless the prose is the fuller account, which `ownProgramme` marks.
+          The brunch is a five-act morning in `detail` and a single row in the
+          CMS, and the default rule hid four of the five acts behind that row.
+          The row still exists and still feeds the speaker pages; it just does
+          not get to speak for the morning here. */}
+      {sessions.length > 0 && !session.detail?.ownProgramme ? (
         // Suppressed when the hero already carries it — see `heroTalk`. The
         // same talk in a masthead and again under a rule is the collision this
         // page has avoided everywhere else.
@@ -663,7 +693,7 @@ function ActivationPage({
           <ActivationSessions sessions={sessions} speakers={speakers} />
         )
       ) : (
-        <ActivationDetail detail={session.detail} />
+        <ActivationDetail detail={session.detail} speakers={speakers} />
       )}
 
       {/* Only while the slot is open, and only while nothing real has landed —
@@ -809,10 +839,14 @@ export default async function VenueSchedulePage({
     // fetched and request-cached for the speaker pages.
     const all = await safeList(listSessions());
     const mine = all.filter((s) => s.activation === schedule.session.page);
-    // The roster only where a session will actually use it. An activation
-    // running on its hardcoded `detail` renders no participants, so fetching
-    // speakers for it would be a Firestore read for a join nobody makes.
-    const speakers = mine.length > 0 ? await safeList(listSpeakers()) : [];
+    // The roster where anything on the page will use it: a CMS session's
+    // participants, or a hardcoded programme that names someone with a
+    // `speaker` slug. Neither means no join, and no reason to read Firestore.
+    const namesSpeakers = (schedule.session.detail?.programme ?? []).some((i) =>
+      (i.people ?? []).some((who) => who.speaker),
+    );
+    const speakers =
+      mine.length > 0 || namesSpeakers ? await safeList(listSpeakers()) : [];
     return (
       <ActivationPage
         session={schedule.session}
