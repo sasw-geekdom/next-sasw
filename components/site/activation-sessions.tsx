@@ -1,5 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Clock } from "lucide-react";
+import { LinkedInMark } from "@/components/site/linkedin-mark";
+import type { CardSpeaker } from "@/components/site/speaker-card";
 import type { SessionRow } from "@/lib/admin/cms-types";
 import { SPEAKERS_ANNOUNCED } from "@/lib/speakers";
 
@@ -22,8 +25,24 @@ const TIME = new Intl.DateTimeFormat("en-US", {
   minute: "2-digit",
 });
 
-export function ActivationSessions({ sessions }: { sessions: SessionRow[] }) {
+export function ActivationSessions({
+  sessions,
+  speakers = [],
+}: {
+  sessions: SessionRow[];
+  /**
+   * Everyone in the CMS, for the join below.
+   *
+   * A session's participants carry `{ speakerId, name, role }` and nothing
+   * else — no portrait, no LinkedIn, and crucially no slug. Passing the roster
+   * in is what lets a talk show the person giving it rather than their name in
+   * mono caps.
+   */
+  speakers?: CardSpeaker[];
+}) {
   if (sessions.length === 0) return null;
+
+  const byId = new Map(speakers.map((s) => [s.id, s]));
 
   return (
     <section className="border-t border-white/10 bg-black">
@@ -69,29 +88,109 @@ export function ActivationSessions({ sessions }: { sessions: SessionRow[] }) {
                       {s.track}
                     </span>
                   )}
-                  {/* Names only while the lineup is under wraps — the speaker
-                      pages they would link to are behind the same switch, and
-                      a link to a hidden page is worse than plain text. */}
-                  {s.participants.length > 0 && (
-                    <p className="font-mono text-[10px] uppercase tracking-widest text-white/55">
-                      {s.participants.map((p, i) => (
-                        <span key={p.speakerId}>
-                          {i > 0 && " · "}
-                          {SPEAKERS_ANNOUNCED ? (
-                            <Link
-                              href={`/speakers/${p.speakerId}`}
-                              className="transition-colors duration-200 hover:text-magenta"
-                            >
-                              {p.name}
-                            </Link>
-                          ) : (
-                            p.name
-                          )}
-                        </span>
-                      ))}
-                    </p>
-                  )}
                 </div>
+
+                {/* Who is giving it.
+                
+                    This was a line of mono caps — names and nothing else — on
+                    the one surface where a reader has just decided a talk
+                    sounds interesting and wants to know who is delivering it.
+                    A face, a role and a way to look someone up is the payoff
+                    for having a speaker CMS at all.
+                
+                    Names only while the lineup is under wraps: the speaker
+                    pages these link to are behind the same switch, and a link
+                    to a hidden page is worse than plain text. The portrait
+                    goes with them — an unannounced face is the announcement.
+                */}
+                {s.participants.length > 0 && (
+                  <ul className="mt-5 flex flex-wrap gap-x-8 gap-y-4">
+                    {s.participants.map((p) => {
+                      const who = byId.get(p.speakerId);
+                      return (
+                        <li
+                          key={p.speakerId}
+                          className="group/who relative flex items-center gap-3"
+                        >
+                          {SPEAKERS_ANNOUNCED && (
+                            <span className="relative size-11 shrink-0 overflow-hidden rounded-full ring-1 ring-white/15">
+                              {who?.imageUrl ? (
+                                <Image
+                                  src={who.imageUrl}
+                                  // Decorative: the name is right beside it.
+                                  alt=""
+                                  fill
+                                  sizes="44px"
+                                  // The same grayscale the wall and the cards
+                                  // use, so a portrait pulled in here belongs
+                                  // to the same set as the ones on /speakers
+                                  // rather than reading as a stray photo.
+                                  className="object-cover object-top grayscale"
+                                />
+                              ) : (
+                                <span
+                                  aria-hidden="true"
+                                  className="absolute inset-0 grid place-items-center bg-white/5 font-display text-base font-bold uppercase text-white/30"
+                                >
+                                  {p.name.charAt(0)}
+                                </span>
+                              )}
+                            </span>
+                          )}
+
+                          <span className="min-w-0">
+                            <span className="block text-pretty text-sm font-medium text-white">
+                              {/* Linked by slug. This used to interpolate
+                                  `speakerId`, which is the Firestore document
+                                  id — /speakers/[slug] is keyed by slug, so
+                                  every name on every activation page pointed
+                                  at a 404. Nothing surfaced it because the
+                                  only activation with a CMS session is this
+                                  one, and it got its session after the link
+                                  was written. */}
+                              {SPEAKERS_ANNOUNCED && who ? (
+                                <Link
+                                  href={`/speakers/${who.slug}`}
+                                  className="rounded-sm transition-colors duration-200 after:absolute after:inset-0 hover:text-magenta focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-magenta"
+                                >
+                                  {p.name}
+                                </Link>
+                              ) : (
+                                p.name
+                              )}
+                            </span>
+                            {(who?.title ||
+                              who?.company ||
+                              p.role === "moderator") && (
+                              <span className="mt-0.5 block truncate font-mono text-[10px] uppercase tracking-widest text-white/50">
+                                {p.role === "moderator"
+                                  ? "Moderator"
+                                  : [who?.title, who?.company]
+                                      .filter(Boolean)
+                                      .join(" · ")}
+                              </span>
+                            )}
+                          </span>
+
+                          {/* Above the name's stretched link so it stays its
+                              own destination, the same split SpeakerCard
+                              makes. */}
+                          {SPEAKERS_ANNOUNCED && who?.linkedin && (
+                            <a
+                              href={who.linkedin}
+                              target="_blank"
+                              rel="noreferrer"
+                              aria-label={`${p.name} on LinkedIn`}
+                              className="relative z-10 -m-1.5 p-1.5 text-white/45 transition-colors duration-200 hover:text-magenta focus-visible:text-magenta focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-magenta"
+                            >
+                              <LinkedInMark className="h-4 w-4" />
+                            </a>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
             </li>
           ))}

@@ -17,7 +17,12 @@ import { ButtonLink } from "@/components/ui/button";
 import { ARROW_MOTION } from "@/lib/motion";
 import { ActivationDetail } from "@/components/site/activation-detail";
 import { ActivationSessions } from "@/components/site/activation-sessions";
-import { listPartners, listSessions } from "@/lib/admin/cms-queries";
+import type { CardSpeaker } from "@/components/site/speaker-card";
+import {
+  listPartners,
+  listSessions,
+  listSpeakers,
+} from "@/lib/admin/cms-queries";
 import type { SessionRow } from "@/lib/admin/cms-types";
 import {
   resolveSchedule,
@@ -174,10 +179,13 @@ function heroTitleParts(session: ResolvedSession): [string] | [string, string] {
 function ActivationPage({
   session,
   sessions,
+  speakers,
 }: {
   session: ResolvedSession;
   /** CMS sessions linked to this activation, in start order. */
   sessions: SessionRow[];
+  /** Everyone in the CMS, so a session can show who is giving it. */
+  speakers: CardSpeaker[];
 }) {
   const isPysa = session.page === "pysanantonio";
   const isAccessGranted = session.page === "access-granted";
@@ -606,7 +614,7 @@ function ActivationPage({
           organiser can change them without a deploy. The prose version is what
           an organiser sent over before any of that was entered. */}
       {sessions.length > 0 ? (
-        <ActivationSessions sessions={sessions} />
+        <ActivationSessions sessions={sessions} speakers={speakers} />
       ) : (
         <ActivationDetail detail={session.detail} />
       )}
@@ -754,7 +762,17 @@ export default async function VenueSchedulePage({
     // fetched and request-cached for the speaker pages.
     const all = await safeList(listSessions());
     const mine = all.filter((s) => s.activation === schedule.session.page);
-    return <ActivationPage session={schedule.session} sessions={mine} />;
+    // The roster only where a session will actually use it. An activation
+    // running on its hardcoded `detail` renders no participants, so fetching
+    // speakers for it would be a Firestore read for a join nobody makes.
+    const speakers = mine.length > 0 ? await safeList(listSpeakers()) : [];
+    return (
+      <ActivationPage
+        session={schedule.session}
+        sessions={mine}
+        speakers={speakers}
+      />
+    );
   }
 
   // A room with one activation sends people to that activation instead of
