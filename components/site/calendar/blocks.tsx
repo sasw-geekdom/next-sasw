@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CalendarPlus, Check } from "lucide-react";
 import {
   BoltDrift,
+  CipherField,
   CircuitTrace,
   MascotBurst,
   PysaMascot,
@@ -841,6 +842,16 @@ export function Block({
           a thumbnail wedged behind the type. */}
       {spare && item.page === "pysanantonio" && <PysaMascot />}
 
+      {/* Access Granted's ciphertext, decrypted under the cursor. `spare` for
+          the same reason the three above it are: a one-hour block is 40px of
+          content box, and a 72px beam on it is not a spotlight, it is the
+          block lit up.
+
+          Hover-gated inside the component rather than here — it costs nothing
+          until a pointer arrives, and touch never sees it. StackBlock draws it
+          too, which is the one figure here that is not axis-only. */}
+      {spare && item.page === "access-granted" && <CipherField />}
+
       {/* The link is stretched over the whole block rather than wrapped
           around it: the select button lives inside, and a button inside an
           anchor is invalid markup that browsers resolve by dropping one of
@@ -1231,6 +1242,12 @@ export function StackBlock({
       {item.page === "startup-bash" && <BoltDrift />}
       {item.page === "the-model" && <MascotBurst />}
       {kind === "wordmark" && item.page === "open-circuit" && <CircuitTrace />}
+      {/* The beam reads here as well as on the axis, which is why this is the
+          one figure that is not axis-only. A row is 83px and wide, so the
+          spotlight crosses it rather than roaming a tall box — but it is still
+          a patch of ciphertext under the cursor, and the row has the width to
+          make that legible. */}
+      {item.page === "access-granted" && <CipherField />}
 
       {/* The mark, and the link over the whole row.
       

@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { motion, useMotionTemplate, useMotionValue } from "motion/react";
+import { ACCESS_GREEN } from "@/lib/access-granted";
 import { TOOL_MARKS } from "@/lib/tool-marks";
 import { cn } from "@/lib/utils";
 
@@ -649,5 +651,171 @@ export function CircuitTrace() {
         </g>
       </svg>
     </span>
+  );
+}
+
+// ─── Access Granted ─────────────────────────────────────────────────────────
+
+/** The ciphertext's own alphabet, the same one the band's field uses. */
+const CIPHER_ALPHABET =
+  "ABCDEF0123456789abcdef!<>/\\|=+*#$%&?^~ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+/** 7px mono at 1.35 leading — the metrics the fill count is derived from. */
+const CIPHER_SIZE = 7;
+const CIPHER_CHAR_W = CIPHER_SIZE * 0.6;
+const CIPHER_LINE_H = CIPHER_SIZE * 1.35;
+/** A ceiling, so a full-width agenda row cannot ask for a novel. */
+const CIPHER_MAX = 8000;
+
+/**
+ * How wide the beam is.
+ *
+ * The band on the activation's own page uses 190px against a field over a
+ * thousand pixels tall. These are much smaller surfaces — a five-hour week
+ * block is 143x294 and an agenda row is 83px high — and a 190px circle on
+ * either is not a spotlight, it is the whole box lit at once. 72 reads as a
+ * beam on both: about a quarter of the block's height, and a little under the
+ * full height of a row.
+ */
+const CIPHER_BEAM = 72;
+
+function scrambleCipher(n: number) {
+  let out = "";
+  for (let i = 0; i < n; i++)
+    out += CIPHER_ALPHABET.charAt(
+      Math.floor(Math.random() * CIPHER_ALPHABET.length),
+    );
+  return out;
+}
+
+/**
+ * Access Granted's ciphertext, decrypted under the cursor.
+ *
+ * The band on the activation's own page hides a field of characters behind the
+ * padlock and lets a pointer read a patch of it. This is that, at block scale,
+ * on the two surfaces where the activation has a box of its own: the week and
+ * day axis, and the agenda row. On an activation about lockpicking, a beam that
+ * decrypts a patch of noise is the subject rather than an effect borrowed from
+ * somewhere else.
+ *
+ * ─── What it costs ──────────────────────────────────────────────────────────
+ *
+ * Nothing until a pointer arrives. The characters are written straight to a ref
+ * on a ~11fps timer, never through React state, and the pointer only ever
+ * writes to motion values, which by design do not re-render. So neither this
+ * component nor the block around it re-renders while the beam moves — the same
+ * two tricks the band uses, for the same reason. The timer is created on enter
+ * and cleared on leave; a schedule sitting open costs one listener pair.
+ *
+ * ─── Why it listens on the block rather than on itself ──────────────────────
+ *
+ * It cannot hear its own pointer events. Every figure here renders before the
+ * block's link, whose stretched `::after` covers the whole box, and among
+ * positioned siblings the later one paints on top — which is exactly what makes
+ * the whole block clickable. So the pointer never reaches this layer, and the
+ * listeners go on the parent instead. The parent is also the box the beam is
+ * measured against, which is the same box this layer fills.
+ *
+ * Reduced motion keeps the beam and drops the scramble: the field is written
+ * once and holds still, so the spotlight becomes a plain reveal. Touch never
+ * sees it at all — `pointerenter` does fire on a tap, so the hover query is
+ * what keeps a phone from being given an effect it cannot dismiss.
+ */
+export function CipherField() {
+  const host = React.useRef<HTMLSpanElement>(null);
+  const text = React.useRef<HTMLSpanElement>(null);
+  const timer = React.useRef<number | null>(null);
+  const count = React.useRef(0);
+  const [lit, setLit] = React.useState(false);
+
+  // Parked off-box until a pointer arrives, so the first frame after `lit`
+  // turns on never flashes a beam at the top-left corner.
+  const x = useMotionValue(-9999);
+  const y = useMotionValue(-9999);
+  const mask = useMotionTemplate`radial-gradient(${CIPHER_BEAM}px circle at ${x}px ${y}px, #000 0%, rgba(0,0,0,0.65) 55%, transparent 78%)`;
+
+  React.useEffect(() => {
+    const el = host.current;
+    const block = el?.parentElement;
+    if (!el || !block) return;
+
+    if (!window.matchMedia("(hover: hover)").matches) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const fill = () => {
+      const box = el.getBoundingClientRect();
+      if (!text.current || !box.width) return;
+      count.current = Math.min(
+        CIPHER_MAX,
+        Math.ceil(
+          (box.width / CIPHER_CHAR_W) * (box.height / CIPHER_LINE_H) * 1.15,
+        ),
+      );
+      text.current.textContent = scrambleCipher(count.current);
+    };
+
+    const stop = () => {
+      if (timer.current !== null) {
+        clearInterval(timer.current);
+        timer.current = null;
+      }
+    };
+
+    const move = (e: PointerEvent) => {
+      const box = el.getBoundingClientRect();
+      x.set(e.clientX - box.left);
+      y.set(e.clientY - box.top);
+    };
+
+    const enter = (e: PointerEvent) => {
+      fill();
+      move(e);
+      setLit(true);
+      if (still || timer.current !== null) return;
+      timer.current = window.setInterval(() => {
+        if (text.current)
+          text.current.textContent = scrambleCipher(count.current);
+      }, 90);
+    };
+
+    const leave = () => {
+      setLit(false);
+      stop();
+      x.set(-9999);
+      y.set(-9999);
+    };
+
+    block.addEventListener("pointerenter", enter);
+    block.addEventListener("pointermove", move);
+    block.addEventListener("pointerleave", leave);
+    return () => {
+      block.removeEventListener("pointerenter", enter);
+      block.removeEventListener("pointermove", move);
+      block.removeEventListener("pointerleave", leave);
+      stop();
+    };
+  }, [x, y]);
+
+  return (
+    <motion.span
+      ref={host}
+      aria-hidden="true"
+      data-particles=""
+      className={cn(
+        "pointer-events-none absolute inset-0 overflow-hidden rounded transition-opacity duration-300",
+        lit ? "opacity-100" : "opacity-0",
+      )}
+      style={{ maskImage: mask, WebkitMaskImage: mask }}
+    >
+      <span
+        ref={text}
+        className="absolute inset-0 break-all p-1 font-mono text-[7px] leading-[1.35] font-medium whitespace-pre-wrap"
+        // Dimmer than the band's field, which has only artwork behind it.
+        // A block has type in it, and the beam crosses that type wherever the
+        // cursor goes — at the band's weight the ciphertext competed with
+        // "1 – 6 PM · THE RAND" instead of running under it.
+        style={{ color: `${ACCESS_GREEN}9c` }}
+      />
+    </motion.span>
   );
 }
