@@ -74,6 +74,34 @@ const HERO_MASK =
 const HERO_SCRIM =
   "linear-gradient(to right, #000 0%, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0.5) 54%, rgba(0,0,0,0.12) 63%, transparent 70%)";
 
+// And the vertical one, which stops the photograph ending in a hard edge at
+// the top of the section and blends its foot into the black below.
+//
+// This was `from-black via-transparent to-black` — black at 0%, clear at 50%,
+// black again at 100% — and the top half of that was far too much. These
+// photographs are of people on a stage, and a stage photograph puts heads near
+// the top of the frame: on the Mission Pitch hero the man holding the cheque
+// has the crown of his head about 10% down, where a fade that does not clear
+// until 50% is still better than half black. It read as the picture being cut
+// off rather than as a vignette.
+//
+// Reported from a MacBook Air and not visible on a large external monitor,
+// which sounds like a height bug and is not one. The gradient's stops are
+// percentages and the image is `object-cover` with no vertical crop at either
+// size, so the head sits at the same 8–10% of the frame on both — measured, on
+// a 1440x900 and a 2560x1440. What differs is scale: at 1376px of hero the
+// same proportional shadow falls across a much larger face and reads as
+// lighting, while at 836px it lands on a small head as a smudge. Both were
+// wrong; only one was obvious.
+//
+// So the top fade is short and the bottom is untouched. Clear by 18% frees the
+// heads in every hero on the site — measured against all five — and 6% of
+// section height is still enough of a band that the photograph does not butt
+// into the row above it. The bottom holds its black to 58% rather than 50%
+// because that half was never the problem and the copy sits on it.
+const HERO_VEIL =
+  "linear-gradient(to bottom, #000 0%, transparent 18%, transparent 58%, #000 100%)";
+
 export const revalidate = 300;
 export const dynamicParams = false;
 
@@ -452,7 +480,8 @@ function ActivationPage({
               />
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 hidden bg-linear-to-b from-black via-transparent to-black lg:block"
+                className="pointer-events-none absolute inset-0 hidden lg:block"
+                style={{ background: HERO_VEIL }}
               />
             </>
           )}

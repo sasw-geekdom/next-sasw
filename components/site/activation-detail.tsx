@@ -53,10 +53,101 @@ export function ActivationDetail({
 
   const bySlug = new Map(speakers.map((s) => [s.slug, s]));
 
+  /**
+   * Whether the second column has anything of its own to hold.
+   *
+   * The grid was written for an activation with a running order: a narrow
+   * pinned column of prose on the left, the programme scrolling past it on the
+   * right. Six activations have no running order and never did — a user group
+   * meets for an hour, and the hour is the whole of it — and on those the right
+   * track rendered as 848px of nothing beside a 384px column of text, over
+   * about 545px of height. It reads as a missing section rather than as space.
+   *
+   * So the prose moves into the track when the track is free. The heading stays
+   * pinned on the left where it was, which is what keeps these pages looking
+   * like the ones that do have a programme.
+   *
+   * Order is why the split falls where it does rather than at the lede. Below
+   * `lg` the grid is one column and the children stack in source order, so
+   * everything after the headline has to travel together: heading, then the
+   * narrative, then the credits and how to get in. Splitting at the lede and
+   * leaving `access` behind would read correctly on a desktop and put "Free,
+   * and seated through…" above the paragraph it qualifies on every phone.
+   */
+  const hasAside =
+    (detail.programme?.length ?? 0) > 0 || (detail.spotlight?.length ?? 0) > 0;
+
+  /**
+   * Everything under the headline: the standfirst, who is behind it, and how
+   * to get in. One fragment because the three always travel together — see
+   * `hasAside` for why they cannot be split.
+   */
+  const narrative = (
+    <>
+      {detail.lede.map((para, i) => (
+        <p
+          key={i}
+          className={cn(
+            // Standfirst, not display type. The opening paragraph still leads
+            // — white, a step up in size — but the headline above now carries
+            // the weight, so this doesn't have to.
+            i === 0
+              ? "text-pretty text-lg leading-relaxed text-white/90"
+              : "mt-4 text-pretty text-white/60",
+            // Only when it is following the headline inside the same column.
+            // In the free track it starts the column, and the grid's own gap
+            // is what separates the two.
+            i === 0 && hasAside && "mt-5",
+          )}
+        >
+          {para}
+        </p>
+      ))}
+
+      {/* The orgs behind it, under the lede — the same label-over-a-row the
+          bands use, so an activation without a band credits its partners the
+          same way one with a band does. */}
+      {detail.poweredBy && detail.poweredBy.length > 0 && (
+        <div className="mt-9">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
+            Powered by
+          </p>
+          <ul className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-6 sm:gap-x-10">
+            {detail.poweredBy.map((o) => (
+              <li key={o.name}>
+                <OrganizerLogo org={o} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* How to get in, at the foot of the narrative rather than at the foot of
+          the section. It answers "do I need to do anything?" while the reader
+          is still deciding, instead of after they have read a running order
+          they may have assumed was ticketed. */}
+      {detail.access && (
+        <p className="mt-8 border-t border-white/10 pt-6 text-pretty text-sm text-white/55">
+          {detail.access}
+        </p>
+      )}
+    </>
+  );
+
   return (
     <section className="border-t border-white/10 bg-black">
       <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] xl:gap-24">
+        <div
+          className={cn(
+            "grid gap-12 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] xl:gap-24",
+            // Stacked, the narrative is a second child where it used to be
+            // more of the first, and the grid's 48px row gap would open a hole
+            // under the headline that was 20px yesterday. This puts the phone
+            // back exactly where it was; the column gap at lg and up is
+            // untouched.
+            !hasAside && "max-lg:gap-y-5",
+          )}
+        >
           {/* `self-start` as well as `sticky`: a grid item stretches to the row
               by default, so its box is already the full height and there is
               nothing for `top` to pin against. `top-24` clears the 4rem header
@@ -79,58 +170,15 @@ export function ActivationDetail({
                 </span>
               ))}
             </h2>
-            {detail.lede.map((para, i) => (
-              <p
-                key={i}
-                className={
-                  // Standfirst, not display type. The opening paragraph still
-                  // leads — white, a step up in size — but the headline above
-                  // now carries the weight, so this doesn't have to.
-                  i === 0
-                    ? "mt-5 text-pretty text-lg leading-relaxed text-white/90"
-                    : "mt-4 text-pretty text-white/60"
-                }
-              >
-                {para}
-              </p>
-            ))}
-
-            {/* How to get in, at the foot of the intro rather than at the foot
-                of the section.
-    
-                Two reasons. It answers "do I need to do anything?" while the
-                reader is still deciding, instead of after they've read a
-                running order they may have assumed was ticketed. And it gives
-                this column something to end on — pinned, a short column leaves
-                the eye on empty space once the programme scrolls past it.
-    
-                Measured before moving: the column runs 384x393 and this adds
-                ~150px, which still clears the pin on a 1280x800 laptop with
-                150px to spare. */}
-            {/* The orgs behind it, in the pinned column under the lede — the
-              same label-over-a-row the bands use, so an activation without a
-              band credits its partners the same way one with a band does. */}
-            {detail.poweredBy && detail.poweredBy.length > 0 && (
-              <div className="mt-9">
-                <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
-                  Powered by
-                </p>
-                <ul className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-6 sm:gap-x-10">
-                  {detail.poweredBy.map((o) => (
-                    <li key={o.name}>
-                      <OrganizerLogo org={o} />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {detail.access && (
-              <p className="mt-8 border-t border-white/10 pt-6 text-pretty text-sm text-white/55">
-                {detail.access}
-              </p>
-            )}
+            {hasAside && narrative}
           </div>
+
+          {/* The narrative in the free track, at a measure rather than at the
+              track's full 848px — a line of body copy that wide is past the
+              point anyone reads comfortably, and the point was never to fill
+              pixels. `max-w-2xl` lands it around 672, which with the pinned
+              column and the gap leaves 80px of the grid over instead of 848. */}
+          {!hasAside && <div className="max-w-2xl">{narrative}</div>}
 
           {/* A room's guests, where there is no running order to list. See
               `detail.spotlight` — the two are alternatives, and a social gets

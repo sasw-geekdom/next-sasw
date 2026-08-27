@@ -545,20 +545,51 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       height: 1200,
       alt: "",
     },
-    // Confirmed: Monday 28 September, 5–7pm, and the only thing running at
-    // Texas Public Radio that evening.
+    // Moved an hour later. The organisers' Luma listing has it 6–8pm, against
+    // the 5–7 this held from the first brief, and that page is the one taking
+    // registrations so it is the one that decides. Still the only thing
+    // running at Texas Public Radio that evening.
     when: {
-      start: "2026-09-28T17:00:00-05:00",
-      end: "2026-09-28T19:00:00-05:00",
+      start: "2026-09-28T18:00:00-05:00",
+      end: "2026-09-28T20:00:00-05:00",
+    },
+    // Seats are held on MissionPitch's own page, not ours — see `register`.
+    // The second activation to need it after Trinity, and for a softer
+    // reason: this one is on our main stage and a badge plausibly does get
+    // you in, but the organisers are counting a room and the count happens
+    // there. Sending people to the week's list would leave them uncounted.
+    register: {
+      label: "Save a seat.",
+      href: "https://luma.com/lb8n7frf",
     },
     // Nonprofit leaders, not founders. missionpitch.org describes it as "an
     // accelerator for nonprofit leaders in the greater San Antonio area", run
-    // by Social Venture Partners with Geekdom, and what's awarded is
-    // unrestricted grant money — the 2025 cohort took $72,855, part of it
-    // raised from the room on the night. The old blurb said "founders" and
-    // "capital", which described a startup demo day this isn't.
+    // by Social Venture Partners with Geekdom. The old blurb said "founders"
+    // and "capital", which described a startup demo day this isn't.
+    //
+    // "Grants decided in the room" went with the 2026 listing. That was the
+    // 2025 shape, where the cohort took $72,855 and part of it was raised on
+    // the night; this year's copy asks the room to donate live rather than
+    // describing a decision, and the money is not the whole of what is being
+    // asked for either — "funding and support" is theirs, and the support is
+    // board seats and volunteers.
     blurb:
-      "San Antonio nonprofit leaders pitch funders from the main stage — grants decided in the room.",
+      "Five San Antonio nonprofits pitch from the main stage \u2014 and the room funds them on the night.",
+    detail: {
+      eyebrow: "The evening",
+      headline: "Five nonprofits pitch. The room funds them.",
+      lede: [
+        "MissionPitch is an accelerator for nonprofit leaders across greater San Antonio \u2014 Social Venture Partners San Antonio and Geekdom running the startup world\u2019s playbook for organisations that are not startups. This is the night it ends.",
+        "Five take the stage: ABODE Contemplative Care for the Dying, Bexar Branches Alliance, For Her, the San Antonio Book Festival and Black Outside, Inc. They pitch their work to the room, and the room donates live.",
+      ],
+      coda: "More than a pitch competition, in their own framing: a bridge. Unrestricted funding on one side, a room of people who can give time and expertise on the other, and a few weeks of coaching to make the ask land. Powered by the San Antonio Area Foundation, with Kronkosky and the H.E. Butt Foundation.",
+      // Their line, verbatim, and the sharpest thing on the page — it says
+      // what an organisation actually leaves with, which is not only money.
+      kicker:
+        "One pitch on our stage can be the catalyst that secures a new board member, a dedicated volunteer, or the funding needed to reach the next milestone.",
+      access:
+        "Free, and seated through MissionPitch\u2019s own registration rather than the week\u2019s \u2014 their page is the one holding the count.",
+    },
   },
   {
     slug: "latin-tech-pitch",
