@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { weekCalendar } from "@/lib/schedule";
+import { liveCalendarItems } from "@/lib/live-schedule";
 import { TRACK_NAMES } from "@/lib/tracks";
 import { WeekCalendarGrid } from "@/components/site/week-calendar-grid";
 import type { Option } from "@/components/site/calendar/controls";
@@ -15,8 +16,8 @@ import type { Option } from "@/components/site/calendar/controls";
 // The layout decisions — the derived axis, the two rails, lane assignment —
 // are documented in week-calendar-grid.tsx, next to the code that makes them.
 
-export function WeekCalendar() {
-  const { days, items, spans, axis } = weekCalendar();
+export async function WeekCalendar() {
+  const { days, items, spans, axis } = weekCalendar(await liveCalendarItems());
 
   // Only what the week actually contains. A chip for a circuit or a venue with
   // nothing behind it is a control whose only outcome is an empty grid, and

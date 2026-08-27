@@ -8,6 +8,7 @@ import { DayCalendarGrid } from "@/components/site/day-calendar-grid";
 import type { Option } from "@/components/site/calendar/controls";
 import { EVENT_DAYS } from "@/lib/event";
 import { dayCalendar } from "@/lib/schedule";
+import { liveCalendarItems } from "@/lib/live-schedule";
 import { TRACK_NAMES } from "@/lib/tracks";
 
 // One day of the week, at full resolution.
@@ -34,7 +35,7 @@ export async function generateMetadata({
   params: Promise<{ iso: string }>;
 }): Promise<Metadata> {
   const { iso } = await params;
-  const data = dayCalendar(iso);
+  const data = dayCalendar(iso, await liveCalendarItems());
   if (!data) return {};
 
   const rooms = data.venues.map((v) => v.name).join(", ");
@@ -60,7 +61,7 @@ export default async function ScheduleDayPage({
   params: Promise<{ iso: string }>;
 }) {
   const { iso } = await params;
-  const data = dayCalendar(iso);
+  const data = dayCalendar(iso, await liveCalendarItems());
   if (!data) notFound();
 
   const { day, venues, items, spans, axis, index } = data;

@@ -13,6 +13,7 @@ import {
   StackBlock,
   StackSpanBar,
   axisMarkCap,
+  fitsTimeRow,
   hasSpareRows,
   placeLanes,
 } from "@/components/site/calendar/blocks";
@@ -140,6 +141,10 @@ export function DayCalendarGrid({
             dense={item.lanes >= 2}
             lanes={item.lanes}
             spare={hasSpareRows(item.startMin, item.endMin, hourPx)}
+            showTime={fitsTimeRow(item.startMin, item.endMin, hourPx)}
+            // The day column is the full width of its room, so a name reads
+            // here where it would be four characters in a week lane.
+            showPeople
             markMax={axisMarkCap(item.startMin, item.endMin, hourPx)}
             fill
           />

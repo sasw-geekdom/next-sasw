@@ -90,6 +90,33 @@ export function placeLanes<T extends Interval>(items: T[]): Placed<T>[] {
  * by position, but at half an hour the position is too fine to read off the
  * gutter at a glance.
  */
+/**
+ * Whether a block is tall enough to print its own time under the title.
+ *
+ * The third tier, under `hasSpareRows`. A block gets its mark, then either the
+ * strand and the room (tall) or the time (short) — and under about an hour
+ * there is room for neither, so the time row was drawn and then clipped by the
+ * block's own `overflow-hidden`. Half a label sheared off mid-glyph reads as a
+ * rendering fault; a title alone reads as a title.
+ *
+ * 58 is the budget from `axisMarkCap` read the other way round: 20px of chrome,
+ * 16 for the title's line, 6 to separate it, 16 for the time. At the week's
+ * 60px hour that is a 58-minute session, so every activation in the curated
+ * week clears it and only the short CMS sessions do not.
+ *
+ * Nothing is lost by dropping it. The block is sitting on an hour axis at the
+ * position its own start and length put it — which is the argument the note on
+ * `timeLabel` already makes for leaving the time off the blocks that can say
+ * something better instead.
+ */
+export function fitsTimeRow(
+  startMin: number,
+  endMin: number,
+  hourPx: number,
+): boolean {
+  return ((endMin - startMin) / 60) * hourPx >= 58;
+}
+
 export function hasSpareRows(
   startMin: number,
   endMin: number,
@@ -611,6 +638,8 @@ export function Block({
   showVenue = true,
   lanes = 1,
   markMax,
+  showTime = true,
+  showPeople = false,
   splitArt = false,
   showAction = true,
 }: {
@@ -648,6 +677,23 @@ export function Block({
   lanes?: number;
   /** A mark ceiling from the block's own height — see `axisMarkCap`. */
   markMax?: number;
+  /**
+   * Whether there is room under the title for the time — see `fitsTimeRow`.
+   *
+   * Only the axis passes it. The rail and the stack size to their content, so
+   * nothing there can clip and the row always fits.
+   */
+  showTime?: boolean;
+  /**
+   * Whether to name the speaker under the title.
+   *
+   * The day view passes it and the week does not, which is a measurement
+   * rather than a preference. A week lane on a Tuesday running four venues is
+   * 31–55px of text: "Hastimal Jangid" comes out "Hast…" there, no better than
+   * the title it would have replaced. A day column is the full width of its
+   * room and has the line to spare.
+   */
+  showPeople?: boolean;
   /**
    * Whether this block may draw an activation's `blockArt` apart from its
    * title. See `splitMark` below.
@@ -710,6 +756,10 @@ export function Block({
    * a week lane draws the artwork far larger than it was ever measured at.
    */
   const splitMark = spare && splitArt && !!brand?.art;
+
+  // Named only where the surface asked for it and the block has a line spare.
+  // `spare` blocks always do; a short one has exactly one, which this takes.
+  const people = showPeople && (spare || showTime) ? item.people : undefined;
 
   /**
    * College Night takes two lines where it stands — see the note in
@@ -929,6 +979,19 @@ export function Block({
         </div>
       )}
 
+      {/* Who is on. Only CMS sessions have it — see `people` on CalendarItem.
+
+          It outranks the time on a block with one line to give, and that is
+          the whole reason the time row below tests for it. A block on an hour
+          axis has already stated when it runs by where it sits and how far it
+          reaches; the speaker is the one fact the geometry cannot supply. On a
+          taller block both fit and both are drawn. */}
+      {people && (
+        <p className="mt-1.5 shrink-0 truncate text-[11px] leading-tight text-white/70">
+          {people}
+        </p>
+      )}
+
       {/* The time, only where the block is too short to say anything else.
           Everywhere else the axis has already stated it by position, and the
           rows below carry the strand and the room instead.
@@ -943,7 +1006,7 @@ export function Block({
           `shrink-0` so this can never be the thing that gives. If the budget
           is ever wrong again the mark clips — visible, and obviously a bug —
           rather than the text compressing into itself. */}
-      {!spare && (
+      {!spare && showTime && !people && (
         <p className="mt-1.5 shrink-0 truncate font-mono text-[9px] uppercase tracking-widest text-white/60">
           {item.timeLabel}
           {showVenue && (
@@ -952,7 +1015,11 @@ export function Block({
         </p>
       )}
 
-      {showCircuit && (
+      {/* `item.circuit` as well as the height test: a track is optional on a
+          CMS session, and an empty strand drew an empty line with its own
+          padding — a gap under the block that looked like a layout fault
+          rather than an absent fact. */}
+      {showCircuit && item.circuit && (
         // Wraps rather than truncates. A block that qualifies for this line
         // has height to spare by definition, and in a half-width lane the
         // longest circuit clipped to "AI & APPLIED INNOVATI…" — a truncation
@@ -1290,6 +1357,16 @@ export function StackBlock({
         ) : (
           <RowTitle head={titleHead} tail={titleTail} />
         )}
+
+        {/* Who is on, under the title. A row is 768px wide at 1440 and the
+            mark rarely fills half of it, so this costs the layout nothing and
+            answers the question a session row otherwise leaves open. Only CMS
+            sessions carry it — see `people` on CalendarItem. */}
+        {item.people && (
+          <p className="mt-1.5 truncate text-[11px] leading-tight text-white/70">
+            {item.people}
+          </p>
+        )}
       </div>
 
       {/* When, where, which circuit — a column of facts, right-aligned so they
@@ -1308,7 +1385,10 @@ export function StackBlock({
       <div className="relative flex w-24 shrink-0 flex-col items-end gap-0.5 text-right font-mono text-[9px] uppercase leading-tight tracking-widest lg:w-32 lg:text-[10px]">
         <span className="text-white/70">{item.timeLabel}</span>
         <span className="text-white/50">{item.venueShort}</span>
-        <span className="text-balance text-magenta">{item.circuit}</span>
+        {/* Omitted rather than empty — see the note in Block. */}
+        {item.circuit && (
+          <span className="text-balance text-magenta">{item.circuit}</span>
+        )}
       </div>
 
       {/* The slot is always here, empty or not. A span has nothing to export,

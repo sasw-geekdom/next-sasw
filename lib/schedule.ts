@@ -1,5 +1,12 @@
 import { EVENT_DAYS } from "@/lib/event";
-import { ASSET, ROOMS, type Room, type RoomTier } from "@/lib/locations";
+import {
+  ASSET,
+  ROOMS,
+  roomSlugFromLegacy,
+  type Room,
+  type RoomTier,
+} from "@/lib/locations";
+import type { SessionRow } from "@/lib/admin/cms-types";
 import { ACCESS_GREEN } from "@/lib/access-granted";
 import { PYSA, PYSA_BLUE } from "@/lib/pysa";
 import { MODEL_INK, MODEL_LAVENDER } from "@/lib/the-model";
@@ -2007,6 +2014,21 @@ function minutesInTz(iso: string): number {
  * heading with room for it. A block in a five-across grid does not have that
  * room, so a redundant `:00` and a repeated meridiem are both dropped.
  */
+/**
+ * One time, with its meridiem — for a session that has a start and no end.
+ *
+ * `compactRange` cannot answer this: it needs both ends to decide whether the
+ * first one carries an "AM"/"PM" of its own. A block with no end has to state
+ * the fact it actually holds and stop, rather than print a finish nobody
+ * entered.
+ */
+export function clockLabel(min: number): string {
+  const h24 = Math.floor(min / 60);
+  const m = min % 60;
+  const h = h24 % 12 === 0 ? 12 : h24 % 12;
+  return `${h}${m ? `:${String(m).padStart(2, "0")}` : ""} ${h24 < 12 ? "AM" : "PM"}`;
+}
+
 export function compactRange(startMin: number, endMin: number): string {
   const clock = (min: number, meridiem: boolean) => {
     const h24 = Math.floor(min / 60);
@@ -2169,6 +2191,19 @@ export interface CalendarItem {
    */
   venueTier: RoomTier;
   circuit: string;
+  /**
+   * Who is on, where the block knows.
+   *
+   * Only CMS sessions carry it: a hardcoded activation is a room's whole
+   * afternoon and the people inside it are a running order, not a byline. A
+   * session is one talk, and the speaker is most of what a reader wants from
+   * it — so it rides on the item rather than being fetched again per surface.
+   *
+   * Pre-joined, like `timeLabel`, because the list separator is a formatting
+   * decision and the client has no more business making it than it has
+   * re-deriving a timezone.
+   */
+  people?: string;
   /** The activation's own brand, where it has one. */
   brand?: CalendarBrand;
   /** Whether a calendar file can be built for it — drives the export toggle. */
@@ -2230,12 +2265,111 @@ function sameMonth(a: string, b: string): boolean {
   return a.split(" ")[0] === b.split(" ")[0];
 }
 
-export function weekCalendar(): WeekCalendar {
+/**
+ * How long a block runs when nobody said when it ends.
+ *
+ * `endsAt` is optional in the session form, and an axis block has to have a
+ * height — there is no way to draw "starts at one and runs for a while". An
+ * hour is the least surprising guess and it is only ever a *placement*: the
+ * block's own label prints the start alone, so the grid never states a finish
+ * that nobody entered.
+ */
+const ASSUMED_MINUTES = 60;
+
+/**
+ * CMS sessions that stand on their own, as blocks the calendar can draw.
+ *
+ * ─── Why only the ones with no activation ───────────────────────────────────
+ *
+ * A session that names an activation is already on the grid — inside it. The
+ * GDG talk runs 2–3pm at The Rand and so does the Google Developer Groups
+ * activation it belongs to; the AWS talk and its user group are the same hour
+ * in the same room. Drawing both would put the same hour on the calendar twice,
+ * once as the host and once as its contents, and a reader would count two
+ * things happening where there is one. Those rows already render, in the
+ * activation's own running order, which is where a talk inside a takeover
+ * belongs.
+ *
+ * So this is the other half of that rule rather than a filter for tidiness:
+ * `activation: null` is the session form's way of saying "this is its own
+ * thing in the week", and until now nothing on the site drew it.
+ *
+ * ─── What a CMS row cannot give the grid ────────────────────────────────────
+ *
+ * `page` is null, so the block renders without a link — `Block` has always
+ * supported that, because the type has always allowed it. No page also means
+ * no `.ics` route to point at, so `exportable` is false and the block draws no
+ * add-to-calendar control.
+ *
+ * `brand` is undefined, so it draws its title in type rather than a lockup.
+ * That is the same path every activation without a logo file already takes.
+ *
+ * `track` is optional in the form, and an empty circuit prints nothing rather
+ * than an empty line — see the note in `Block`.
+ *
+ * Pure, and takes its rows as an argument, so this file stays importable from
+ * the client components that read `CalendarItem` off it. The Firestore read
+ * lives in lib/live-schedule.
+ */
+export function standaloneItems(rows: SessionRow[]): CalendarItem[] {
+  return rows.flatMap((row) => {
+    if (row.activation) return [];
+
+    // Rows saved before the venue picker hold free text; `roomSlugFromLegacy`
+    // is the same best-guess the admin table uses. A row whose venue still
+    // cannot be resolved is dropped, because a block with no lane has nowhere
+    // to be drawn.
+    const venue =
+      ROOMS.find((r) => r.slug === row.location) ??
+      ROOMS.find((r) => r.slug === roomSlugFromLegacy(row.location));
+    if (!venue) return [];
+
+    const startIso = new Date(row.startsAt).toISOString();
+    const startMin = minutesInTz(startIso);
+    const endMin = row.endsAt
+      ? minutesInTz(new Date(row.endsAt).toISOString())
+      : startMin + ASSUMED_MINUTES;
+
+    return [
+      {
+        // The Firestore id. Unique by construction, stable across edits, and
+        // it never collides with an activation slug.
+        slug: row.id,
+        title: row.title,
+        longTitle: row.title,
+        page: null,
+        dayIso: dayKey(startIso),
+        startMin,
+        endMin,
+        timeLabel: row.endsAt
+          ? compactRange(startMin, endMin)
+          : clockLabel(startMin),
+        morning: endMin <= MORNING_CUTOFF,
+        venueSlug: venue.slug,
+        venueName: venue.name,
+        venueShort: venue.shortName ?? venue.name,
+        venueTier: venue.tier,
+        circuit: row.track ?? "",
+        people:
+          row.participants
+            .map((who) => who.name)
+            .filter(Boolean)
+            .join(", ") || undefined,
+        exportable: false,
+      },
+    ];
+  });
+}
+
+export function weekCalendar(extra: CalendarItem[] = []): WeekCalendar {
   const resolved = resolveSessions(allSessions());
 
   const items: CalendarItem[] = resolved
     .filter((s) => s.when)
-    .map((s) => {
+    // Annotated, because `concat` below needs the element type to be
+    // CalendarItem exactly. Inferred, the object literal comes out without the
+    // optional `brand` and the two arrays stop being the same shape.
+    .map((s): CalendarItem => {
       const startMin = minutesInTz(s.when!.start);
       const endMin = minutesInTz(s.when!.end);
       return {
@@ -2260,6 +2394,10 @@ export function weekCalendar(): WeekCalendar {
         exportable: !!s.page,
       };
     })
+    // The CMS's own sessions, alongside the curated week. Concatenated before
+    // the sort rather than after, so a standalone session takes its lane by
+    // start time like everything else instead of being stacked on the end.
+    .concat(extra)
     // Ordered by start, then by the canonical room order, so lane assignment
     // downstream is stable: without the tiebreak two activations starting at
     // the same minute could swap columns between renders.
@@ -2360,12 +2498,17 @@ export interface DayCalendar {
  *    that Thursday has a morning and an evening and nothing between them.
  *  - The axis is derived from this day alone, so a quiet day draws short.
  */
-export function dayCalendar(iso: string): DayCalendar | null {
+export function dayCalendar(
+  iso: string,
+  extra: CalendarItem[] = [],
+): DayCalendar | null {
   const index = EVENT_DAYS.findIndex((d) => d.iso === iso);
   if (index === -1) return null;
   const meta = EVENT_DAYS[index];
 
-  const all = weekCalendar();
+  // The day view is a filter over the week, so a standalone session reaches it
+  // by the same route and lands in its room's lane with no extra wiring.
+  const all = weekCalendar(extra);
   const items = all.items.filter((i) => i.dayIso === iso);
   const spans = all.spans.filter(
     (s) => index >= s.fromIndex && index <= s.toIndex,

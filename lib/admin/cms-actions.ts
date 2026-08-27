@@ -55,6 +55,12 @@ function revalidateActivationPages() {
   revalidatePath("/schedule");
   revalidatePath("/schedule/[slug]", "page");
   revalidatePath("/(site)/schedule/[slug]", "page");
+  // The day view as well, which this used to miss. It reads the same calendar
+  // as /schedule, so a session write moves it too — and now that a standalone
+  // session draws its own block, the day it lands on is the page most likely
+  // to be looked at straight after the edit.
+  revalidatePath("/schedule/day/[iso]", "page");
+  revalidatePath("/(site)/schedule/day/[iso]", "page");
 }
 
 function revalidateSpeakerPages() {
