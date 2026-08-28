@@ -3,7 +3,6 @@ import { ButtonLink } from "@/components/ui/button";
 import { SpeakerWall } from "@/components/site/speaker-wall";
 import { SpeakersHero } from "@/components/site/speakers-hero";
 import { loadLineup, SPEAKERS_ANNOUNCED } from "@/lib/speakers";
-import { activationOptions } from "@/lib/schedule";
 import { VENUE_OPTIONS } from "@/lib/locations";
 
 // Speakers and sessions both come from the CMS; admin saves bust this path
@@ -94,10 +93,6 @@ export default async function SpeakersPage() {
                   rather than whatever a CMS row happens to hold. */}
               <SpeakerWall
                 speakers={lineup}
-                activations={activationOptions().map((a) => ({
-                  value: a.slug,
-                  label: a.title,
-                }))}
                 venues={VENUE_OPTIONS.map((v) => ({
                   value: v.slug,
                   label: v.name,

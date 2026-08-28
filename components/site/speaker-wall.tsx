@@ -5,13 +5,12 @@ import { motion } from "motion/react";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { SpeakerCard } from "@/components/site/speaker-card";
 import { TRACK_NAMES, type TrackName } from "@/lib/tracks";
-import { cn } from "@/lib/utils";
 import type { LineupSpeaker } from "@/lib/admin/cms-types";
+import { Filters, type Option } from "@/components/site/calendar/controls";
 
-// The full lineup, filtered three ways: by circuit, by activation, and by
-// venue.
+// The full lineup, filtered two ways: by circuit and by venue.
 //
-// None of the three is a field on a speaker. All of them fall out of the
+// Neither is a field on a speaker. Both fall out of the
 // sessions a speaker is on — a session already carries a track, an activation
 // and a venue, plus a participant list — so the taxonomy can't drift from the
 // schedule. Move a session to another room in the CMS and every speaker on it
@@ -26,25 +25,16 @@ import type { LineupSpeaker } from "@/lib/admin/cms-types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-interface Option {
-  value: string;
-  label: string;
-}
-
 export function SpeakerWall({
   speakers,
-  activations = [],
   venues = [],
 }: {
   speakers: LineupSpeaker[];
-  /** Slug → title, for every activation on the schedule. */
-  activations?: Option[];
   /** Slug → name, for every venue. */
   venues?: Option[];
 }) {
   const reduce = useReducedMotion();
   const [circuit, setCircuit] = React.useState<string | null>(null);
-  const [activation, setActivation] = React.useState<string | null>(null);
   const [venue, setVenue] = React.useState<string | null>(null);
 
   // Only what the lineup actually contains, ordered off the site's own lists.
@@ -58,14 +48,6 @@ export function SpeakerWall({
     [speakers],
   );
 
-  const activationOptions = React.useMemo(
-    () =>
-      activations.filter((o) =>
-        speakers.some((s) => s.activations.includes(o.value)),
-      ),
-    [activations, speakers],
-  );
-
   const venueOptions = React.useMemo(
     () =>
       venues.filter((o) => speakers.some((s) => s.venues.includes(o.value))),
@@ -76,55 +58,49 @@ export function SpeakerWall({
     () =>
       speakers.filter(
         (s) =>
-          // Three filters combine as AND. Someone narrowing to a circuit and
+          // Both filters combine as AND. Someone narrowing to a circuit and
           // then a venue means "this circuit, in this room" — the reading that
           // matches how the schedule is laid out.
           (circuit === null || s.circuits.includes(circuit as TrackName)) &&
-          (activation === null || s.activations.includes(activation)) &&
           (venue === null || s.venues.includes(venue)),
       ),
-    [speakers, circuit, activation, venue],
+    [speakers, circuit, venue],
   );
 
-  const rows = [
-    {
-      legend: "Circuit",
-      options: circuitOptions,
-      value: circuit,
-      onChange: setCircuit,
-    },
-    {
-      legend: "Event",
-      options: activationOptions,
-      value: activation,
-      onChange: setActivation,
-    },
-    {
-      legend: "Venue",
-      options: venueOptions,
-      value: venue,
-      onChange: setVenue,
-    },
-    // A row with one option filters nothing — everything already matches it.
-  ].filter((r) => r.options.length > 1);
+  // Anything worth offering. A dimension with one option filters nothing —
+  // everything already matches it — and with neither, the whole block goes.
+  const hasFilters = circuitOptions.length > 1 || venueOptions.length > 1;
 
-  const filtering = circuit !== null || activation !== null || venue !== null;
+  const filtering = circuit !== null || venue !== null;
 
   const clear = () => {
     setCircuit(null);
-    setActivation(null);
     setVenue(null);
   };
 
   return (
     <>
-      {rows.length > 0 && (
-        <div className="mt-12 border-t border-white/10 pt-8">
-          <div className="flex flex-col gap-3">
-            {rows.map((row) => (
-              <FilterRow key={row.legend} {...row} />
-            ))}
-          </div>
+      {/* Close to the copy it belongs to. This carried `mt-12 border-t pt-8`,
+          which put 81px and a rule between "More land as they're locked." and
+          the control that acts on it — the rule floating in the middle of that
+          gap, reading as a section break rather than as a seam. The schedule
+          sits its own controls 16px under its intro with no rule at all, and
+          that is the pattern being matched. */}
+      {hasFilters && (
+        <div className="mt-8">
+          {/* The schedule's own control, not a copy of it. `Filters` owns the
+              switch this page was missing: selects below lg, where ten chips
+              cost four lines of a phone, and chips from lg, where there is
+              width to show the vocabulary. Matching the chip styling alone
+              left the two pages apart at exactly the size it mattered. */}
+          <Filters
+            circuits={circuitOptions}
+            venues={venueOptions}
+            circuit={circuit}
+            venue={venue}
+            onCircuit={setCircuit}
+            onVenue={setVenue}
+          />
 
           {/* Only once something is on. With three rows, clearing one at a
               time is four clicks; this is one. It also states the count, which
@@ -133,7 +109,7 @@ export function SpeakerWall({
             <p className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
               <span className="font-mono text-[11px] uppercase tracking-widest text-white/55">
                 {visible.length === 0
-                  ? "Nobody matches all three"
+                  ? "Nobody matches both"
                   : `Showing ${visible.length} of ${speakers.length}`}
               </span>
               <button
@@ -170,71 +146,5 @@ export function SpeakerWall({
         ))}
       </div>
     </>
-  );
-}
-
-function FilterRow({
-  legend,
-  options,
-  value,
-  onChange,
-}: {
-  legend: string;
-  options: Option[];
-  value: string | null;
-  onChange: (next: string | null) => void;
-}) {
-  return (
-    <fieldset className="flex flex-wrap items-center gap-2">
-      <legend className="sr-only">
-        Filter speakers by {legend.toLowerCase()}
-      </legend>
-      <span
-        aria-hidden="true"
-        className="mr-1 w-14 shrink-0 font-mono text-[10px] uppercase tracking-widest text-white/55"
-      >
-        {legend}
-      </span>
-      {options.map((o) => (
-        <FilterChip
-          key={o.value}
-          active={value === o.value}
-          onClick={() => onChange(value === o.value ? null : o.value)}
-        >
-          {o.label}
-        </FilterChip>
-      ))}
-    </fieldset>
-  );
-}
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        // Charge, not hue — the selected chip is the one at full current.
-        "rounded-full border px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2 focus-visible:ring-offset-black",
-        active
-          ? "border-magenta bg-magenta text-black"
-          : // border-white/40, not the /15 this carried before: WCAG 1.4.11
-            // wants 3:1 for a boundary that identifies a control, and /15 on
-            // black measures nowhere near it. Same value the week strip's
-            // chips landed on for the same reason.
-            "border-white/40 text-white/70 hover:border-magenta/60 hover:text-white",
-      )}
-    >
-      {children}
-    </button>
   );
 }
