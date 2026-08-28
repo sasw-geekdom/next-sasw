@@ -24,9 +24,19 @@ export function SiteFooter() {
               alt="San Antonio Startup + Tech Week"
               className="h-28 w-auto"
             />
-            <p className="mt-5 max-w-xs text-sm text-white/60">
-              Five circuits, six rooms, one current — Sept 28 – Oct 2, San
-              Antonio.
+            {/* One sentence: what the week is, when and where, and who runs
+              it. The credit used to sit in a second, quieter paragraph
+              underneath, which read as an afterthought bolted on rather than
+              part of the same statement — the em dash carries the when and
+              where, and the comma hands off to the who.
+
+              The site names a host for every room and shows a partner wall,
+              and until this line said nowhere at all who convenes the thing
+              those rooms are part of. A footer is exactly the place for it. */}
+            <p className="mt-5 max-w-sm text-sm text-white/60">
+              Five circuits, six rooms, one current — Sept 28 – Oct 2 in San
+              Antonio, curated by Geekdom and Launch SA with anchor venues and
+              organisations across the city.
             </p>
           </div>
 

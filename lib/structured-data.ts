@@ -18,11 +18,24 @@ import type { ResolvedSession } from "@/lib/schedule";
 /** Stable @id for the week, so activations can point at it as their parent. */
 const WEEK_ID = `${SITE_URL}/#event`;
 
-const ORGANIZER = {
-  "@type": "Organization",
-  name: "San Antonio Startup + Tech Week",
-  url: SITE_URL,
-} as const;
+/**
+ * Who convenes the week.
+ *
+ * This used to be the event naming itself as its own organiser, which is
+ * circular and tells a crawler nothing. The week is curated by Geekdom and
+ * Launch SA — a fact the site states nowhere else, and the one an `organizer`
+ * field exists to carry.
+ *
+ * An array because there are genuinely two of them and schema.org takes a list
+ * here. Activations fall back to this when no partner runs them, which stays
+ * true: an activation the week puts on is one these two put on.
+ *
+ * "Launch SA", spaced, which is how the rest of the site writes it.
+ */
+const ORGANIZER = [
+  { "@type": "Organization", name: "Geekdom", url: "https://geekdom.com" },
+  { "@type": "Organization", name: "Launch SA", url: "https://launchsa.org" },
+] as const;
 
 /**
  * Free to attend, which is a fact worth stating in the markup — Google shows

@@ -36,15 +36,42 @@ export function Hero() {
           </span>
         </>
       }
-      // Concrete nouns before the metaphor closes. "Five days, five circuits,
-      // one current" is a cadence, not a description — a first-time reader had
-      // no way to tell talks from pitch stages from parties. Every noun here is
+      // Concrete nouns, then who they are for. Every noun in the first half is
       // backed by something already programmed: State of Innovation (keynote),
       // Mission and Latin Tech Pitch (pitch stages), PySanAntonio II
       // (workshops), the Bash and the Brunch (nights after). No count yet —
-      // nine activations are confirmed against a week that isn't fully
-      // programmed, and /sessions is the surface that says so.
-      blurb="San Antonio Startup + Tech Week. Keynotes, pitch stages, workshops, and the nights after — five days, five circuits, one current."
+      // the week isn't fully programmed, and /schedule is the surface that
+      // says so.
+      //
+      // The second half is the organisers' own range line, verbatim, and it
+      // closes the gap the first half left: a reader could tell talks from
+      // pitch stages and still not know whether the week was pitched above
+      // them. "Capital" as a circuit name does not answer that; "pre-seed to
+      // Series A" does.
+      //
+      // It sat under the circuit chips first, which read as a stranded
+      // caption — small, grey, between the chips and the button, in the one
+      // place a reader skips. In the blurb it is in the paragraph they
+      // actually read, and the hero goes from what happens to who it is for
+      // without a second block to land in.
+      //
+      // One sentence, not two lists. Dropped in whole it read as two
+      // catchphrases pasted together: four nouns stopping on a period, then
+      // three ranges stopping on three more, with nothing joining them. The
+      // "for everyone from" is the join — it turns the ranges from a second
+      // slogan into the thing the first half is being offered to, which is
+      // what they were always saying and never grammatically doing.
+      //
+      // "Five days" came off the front. The eyebrow directly above this reads
+      // "Year 11 · Sept 28 – Oct 2, 2026", so the count was being stated twice
+      // within thirty pixels, and the sentence needed the room more.
+      //
+      // What it cost: "— five days, five circuits, one current", which used to
+      // close this line. The cadence is not lost, only moved off this
+      // paragraph — "one current" is the h1 directly above, the five circuits
+      // are the list directly below, the five days are the eyebrow, and the
+      // full line still runs in the footer, the metadata and the OG cards.
+      blurb="San Antonio Startup + Tech Week — keynotes, pitch stages, workshops and the nights after, for everyone from pre-seed to Series A, solopreneur to scale-up, local to regional."
       cta={{
         href: "/register",
         label: "Get on the list.",
