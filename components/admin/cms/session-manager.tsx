@@ -14,6 +14,7 @@ import { formatDateTime } from "@/lib/format";
 import { EVENT_DAYS } from "@/lib/event";
 import { VENUE_OPTIONS, roomSlugFromLegacy, venueLabel } from "@/lib/locations";
 import { activationOptions } from "@/lib/schedule";
+import { slugify } from "@/lib/slug";
 import { TRACKS } from "@/lib/tracks";
 import type {
   SessionRow,
@@ -139,6 +140,10 @@ export function SessionManager({
   const [participants, setParticipants] = React.useState<SessionParticipant[]>(
     [],
   );
+  // Controlled so the URL preview below the field can follow it as you type,
+  // the way the speakers' drawer follows a name.
+  const [title, setTitle] = React.useState("");
+  const [slug, setSlug] = React.useState("");
   const [track, setTrack] = React.useState("");
   const [venue, setVenue] = React.useState("");
   const [activation, setActivation] = React.useState("");
@@ -168,6 +173,11 @@ export function SessionManager({
             role: p.role,
           })),
     );
+    setTitle(row === "new" ? "" : row.title);
+    // Pre-filled with the stored slug, which is what keeps a retitle from
+    // moving a published URL: the field carries the old slug forward unless
+    // someone edits it on purpose.
+    setSlug(row === "new" ? "" : row.slug);
     setTrack(row === "new" ? "" : (row.track ?? ""));
     // Legacy rows hold a free-text location. Match it back to a slug where
     // possible so an edit doesn't silently blank a field the admin never
@@ -213,6 +223,7 @@ export function SessionManager({
     setIssues({});
     const form = new FormData(e.currentTarget);
     form.set("participants", JSON.stringify(participants));
+    form.set("slug", slug.trim());
     form.set("track", track);
     form.set("location", venue);
     form.set("activation", activation);
@@ -341,11 +352,25 @@ export function SessionManager({
               <Input
                 id="title"
                 name="title"
-                defaultValue={current?.title}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 required
               />
               {issues.title?.[0] && <FieldError>{issues.title[0]}</FieldError>}
             </div>
+
+            <SlugField
+              title={title}
+              slug={slug}
+              setSlug={setSlug}
+              // Only a session that stands on its own has a page of its own.
+              // One inside an activation is shown on that activation's page,
+              // so its slug is stored and unused — say so rather than print a
+              // URL that goes nowhere.
+              standalone={activation === ""}
+              currentSlug={current?.slug ?? null}
+              issue={issues.slug?.[0]}
+            />
 
             <div>
               <Label htmlFor="description">Description</Label>
@@ -544,6 +569,67 @@ export function SessionManager({
           </form>
         )}
       </Drawer>
+    </div>
+  );
+}
+
+function SlugField({
+  title,
+  slug,
+  setSlug,
+  standalone,
+  currentSlug,
+  issue,
+}: {
+  title: string;
+  slug: string;
+  setSlug: (v: string) => void;
+  standalone: boolean;
+  currentSlug: string | null;
+  issue?: string;
+}) {
+  // Mirrors what the action will land on, minus the collision suffix — it
+  // can't know what's taken without a round trip, and a "-2" surprise on save
+  // is rare enough to explain there rather than predict here.
+  const preview = slugify(slug.trim() || title, "session");
+  const moving =
+    standalone && currentSlug && slug.trim() && preview !== currentSlug;
+
+  return (
+    <div>
+      <Label htmlFor="slug">Public URL</Label>
+      <div className="flex items-center gap-1.5">
+        <span className="shrink-0 font-mono text-xs text-muted-foreground">
+          /schedule/talk/
+        </span>
+        <Input
+          id="slug"
+          name="slug"
+          value={slug}
+          placeholder={slugify(title || "title", "session")}
+          onChange={(e) => setSlug(e.target.value)}
+          className="font-mono"
+        />
+      </div>
+      {standalone ? (
+        <p className="mt-1.5 font-mono text-[11px] text-muted-foreground">
+          {preview
+            ? `sasw.co/schedule/talk/${preview}`
+            : "sasw.co/schedule/talk/\u2026"}
+        </p>
+      ) : (
+        <p className="mt-1.5 text-[11px] text-muted-foreground">
+          This session runs inside an activation, so it shows on that
+          activation&rsquo;s page rather than one of its own. Saved either way,
+          for if it is ever detached.
+        </p>
+      )}
+      {issue && <FieldError>{issue}</FieldError>}
+      {moving && (
+        <p className="mt-1 text-xs text-amber-600">
+          Changing this moves the page. {currentSlug} will redirect here.
+        </p>
+      )}
     </div>
   );
 }
