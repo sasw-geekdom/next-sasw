@@ -2313,6 +2313,46 @@ function sameMonth(a: string, b: string): boolean {
 export const ASSUMED_MINUTES = 60;
 
 /**
+ * -05:00 for the whole week, and safe to hardcode for the reason the session
+ * drawer's own `OFFSET` gives: the event is Sept 28 – Oct 2 2026 and US DST
+ * does not end until Nov 1, so every session is CDT. A week that ever
+ * straddles the change needs a real zoned conversion, not a different
+ * constant.
+ */
+export const EVENT_OFFSET = "-05:00";
+
+/**
+ * An epoch as the ISO string the rest of the schedule is authored in.
+ *
+ * A CMS row stores an instant and loses the offset it was entered in; the
+ * curated week is written by hand as `2026-09-29T13:00:00-05:00`. Emitting
+ * `toISOString()` for one and the authored string for the other put both forms
+ * in a single JSON-LD ItemList, where a 1 PM talk printed as 18:00 and read as
+ * out of order beside a 13:00 activation at the same instant. Both are valid
+ * and a crawler takes either; a human reading the markup should not have to
+ * convert in their head to check it.
+ */
+export function eventIso(ms: number): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    // Not `hour12: false`, which yields "24" for midnight in some runtimes.
+    hourCycle: "h23",
+  })
+    .formatToParts(new Date(ms))
+    .reduce<Record<string, string>>((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}${EVENT_OFFSET}`;
+}
+
+/**
  * CMS sessions that stand on their own, as blocks the calendar can draw.
  *
  * ─── Why only the ones with no activation ───────────────────────────────────

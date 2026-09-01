@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
 import { BackLink } from "@/components/site/back-link";
 import { ARROW_MOTION } from "@/lib/motion";
 import { formatDateTime } from "@/lib/format";
-import { ASSUMED_MINUTES, dayKey } from "@/lib/schedule";
+import { ASSUMED_MINUTES, dayKey, eventIso } from "@/lib/schedule";
 import { jsonLd, talkEvent } from "@/lib/structured-data";
 import type { ResolvedParticipant } from "@/lib/admin/cms-types";
 import { listTalks, resolveTalk, type Talk } from "@/lib/talks";
@@ -123,13 +123,11 @@ export default async function TalkPage({
     slug: row.slug,
     title: row.title,
     description: row.description,
-    // UTC, where an activation's markup carries -05:00. Those are authored as
-    // strings and kept as authored; a CMS row is an epoch, so the offset it
-    // was entered in is not recoverable from it. The same instant either way,
-    // and schema.org takes both — inventing an offset would be the only way
-    // to get this wrong.
-    startIso: new Date(row.startsAt).toISOString(),
-    endIso: new Date(endsAt).toISOString(),
+    // -05:00, matching how the curated week is authored — see `eventIso`. A
+    // row stores an instant and loses the offset it was entered in, but the
+    // whole week is CDT, so rendering it back is a fact rather than a guess.
+    startIso: eventIso(row.startsAt),
+    endIso: eventIso(endsAt),
     room,
     people: speakers.map((p) => ({ name: p.name, slug: p.slug })),
   });

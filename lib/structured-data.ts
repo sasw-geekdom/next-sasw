@@ -221,16 +221,18 @@ export function activationEvent(session: ResolvedSession) {
  * the shared bolt here keeps the markup honest rather than guessing at a path
  * that changes on every deploy.
  */
-export function talkEvent(talk: {
+export interface TalkEventInput {
   slug: string;
   title: string;
   description: string;
-  /** ISO 8601 with an explicit offset, as schema.org wants. */
+  /** ISO 8601, as schema.org wants. */
   startIso: string;
   endIso: string;
   room: { name: string; place?: Room["place"] } | null;
   people: { name: string; slug: string }[];
-}) {
+}
+
+export function talkEvent(talk: TalkEventInput) {
   const url = `${SITE_URL}/schedule/talk/${talk.slug}`;
   const performers = talk.people
     .filter((p) => p.name)
@@ -290,16 +292,34 @@ function nested(node: object): Record<string, unknown> {
  *
  * Nested nodes drop their own `@context` — it belongs once, at the top.
  */
-export function scheduleGraph(sessions: ResolvedSession[]) {
-  const events = sessions
-    .map(activationEvent)
-    .filter((e): e is NonNullable<typeof e> => e !== null)
-    .sort((a, b) => a.startDate.localeCompare(b.startDate));
+export function scheduleGraph(
+  sessions: ResolvedSession[],
+  talks: TalkEventInput[] = [],
+) {
+  // Talks belong in this list for the same reason they have their own pages:
+  // /schedule visibly draws them, and described nine activations and nothing
+  // else. There is no cost to including them here — an ItemList has no lanes
+  // to lose, which is the whole reason the *visible* grid keeps a dense run
+  // on a rail and this does not have to.
+  const events = [
+    ...sessions.map(activationEvent),
+    ...talks.map(talkEvent),
+  ].filter((e): e is NonNullable<typeof e> => e !== null);
+
+  // Sorted on epoch, not on the string. Three date shapes meet here and only
+  // one of them compares as text: an activation's `-05:00`, a span's plain
+  // `YYYY-MM-DD`, and a talk's UTC `Z`. Comparing "2026-10-01T13:00:00-05:00"
+  // against "2026-10-01T18:00:00.000Z" lexically puts the same instant in the
+  // wrong order — the bug the .ics export already had to fix.
+  events.sort((a, b) => Date.parse(a.startDate) - Date.parse(b.startDate));
 
   return {
     "@context": "https://schema.org",
     "@graph": [
       nested(weekEvent()),
+      // Chronological, mixing activations and talks rather than grouping them.
+      // A schedule reads in time order; "everything big first, then everything
+      // small" is a fact about our data model, not about the week.
       {
         "@type": "ItemList",
         name: "San Antonio Startup + Tech Week 2026 — schedule",

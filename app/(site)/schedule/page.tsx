@@ -6,7 +6,9 @@ import { ModelBand } from "@/components/site/model-band";
 import { PysaBand } from "@/components/site/pysa-band";
 import { ButtonLink } from "@/components/ui/button";
 import { allSessions, resolveSessions } from "@/lib/schedule";
+import { ASSUMED_MINUTES, eventIso } from "@/lib/schedule";
 import { jsonLd, scheduleGraph } from "@/lib/structured-data";
+import { listTalks } from "@/lib/talks";
 
 // ISR, and still needed after the bento went: `ModelBand` reads the partner
 // wall from Firestore for its own organiser logos, so this page has a CMS
@@ -38,16 +40,30 @@ export const metadata: Metadata = {
 };
 
 export default async function SessionsPage() {
+  // The talks the grid draws alongside the activations. Same fallback for a
+  // row with no end that the grid and the .ics use, so the three cannot
+  // disagree about how long the same session runs.
+  const talks = (await listTalks()).map((t) => ({
+    slug: t.row.slug,
+    title: t.row.title,
+    description: t.row.description,
+    startIso: eventIso(t.row.startsAt),
+    endIso: eventIso(t.row.endsAt ?? t.row.startsAt + ASSUMED_MINUTES * 60_000),
+    room: t.room,
+    people: t.row.participants.map((p) => ({ name: p.name, slug: p.slug })),
+  }));
+
   return (
     <>
-      {/* The week and every confirmed activation, as an ItemList. This page had
-          no structured data of any kind — the homepage described the week and
-          each activation described itself, and the one page that *is* the
-          schedule described none of it. */}
+      {/* The week, every confirmed activation and every standalone talk, as one
+          ItemList. This page had no structured data of any kind — the homepage
+          described the week and each activation described itself, and the one
+          page that *is* the schedule described none of it. Talks were the last
+          thing it drew and did not describe. */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: jsonLd(scheduleGraph(resolveSessions(allSessions()))),
+          __html: jsonLd(scheduleGraph(resolveSessions(allSessions()), talks)),
         }}
       />
       <main>

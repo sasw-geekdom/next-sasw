@@ -1135,20 +1135,51 @@ export default async function VenueSchedulePage({
                   {group.talks.map((talk) => (
                     <li
                       key={talk.slug}
-                      className="flex items-baseline justify-between gap-6 border-b border-white/10 py-4"
+                      className="group relative flex items-baseline justify-between gap-6 border-b border-white/10 py-4"
                     >
                       <div className="min-w-0">
-                        <p className="text-pretty font-medium text-white">
-                          {talk.title}
-                        </p>
+                        {/* The whole row, via the stretched `::after` the grid
+                            blocks use — a 14px title is a small target and the
+                            time on the far right is part of the same thing.
+                            `href` is null for a talk inside an activation,
+                            which is not reachable here (this list is built
+                            from standalone sessions) but is cheap to honour
+                            rather than assume. */}
+                        {talk.href ? (
+                          <Link
+                            href={talk.href}
+                            className="block text-pretty font-medium text-white transition-colors duration-200 after:absolute after:inset-0 hover:text-magenta focus-visible:text-magenta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-magenta"
+                          >
+                            {talk.title}
+                          </Link>
+                        ) : (
+                          <p className="text-pretty font-medium text-white">
+                            {talk.title}
+                          </p>
+                        )}
                         {talk.people && (
                           <p className="mt-1 text-pretty text-sm text-white/60">
                             {talk.people}
                           </p>
                         )}
                       </div>
-                      <p className="shrink-0 font-mono text-[11px] uppercase tracking-widest text-white/55">
+                      {/* The time, and — where the row leads somewhere — the
+                          house arrow beside it. Without it the row announced
+                          nothing at rest and only turned magenta on hover,
+                          which is no affordance at all for anyone who does
+                          not happen to sweep the mouse across it. */}
+                      <p className="flex shrink-0 items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55">
                         {talk.timeLabel}
+                        {talk.href && (
+                          <ArrowUpRight
+                            className={cn(
+                              ARROW_MOTION,
+                              "h-3.5 w-3.5 group-hover:-translate-y-px group-hover:translate-x-px group-hover:text-magenta",
+                            )}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
+                        )}
                       </p>
                     </li>
                   ))}
