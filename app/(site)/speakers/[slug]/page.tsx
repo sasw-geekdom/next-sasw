@@ -251,9 +251,29 @@ export default async function SpeakerPage({
                         className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-xs bg-magenta/70"
                       />
                       <div className="min-w-0">
-                        <p className="font-display text-lg font-bold uppercase leading-tight text-white">
-                          {s.title}
-                        </p>
+                        {/* A talk that stands on its own has a page now, and
+                            this list was the last place still printing its
+                            title as dead text. One inside an activation keeps
+                            its title plain and takes the "Part of" link below
+                            — that page is its home, and linking the title
+                            there would name the activation as the talk. */}
+                        {s.activation === null ? (
+                          <Link
+                            href={`/schedule/talk/${s.slug}`}
+                            className="group font-display text-lg font-bold uppercase leading-tight text-white transition-colors duration-200 hover:text-magenta focus-visible:text-magenta focus-visible:outline-none"
+                          >
+                            {s.title}
+                            <ArrowUpRight
+                              className={cn(ARROW_OUT, "ml-1 inline-block")}
+                              strokeWidth={2}
+                              aria-hidden="true"
+                            />
+                          </Link>
+                        ) : (
+                          <p className="font-display text-lg font-bold uppercase leading-tight text-white">
+                            {s.title}
+                          </p>
+                        )}
                         <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-white/55">
                           {formatDateTime(s.startsAt)}
                           {venueLabel(s.location)

@@ -98,6 +98,8 @@ export interface SessionRow {
 
 export interface LineupSession {
   id: string;
+  /** The talk's own URL segment, for a session with no activation. */
+  slug: string;
   title: string;
   startsAt: number;
   location: string;

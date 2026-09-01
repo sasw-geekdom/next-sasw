@@ -79,6 +79,7 @@ export const loadLineup = cache(async (): Promise<LineupSpeaker[]> => {
       // Sessions arrive ordered by start time, so pushing preserves it.
       entry.sessions.push({
         id: session.id,
+        slug: session.slug,
         title: session.title,
         startsAt: session.startsAt,
         location: session.location,
