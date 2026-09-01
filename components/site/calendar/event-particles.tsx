@@ -4,6 +4,8 @@ import * as React from "react";
 import Image from "next/image";
 import { motion, useMotionTemplate, useMotionValue } from "motion/react";
 import { ACCESS_GREEN } from "@/lib/access-granted";
+import { PYSA } from "@/lib/pysa";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { TOOL_MARKS } from "@/lib/tool-marks";
 import { cn } from "@/lib/utils";
 
@@ -452,12 +454,21 @@ export function MascotBurst() {
 /**
  * PySanAntonio's mariachi, standing in the empty middle of his own block.
  *
- * A still, not the loop. `PYSA.video` is already on this page for the band, so
- * a second `<video>` would cost no download — but it would cost a second
- * decode, of a 1114x720 clip, inside a cell 224px wide. The other two
- * flourishes are cheap by construction (CSS keyframes, and a handful of
- * sprites on one RAF), and a decoding video in a calendar cell is a different
- * order of thing.
+ * A still in the week view, the loop in the day view — `animated` picks.
+ *
+ * Not `motion`: this module imports `motion/react` under that name, and a prop
+ * called `motion` would shadow it inside this component.
+ *
+ * The week keeps the still on the original reasoning: `PYSA.video` is already
+ * on /schedule for the band, so a second `<video>` costs no download, but it
+ * costs a second decode of a 1114x720 clip inside a cell 224px wide, and the
+ * other two flourishes on that grid are cheap by construction (CSS keyframes,
+ * and a handful of sprites on one RAF).
+ *
+ * The day view is not that cell and the band is not on that page. There is one
+ * PySA block on 2026-10-02, it is roughly 1016x495, and nothing else on the
+ * route decodes anything — so the argument that kept the still here does not
+ * reach it, and at that size a frozen frame is the weaker picture.
  *
  * The plate carries its own feathered alpha rather than a CSS mask. The frame
  * is a studio shot on near-black and the block's ground is PySA blue at 10%
@@ -469,7 +480,26 @@ export function MascotBurst() {
  * Sized as a percentage of the block, not in pixels, for that same reason: the
  * week draws this block 300px tall and the day view 660.
  */
-export function PysaMascot() {
+export function PysaMascot({ animated = false }: { animated?: boolean }) {
+  const reduce = useReducedMotion();
+  const clip = React.useRef<HTMLVideoElement>(null);
+
+  // `autoPlay` is an initial-render attribute, and `useReducedMotion` returns
+  // `false` on the server and the first client render before it returns the
+  // truth. So a reader who asks for reduced motion gets `autoPlay` on the
+  // frame that matters, the clip starts, and React flipping the attribute
+  // afterwards does not stop it — measured under Playwright's `reduce`
+  // emulation, the video was still playing. Drive the element instead.
+  React.useEffect(() => {
+    const v = clip.current;
+    if (!v) return;
+    if (reduce) {
+      v.pause();
+      v.currentTime = 0;
+    } else {
+      void v.play().catch(() => {});
+    }
+  }, [reduce, animated]);
   return (
     <div
       aria-hidden="true"
@@ -479,24 +509,103 @@ export function PysaMascot() {
       // the strand lost its contrast against a bright blue soundboard. 36px is
       // the two rows plus their leading, so the type keeps the plain ground it
       // is legible on and he stands on top of it.
+      //
+      // Keyed against the block, on the wrapper so the still and the clip are
+      // composited the same way.
+      //
+      // The plate carries feathered alpha, but only at its edges — inside the
+      // feather it is opaque studio black, tone-matched to the block's resting
+      // ground. That held exactly as long as the ground held still. The block
+      // paints its hover as an accent layer *under* the flourishes, so on
+      // hover the ground lifted to rgb(17,33,50) while the plate stayed at
+      // rgb(14,26,40) and the mascot appeared to be standing on a dark square.
+      //
+      // `lighten` takes the per-channel max, so the plate's black resolves to
+      // whatever the block is currently painting — matched at rest, matched on
+      // hover, and matched again if the accent ever changes. The mascot is the
+      // bright half of a high-contrast studio shot and passes through.
+      style={{ mixBlendMode: "lighten" }}
       className="pointer-events-none absolute inset-x-0 bottom-9 top-0 flex items-end justify-center overflow-hidden rounded"
     >
-      <Image
-        src="/pysa/mascot-block.webp"
-        alt=""
-        width={420}
-        height={441}
-        // Sized by height against a capped ceiling, not by the block's width.
-        // Width-led sizing made him a function of the column: 166px in the
-        // week, where that is most of the block, and the same 166 in the day
-        // view where the block is 1175px across and he read as a stamp
-        // floating in it. A height cap draws him the same size in both, which
-        // is the thing a mascot should be.
-        //
-        // Bottom-anchored by the wrapper's flex rather than by his own box, so
-        // he stands on the meta rows whatever height is left above him.
-        className="h-full max-h-[190px] w-auto object-contain opacity-90 motion-safe:animate-[pysaSway_7s_ease-in-out_infinite]"
-      />
+      {animated ? (
+        <video
+          ref={clip}
+          src={PYSA.video}
+          // The plate, not the clip's own first frame: it is what shows before
+          // metadata lands and on reduced motion, and it is already the right
+          // crop and already feathered.
+          poster="/pysa/mascot-block.webp"
+          autoPlay={!reduce}
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+          // Cropped to the man, not letterboxed. The clip is 1114x720 of which
+          // he occupies about 610x690 centred at 56% across — drawn whole in a
+          // portrait box he would be a third the height of the still he
+          // replaces, with black bars for the rest. `object-cover` against an
+          // aspect close to his own bounding box scales him to fill it and
+          // throws away the empty studio either side.
+          //
+          // Keyed, then feathered. The still carries alpha in its own file; a
+          // video cannot, so the clip arrives as a rectangle of studio black
+          // over the block's PySA-blue ground — measured, rgb(12,13,14) inside
+          // against rgb(8,15,22) outside. Four points of red and eight of blue
+          // is close enough to look like a mistake and far enough to draw a
+          // box, and no amount of masking fixes a tone difference in the
+          // middle of the shot.
+          //
+          // The `lighten` that resolves it is on the wrapper, which composites
+          // the still and the clip as one group — see the note there. It does
+          // lift his suit slightly toward the ground colour; against a ground
+          // this dark that costs a couple of points on an area that was
+          // already near-black.
+          //
+          // The ellipse stays here rather than moving up: it is the clip's
+          // problem alone, for the corners where `object-cover` can put a lit
+          // edge of studio floor against the block's border. The plate has its
+          // own alpha and needs none.
+          style={{
+            maskImage:
+              "radial-gradient(ellipse 78% 88% at 50% 46%, #000 52%, transparent 100%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse 78% 88% at 50% 46%, #000 52%, transparent 100%)",
+          }}
+          // 74% of the wrapper rather than the still's flat 190px ceiling.
+          //
+          // That cap exists to draw the mascot the same size in the week and
+          // the day, which is the right call for a still standing in a 224px
+          // lane. It is the wrong one here: this block is roughly 1016x495 and
+          // 190px left him a stamp in the middle of it.
+          //
+          // A percentage and not a second pixel number, because the wrapper is
+          // the block minus its meta rows and a percentage tracks that on its
+          // own. 74% leaves the lockup above him its full height at every
+          // block size instead of only at this one. Height also happens to be
+          // the axis a second venue column cannot touch — Launch SA joining
+          // this day narrows The Rand's column, and a width-led size would
+          // have had to be re-picked when it did.
+          className="aspect-[61/69] h-full max-h-[74%] w-auto rounded object-cover [object-position:56%_50%]"
+        />
+      ) : (
+        <Image
+          src="/pysa/mascot-block.webp"
+          alt=""
+          width={420}
+          height={441}
+          // Sized by height against a capped ceiling, not by the block's width.
+          // Width-led sizing made him a function of the column: 166px in the
+          // week, where that is most of the block, and the same 166 in the day
+          // view where the block is 1175px across and he read as a stamp
+          // floating in it. A height cap draws him the same size in both, which
+          // is the thing a mascot should be.
+          //
+          // Bottom-anchored by the wrapper's flex rather than by his own box, so
+          // he stands on the meta rows whatever height is left above him.
+          className="h-full max-h-[190px] w-auto object-contain opacity-90 motion-safe:animate-[pysaSway_7s_ease-in-out_infinite]"
+        />
+      )}
     </div>
   );
 }

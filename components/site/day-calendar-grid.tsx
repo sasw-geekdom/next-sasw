@@ -49,11 +49,22 @@ import {
  * follows the shortest thing on the day, and the axis is as tall as it needs
  * to be rather than as tall as a constant says.
  */
+/**
+ * Grid height past which a day stops taking the roomy boost — about a
+ * screenful under the header on the laptop this view is read on.
+ */
+const ROOMY_CEILING = 700;
+
 function scaleFor(items: CalendarItem[]): number {
   if (items.length === 0) return 80;
   const shortest = Math.min(...items.map((i) => i.endMin - i.startMin));
   if (shortest <= 30) return 132;
-  if (shortest <= 60) return 104;
+  // No tier for the hour. The week view draws a 60-minute block at 60px and it
+  // carries title, speaker and time without strain, so an hour needs nothing
+  // finer than the base scale to stay legible — and buying it 104px charged
+  // the same 1.7x to every long block on the day. Thursday's four-hour brunch
+  // went to 416px and pushed the whole afternoon under the fold, which is the
+  // opposite of what this scale is for.
   return 80;
 }
 
@@ -118,12 +129,24 @@ export function DayCalendarGrid({
     [venues, venue, shownItems, shownSpans],
   );
 
-  const hourPx = React.useMemo(() => scaleFor(shownItems), [shownItems]);
+  // The same split the week makes: a 7:30 AM brunch belongs on a rail, not on
+  // an axis five hours of which would then be empty.
+  const morningItems = React.useMemo(
+    () => shownItems.filter((i) => i.morning),
+    [shownItems],
+  );
+  const axisItems = React.useMemo(
+    () => shownItems.filter((i) => !i.morning),
+    [shownItems],
+  );
+
+  const hourPx = React.useMemo(() => scaleFor(axisItems), [axisItems]);
+  const axisHours = (axis.endMin - axis.startMin) / 60;
 
   const placements = React.useMemo(() => {
     const out: Record<string, AxisPlacement[]> = {};
     for (const col of columns) {
-      const inColumn = shownItems
+      const inColumn = axisItems
         .filter((i) => i.venueSlug === col.key)
         .sort((a, b) => a.startMin - b.startMin);
       out[col.key] = placeLanes(inColumn).map((item) => ({
@@ -146,25 +169,73 @@ export function DayCalendarGrid({
             // here where it would be four characters in a week lane.
             showPeople
             markMax={axisMarkCap(item.startMin, item.endMin, hourPx)}
+            // Stumberg is the only activation carrying `blockArt`, and it is
+            // the one this was asked for: on the day axis its mark was a 24px
+            // thumbnail wedged beside the title with 190px of empty block
+            // under it, where the week centres it. Same card, both views.
+            splitArt
+            // The one block on 2026-10-02 that has a clip, on the one view
+            // with the room to play it.
+            showcaseArt
             fill
+            // A venue column here is 367px against a week lane's 240, so the
+            // day view prints the whole title — the same one the week's
+            // morning rail prints, so the brunch reads the same on both.
+            fullTitle
           />
         ),
       }));
     }
     return out;
-  }, [columns, shownItems, picked, toggle, hourPx]);
+  }, [columns, axisItems, picked, toggle, hourPx]);
 
   const rails = React.useMemo(() => {
-    if (shownSpans.length === 0) return [];
-    const byColumn: Record<string, React.ReactNode> = {};
-    for (const span of shownSpans) {
-      byColumn[span.venueSlug] = <SpanBar key={span.slug} span={span} />;
+    const list: AxisRail[] = [];
+
+    if (shownSpans.length > 0) {
+      const byColumn: Record<string, React.ReactNode> = {};
+      for (const span of shownSpans) {
+        byColumn[span.venueSlug] = <SpanBar key={span.slug} span={span} />;
+      }
+      // Per column here, not spanning: on one day a multi-day drive belongs to
+      // the room running it, and the week's "which days" question is already
+      // answered by being on this page.
+      list.push({ label: "All day", byColumn });
     }
-    // Per column here, not spanning: on one day a multi-day drive belongs to
-    // the room running it, and the week's "which days" question is already
-    // answered by being on this page.
-    return [{ label: "All day", byColumn }] satisfies AxisRail[];
-  }, [shownSpans]);
+
+    if (morningItems.length > 0) {
+      const byColumn: Record<string, React.ReactNode> = {};
+      for (const col of columns) {
+        const inColumn = morningItems
+          .filter((i) => i.venueSlug === col.key)
+          .sort((a, b) => a.startMin - b.startMin);
+        if (inColumn.length === 0) continue;
+        byColumn[col.key] = (
+          <>
+            {inColumn.map((item) => (
+              <Block
+                key={item.slug}
+                item={item}
+                picked={picked.includes(item.slug)}
+                onToggle={toggle}
+                showVenue={false}
+                // The rail is a full-width column with no height budget, so
+                // the block carries the whole title and the speaker, same as
+                // the axis blocks below it.
+                showPeople
+                fullTitle
+              />
+            ))}
+          </>
+        );
+      }
+      // Below the all-day rail and immediately above 1 PM, so the column reads
+      // top to bottom in time order.
+      list.push({ label: "Before noon", byColumn });
+    }
+
+    return list;
+  }, [shownSpans, morningItems, columns, picked, toggle]);
 
   const hidden = picked.filter(
     (slug) => !shownItems.some((i) => i.slug === slug),
@@ -209,11 +280,18 @@ export function DayCalendarGrid({
             columns={columns}
             axis={axis}
             hourPx={hourPx}
-            // A quarter more on a roomy display. Proportional to the day's own
-            // scale rather than a constant, so a day of thirty-minute slots
-            // (which already runs fine) grows by the same ratio as a day of
-            // takeovers (which runs coarse).
-            roomyHourPx={Math.round(hourPx * 1.25)}
+            // A quarter more on a roomy display, but only on a day short
+            // enough to have spare height to fill. The boost exists to use a
+            // tall screen, and on a long day it does the opposite: Thursday
+            // runs 7:30 AM to 8 PM, so the quarter added 260px to a grid that
+            // was already twice a viewport and pushed the whole afternoon
+            // under the fold. Past roughly a screenful the day is long enough
+            // on its own.
+            roomyHourPx={
+              axisHours * hourPx < ROOMY_CEILING
+                ? Math.round(hourPx * 1.25)
+                : hourPx
+            }
             placements={placements}
             rails={rails}
             emptyLabel={filtering ? "Nothing matching" : "Nothing here"}

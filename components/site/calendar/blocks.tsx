@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarPlus, Check } from "lucide-react";
+import { ArrowUpRight, CalendarPlus, Check } from "lucide-react";
 import {
   BoltDrift,
   CipherField,
@@ -206,6 +206,22 @@ export function axisMarkCap(
  */
 export const MARK_TARGET = 150;
 
+/**
+ * The height ceiling for an image lockup, scaled to the width it aims for.
+ *
+ * `markKind` and `BrandMark` both need this and both have to say the same
+ * thing — see the note on `markKind`. It used to be three literals, which was
+ * right while every axis block aimed at `MARK_TARGET`: a bigger target then
+ * bought nothing, because the ceiling clamped the result back to 56 before the
+ * extra width could be drawn. Scaling it keeps the default identical (150
+ * returns exactly 56/50/44) and lets a caller that has genuinely more room ask
+ * for more and get it.
+ */
+function lockupCeiling(size: "sm" | "md" | "lg", markTarget: number): number {
+  const base = size === "lg" ? 56 : size !== "sm" ? 50 : 44;
+  return Math.round(base * (markTarget / MARK_TARGET));
+}
+
 export function lockupHeight(
   lockup: { width: number; height: number },
   targetWidth: number,
@@ -287,7 +303,7 @@ export function markKind(
       lockupHeight(
         brand.lockup,
         markTarget,
-        Math.min(lg ? 56 : size !== "sm" ? 50 : 44, markMax ?? Infinity),
+        Math.min(lockupCeiling(size, markTarget), markMax ?? Infinity),
       ) * (lg ? 1.5 : 1);
     const ratio = brand.lockup.width / brand.lockup.height;
     if (h * ratio >= MARK_MIN_W) return "lockup";
@@ -594,7 +610,7 @@ function BrandMark({
             "--mark-h": `${lockupHeight(
               brand.lockup,
               markTarget,
-              Math.min(lg ? 56 : roomy ? 50 : 44, markMax ?? Infinity),
+              Math.min(lockupCeiling(size, markTarget), markMax ?? Infinity),
             )}px`,
           } as React.CSSProperties
         }
@@ -642,6 +658,8 @@ export function Block({
   showPeople = false,
   splitArt = false,
   showAction = true,
+  fullTitle = false,
+  showcaseArt = false,
 }: {
   item: CalendarItem;
   picked: boolean;
@@ -698,11 +716,17 @@ export function Block({
    * Whether this block may draw an activation's `blockArt` apart from its
    * title. See `splitMark` below.
    *
-   * The week axis sets it and nothing else does. A day column is three times
-   * the width of a week lane and its hours are taller, so the same layout
-   * there hands the drawing a 341x264 box — the artwork stops being a mark and
-   * becomes a poster with a caption. The week lane is the size this was asked
-   * for and the size it was measured at.
+   * Both axes set it; the mobile stack does not. It was week-only at first, on
+   * the worry that a day column is three times the width of a week lane and
+   * its hours are taller, so the drawing would stop being a mark and become a
+   * poster with a caption. Measured on Stumberg the day block is 306x247 and
+   * the art lands about 220x170 — large, but the alternative was worse: the
+   * inline lockup drew the mark 24px tall and left 190px of the block empty
+   * beneath it, which is the hole the split layout exists to fill.
+   *
+   * The art is height-led (see the `Image` below), so what actually bounds it
+   * is `markMax` and the room the title and meta rows leave — not the column
+   * width. A wider column gets a wider box, not a taller drawing.
    */
   splitArt?: boolean;
   /**
@@ -714,6 +738,28 @@ export function Block({
    * shortlist meant finding forty invisible buttons one at a time.
    */
   showAction?: boolean;
+  /**
+   * Whether there is width here for the title the organisers actually gave the
+   * event, rather than the cut one a narrow lane needs.
+   *
+   * Set by the two wide surfaces — the week's morning rail and the day
+   * view's axis — and not by the week's main axis, which is a fifth of the
+   * page. It is a judgement about this caller's width, so the caller makes it;
+   * inferring it from `fill` is what named the brunch two different things on
+   * two pages. `dense` still overrides it: a column split into lanes is narrow
+   * again whatever the surface.
+   */
+  fullTitle?: boolean;
+  /**
+   * Whether this surface has room for an activation's art at full size.
+   *
+   * PySanAntonio is the only activation this reaches, and it changes two
+   * things for it: the flourish runs its loop rather than a still, and the
+   * lockup aims wider. Off in the week, where a lane is 224px and five days of
+   * blocks share a page with the band's own clip; on in the day view, where
+   * the block is roughly 1016x495 and nothing else on the route decodes.
+   */
+  showcaseArt?: boolean;
 }) {
   const brand = item.brand;
   const accent = brand?.accent;
@@ -730,7 +776,19 @@ export function Block({
   // Where there's height for a description there's height for the strand.
   const showCircuit = spare && !dense;
 
-  const kind = markKind(brand, dense, markSize, markMax);
+  // PySanAntonio on a showcase surface, which is the day view and nothing
+  // else. Scoped to the one activation rather than applied to every block the
+  // day view draws: this is about filling the empty middle of a block that
+  // also carries a mascot, not a general claim that day blocks want bigger
+  // logos.
+  const pysaShowcase = showcaseArt && item.page === "pysanantonio";
+  // Height, not width, is what a second venue column on this day would not
+  // change — see the note in `PysaMascot`. 260 draws PySA's 4.24:1 lockup
+  // about 390px wide against the old 223, and `max-w-full` still clamps it if
+  // the column ever narrows below that.
+  const markTarget = pysaShowcase ? 260 : MARK_TARGET;
+
+  const kind = markKind(brand, dense, markSize, markMax, markTarget);
   const hasMark = kind !== null;
 
   /**
@@ -770,13 +828,18 @@ export function Block({
   const wrapWordmark = spare && item.page === "college-night";
 
   /**
-   * The full title off the axis, the short one on it.
+   * The organisers' whole title wherever the block is wide enough to carry it.
    *
-   * `fill` means the block is sized by its own duration inside a lane, where
-   * "The Creative Futures™ Brunch powered by The Down Market" would clamp to a
-   * fragment. The rail has no such constraint — it is a full column and grows
-   * to its content — so that is where the organisers' whole title belongs, and
-   * it is where the brunch actually sits.
+   * This used to read the layout flag `fill` as a proxy for "has room", and
+   * the two came apart in both directions. `fill` only means `h-full`, so the
+   * week's morning rail — the narrowest surface at 286px — was the one place
+   * printing "The Creative Futures\u2122 Brunch powered by The Down Market",
+   * while the day view's 367px axis block for the same activation printed the
+   * short form. Same event, two names, two pages.
+   *
+   * So the caller says. The week's main axis is a fifth of the page and stays
+   * short; the rail and the day axis, which have the width, print the title
+   * the organisers actually gave the event.
    */
   const label =
     hasMark && !splitMark ? (
@@ -785,6 +848,7 @@ export function Block({
         title={item.title}
         dense={dense}
         markMax={markMax}
+        markTarget={markTarget}
         size={markSize}
         kind={kind}
         canWrap={wrapWordmark}
@@ -809,7 +873,7 @@ export function Block({
                 : "line-clamp-4",
         )}
       >
-        {dense || fill || splitMark ? item.title : item.longTitle}
+        {fullTitle && !dense && !splitMark ? item.longTitle : item.title}
       </span>
     );
 
@@ -890,7 +954,9 @@ export function Block({
           here: five hours is a 300px block with an empty middle. An agenda row
           is 83px of which the mark takes 57, so the same mascot there would be
           a thumbnail wedged behind the type. */}
-      {spare && item.page === "pysanantonio" && <PysaMascot />}
+      {spare && item.page === "pysanantonio" && (
+        <PysaMascot animated={pysaShowcase} />
+      )}
 
       {/* Access Granted's ciphertext, decrypted under the cursor. `spare` for
           the same reason the three above it are: a one-hour block is 40px of
@@ -1098,6 +1164,7 @@ export function SummaryBlock({
   onOpen,
   fill = false,
   dense = false,
+  compact = false,
 }: {
   venueName: string;
   venueTier: string;
@@ -1108,6 +1175,22 @@ export function SummaryBlock({
   onOpen: () => void;
   fill?: boolean;
   dense?: boolean;
+  /**
+   * A two-line cut for the `Talks` rail.
+   *
+   * The rail has the whole day column for width and no height budget of its
+   * own — which is exactly why it needs one. Five stacked lines came to 128px
+   * per rail row, more than `Before noon` (91) and `All week` (67) together
+   * are worth, and it pushed the week grid to 747px against the 750 a 13"
+   * laptop has under its header. The week not fitting on one screen is the
+   * thing this whole view is for.
+   *
+   * So the count and the span share a line with `Open →`, and the circuit
+   * list goes: at 222px "Founder · Tech & Builders · AI & Applied Innovation ·
+   * Capital" wraps to two lines on its own, and it is the least load-bearing
+   * thing here — one click answers it in full.
+   */
+  compact?: boolean;
 }) {
   return (
     <button
@@ -1130,24 +1213,51 @@ export function SummaryBlock({
           row loses the half that says when — the lane is 150px and the count
           is what survives. A summary block has height to spare by definition;
           it is the widest thing in the column that it is not. */}
-      <span className="mt-0.5 block truncate font-mono text-[9px] uppercase tracking-widest text-white/70">
-        {count} sessions
-      </span>
-      <span className="block truncate font-mono text-[9px] uppercase tracking-widest text-white/50">
-        {timeLabel}
-      </span>
-
-      {/* What kind of week this room is running. Dropped in a narrow lane,
-          where it would wrap to four lines of nine-pixel type. */}
-      {!dense && circuits.length > 0 && (
-        <span className="mt-1.5 line-clamp-3 text-[11px] leading-snug text-white/55">
-          {circuits.join(" · ")}
+      {compact ? (
+        <span className="mt-0.5 flex items-baseline justify-between gap-2 font-mono text-[9px] uppercase tracking-widest">
+          <span className="truncate text-white/70">
+            {count} sessions{" "}
+            <span className="text-white/50">· {timeLabel}</span>
+          </span>
+          {/* The house treatment for "this goes somewhere": `ArrowUpRight` with
+              the up-and-right hop, the same one the column heads, room-flow,
+              model-band and speaker-lineup carry. The typed "→" here was a
+              variant of a thing the site had already settled — see the note in
+              axis-grid. */}
+          <span className="inline-flex shrink-0 items-center gap-1 text-white/55 transition-colors group-hover:text-magenta">
+            Open
+            <ArrowUpRight
+              className="size-3 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </span>
         </span>
-      )}
+      ) : (
+        <>
+          <span className="mt-0.5 block truncate font-mono text-[9px] uppercase tracking-widest text-white/70">
+            {count} sessions
+          </span>
+          <span className="block truncate font-mono text-[9px] uppercase tracking-widest text-white/50">
+            {timeLabel}
+          </span>
 
-      <span className="mt-auto pt-1.5 font-mono text-[9px] uppercase tracking-widest text-white/55 transition-colors group-hover:text-magenta">
-        Open →
-      </span>
+          {/* What kind of week this room is running. Dropped in a narrow lane,
+              where it would wrap to four lines of nine-pixel type. */}
+          {!dense && circuits.length > 0 && (
+            <span className="mt-1.5 line-clamp-3 text-[11px] leading-snug text-white/55">
+              {circuits.join(" · ")}
+            </span>
+          )}
+
+          <span className="mt-auto inline-flex items-center gap-1 pt-1.5 font-mono text-[9px] uppercase tracking-widest text-white/55 transition-colors group-hover:text-magenta">
+            Open
+            <ArrowUpRight
+              className="size-3 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </span>
+        </>
+      )}
     </button>
   );
 }

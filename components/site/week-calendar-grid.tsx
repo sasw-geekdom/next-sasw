@@ -274,36 +274,52 @@ export function WeekCalendarGrid({
     [spans, matches],
   );
 
-  // Everything the axis draws, per day: sessions where a run is small enough
-  // to read, one summary where it isn't. Lanes are assigned across the mix, so
-  // a summary and a session running at the same hour share a column properly.
-  const placements = React.useMemo(() => {
+  // Everything the axis draws, per day, plus the runs too dense to draw there.
+  //
+  // A dense run used to take a lane and stand in it as one summary block. That
+  // is what a lane costs, and measured on the real week it costs too much: TPR
+  // running ten thirty-minute talks on Thursday took The Rand's column from
+  // one lane to two, and Linux San Antonio's wordmark — 210px, the width of
+  // the whole column — was redrawn at 93. Datanauts and AWS with it. The
+  // summary did not even win the trade: 111px, its circuit list clipped
+  // mid-word.
+  //
+  // So a dense run comes off the axis entirely and rides the `Talks` rail,
+  // which is what this view already does with a brunch that starts at 7:30 and
+  // a giveaway that runs three days. A rail costs no lane width, and the bar
+  // gets the full day column instead of a sliver of it.
+  const { placements, railRuns } = React.useMemo(() => {
     const out: Record<string, AxisPlacement[]> = {};
+    const rail: Record<string, Run[]> = {};
     for (const day of days) {
       const onAxis = shownItems.filter(
         (i) => i.dayIso === day.iso && !i.morning,
       );
       const runs = runsFor(onAxis, circuitOrder);
+      // The venue chip forces expansion: one venue per column means every
+      // block is full width, and there is nothing left to protect.
+      const expand = (run: Run) =>
+        venue !== null || run.items.length <= EXPAND_MAX;
+      const dense = runs.filter((run) => !expand(run));
+      if (dense.length > 0) rail[day.iso] = dense;
 
       type Cell = {
         key: string;
         startMin: number;
         endMin: number;
         run: Run;
-        item?: CalendarItem;
+        // Always set now. A dense run no longer produces an item-less cell
+        // standing in for it — it leaves the axis for the rail instead.
+        item: CalendarItem;
       };
-      const cells: Cell[] = runs.flatMap((run) =>
-        // The venue chip forces expansion: one venue per column means every
-        // block is full width, and there is nothing left to protect.
-        venue !== null || run.items.length <= EXPAND_MAX
-          ? run.items.map((item) => ({
-              key: item.slug,
-              startMin: item.startMin,
-              endMin: item.endMin,
-              run,
-              item,
-            }))
-          : [{ key: run.key, startMin: run.startMin, endMin: run.endMin, run }],
+      const cells: Cell[] = runs.filter(expand).flatMap((run) =>
+        run.items.map((item) => ({
+          key: item.slug,
+          startMin: item.startMin,
+          endMin: item.endMin,
+          run,
+          item,
+        })),
       );
       cells.sort((a, b) => a.startMin - b.startMin);
 
@@ -313,7 +329,7 @@ export function WeekCalendarGrid({
         endMin: cell.endMin,
         lane: cell.lane,
         lanes: cell.lanes,
-        node: cell.item ? (
+        node: (
           <Block
             item={cell.item}
             picked={picked.includes(cell.item.slug)}
@@ -327,22 +343,11 @@ export function WeekCalendarGrid({
             splitArt
             fill
           />
-        ) : (
-          <SummaryBlock
-            venueName={cell.run.venueName}
-            venueTier={cell.run.venueTier}
-            count={cell.run.items.length}
-            timeLabel={cell.run.timeLabel}
-            circuits={cell.run.circuits}
-            dense={cell.lanes >= 3}
-            onOpen={() => setVenue(cell.run.venueSlug)}
-            fill
-          />
         ),
       }));
     }
-    return out;
-  }, [days, shownItems, circuitOrder, venue, picked, toggle, setVenue]);
+    return { placements: out, railRuns: rail };
+  }, [days, shownItems, circuitOrder, venue, picked, toggle]);
 
   // The two rails. Mornings come off the axis so it doesn't have to start at
   // 7:30 AM for one brunch; all-day bars span columns.
@@ -396,6 +401,9 @@ export function WeekCalendarGrid({
                     // toggle already covers them — its slugs come from every
                     // item on the day, rail included.
                     showAction={false}
+                    // A full-width column that grows to its content, so the
+                    // brunch is named here the way its organisers name it.
+                    fullTitle
                   />
                 ))
               ) : (
@@ -416,9 +424,47 @@ export function WeekCalendarGrid({
       list.push({ label: "Before noon", byColumn });
     }
 
+    // Last, so the column reads down in time: all week, then the morning, then
+    // the afternoon's dense tracks, then the axis itself.
+    //
+    // A 1–6 PM run drawn above the noon line is the trade this makes, and it
+    // is the grammar the other two rails already set: a band means "this does
+    // not sit on the clock". The label says `Talks` rather than a time for the
+    // same reason.
+    if (Object.keys(railRuns).length > 0) {
+      const byColumn: Record<string, React.ReactNode> = {};
+      for (const day of days) {
+        const runs = railRuns[day.iso];
+        if (!runs || runs.length === 0) continue;
+        byColumn[day.iso] = (
+          <div className="flex flex-col gap-1">
+            {runs.map((run) => (
+              <SummaryBlock
+                key={run.key}
+                venueName={run.venueName}
+                venueTier={run.venueTier}
+                count={run.items.length}
+                timeLabel={run.timeLabel}
+                circuits={run.circuits}
+                // Neither `fill` nor `dense`: the rail has no height budget
+                // and the bar has the whole day column, which is the point of
+                // moving it here. `compact` because that same absence of a
+                // budget is what let this rail grow to 128px and push the
+                // week off a 13" screen — see the note on the prop.
+                compact
+                onOpen={() => setVenue(run.venueSlug)}
+              />
+            ))}
+          </div>
+        );
+      }
+      list.push({ label: "Talks", byColumn });
+    }
+
     return list;
   }, [
     days,
+    railRuns,
     shownItems,
     shownSpans,
     circuitOrder,
@@ -523,28 +569,27 @@ export function WeekCalendarGrid({
                 </p>
               ) : (
                 <div className="flex flex-col gap-2">
+                  {/* Every session, however dense the run. `EXPAND_MAX` is a
+                      density rule and density is a problem the grid has, not
+                      this list: there a run of ten is ten 36px slivers sharing
+                      a lane, here it is ten 83px rows and the page simply gets
+                      longer, which is what an agenda is for. Collapsing them
+                      here put a lid on content that fits — and this is the
+                      surface people read a day on, so it is the worst place to
+                      hide it.
+
+                      The cost is real and worth stating: a TPR Tuesday adds
+                      roughly ten rows, about 1,000px of scroll. */}
                   {runs.map((run) =>
-                    venue !== null || run.items.length <= EXPAND_MAX ? (
-                      run.items.map((item) => (
-                        <StackBlock
-                          key={item.slug}
-                          item={item}
-                          picked={picked.includes(item.slug)}
-                          onToggle={toggle}
-                          showAction={false}
-                        />
-                      ))
-                    ) : (
-                      <SummaryBlock
-                        key={run.key}
-                        venueName={run.venueName}
-                        venueTier={run.venueTier}
-                        count={run.items.length}
-                        timeLabel={run.timeLabel}
-                        circuits={run.circuits}
-                        onOpen={() => setVenue(run.venueSlug)}
+                    run.items.map((item) => (
+                      <StackBlock
+                        key={item.slug}
+                        item={item}
+                        picked={picked.includes(item.slug)}
+                        onToggle={toggle}
+                        showAction={false}
                       />
-                    ),
+                    )),
                   )}
                 </div>
               )}

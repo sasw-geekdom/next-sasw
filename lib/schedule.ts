@@ -1909,11 +1909,25 @@ export function spanLabel(span: { from: string; to: string }): string {
  * which belong outside the per-day grouping rather than under a day they do
  * not have.
  */
-export function sessionDay(
-  session: ResolvedSession,
-): { iso: string; weekday: string; label: string } | null {
-  if (!session.when) return null;
-  const iso = dayKey(session.when.start);
+export interface DayMeta {
+  iso: string;
+  weekday: string;
+  label: string;
+}
+
+/**
+ * A day of the week, named — from its ISO date alone.
+ *
+ * Split out of `sessionDay` because a venue page now groups two things by day:
+ * hardcoded activations, which carry a `when`, and CMS sessions, which arrive
+ * as CalendarItems carrying a `dayIso` and nothing to derive one from. Both
+ * need the same heading.
+ *
+ * Returns null for a date outside the week, which is the honest answer — a
+ * heading for a day the event does not run is worse than the row being
+ * dropped.
+ */
+export function dayMeta(iso: string): DayMeta | null {
   const meta = EVENT_DAYS.find((d) => d.iso === iso);
   if (!meta) return null;
   return {
@@ -1926,6 +1940,11 @@ export function sessionDay(
     }),
     label: meta.label,
   };
+}
+
+export function sessionDay(session: ResolvedSession): DayMeta | null {
+  if (!session.when) return null;
+  return dayMeta(dayKey(session.when.start));
 }
 
 function dayKey(iso: string): string {
@@ -2274,7 +2293,7 @@ function sameMonth(a: string, b: string): boolean {
  * block's own label prints the start alone, so the grid never states a finish
  * that nobody entered.
  */
-const ASSUMED_MINUTES = 60;
+export const ASSUMED_MINUTES = 60;
 
 /**
  * CMS sessions that stand on their own, as blocks the calendar can draw.
@@ -2297,9 +2316,18 @@ const ASSUMED_MINUTES = 60;
  * ─── What a CMS row cannot give the grid ────────────────────────────────────
  *
  * `page` is null, so the block renders without a link — `Block` has always
- * supported that, because the type has always allowed it. No page also means
- * no `.ics` route to point at, so `exportable` is false and the block draws no
- * add-to-calendar control.
+ * supported that, because the type has always allowed it.
+ *
+ * These are exportable all the same. `exportable` was false here at first, on
+ * the reasoning that no page means no `.ics` route to point at — but a
+ * calendar entry wants a start, an end, a title and a room, and a row has all
+ * four; `URL` is the only field it cannot fill, and that field is optional.
+ * The flag matters most for exactly this content: an afternoon-long activation
+ * is something you turn up to, while a thirty-minute talk in one room at 3:30
+ * is the case add-to-calendar exists for. Leaving it false also made `ADD DAY`
+ * quietly wrong — it takes the day's *exportable* items, so it would have
+ * added the activations and skipped the talks with nothing on screen saying
+ * so. `/schedule/export.ics` resolves these rows alongside the curated week.
  *
  * `brand` is undefined, so it draws its title in type rather than a lockup.
  * That is the same path every activation without a logo file already takes.
@@ -2355,7 +2383,7 @@ export function standaloneItems(rows: SessionRow[]): CalendarItem[] {
             .map((who) => who.name)
             .filter(Boolean)
             .join(", ") || undefined,
-        exportable: false,
+        exportable: true,
       },
     ];
   });
@@ -2492,11 +2520,15 @@ export interface DayCalendar {
  *
  * Two deliberate differences from `weekCalendar`:
  *
- *  - No morning rail. The rail exists in the week view so the axis doesn't
- *    start at 7:30 AM for one brunch across five columns. A day view is the
- *    detail view and should show the day's true shape, including the fact
- *    that Thursday has a morning and an evening and nothing between them.
  *  - The axis is derived from this day alone, so a quiet day draws short.
+ *
+ * The morning rail is shared with the week rather than skipped. It used to be
+ * skipped on the argument that a detail view should show the day's true shape,
+ * including the fact that Thursday has a morning and an evening and nothing
+ * between them. Drawn, that shape was a 7:30 AM start, a 90-minute void from
+ * 11:30 and an afternoon below the fold — the reader lost the rest of the day
+ * to make a point about its emptiness. So Thursday's brunch rides the rail
+ * here as it does in the week, and both views open at 1 PM.
  */
 export function dayCalendar(
   iso: string,
@@ -2534,13 +2566,16 @@ export function dayCalendar(
   // Tight to this day's own extent. `Math.min` of an empty list is Infinity,
   // which would lay the grid out with a negative height, so an empty day
   // falls back to the afternoon the rest of the week runs in.
+  // Off the morning items, which the rail carries. Counting them would put the
+  // axis back at 7:00 with nothing to draw until the afternoon.
+  const onAxis = items.filter((i) => !i.morning);
   const axis =
-    items.length === 0
+    onAxis.length === 0
       ? { startMin: 13 * 60, endMin: 18 * 60 }
       : {
           startMin:
-            Math.floor(Math.min(...items.map((i) => i.startMin)) / 60) * 60,
-          endMin: Math.ceil(Math.max(...items.map((i) => i.endMin)) / 60) * 60,
+            Math.floor(Math.min(...onAxis.map((i) => i.startMin)) / 60) * 60,
+          endMin: Math.ceil(Math.max(...onAxis.map((i) => i.endMin)) / 60) * 60,
         };
 
   return {

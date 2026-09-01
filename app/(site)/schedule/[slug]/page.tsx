@@ -29,6 +29,7 @@ import {
 } from "@/lib/admin/cms-queries";
 import type { SessionRow } from "@/lib/admin/cms-types";
 import {
+  dayMeta,
   resolveSchedule,
   scheduleSlugs,
   sessionDay,
@@ -36,8 +37,11 @@ import {
   venueRedirect,
   RETIRED_PAGES,
   whenLabels,
+  type CalendarItem,
   type ResolvedSession,
 } from "@/lib/schedule";
+import { liveCalendarItems } from "@/lib/live-schedule";
+import { EVENT_DAYS } from "@/lib/event";
 import { PYSA } from "@/lib/pysa";
 import { BackLink } from "@/components/site/back-link";
 import { activationEvent, jsonLd } from "@/lib/structured-data";
@@ -902,6 +906,26 @@ export default async function VenueSchedulePage({
   const { room, sessions } = schedule;
   const partners = await safeList(listPartners());
 
+  /**
+   * The room's own CMS sessions, which this page did not used to read at all.
+   *
+   * `resolveSchedule` builds a venue's list from the hardcoded array, so a
+   * standalone session entered in the admin reached the week grid and the day
+   * view and never reached the page headed "What's running here." A room
+   * running a dozen half-hour talks would have shown the two activations
+   * around them and nothing else — a heading contradicted by its own contents.
+   *
+   * Same rule the calendar applies: rows with no activation, in this room. A
+   * row that names an activation belongs inside it, and already renders there.
+   */
+  const talksByDay = new Map<string, CalendarItem[]>();
+  for (const item of await liveCalendarItems()) {
+    if (item.venueSlug !== room.slug) continue;
+    const bucket = talksByDay.get(item.dayIso) ?? [];
+    bucket.push(item);
+    talksByDay.set(item.dayIso, bucket);
+  }
+
   // Same lockup resolution as /schedule — a session that borrows a partner's
   // mark tracks whatever the admin has uploaded rather than a file in the repo.
   const cards: SessionCard[] = sessions.map((s) => {
@@ -921,7 +945,13 @@ export default async function VenueSchedulePage({
   // an insertion-ordered Map keeps the days in order without a second sort.
   const groups = new Map<
     string,
-    { iso: string; weekday: string; label: string; cards: SessionCard[] }
+    {
+      iso: string;
+      weekday: string;
+      label: string;
+      cards: SessionCard[];
+      talks: CalendarItem[];
+    }
   >();
   // A span is not undated — it runs across days rather than on one. Filing it
   // under "slot to be confirmed" said the opposite of the truth for the one
@@ -934,11 +964,30 @@ export default async function VenueSchedulePage({
       (card.span ? spanned : undated).push(card);
       continue;
     }
-    const bucket = groups.get(day.iso) ?? { ...day, cards: [] };
+    const bucket = groups.get(day.iso) ?? { ...day, cards: [], talks: [] };
     bucket.cards.push(card);
     groups.set(day.iso, bucket);
   }
-  const dayGroups = [...groups.values()];
+
+  // A day can be all talks and no activation — a room running a speaker track
+  // on a day nothing else is booked in it — so the buckets are opened from
+  // both sources rather than only from the cards.
+  for (const [iso, talks] of talksByDay) {
+    const day = dayMeta(iso);
+    if (!day) continue;
+    const bucket = groups.get(iso) ?? { ...day, cards: [], talks: [] };
+    bucket.talks = talks.sort((a, b) => a.startMin - b.startMin);
+    groups.set(iso, bucket);
+  }
+
+  // Explicitly by date now. Insertion order was enough while every bucket came
+  // from one already-sorted list; with a second source opening buckets of its
+  // own, a Tuesday entered after a Thursday would have printed in that order.
+  const dayGroups = [...groups.values()].sort(
+    (a, b) =>
+      EVENT_DAYS.findIndex((d) => d.iso === a.iso) -
+      EVENT_DAYS.findIndex((d) => d.iso === b.iso),
+  );
 
   return (
     <main>
@@ -1052,13 +1101,59 @@ export default async function VenueSchedulePage({
                   {group.weekday}
                 </h3>
                 <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
-                  {group.label} · {group.cards.length}{" "}
-                  {group.cards.length === 1 ? "session" : "sessions"}
+                  {group.label} · {group.cards.length + group.talks.length}{" "}
+                  {group.cards.length + group.talks.length === 1
+                    ? "session"
+                    : "sessions"}
                 </p>
               </div>
-              <div className="mt-6 lg:mt-8">
-                <SessionBento sessions={group.cards} matchTitleSize inContext />
-              </div>
+              {group.cards.length > 0 && (
+                <div className="mt-6 lg:mt-8">
+                  <SessionBento
+                    sessions={group.cards}
+                    matchTitleSize
+                    inContext
+                  />
+                </div>
+              )}
+
+              {/* The room's own talks, as rows rather than cards.
+              
+                  A bento card is ~260px and earns it for an activation: a
+                  lockup, a hero, five hours and a partner to credit. A
+                  thirty-minute talk by one person has none of that, and a
+                  dozen of them in card form is 3,000px of scrolling for a
+                  running order. Rows put the same day on one screen.
+              
+                  The split matches the one the week grid already makes
+                  between a block and a summary: the shape follows how much is
+                  behind it, not what kind of record it came from. */}
+              {group.talks.length > 0 && (
+                <ul
+                  className={group.cards.length > 0 ? "mt-8" : "mt-6 lg:mt-8"}
+                >
+                  {group.talks.map((talk) => (
+                    <li
+                      key={talk.slug}
+                      className="flex items-baseline justify-between gap-6 border-b border-white/10 py-4"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-pretty font-medium text-white">
+                          {talk.title}
+                        </p>
+                        {talk.people && (
+                          <p className="mt-1 text-pretty text-sm text-white/60">
+                            {talk.people}
+                          </p>
+                        )}
+                      </div>
+                      <p className="shrink-0 font-mono text-[11px] uppercase tracking-widest text-white/55">
+                        {talk.timeLabel}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
 

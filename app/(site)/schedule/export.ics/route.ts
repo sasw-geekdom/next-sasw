@@ -1,5 +1,7 @@
+import { listSessions } from "@/lib/admin/cms-queries";
 import { eventLocation, icsLine as line, icsStamp } from "@/lib/calendar";
-import { exportableSessions } from "@/lib/schedule";
+import { ROOMS, roomSlugFromLegacy } from "@/lib/locations";
+import { ASSUMED_MINUTES, exportableSessions } from "@/lib/schedule";
 
 // The week a reader actually picked, as one calendar file.
 //
@@ -29,39 +31,106 @@ export async function GET(request: Request): Promise<Response> {
   const requested = new URL(request.url).searchParams.get("s");
   if (!requested) return new Response("No selection", { status: 400 });
 
-  const sessions = exportableSessions();
-
-  // Resolved against the known schedule rather than trusted, and in the
-  // week's own order rather than the order they were clicked — a calendar
-  // file is read chronologically, and the click order is noise.
+  // Resolved against the known schedule rather than trusted.
   const wanted = new Set(requested.split(",").slice(0, MAX_SELECTION));
-  const picked = sessions
+
+  // Sorted on epoch rather than on the ISO string. The curated week is all one
+  // offset so comparing text worked while that was the only source; a CMS row
+  // arrives as a UTC instant, and "2026-10-02T13:00:00-05:00" against
+  // "2026-10-02T18:00:00.000Z" compares as text to the wrong answer.
+  type Entry = { at: number; lines: string[] };
+
+  const curated: Entry[] = exportableSessions()
     .filter((s) => wanted.has(s.slug))
-    .sort((a, b) => a.when!.start.localeCompare(b.when!.start));
+    .map((session) => ({
+      at: Date.parse(session.when!.start),
+      lines: [
+        "BEGIN:VEVENT",
+        // The same UID the per-session file uses, deliberately. Someone who
+        // added one activation from its own page and then exported a selection
+        // containing it gets the entry updated rather than duplicated.
+        line("UID", `${session.slug}@sasw.co`),
+        "DTSTAMP:20260101T000000Z",
+        `DTSTART:${icsStamp(session.when!.start)}`,
+        `DTEND:${icsStamp(session.when!.end)}`,
+        line("SUMMARY", session.title),
+        line(
+          "DESCRIPTION",
+          `${session.blurb} Part of San Antonio Startup + Tech Week.`,
+        ),
+        line("LOCATION", eventLocation(session)),
+        "END:VEVENT",
+      ],
+    }));
+
+  // The CMS's standalone sessions, which the grid has drawn since the calendar
+  // became part data and which are `exportable` for the reason set out on
+  // `standaloneItems`. A row carries a start, an end, a title and a room —
+  // everything a VEVENT needs but `URL`, which is optional.
+  //
+  // Wrapped, like every other read of this collection: an outage costs the CMS
+  // sessions from the file rather than the whole download, so a reader who
+  // picked four activations and one talk still gets their four.
+  let fromCms: Entry[] = [];
+  try {
+    fromCms = (await listSessions())
+      .filter((row) => row.activation === null && wanted.has(row.id))
+      .map((row) => {
+        const room =
+          ROOMS.find((r) => r.slug === row.location) ??
+          ROOMS.find((r) => r.slug === roomSlugFromLegacy(row.location));
+        // The same fallback the grid draws with, so the block and the calendar
+        // entry cannot disagree about how long a row with no end runs.
+        const end = row.endsAt ?? row.startsAt + ASSUMED_MINUTES * 60_000;
+        const who = row.participants
+          .map((p) => p.name)
+          .filter(Boolean)
+          .join(", ");
+        return {
+          at: row.startsAt,
+          lines: [
+            "BEGIN:VEVENT",
+            // The Firestore id, which is what the grid uses as this block's
+            // slug and what the reader's selection therefore holds.
+            line("UID", `${row.id}@sasw.co`),
+            "DTSTAMP:20260101T000000Z",
+            `DTSTART:${icsStamp(new Date(row.startsAt).toISOString())}`,
+            `DTEND:${icsStamp(new Date(end).toISOString())}`,
+            line("SUMMARY", row.title),
+            line(
+              "DESCRIPTION",
+              [
+                row.description,
+                who && `With ${who}.`,
+                "Part of San Antonio Startup + Tech Week.",
+              ]
+                .filter(Boolean)
+                .join(" "),
+            ),
+            line(
+              "LOCATION",
+              room ? eventLocation({ venue: room }) : "San Antonio, TX",
+            ),
+            "END:VEVENT",
+          ],
+        };
+      });
+  } catch {
+    fromCms = [];
+  }
 
   // An unknown slug is dropped silently, but a selection that resolves to
   // nothing is a 404 rather than an empty calendar — an .ics with no VEVENT
   // imports "successfully" and adds nothing, which looks exactly like the
   // feature being broken.
-  if (picked.length === 0) return new Response("Not found", { status: 404 });
+  if (curated.length + fromCms.length === 0)
+    return new Response("Not found", { status: 404 });
 
-  const events = picked.flatMap((session) => [
-    "BEGIN:VEVENT",
-    // The same UID the per-session file uses, deliberately. Someone who added
-    // one activation from its own page and then exported a selection
-    // containing it gets the entry updated rather than duplicated.
-    line("UID", `${session.slug}@sasw.co`),
-    "DTSTAMP:20260101T000000Z",
-    `DTSTART:${icsStamp(session.when!.start)}`,
-    `DTEND:${icsStamp(session.when!.end)}`,
-    line("SUMMARY", session.title),
-    line(
-      "DESCRIPTION",
-      `${session.blurb} Part of San Antonio Startup + Tech Week.`,
-    ),
-    line("LOCATION", eventLocation(session)),
-    "END:VEVENT",
-  ]);
+  // In the week's own order rather than the order they were clicked — a
+  // calendar file is read chronologically, and the click order is noise.
+  const events = [...curated, ...fromCms]
+    .sort((a, b) => a.at - b.at)
+    .flatMap((e) => e.lines);
 
   const ics = [
     "BEGIN:VCALENDAR",
