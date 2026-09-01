@@ -65,6 +65,15 @@ export interface SessionRow {
    * content that page deliberately gathers.
    */
   slug: string;
+  /**
+   * Slugs this session has published under and moved off.
+   *
+   * A talk's URL is derived from its title, and titles get edited — the first
+   * one on the site was retitled within a day of going up, which moved its
+   * slug and 404'd the URL that had already been shared. Retiring rather than
+   * dropping lets the route redirect, exactly as a renamed speaker does.
+   */
+  previousSlugs: string[];
   title: string;
   description: string;
   startsAt: number;

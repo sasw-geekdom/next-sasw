@@ -103,6 +103,33 @@ const EXPAND_MAX = 4;
  */
 const HOUR_PX = 60;
 
+/**
+ * The scale once a venue chip narrows the week to one room.
+ *
+ * The note above is true of the unfiltered week and stopped being true of the
+ * filtered one. "It never has to draw a thirty-minute slot" held while the
+ * summary rule collapsed every dense run — but the venue chip forces
+ * expansion, so `?venue=tpr` is exactly where the week draws half hours, and
+ * at 60 a talk is 30px: under the 58 `fitsTimeRow` needs before a block may
+ * print even its own time. Measured on TPR's first talk, a 228x24 strip with
+ * its title cut mid-word.
+ *
+ * 132 is the day view's own fine scale for half-hour content, borrowed rather
+ * than picked — `scaleFor` there returns exactly this for a day whose shortest
+ * item is 30 minutes, and two views drawing the same half hour at the same
+ * height is worth more than a number tuned twice.
+ *
+ * 120 was the first cut, on the reasoning that it is the smallest that clears
+ * the 58px floor. It clears it for a one-line title and not for this one:
+ * "Building Nopalera on Her Own Terms" wraps to two lines in a 228px lane and
+ * pushed the time row out of the block. `fitsTimeRow` measures the block, not
+ * the copy in it.
+ *
+ * It is not free — the filtered grid goes from 462px to 966 — which is why it
+ * is spent only on a filtered view that actually holds a short block.
+ */
+const FILTERED_HOUR_PX = 132;
+
 export interface CalendarDay {
   iso: string;
   weekday: string;
@@ -288,6 +315,20 @@ export function WeekCalendarGrid({
   // which is what this view already does with a brunch that starts at 7:30 and
   // a giveaway that runs three days. A rail costs no lane width, and the bar
   // gets the full day column instead of a sliver of it.
+  // Fine only where something on screen needs it — see `FILTERED_HOUR_PX`.
+  //
+  // Keyed on what is actually drawn rather than on the chip being set, because
+  // the chip is not the thing that costs. Filtering to The Rand, whose blocks
+  // are all an hour or more, would pay 500px of extra axis to draw the same
+  // blocks larger than they already read; filtering to TPR, which runs half
+  // hours, is where the scale buys a legible block. So the rule asks the
+  // content, exactly as the day view's `scaleFor` does.
+  const hourPx = React.useMemo(() => {
+    if (venue === null || shownItems.length === 0) return HOUR_PX;
+    const shortest = Math.min(...shownItems.map((i) => i.endMin - i.startMin));
+    return shortest <= 30 ? FILTERED_HOUR_PX : HOUR_PX;
+  }, [venue, shownItems]);
+
   const { placements, railRuns } = React.useMemo(() => {
     const out: Record<string, AxisPlacement[]> = {};
     const rail: Record<string, Run[]> = {};
@@ -311,7 +352,7 @@ export function WeekCalendarGrid({
       // So density is asked directly. A run the axis cannot draw goes to the
       // rail however few things are in it.
       const drawable = (run: Run) =>
-        run.items.every((i) => fitsTimeRow(i.startMin, i.endMin, HOUR_PX));
+        run.items.every((i) => fitsTimeRow(i.startMin, i.endMin, hourPx));
 
       // The venue chip still forces expansion: one venue per column means every
       // block is full width, and there is nothing left to protect. A short
@@ -355,9 +396,9 @@ export function WeekCalendarGrid({
             onToggle={toggle}
             dense={cell.lanes >= 3}
             lanes={cell.lanes}
-            spare={hasSpareRows(cell.startMin, cell.endMin, HOUR_PX)}
-            showTime={fitsTimeRow(cell.startMin, cell.endMin, HOUR_PX)}
-            markMax={axisMarkCap(cell.startMin, cell.endMin, HOUR_PX)}
+            spare={hasSpareRows(cell.startMin, cell.endMin, hourPx)}
+            showTime={fitsTimeRow(cell.startMin, cell.endMin, hourPx)}
+            markMax={axisMarkCap(cell.startMin, cell.endMin, hourPx)}
             showAction={false}
             splitArt
             fill
@@ -366,7 +407,7 @@ export function WeekCalendarGrid({
       }));
     }
     return { placements: out, railRuns: rail };
-  }, [days, shownItems, circuitOrder, venue, picked, toggle]);
+  }, [days, shownItems, circuitOrder, venue, hourPx, picked, toggle]);
 
   // The two rails. Mornings come off the axis so it doesn't have to start at
   // 7:30 AM for one brunch; all-day bars span columns.
@@ -682,7 +723,7 @@ export function WeekCalendarGrid({
             className="mt-5 hidden lg:block"
             columns={columns}
             axis={axis}
-            hourPx={HOUR_PX}
+            hourPx={hourPx}
             // No `roomyHourPx`. `roomy` is min-width 1024 *and* min-height
             // 900, and a MacBook Air is exactly 900 tall — so it fired at
             // precisely the viewport where the grid stopped fitting and made

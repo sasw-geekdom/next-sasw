@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
 import { BackLink } from "@/components/site/back-link";
 import { ARROW_MOTION } from "@/lib/motion";
 import { formatDateTime } from "@/lib/format";
-import { dayKey } from "@/lib/schedule";
+import { ASSUMED_MINUTES, dayKey } from "@/lib/schedule";
+import { jsonLd, talkEvent } from "@/lib/structured-data";
 import type { ResolvedParticipant } from "@/lib/admin/cms-types";
 import { listTalks, resolveTalk, type Talk } from "@/lib/talks";
 import { cn } from "@/lib/utils";
@@ -64,8 +65,9 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const talk = await resolveTalk(slug);
-  if (!talk) return { title: "Talk not found" };
+  const hit = await resolveTalk(slug);
+  if (!hit) return { title: "Talk not found" };
+  const talk = hit.talk;
 
   // The organiser's own description leads, cut to a length a result page will
   // actually print; the speaker-and-room line is the fallback rather than a
@@ -97,12 +99,40 @@ export default async function TalkPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const talk = await resolveTalk(slug);
-  if (!talk) notFound();
+  const hit = await resolveTalk(slug);
+  if (!hit) notFound();
+  // Matched a retired slug — send the shared link to the current URL rather
+  // than serving the same talk at two addresses.
+  if (!hit.canonical) permanentRedirect(`/schedule/talk/${hit.talk.row.slug}`);
+  const talk = hit.talk;
 
   const { row, room } = talk;
   const speakers = row.participants.filter((p) => p.name);
   const day = dayKey(new Date(row.startsAt).toISOString());
+
+  // The same markup an activation page carries, which this had no equivalent
+  // of — so a talk with a named speaker, a room and a confirmed half hour was
+  // the one event on the site describing itself to nobody.
+  //
+  // `endsAt` is nullable in the CMS and the grid assumes an hour for a row
+  // without one. The markup assumes the same, rather than omitting `endDate`:
+  // an Event needs both to be eligible, and the two would otherwise disagree
+  // about the same session.
+  const endsAt = row.endsAt ?? row.startsAt + ASSUMED_MINUTES * 60_000;
+  const event = talkEvent({
+    slug: row.slug,
+    title: row.title,
+    description: row.description,
+    // UTC, where an activation's markup carries -05:00. Those are authored as
+    // strings and kept as authored; a CMS row is an epoch, so the offset it
+    // was entered in is not recoverable from it. The same instant either way,
+    // and schema.org takes both — inventing an offset would be the only way
+    // to get this wrong.
+    startIso: new Date(row.startsAt).toISOString(),
+    endIso: new Date(endsAt).toISOString(),
+    room,
+    people: speakers.map((p) => ({ name: p.name, slug: p.slug })),
+  });
 
   return (
     // The speakers' shell, not a prose column. A talk page is the same shape
@@ -113,6 +143,10 @@ export default async function TalkPage({
     // screen; the two columns halve that and put it back inside the system
     // every other slug page on the site already uses.
     <main className="bg-black">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(event) }}
+      />
       {/* One screen, not a scroll. `100vh-4rem` is the site's own idiom for
           this — `4rem` is the sticky navbar's `h-16` — and hero-shell,
           form-page and the two bands all fill the viewport with exactly this

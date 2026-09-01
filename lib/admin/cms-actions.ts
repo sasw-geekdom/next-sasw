@@ -371,6 +371,9 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
     if (doc.id === ref.id) continue;
     const current = doc.get("slug");
     if (typeof current === "string" && current) taken.add(current);
+    for (const retired of doc.get("previousSlugs") ?? []) {
+      if (typeof retired === "string") taken.add(retired);
+    }
   }
 
   // A stored slug outlives a retitled session. There is no slug field in the
@@ -378,7 +381,8 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
   // would silently move the page's URL and break every link already shared —
   // the failure the speakers form avoids by pre-filling its slug field. New
   // sessions derive from the title; edits keep what they have.
-  const existingSlug = id ? (await ref.get()).get("slug") : null;
+  const snap = id ? await ref.get() : null;
+  const existingSlug = snap?.get("slug");
   const desired =
     data.slug ||
     (typeof existingSlug === "string" && existingSlug
@@ -386,9 +390,27 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
       : slugify(data.title, "session"));
   const slug = uniqueSlug(desired, taken);
 
+  // A changed slug is retired rather than dropped, so a link already shared
+  // redirects instead of 404ing — the same contract a renamed speaker gets.
+  // Reclaiming one this session used before just takes it off the list.
+  //
+  // This only bites when someone edits the slug directly, since a retitle now
+  // keeps the stored one. It is the case worth covering anyway: an explicit
+  // slug edit is the one place a URL is *meant* to move, and it is exactly
+  // then that the old one needs to keep working.
+  const retired = new Set<string>(
+    (snap?.get("previousSlugs") ?? []).filter(
+      (v: unknown): v is string => typeof v === "string",
+    ),
+  );
+  if (typeof existingSlug === "string" && existingSlug && existingSlug !== slug)
+    retired.add(existingSlug);
+  retired.delete(slug);
+
   const payload = {
     title: data.title,
     slug,
+    previousSlugs: [...retired],
     description: data.description,
     startsAt: data.startsAt,
     endsAt: data.endsAt ?? null,
@@ -399,6 +421,7 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
   };
 
   if (id) {
+    if (!snap?.exists) return { ok: false, error: "Not found." };
     await ref.update(payload);
   } else {
     await ref.set({ ...payload, createdAt: FieldValue.serverTimestamp() });

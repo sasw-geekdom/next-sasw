@@ -198,6 +198,70 @@ export function activationEvent(session: ResolvedSession) {
 }
 
 /**
+ * One standalone talk, for /schedule/talk/[slug].
+ *
+ * Separate from `activationEvent` rather than a branch inside it, because the
+ * two describe different things off different data. An activation is a
+ * curated block with a hero image, a blurb and sometimes a partner running it;
+ * a talk is a CMS row with a start, a room and the people on stage.
+ *
+ * `performer` is the field that only exists here and is most of the point. A
+ * talk's speakers are named, they have their own pages on this site, and a
+ * `Person` with a `url` is what links the two entities for a crawler — the
+ * thing a speaker sharing their own talk most wants working. An unresolved
+ * participant is named without a url rather than pointed at a dead page; see
+ * `slug` on ResolvedParticipant.
+ *
+ * `superEvent` points at the week, exactly as an activation does, so a talk
+ * reads as part of it rather than as an unrelated event that happens to fall
+ * in the same five days.
+ *
+ * No `image` override: the OG route builds a card per talk and the metadata
+ * already points at it, but that URL carries a content hash Next owns. Naming
+ * the shared bolt here keeps the markup honest rather than guessing at a path
+ * that changes on every deploy.
+ */
+export function talkEvent(talk: {
+  slug: string;
+  title: string;
+  description: string;
+  /** ISO 8601 with an explicit offset, as schema.org wants. */
+  startIso: string;
+  endIso: string;
+  room: { name: string; place?: Room["place"] } | null;
+  people: { name: string; slug: string }[];
+}) {
+  const url = `${SITE_URL}/schedule/talk/${talk.slug}`;
+  const performers = talk.people
+    .filter((p) => p.name)
+    .map((p) => ({
+      "@type": "Person",
+      name: p.name,
+      ...(p.slug ? { url: `${SITE_URL}/speakers/${p.slug}` } : {}),
+    }));
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: talk.title,
+    ...(talk.description ? { description: talk.description } : {}),
+    startDate: talk.startIso,
+    endDate: talk.endIso,
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    // A talk with no resolvable room is still a real event; omitting `location`
+    // costs the rich result rather than publishing an address that is a guess.
+    ...(talk.room ? { location: place(talk.room) } : {}),
+    ...(performers.length > 0 ? { performer: performers } : {}),
+    organizer: ORGANIZER,
+    superEvent: { "@id": WEEK_ID },
+    offers: FREE_OFFER,
+    url,
+    image: [`${SITE_URL}/brand/bolt-current-og.png`],
+  };
+}
+
+/**
  * A node about to sit inside a `@graph`, minus its own `@context`.
  *
  * Written as a copy-and-delete rather than the obvious rest-destructure,

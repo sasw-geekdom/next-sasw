@@ -30,7 +30,7 @@ export default async function OgImage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const talk = await resolveTalk(slug);
+  const talk = (await resolveTalk(slug))?.talk ?? null;
 
   // Everything `boltOgImage` reads lives in public/brand — see the note there.
   // This route renders on demand for any talk added since the last deploy, so

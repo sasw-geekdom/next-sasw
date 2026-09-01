@@ -114,6 +114,9 @@ export async function listSessions(): Promise<SessionRow[]> {
   for (const doc of sessionsSnap.docs) {
     const stored = doc.get("slug");
     if (typeof stored === "string" && stored) taken.add(stored);
+    // Retired slugs hold their names as well, or a new session could derive
+    // one that already redirects somewhere else.
+    for (const old of strings(doc.get("previousSlugs"))) taken.add(old);
   }
 
   return sessionsSnap.docs.map((doc) => {
@@ -139,6 +142,7 @@ export async function listSessions(): Promise<SessionRow[]> {
     return {
       id: doc.id,
       slug,
+      previousSlugs: strings(d.previousSlugs),
       title: d.title ?? "",
       description: d.description ?? "",
       startsAt: toMillis(d.startsAt) ?? 0,

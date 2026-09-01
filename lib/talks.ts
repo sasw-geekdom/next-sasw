@@ -52,7 +52,22 @@ export async function listTalks(): Promise<Talk[]> {
     }));
 }
 
-/** One talk by its public slug, or null. */
-export async function resolveTalk(slug: string): Promise<Talk | null> {
-  return (await listTalks()).find((t) => t.row.slug === slug) ?? null;
+export type TalkMatch =
+  { talk: Talk; canonical: true } | { talk: Talk; canonical: false };
+
+/**
+ * Resolve a URL segment. A hit on `previousSlugs` comes back non-canonical so
+ * the route can redirect to the current URL rather than serving one talk at
+ * two addresses — the same contract `resolveSlug` gives a renamed speaker.
+ */
+export async function resolveTalk(slug: string): Promise<TalkMatch | null> {
+  const talks = await listTalks();
+
+  const exact = talks.find((t) => t.row.slug === slug);
+  if (exact) return { talk: exact, canonical: true };
+
+  const renamed = talks.find((t) => t.row.previousSlugs.includes(slug));
+  if (renamed) return { talk: renamed, canonical: false };
+
+  return null;
 }
