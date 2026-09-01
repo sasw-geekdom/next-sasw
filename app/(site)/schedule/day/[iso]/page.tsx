@@ -98,7 +98,10 @@ export default async function ScheduleDayPage({
           className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
         >
           <ArrowLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-0.5" />
-          The whole week
+          {/* Generic. See `BackLink` — a day is reachable from a talk page's
+              "The rest of the day" as well as from the week, and this label
+              was only ever true of the second. */}
+          Back
         </BackLink>
 
         <div className="mt-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-6">

@@ -125,7 +125,10 @@ export default async function SpeakerPage({
             strokeWidth={2}
             aria-hidden="true"
           />
-          The lineup
+          {/* Generic. See `BackLink` — naming a destination on a control that
+              goes back is only true when the two coincide, and a speaker is
+              now reachable from a talk page as well as from the wall. */}
+          Back
         </BackLink>
 
         <article className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-16">

@@ -158,7 +158,11 @@ export default async function TalkPage({
           copy column takes the slack instead. */}
       <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:flex lg:h-[calc(100vh-4rem)] lg:flex-col lg:py-12">
         <BackLink
-          href="/schedule"
+          // Only the fallback — BackLink prefers router.back(). The anchor is
+          // for someone arriving on a shared link with no week behind them:
+          // /schedule opens ~990px above its own grid, and this is a talk, so
+          // the grid is what they came for.
+          href="/schedule#the-week"
           className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none"
         >
           <ArrowLeft
@@ -169,7 +173,12 @@ export default async function TalkPage({
             strokeWidth={2}
             aria-hidden="true"
           />
-          The schedule
+          {/* Generic, which is `BackLink`'s own documented rule: it goes back,
+              so any label naming a destination is only true when that is where
+              you came from. This said "The schedule" and returned you to a
+              speaker's page. The same bug was found and fixed once already on
+              the activation pages, which say this. */}
+          Back
         </BackLink>
 
         <article className="mt-8 grid gap-10 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-16">
