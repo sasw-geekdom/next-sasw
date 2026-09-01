@@ -1216,7 +1216,7 @@ export function SummaryBlock({
       {compact ? (
         <span className="mt-0.5 flex items-baseline justify-between gap-2 font-mono text-[9px] uppercase tracking-widest">
           <span className="truncate text-white/70">
-            {count} sessions{" "}
+            {count} {count === 1 ? "session" : "sessions"}{" "}
             <span className="text-white/50">· {timeLabel}</span>
           </span>
           {/* The house treatment for "this goes somewhere": `ArrowUpRight` with
@@ -1235,7 +1235,7 @@ export function SummaryBlock({
       ) : (
         <>
           <span className="mt-0.5 block truncate font-mono text-[9px] uppercase tracking-widest text-white/70">
-            {count} sessions
+            {count} {count === 1 ? "session" : "sessions"}
           </span>
           <span className="block truncate font-mono text-[9px] uppercase tracking-widest text-white/50">
             {timeLabel}

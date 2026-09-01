@@ -296,10 +296,29 @@ export function WeekCalendarGrid({
         (i) => i.dayIso === day.iso && !i.morning,
       );
       const runs = runsFor(onAxis, circuitOrder);
-      // The venue chip forces expansion: one venue per column means every
-      // block is full width, and there is nothing left to protect.
+      // Two ways a run leaves the axis, and the second is the one `EXPAND_MAX`
+      // could never see. Its own note called this: "a count is a proxy for
+      // density and it is wrong the moment the blocks are not the same size."
+      //
+      // A single thirty-minute talk is one session, well inside the count, and
+      // at HOUR_PX it draws 30px — under the 58 `fitsTimeRow` needs before a
+      // block can show even its own time. Measured on TPR's first Tuesday
+      // talk: a 24px sliver with its title clipped, which had taken a lane and
+      // halved .NET User Group from 228px to 111. That is the exact harm the
+      // rail was built to prevent, arriving through the one door the count
+      // rule left open.
+      //
+      // So density is asked directly. A run the axis cannot draw goes to the
+      // rail however few things are in it.
+      const drawable = (run: Run) =>
+        run.items.every((i) => fitsTimeRow(i.startMin, i.endMin, HOUR_PX));
+
+      // The venue chip still forces expansion: one venue per column means every
+      // block is full width, and there is nothing left to protect. A short
+      // block is still short there, but it is full-width short and the reader
+      // asked for exactly this room.
       const expand = (run: Run) =>
-        venue !== null || run.items.length <= EXPAND_MAX;
+        venue !== null || (run.items.length <= EXPAND_MAX && drawable(run));
       const dense = runs.filter((run) => !expand(run));
       if (dense.length > 0) rail[day.iso] = dense;
 
