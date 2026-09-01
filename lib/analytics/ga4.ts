@@ -23,7 +23,10 @@ export interface WebAnalytics {
   topPages: { path: string; views: number }[];
 }
 
-function serviceAccount(): { client_email: string; private_key: string } | null {
+function serviceAccount(): {
+  client_email: string;
+  private_key: string;
+} | null {
   const raw = process.env.GOOGLE_SERVICE_ACCOUNT_KEY?.trim();
   if (!raw) return null;
   try {
@@ -31,7 +34,10 @@ function serviceAccount(): { client_email: string; private_key: string } | null 
       ? raw
       : Buffer.from(raw, "base64").toString("utf8");
     const parsed = JSON.parse(json);
-    return { client_email: parsed.client_email, private_key: parsed.private_key };
+    return {
+      client_email: parsed.client_email,
+      private_key: parsed.private_key,
+    };
   } catch {
     return null;
   }
@@ -136,7 +142,11 @@ export async function getWebAnalytics(
 
     const byDay = (series.rows ?? []).map((row) => {
       const { iso, label } = parseGaDate(row.dimensionValues?.[0]?.value ?? "");
-      return { iso, label, sessions: Number(row.metricValues?.[0]?.value ?? 0) };
+      return {
+        iso,
+        label,
+        sessions: Number(row.metricValues?.[0]?.value ?? 0),
+      };
     });
 
     const channelRows = (channelRes.rows ?? []).map((row) => ({

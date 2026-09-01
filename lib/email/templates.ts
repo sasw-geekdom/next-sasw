@@ -136,7 +136,8 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
     key: "speaker",
     label: "Speaker",
     flow: "Plug In",
-    description: "Sent automatically when someone pitches a session via Plug In.",
+    description:
+      "Sent automatically when someone pitches a session via Plug In.",
     tokens: ["{firstName}", "{sessionTitle}"],
     defaults: DEFAULT_SPEAKER_COPY,
     sample: { firstName: "Alex", sessionTitle: "Scaling AI at the edge" },

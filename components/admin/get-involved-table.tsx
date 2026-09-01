@@ -254,15 +254,26 @@ export function GetInvolvedTable({ rows }: { rows: GetInvolvedRow[] }) {
                   />
                 )}
                 {selected.audience.length > 0 && (
-                  <Detail label="Audience" value={selected.audience.join(", ")} />
+                  <Detail
+                    label="Audience"
+                    value={selected.audience.join(", ")}
+                  />
                 )}
                 {selected.attendance && (
-                  <Detail label="Expected attendance" value={selected.attendance} />
+                  <Detail
+                    label="Expected attendance"
+                    value={selected.attendance}
+                  />
                 )}
                 {selected.preferredTime && (
-                  <Detail label="Preferred time" value={selected.preferredTime} />
+                  <Detail
+                    label="Preferred time"
+                    value={selected.preferredTime}
+                  />
                 )}
-                {selected.venue && <Detail label="Venue" value={selected.venue} />}
+                {selected.venue && (
+                  <Detail label="Venue" value={selected.venue} />
+                )}
                 {selected.coSponsors && (
                   <Detail
                     label="Co-sponsors / partners"
@@ -283,7 +294,10 @@ export function GetInvolvedTable({ rows }: { rows: GetInvolvedRow[] }) {
             {selected.notes && (
               <Detail label="Anything else" value={selected.notes} multiline />
             )}
-            <Detail label="Received" value={formatDateTime(selected.createdAt)} />
+            <Detail
+              label="Received"
+              value={formatDateTime(selected.createdAt)}
+            />
 
             <div className="mt-2 border-t border-border pt-4">
               {confirm ? (

@@ -36,8 +36,13 @@ export function Topbar({
           {trail.map((item, i) => {
             const last = i === trail.length - 1;
             return (
-              <span key={item.href} className="flex min-w-0 items-center gap-1.5">
-                <span className="hidden text-muted-foreground/50 sm:inline">/</span>
+              <span
+                key={item.href}
+                className="flex min-w-0 items-center gap-1.5"
+              >
+                <span className="hidden text-muted-foreground/50 sm:inline">
+                  /
+                </span>
                 {last ? (
                   <span className="truncate font-medium">{item.label}</span>
                 ) : (

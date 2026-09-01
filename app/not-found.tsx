@@ -69,14 +69,22 @@ export default function NotFound() {
           className="inline-flex items-center gap-0.5 font-medium text-magenta hover:underline"
         >
           Register
-          <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+          <ArrowUpRight
+            className="h-4 w-4"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
         </Link>
         <Link
           href="/"
           className="inline-flex items-center gap-0.5 text-white/60 hover:text-white"
         >
           Plug back in
-          <ArrowUpRight className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+          <ArrowUpRight
+            className="h-4 w-4"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
         </Link>
       </div>
     </main>

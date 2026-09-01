@@ -1,0 +1,20 @@
+# pnpm writes this file and pnpm owns its formatting. Prettier will happily
+# reformat it — 6,634 lines on the first run — which buys nothing, guarantees a
+# conflict on the next `pnpm install`, and is exactly the kind of diff nobody
+# reads. There is no .prettierrc here either, so `prettier --write .` runs on
+# defaults over everything it recognises; this file is what keeps that from
+# being a destructive command.
+pnpm-lock.yaml
+
+# Build output and deploy artefacts. Generated, gitignored, and large.
+.next/
+.vercel/
+out/
+
+# Prose, which is hand-wrapped here and reads worse for being machine-wrapped.
+# Prettier rewrites `*emphasis*` as `_emphasis_`, and on AGENTS.md it
+# de-indented a list item's continuation line — enough to break the bullet it
+# belonged to. The value of a formatter is on code, where the rules are
+# arbitrary and consistency is the whole point; a paragraph's line breaks are a
+# choice someone made.
+*.md

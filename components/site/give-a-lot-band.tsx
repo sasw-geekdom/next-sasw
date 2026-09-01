@@ -1,4 +1,10 @@
-import { ArrowUpRight, CalendarDays, Clock, MapPin, PackageOpen } from "lucide-react";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  Clock,
+  MapPin,
+  PackageOpen,
+} from "lucide-react";
 import { OrganizerLogo } from "@/components/site/organizer-logo";
 import { ButtonLink } from "@/components/ui/button";
 import { listPartners } from "@/lib/admin/cms-queries";
@@ -110,7 +116,10 @@ function Artwork() {
               <span className="text-right text-white/40">{row.before}</span>
               {/* The connector, deliberately faint. It is punctuation between
                   the two halves, not a third thing to read. */}
-              <span aria-hidden="true" className="w-4 text-center text-white/20">
+              <span
+                aria-hidden="true"
+                className="w-4 text-center text-white/20"
+              >
                 &rarr;
               </span>
               <span className="text-(--lot-amber)">{row.after}</span>

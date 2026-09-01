@@ -37,7 +37,9 @@ export function RegistrationForm() {
     set: React.Dispatch<React.SetStateAction<T[]>>,
     value: T,
   ) {
-    set(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+    set(
+      list.includes(value) ? list.filter((v) => v !== value) : [...list, value],
+    );
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {

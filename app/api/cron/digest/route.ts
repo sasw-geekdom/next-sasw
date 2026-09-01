@@ -34,7 +34,10 @@ export async function GET(request: Request) {
     fields: [
       { label: "Total registered", value: String(rows.length) },
       { label: "New this week", value: String(newThisWeek.length) },
-      { label: "First-timers", value: String(count((r) => r.firstTime === true)) },
+      {
+        label: "First-timers",
+        value: String(count((r) => r.firstTime === true)),
+      },
       {
         label: "Volunteer interest",
         value: String(count((r) => r.volunteerInterested === true)),

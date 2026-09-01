@@ -17,9 +17,10 @@ export function GalleryManager({
 }) {
   const router = useRouter();
   const [pending, startTransition] = React.useTransition();
-  const [notice, setNotice] = React.useState<
-    { tone: "ok" | "error"; text: string } | null
-  >(null);
+  const [notice, setNotice] = React.useState<{
+    tone: "ok" | "error";
+    text: string;
+  } | null>(null);
 
   function summarize(r: SyncResult): string {
     const parts = [`${r.generated} built`];
@@ -79,8 +80,8 @@ export function GalleryManager({
       <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
         <li>
           Upload originals to the{" "}
-          <code className="font-mono text-xs">15-years/</code> folder in Firebase
-          Storage (JPG, PNG, WebP, or HEIC).
+          <code className="font-mono text-xs">15-years/</code> folder in
+          Firebase Storage (JPG, PNG, WebP, or HEIC).
         </li>
         <li>
           Click <span className="font-medium text-foreground">Sync photos</span>{" "}

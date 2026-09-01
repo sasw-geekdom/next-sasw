@@ -74,4 +74,3 @@ export interface GetInvolvedRow {
   status: SubmissionStatus;
   createdAt: number;
 }
-

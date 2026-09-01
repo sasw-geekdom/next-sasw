@@ -29,7 +29,8 @@ const CONFIRMATIONS: Record<GetInvolvedPath, string> = {
   sponsor:
     "Someone from our sponsor team will be in touch within 2 business days.",
   host: "We'll review your submission and get back to you within 5 business days. Some anchor events and key session dates/times are locked, so if we need to shift your time, we'll work it out with you.",
-  general: "We'll get back to you as soon as we can, typically within 3 business days.",
+  general:
+    "We'll get back to you as soon as we can, typically within 3 business days.",
 };
 
 export function GetInvolvedForm() {
@@ -242,7 +243,9 @@ export function GetInvolvedForm() {
           <section className="flex flex-col gap-5">
             <SectionLabel>Your event</SectionLabel>
             <div>
-              <Label htmlFor="gi-concept">What event do you want to host?</Label>
+              <Label htmlFor="gi-concept">
+                What event do you want to host?
+              </Label>
               <Textarea
                 id="gi-concept"
                 name="eventConcept"
@@ -305,7 +308,9 @@ export function GetInvolvedForm() {
                 />
               </div>
               <div>
-                <Label htmlFor="gi-time">Preferred day and time (optional)</Label>
+                <Label htmlFor="gi-time">
+                  Preferred day and time (optional)
+                </Label>
                 <Input id="gi-time" name="preferredTime" />
               </div>
             </div>

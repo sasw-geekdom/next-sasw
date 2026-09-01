@@ -37,38 +37,64 @@ const FIELDS: {
   multiline?: boolean;
 }[] = [
   { key: "subject", label: "Subject line" },
-  { key: "heading", label: "Heading", hint: "The big line at the top of the message." },
+  {
+    key: "heading",
+    label: "Heading",
+    hint: "The big line at the top of the message.",
+  },
   {
     key: "body",
     label: "Body",
     hint: "One paragraph per blank line.",
     multiline: true,
   },
-  { key: "ctaIntro", label: "Calendar intro", hint: "Sits just above the “Add to calendar” buttons. Leave blank to omit." },
-  { key: "signoff", label: "Sign-off", hint: "Closing line. Leave blank to omit." },
+  {
+    key: "ctaIntro",
+    label: "Calendar intro",
+    hint: "Sits just above the “Add to calendar” buttons. Leave blank to omit.",
+  },
+  {
+    key: "signoff",
+    label: "Sign-off",
+    hint: "Closing line. Leave blank to omit.",
+  },
 ];
 
-export function EmailManager({ initial, updatedAt, updatedBy, adminEmail }: Props) {
+export function EmailManager({
+  initial,
+  updatedAt,
+  updatedBy,
+  adminEmail,
+}: Props) {
   const router = useRouter();
   const [active, setActive] = React.useState<EmailTemplateKey>("registration");
   const [drafts, setDrafts] = React.useState<Drafts>(initial);
   const [baseline, setBaseline] = React.useState<Drafts>(initial);
-  const [issues, setIssues] = React.useState<Record<string, string[] | undefined>>({});
-  const [notice, setNotice] = React.useState<
-    { tone: "ok" | "error"; text: string } | null
-  >(null);
+  const [issues, setIssues] = React.useState<
+    Record<string, string[] | undefined>
+  >({});
+  const [notice, setNotice] = React.useState<{
+    tone: "ok" | "error";
+    text: string;
+  } | null>(null);
   const [saving, startSave] = React.useTransition();
   const [testing, startTest] = React.useTransition();
 
   const meta = templateMeta(active);
   const draft = drafts[active];
-  const preview = React.useMemo(() => renderSample(active, draft), [active, draft]);
+  const preview = React.useMemo(
+    () => renderSample(active, draft),
+    [active, draft],
+  );
   const dirty = JSON.stringify(draft) !== JSON.stringify(baseline[active]);
 
   function set(field: keyof EmailCopy, value: string) {
     setNotice(null);
     setIssues((prev) => ({ ...prev, [field]: undefined }));
-    setDrafts((prev) => ({ ...prev, [active]: { ...prev[active], [field]: value } }));
+    setDrafts((prev) => ({
+      ...prev,
+      [active]: { ...prev[active], [field]: value },
+    }));
   }
 
   function switchTo(key: EmailTemplateKey) {

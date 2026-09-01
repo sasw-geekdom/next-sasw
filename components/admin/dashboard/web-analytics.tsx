@@ -4,7 +4,10 @@ import type { WebAnalytics as WebAnalyticsData } from "@/lib/analytics/ga4";
 import { RANGE_OPTIONS } from "@/lib/analytics/ga4";
 import { formatCompact, formatPercent, formatDuration } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { MetricCard, DeltaBadge } from "@/components/admin/dashboard/metric-card";
+import {
+  MetricCard,
+  DeltaBadge,
+} from "@/components/admin/dashboard/metric-card";
 import { SessionsTrend } from "@/components/admin/dashboard/sessions-trend";
 
 export function WebAnalytics({
@@ -171,9 +174,10 @@ function Setup() {
     <div className="rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
       <p className="font-medium text-foreground">Connect Google Analytics</p>
       <p className="mt-1 max-w-prose">
-        Set <code className="font-mono text-xs">GA4_PROPERTY_ID</code>, grant the
-        service account Viewer access to the property, and enable the Analytics
-        Data API to see sessions, users, page views, and engagement here.
+        Set <code className="font-mono text-xs">GA4_PROPERTY_ID</code>, grant
+        the service account Viewer access to the property, and enable the
+        Analytics Data API to see sessions, users, page views, and engagement
+        here.
       </p>
     </div>
   );

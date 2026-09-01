@@ -88,7 +88,7 @@ export default async function ScheduleDayPage({
 
             A deliberate break from the page's measure rather than a free win:
             this section is now the one that runs wider than its neighbours. */}
-        <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-20 2xl:max-w-[110rem]">
+      <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-20 2xl:max-w-[110rem]">
         <BackLink
           // Only the fallback: BackLink prefers router.back(), which restores
           // the exact scroll position for anyone who came from the week. This

@@ -73,12 +73,15 @@ async function mapLimit<T, R>(
 ): Promise<R[]> {
   const out: R[] = new Array(items.length);
   let i = 0;
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (i < items.length) {
-      const idx = i++;
-      out[idx] = await fn(items[idx]);
-    }
-  });
+  const workers = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (i < items.length) {
+        const idx = i++;
+        out[idx] = await fn(items[idx]);
+      }
+    },
+  );
   await Promise.all(workers);
   return out;
 }
@@ -95,12 +98,14 @@ export async function syncGalleryThumbnails(): Promise<SyncResult> {
 
   // Prune entries whose original was deleted; best-effort remove their Blob.
   const removedItems = manifest.filter((m) => !liveNames.has(m.name));
-  await Promise.all(
-    removedItems.map((m) => del(m.url).catch(() => {})),
-  );
+  await Promise.all(removedItems.map((m) => del(m.url).catch(() => {})));
 
   // Which originals still need a (re)build? Compare MD5 from Storage metadata.
-  const pending: { name: string; md5: string; file: (typeof originals)[number] }[] = [];
+  const pending: {
+    name: string;
+    md5: string;
+    file: (typeof originals)[number];
+  }[] = [];
   for (const file of originals) {
     const name = file.name.slice(PREFIX.length);
     const md5 = (file.metadata?.md5Hash as string | undefined) ?? "";
@@ -137,10 +142,7 @@ export async function syncGalleryThumbnails(): Promise<SyncResult> {
   await adminDb
     .collection(COLLECTIONS.settings)
     .doc(GALLERY_SETTINGS_DOC)
-    .set(
-      { items, updatedAt: FieldValue.serverTimestamp() },
-      { merge: true },
-    );
+    .set({ items, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
 
   return {
     total: originals.length,

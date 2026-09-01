@@ -76,7 +76,10 @@ function Row({
       )}
     >
       <span
-        className={cn("shrink-0 text-[0.78em]", lit ? "text-white/40" : "text-white/15")}
+        className={cn(
+          "shrink-0 text-[0.78em]",
+          lit ? "text-white/40" : "text-white/15",
+        )}
       >
         {row.tag}
       </span>

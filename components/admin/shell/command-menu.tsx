@@ -57,7 +57,8 @@ export function CommandMenu({
             key: "search-reg",
             label: `Search registrations for “${query.trim()}”`,
             hint: "Check-in",
-            run: () => go(`/admin/checkin?q=${encodeURIComponent(query.trim())}`),
+            run: () =>
+              go(`/admin/checkin?q=${encodeURIComponent(query.trim())}`),
           },
         ]
       : [];
@@ -113,7 +114,10 @@ export function CommandMenu({
               transition={{ duration: 0.16, ease: "easeOut" }}
             >
               <div className="flex items-center gap-2 border-b border-border px-4">
-                <Search className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                <Search
+                  className="h-4 w-4 text-muted-foreground"
+                  strokeWidth={1.5}
+                />
                 <input
                   ref={inputRef}
                   value={query}
@@ -143,7 +147,9 @@ export function CommandMenu({
                         <span className="text-muted-foreground">{c.icon}</span>
                         <span className="flex-1 truncate">{c.label}</span>
                         {c.hint && (
-                          <span className="text-xs text-muted-foreground">{c.hint}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {c.hint}
+                          </span>
                         )}
                       </button>
                     </li>

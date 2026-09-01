@@ -27,7 +27,10 @@ export function SessionsTrend({ data }: { data: Point[] }) {
   const yAt = (v: number) => 100 - (v / max) * 100; // % from top
 
   const line = data
-    .map((d, i) => `${i === 0 ? "M" : "L"}${xAt(i).toFixed(2)} ${yAt(d.sessions).toFixed(2)}`)
+    .map(
+      (d, i) =>
+        `${i === 0 ? "M" : "L"}${xAt(i).toFixed(2)} ${yAt(d.sessions).toFixed(2)}`,
+    )
     .join(" ");
   const area = `${line} L100 100 L0 100 Z`;
 
@@ -74,7 +77,10 @@ export function SessionsTrend({ data }: { data: Point[] }) {
             />
             <div
               className="pointer-events-none absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-space-blue ring-2 ring-white"
-              style={{ left: `${xAt(hover)}%`, top: `${yAt(active.sessions)}%` }}
+              style={{
+                left: `${xAt(hover)}%`,
+                top: `${yAt(active.sessions)}%`,
+              }}
             />
             <div
               className="pointer-events-none absolute top-0 z-10 -translate-y-full whitespace-nowrap rounded bg-foreground px-1.5 py-0.5 text-[10px] font-medium text-white"

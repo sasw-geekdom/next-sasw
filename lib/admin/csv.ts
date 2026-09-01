@@ -5,10 +5,7 @@ function escape(value: unknown): string {
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-export function toCsv(
-  headers: string[],
-  rows: (unknown[])[],
-): string {
+export function toCsv(headers: string[], rows: unknown[][]): string {
   const lines = [headers, ...rows].map((row) => row.map(escape).join(","));
   // Leading BOM so Excel reads UTF-8 correctly.
   return "﻿" + lines.join("\r\n");

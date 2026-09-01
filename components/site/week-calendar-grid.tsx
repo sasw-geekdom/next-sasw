@@ -686,60 +686,59 @@ export function WeekCalendarGrid({
 
   const renderView = (which: WeekView) =>
     which === "week" ? (
-        <>
-          {/* Grid view keeps the full width, so its controls run across the
+      <>
+        {/* Grid view keeps the full width, so its controls run across the
               top the way they always did. */}
-          <div
-            data-controls=""
-            className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4"
-          >
-            <p className="text-sm text-white/55">{captionFor(which)}</p>
-            <ViewToggle view={which} onChange={switchView} />
-          </div>
+        <div
+          data-controls=""
+          className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4"
+        >
+          <p className="text-sm text-white/55">{captionFor(which)}</p>
+          <ViewToggle view={which} onChange={switchView} />
+        </div>
 
-          {/* Tighter than the agenda's control block, and one row of selects
+        {/* Tighter than the agenda's control block, and one row of selects
               rather than two of chips — see Filters' "compact". Between them
               the caption, the filters and these margins were 203px of the
               267px standing between the section top and the first hour. */}
-          <div data-controls="" className="mt-4 flex flex-col gap-3">
-            <DayRail active="week" className="lg:hidden" />
-            <Filters
-              layout="compact"
-              circuits={circuits}
-              venues={venues}
-              circuit={circuit}
-              venue={venue}
-              onCircuit={setCircuit}
-              onVenue={setVenue}
-            />
-          </div>
+        <div data-controls="" className="mt-4 flex flex-col gap-3">
+          <DayRail active="week" className="lg:hidden" />
+          <Filters
+            layout="compact"
+            circuits={circuits}
+            venues={venues}
+            circuit={circuit}
+            venue={venue}
+            onCircuit={setCircuit}
+            onVenue={setVenue}
+          />
+        </div>
 
-          {/* Below lg the axis is replaced wholesale by the agenda. A
+        {/* Below lg the axis is replaced wholesale by the agenda. A
               proportional five-day grid at 375px gives each day 60px before
               lanes divide it, which is not a small version of this — it's an
               unreadable one. Which is also why ViewToggle is desktop-only:
               there is no phone rendering of this view to offer. */}
-          <AxisGrid
-            className="mt-5 hidden lg:block"
-            columns={columns}
-            axis={axis}
-            hourPx={hourPx}
-            // No `roomyHourPx`. `roomy` is min-width 1024 *and* min-height
-            // 900, and a MacBook Air is exactly 900 tall — so it fired at
-            // precisely the viewport where the grid stopped fitting and made
-            // it 168px taller. That variant exists for the activation bands,
-            // which want to fill a screen; a grid wants to fit one. Same
-            // query, opposite goal.
-            placements={placements}
-            rails={rails}
-            emptyLabel={filtering ? "Nothing matching" : "Still landing"}
-          />
+        <AxisGrid
+          className="mt-5 hidden lg:block"
+          columns={columns}
+          axis={axis}
+          hourPx={hourPx}
+          // No `roomyHourPx`. `roomy` is min-width 1024 *and* min-height
+          // 900, and a MacBook Air is exactly 900 tall — so it fired at
+          // precisely the viewport where the grid stopped fitting and made
+          // it 168px taller. That variant exists for the activation bands,
+          // which want to fill a screen; a grid wants to fit one. Same
+          // query, opposite goal.
+          placements={placements}
+          rails={rails}
+          emptyLabel={filtering ? "Nothing matching" : "Still landing"}
+        />
 
-          <div className="lg:hidden">{agenda}</div>
-        </>
+        <div className="lg:hidden">{agenda}</div>
+      </>
     ) : (
-
-        /* The agenda: context pinned on the left, the week scrolling past it
+      /* The agenda: context pinned on the left, the week scrolling past it
            on the right. Same two-column shape as ActivationDetail, down to
            `self-start` alongside `sticky` — a grid item stretches to its row
            by default, so its box is already full height and `top` has nothing
@@ -748,45 +747,45 @@ export function WeekCalendarGrid({
            The page scrolls and the column pins; the right side is not its own
            scroller. Nested scroll areas trap the wheel, double the scrollbars,
            and break the browser's own find-on-page. */
-        <div className="lg:grid lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] xl:gap-20">
-          <div data-controls="" className="lg:sticky lg:top-24 lg:self-start">
-            <p className="font-mono text-xs uppercase tracking-widest text-magenta">
-              Every room
-            </p>
-            {/* Names this view rather than the week — the hero already carried
+      <div className="lg:grid lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] xl:gap-20">
+        <div data-controls="" className="lg:sticky lg:top-24 lg:self-start">
+          <p className="font-mono text-xs uppercase tracking-widest text-magenta">
+            Every room
+          </p>
+          {/* Names this view rather than the week — the hero already carried
                 "Five days, one current." and a sticky column repeating it
                 would put the page's headline on screen for the whole scroll.
                 "Day by day" is what distinguishes the agenda from the grid,
                 which is the only thing this header has to say. */}
-            <h2 className="mt-3 font-display text-2xl font-bold uppercase leading-[0.95] tracking-tight text-white">
-              Day by day.
-            </h2>
-            <p className="mt-3 text-sm text-white/55">{captionFor(which)}</p>
+          <h2 className="mt-3 font-display text-2xl font-bold uppercase leading-[0.95] tracking-tight text-white">
+            Day by day.
+          </h2>
+          <p className="mt-3 text-sm text-white/55">{captionFor(which)}</p>
 
-            <div className="mt-6 flex flex-col gap-3">
-              <DayRail active="week" className="lg:hidden" />
-              {/* Stacked selects, not chips: ten chips will not fit a 20rem
+          <div className="mt-6 flex flex-col gap-3">
+            <DayRail active="week" className="lg:hidden" />
+            {/* Stacked selects, not chips: ten chips will not fit a 20rem
                   column, and the column has to stay shorter than the viewport
                   or the pin has nowhere to go. */}
-              <Filters
-                layout="stacked"
-                circuits={circuits}
-                venues={venues}
-                circuit={circuit}
-                venue={venue}
-                onCircuit={setCircuit}
-                onVenue={setVenue}
-              />
-              <ViewToggle
-                view={which}
-                onChange={switchView}
-                className="self-start"
-              />
-            </div>
+            <Filters
+              layout="stacked"
+              circuits={circuits}
+              venues={venues}
+              circuit={circuit}
+              venue={venue}
+              onCircuit={setCircuit}
+              onVenue={setVenue}
+            />
+            <ViewToggle
+              view={which}
+              onChange={switchView}
+              className="self-start"
+            />
           </div>
-
-          <div className="max-lg:mt-8">{agenda}</div>
         </div>
+
+        <div className="max-lg:mt-8">{agenda}</div>
+      </div>
     );
 
   return (

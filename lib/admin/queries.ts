@@ -13,7 +13,9 @@ function toMillis(value: unknown): number | null {
   return value instanceof Timestamp ? value.toMillis() : null;
 }
 
-export async function listSpeakerSubmissions(): Promise<SpeakerSubmissionRow[]> {
+export async function listSpeakerSubmissions(): Promise<
+  SpeakerSubmissionRow[]
+> {
   const snap = await adminDb
     .collection(COLLECTIONS.speakerSubmissions)
     .orderBy("createdAt", "desc")

@@ -41,81 +41,79 @@ export async function boltOgImage(opts: {
   const titleSize = opts.titleSize ?? 96;
 
   return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          background: "#000000",
-          padding: "0 84px",
-          fontFamily: "Oswald",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", maxWidth: 720 }}>
-          <div
-            style={{
-              fontSize: 30,
-              letterSpacing: 6,
-              color: "#ff32a0",
-              textTransform: "uppercase",
-            }}
-          >
-            {opts.eyebrow}
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              marginTop: 22,
-              textTransform: "uppercase",
-              fontSize: titleSize,
-              lineHeight: 0.98,
-              color: "#ffffff",
-            }}
-          >
-            {opts.lines.map((line, i) => (
-              // Satori requires explicit flex on multi-child rows; no-shrink
-              // spans keep long lines from collapsing onto each other.
-              <div key={i} style={{ display: "flex" }}>
-                <span style={{ flexShrink: 0 }}>{line.text}</span>
-                {line.magenta && (
-                  <span
-                    style={{
-                      color: "#ff32a0",
-                      flexShrink: 0,
-                      marginLeft: titleSize * 0.2,
-                    }}
-                  >
-                    {line.magenta}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {opts.tagline && (
-            <div
-              style={{
-                fontSize: 27,
-                letterSpacing: 2,
-                color: "#ff32a0",
-                textTransform: "uppercase",
-                marginTop: 30,
-              }}
-            >
-              {opts.tagline}
-            </div>
-          )}
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        background: "#000000",
+        padding: "0 84px",
+        fontFamily: "Oswald",
+      }}
+    >
+      <div style={{ display: "flex", flexDirection: "column", maxWidth: 720 }}>
+        <div
+          style={{
+            fontSize: 30,
+            letterSpacing: 6,
+            color: "#ff32a0",
+            textTransform: "uppercase",
+          }}
+        >
+          {opts.eyebrow}
         </div>
 
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={boltSrc} width={340} height={340} alt="" />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            marginTop: 22,
+            textTransform: "uppercase",
+            fontSize: titleSize,
+            lineHeight: 0.98,
+            color: "#ffffff",
+          }}
+        >
+          {opts.lines.map((line, i) => (
+            // Satori requires explicit flex on multi-child rows; no-shrink
+            // spans keep long lines from collapsing onto each other.
+            <div key={i} style={{ display: "flex" }}>
+              <span style={{ flexShrink: 0 }}>{line.text}</span>
+              {line.magenta && (
+                <span
+                  style={{
+                    color: "#ff32a0",
+                    flexShrink: 0,
+                    marginLeft: titleSize * 0.2,
+                  }}
+                >
+                  {line.magenta}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {opts.tagline && (
+          <div
+            style={{
+              fontSize: 27,
+              letterSpacing: 2,
+              color: "#ff32a0",
+              textTransform: "uppercase",
+              marginTop: 30,
+            }}
+          >
+            {opts.tagline}
+          </div>
+        )}
       </div>
-    ),
+
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={boltSrc} width={340} height={340} alt="" />
+    </div>,
     {
       ...OG_SIZE,
       fonts: [{ name: "Oswald", data: oswald, weight: 700, style: "normal" }],

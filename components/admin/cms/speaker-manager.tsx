@@ -25,9 +25,9 @@ export function SpeakerManager({ rows }: { rows: SpeakerRow[] }) {
   const [editing, setEditing] = React.useState<SpeakerRow | "new" | null>(null);
   const [pending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
-  const [issues, setIssues] = React.useState<Record<string, string[] | undefined>>(
-    {},
-  );
+  const [issues, setIssues] = React.useState<
+    Record<string, string[] | undefined>
+  >({});
 
   const { items, draggingId, dragProps } = useDragReorder(rows, (ids) => {
     startTransition(async () => {
@@ -152,7 +152,9 @@ export function SpeakerManager({ rows }: { rows: SpeakerRow[] }) {
                   )}
                 </div>
               </div>
-              <p className="line-clamp-3 text-xs text-muted-foreground">{row.bio}</p>
+              <p className="line-clamp-3 text-xs text-muted-foreground">
+                {row.bio}
+              </p>
               <div className="mt-auto flex gap-2">
                 <Button size="sm" variant="outline" onClick={() => open(row)}>
                   Edit
@@ -194,7 +196,9 @@ export function SpeakerManager({ rows }: { rows: SpeakerRow[] }) {
                   placeholder="Founder & CEO"
                   defaultValue={current?.title}
                 />
-                {issues.title?.[0] && <FieldError>{issues.title[0]}</FieldError>}
+                {issues.title?.[0] && (
+                  <FieldError>{issues.title[0]}</FieldError>
+                )}
               </div>
               <div>
                 <Label htmlFor="company">Company (optional)</Label>
@@ -212,7 +216,13 @@ export function SpeakerManager({ rows }: { rows: SpeakerRow[] }) {
 
             <div>
               <Label htmlFor="bio">Bio</Label>
-              <Textarea id="bio" name="bio" rows={5} defaultValue={current?.bio} required />
+              <Textarea
+                id="bio"
+                name="bio"
+                rows={5}
+                defaultValue={current?.bio}
+                required
+              />
               {issues.bio?.[0] && <FieldError>{issues.bio[0]}</FieldError>}
             </div>
 
@@ -226,7 +236,9 @@ export function SpeakerManager({ rows }: { rows: SpeakerRow[] }) {
                 defaultValue={current?.linkedin}
                 required
               />
-              {issues.linkedin?.[0] && <FieldError>{issues.linkedin[0]}</FieldError>}
+              {issues.linkedin?.[0] && (
+                <FieldError>{issues.linkedin[0]}</FieldError>
+              )}
             </div>
 
             <div>
@@ -262,7 +274,11 @@ export function SpeakerManager({ rows }: { rows: SpeakerRow[] }) {
               <Button type="submit" disabled={pending}>
                 {pending ? "Saving…" : "Save"}
               </Button>
-              <Button type="button" variant="ghost" onClick={() => setEditing(null)}>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setEditing(null)}
+              >
                 Cancel
               </Button>
             </div>

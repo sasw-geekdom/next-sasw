@@ -110,11 +110,23 @@ const BOLT_PATH: [number, number][] = [
 // Parallax skyline: [x, height, width] within a repeating tile.
 const TILE = 800;
 const SKY_FAR_B: [number, number, number][] = [
-  [20, 46, 40], [90, 64, 34], [150, 40, 50], [230, 74, 30], [300, 52, 44],
-  [380, 88, 28], [470, 58, 50], [560, 70, 34], [650, 48, 46], [720, 80, 30],
+  [20, 46, 40],
+  [90, 64, 34],
+  [150, 40, 50],
+  [230, 74, 30],
+  [300, 52, 44],
+  [380, 88, 28],
+  [470, 58, 50],
+  [560, 70, 34],
+  [650, 48, 46],
+  [720, 80, 30],
 ];
 const SKY_NEAR_B: [number, number, number][] = [
-  [40, 70, 54], [130, 96, 40], [210, 64, 60], [430, 80, 54], [600, 90, 48],
+  [40, 70, 54],
+  [130, 96, 40],
+  [210, 64, 60],
+  [430, 80, 54],
+  [600, 90, 48],
   [690, 118, 44],
 ];
 
@@ -470,13 +482,15 @@ function drawSkyline(
   ctx.fillStyle = SKY_FAR;
   let off = (distance * 0.12) % TILE;
   for (let base = -off - TILE; base < vw + TILE; base += TILE) {
-    for (const b of SKY_FAR_B) ctx.fillRect(base + b[0], GROUND_Y - b[1], b[2], b[1]);
+    for (const b of SKY_FAR_B)
+      ctx.fillRect(base + b[0], GROUND_Y - b[1], b[2], b[1]);
   }
   // Near layer + the tower.
   ctx.fillStyle = SKY_NEAR;
   off = (distance * 0.28) % TILE;
   for (let base = -off - TILE; base < vw + TILE; base += TILE) {
-    for (const b of SKY_NEAR_B) ctx.fillRect(base + b[0], GROUND_Y - b[1], b[2], b[1]);
+    for (const b of SKY_NEAR_B)
+      ctx.fillRect(base + b[0], GROUND_Y - b[1], b[2], b[1]);
     const tx = base + 300;
     ctx.fillRect(tx - 4, GROUND_Y - 150, 8, 150); // shaft
     ctx.fillRect(tx - 15, GROUND_Y - 152, 30, 15); // observation deck
@@ -517,7 +531,12 @@ function drawPickup(ctx: CanvasRenderingContext2D, p: Pickup, t: number) {
   ctx.shadowColor = MAGENTA;
   ctx.shadowBlur = 12;
   ctx.fillStyle = MAGENTA;
-  ctx.fillRect(-PICKUP_R * 0.7, -PICKUP_R * 0.7, PICKUP_R * 1.4, PICKUP_R * 1.4);
+  ctx.fillRect(
+    -PICKUP_R * 0.7,
+    -PICKUP_R * 0.7,
+    PICKUP_R * 1.4,
+    PICKUP_R * 1.4,
+  );
   ctx.shadowBlur = 0;
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(-2, -2, 4, 4);
@@ -548,7 +567,8 @@ function draw(ctx: CanvasRenderingContext2D, s: GameState) {
   }
   ctx.stroke();
 
-  for (let i = 0; i < s.obstacles.length; i++) drawObstacle(ctx, s.obstacles[i]);
+  for (let i = 0; i < s.obstacles.length; i++)
+    drawObstacle(ctx, s.obstacles[i]);
   for (let i = 0; i < s.pickups.length; i++) drawPickup(ctx, s.pickups[i], s.t);
 
   // Bolt (squashed when ducking; brighter glow while surging).

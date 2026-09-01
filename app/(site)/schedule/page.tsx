@@ -51,9 +51,9 @@ export default async function SessionsPage() {
         }}
       />
       <main>
-      <SessionsHero />
+        <SessionsHero />
 
-      {/* The week on an hour axis, above the deep dives — the page's answer to
+        {/* The week on an hour axis, above the deep dives — the page's answer to
           "what's on Tuesday, and what am I giving up to be there?"
 
           It replaces week-strip.tsx, which answered the first half of that and
@@ -61,11 +61,11 @@ export default async function SessionsPage() {
           takeover across the same afternoon, which is the shape of this week.
           The strip is still in the tree and still works; it is the smaller
           idea and nothing renders it now. */}
-      <WeekCalendar />
+        <WeekCalendar />
 
-      <PysaBand detailHref="/schedule/pysanantonio" />
+        <PysaBand detailHref="/schedule/pysanantonio" />
 
-      {/* The second and third banded activations. They used to sit below a
+        {/* The second and third banded activations. They used to sit below a
           bento of the other six, and the reason they were never *in* it still
           holds for the calendar above: a full-day takeover with its own brand
           reduced to one cell reads as smaller than it is. The difference is
@@ -86,11 +86,11 @@ export default async function SessionsPage() {
           sorted by start time. Two pages, one click apart, disagreeing about
           the order of the same week. Adding a fourth band? Date, unless it
           becomes the headline. */}
-      <ModelBand detailHref="/schedule/the-model" />
+        <ModelBand detailHref="/schedule/the-model" />
 
-      <AccessGrantedBand detailHref="/schedule/access-granted" />
+        <AccessGrantedBand detailHref="/schedule/access-granted" />
 
-      {/*
+        {/*
         The way onto the schedule, as its own band rather than a tail on the
         section above — the same move the homepage's sponsor ask needed. Tucked inside
         that container it was centred on a page that is left-aligned
@@ -103,26 +103,26 @@ export default async function SessionsPage() {
         reader has passed three times. It also had to hand-override the
         `outline` variant, whose text is `foreground` — black, invisible here.
       */}
-      <section className="border-t border-white/10 bg-black">
-        <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
-          <div className="max-w-2xl">
-            <p className="font-mono text-xs uppercase tracking-widest text-magenta">
-              Hosting is open · Sept 28 – Oct 2
-            </p>
-            <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
-              Want a slot on it?
-            </h2>
-            <p className="mt-4 max-w-xl text-pretty text-white/60">
-              Host an activation, sponsor the week, or just take a seat.
-            </p>
-            <div className="mt-7">
-              <ButtonLink href="/get-involved" size="lg">
-                Get involved
-              </ButtonLink>
+        <section className="border-t border-white/10 bg-black">
+          <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
+            <div className="max-w-2xl">
+              <p className="font-mono text-xs uppercase tracking-widest text-magenta">
+                Hosting is open · Sept 28 – Oct 2
+              </p>
+              <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
+                Want a slot on it?
+              </h2>
+              <p className="mt-4 max-w-xl text-pretty text-white/60">
+                Host an activation, sponsor the week, or just take a seat.
+              </p>
+              <div className="mt-7">
+                <ButtonLink href="/get-involved" size="lg">
+                  Get involved
+                </ButtonLink>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
       </main>
     </>
   );

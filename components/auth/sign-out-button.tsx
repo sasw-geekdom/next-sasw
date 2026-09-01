@@ -18,12 +18,7 @@ export function SignOutButton() {
   }
 
   return (
-    <Button
-      onClick={onSignOut}
-      disabled={pending}
-      variant="ghost"
-      size="sm"
-    >
+    <Button onClick={onSignOut} disabled={pending} variant="ghost" size="sm">
       {pending ? "Signing out…" : "Sign out"}
     </Button>
   );

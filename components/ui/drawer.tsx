@@ -17,7 +17,13 @@ interface DrawerProps {
 const EASE = [0.32, 0.72, 0, 1] as const;
 
 /** Right-side slide-in panel. Escape or backdrop click to close. */
-export function Drawer({ open, onClose, title, children, className }: DrawerProps) {
+export function Drawer({
+  open,
+  onClose,
+  title,
+  children,
+  className,
+}: DrawerProps) {
   React.useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {

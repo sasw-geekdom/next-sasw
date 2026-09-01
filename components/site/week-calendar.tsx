@@ -63,7 +63,7 @@ export async function WeekCalendar() {
 
             A deliberate break from the page's measure rather than a free win:
             this section is now the one that runs wider than its neighbours. */}
-        <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-20 2xl:max-w-[110rem]">
+      <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-20 2xl:max-w-[110rem]">
         {/* The heading the visible design does without.
 
             Removing the visible h2 was right — the hero carries the message

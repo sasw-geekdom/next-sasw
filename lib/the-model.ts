@@ -158,7 +158,6 @@ export const THE_MODEL = {
     turn: "An afternoon of showing each other what comes next.",
   },
 
-
   // The opening talk used to live here and render as a selected line on the
   // masthead. Taken off the page by request — the fact still reaches readers
   // through `blurb` in lib/schedule.ts, which feeds the page metadata, the .ics
@@ -405,9 +404,7 @@ export const MODEL_ICON_CH = 2;
 export const MODEL_ARTWORK: readonly ModelArtLine[] = [
   {
     indent: 26.5,
-    segs: [
-      { t: "// ai models", bg: ART.forest, fg: ART.lavender },
-    ],
+    segs: [{ t: "// ai models", bg: ART.forest, fg: ART.lavender }],
   },
   {
     indent: 24.65,
@@ -495,9 +492,7 @@ export const MODEL_ARTWORK: readonly ModelArtLine[] = [
   },
   {
     indent: 2.41,
-    segs: [
-      { t: "// tools", bg: ART.forest, fg: ART.lavender },
-    ],
+    segs: [{ t: "// tools", bg: ART.forest, fg: ART.lavender }],
   },
   {
     indent: 0.56,

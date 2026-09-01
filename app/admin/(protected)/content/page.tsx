@@ -15,12 +15,36 @@ export const metadata: Metadata = { title: "Content" };
 export const dynamic = "force-dynamic";
 
 const SECTIONS = [
-  { href: "/admin/content/partners", label: "Partners", blurb: "Logos + links." },
-  { href: "/admin/content/sponsors", label: "Sponsors", blurb: "Who's powering it." },
-  { href: "/admin/content/speakers", label: "Speakers", blurb: "The people on stage." },
-  { href: "/admin/content/sessions", label: "Sessions", blurb: "The schedule." },
-  { href: "/admin/content/emails", label: "Emails", blurb: "Automated confirmations." },
-  { href: "/admin/content/gallery", label: "Gallery", blurb: "15-years photo wall." },
+  {
+    href: "/admin/content/partners",
+    label: "Partners",
+    blurb: "Logos + links.",
+  },
+  {
+    href: "/admin/content/sponsors",
+    label: "Sponsors",
+    blurb: "Who's powering it.",
+  },
+  {
+    href: "/admin/content/speakers",
+    label: "Speakers",
+    blurb: "The people on stage.",
+  },
+  {
+    href: "/admin/content/sessions",
+    label: "Sessions",
+    blurb: "The schedule.",
+  },
+  {
+    href: "/admin/content/emails",
+    label: "Emails",
+    blurb: "Automated confirmations.",
+  },
+  {
+    href: "/admin/content/gallery",
+    label: "Gallery",
+    blurb: "15-years photo wall.",
+  },
 ] as const;
 
 export default async function ContentHub() {

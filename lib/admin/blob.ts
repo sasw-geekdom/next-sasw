@@ -22,7 +22,9 @@ export async function uploadImage(file: File, prefix: string): Promise<string> {
 }
 
 /** Delete a Blob object by URL. Best-effort — never throws. */
-export async function deleteImage(url: string | undefined | null): Promise<void> {
+export async function deleteImage(
+  url: string | undefined | null,
+): Promise<void> {
   if (!url) return;
   try {
     await del(url);

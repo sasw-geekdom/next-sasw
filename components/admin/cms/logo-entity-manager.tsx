@@ -35,9 +35,9 @@ export function LogoEntityManager({
   );
   const [pending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
-  const [issues, setIssues] = React.useState<Record<string, string[] | undefined>>(
-    {},
-  );
+  const [issues, setIssues] = React.useState<
+    Record<string, string[] | undefined>
+  >({});
 
   const { items, draggingId, dragProps } = useDragReorder(rows, (ids) => {
     startTransition(async () => {
@@ -164,7 +164,12 @@ export function LogoEntityManager({
 
             <div>
               <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" defaultValue={current?.name} required />
+              <Input
+                id="name"
+                name="name"
+                defaultValue={current?.name}
+                required
+              />
               {issues.name?.[0] && <FieldError>{issues.name[0]}</FieldError>}
             </div>
 

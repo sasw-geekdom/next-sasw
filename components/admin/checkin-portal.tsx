@@ -72,7 +72,12 @@ export function CheckinPortal({
     setItems((list) =>
       list.map((r) =>
         r.id === row.id
-          ? { ...r, checkedIn: true, checkedInAt: Date.now(), checkedInBy: "you" }
+          ? {
+              ...r,
+              checkedIn: true,
+              checkedInAt: Date.now(),
+              checkedInBy: "you",
+            }
           : r,
       ),
     );
@@ -160,7 +165,8 @@ export function CheckinPortal({
           </h2>
           {recent.length === 0 ? (
             <p className="py-6 text-muted-foreground">
-              Nobody&apos;s plugged in yet. Search above to check the first person in.
+              Nobody&apos;s plugged in yet. Search above to check the first
+              person in.
             </p>
           ) : (
             <div className="flex flex-col gap-2">
@@ -258,4 +264,3 @@ function Row({
     </div>
   );
 }
-

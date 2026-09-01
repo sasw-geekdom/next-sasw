@@ -42,7 +42,9 @@ export const TRACKS: Track[] = [
   },
 ];
 
-export function trackByName(name: string | undefined | null): Track | undefined {
+export function trackByName(
+  name: string | undefined | null,
+): Track | undefined {
   return TRACKS.find((t) => t.name === name);
 }
 
@@ -73,7 +75,9 @@ export function mixCircuits(a: TrackName, b: TrackName): string {
   const channel = (hex: string, i: number) =>
     parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
   const mid = [0, 1, 2].map((i) =>
-    Math.round((channel(CIRCUIT_COLORS[a], i) + channel(CIRCUIT_COLORS[b], i)) / 2),
+    Math.round(
+      (channel(CIRCUIT_COLORS[a], i) + channel(CIRCUIT_COLORS[b], i)) / 2,
+    ),
   );
   return `#${mid.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
 }

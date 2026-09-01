@@ -91,7 +91,10 @@ export function SiteNavbar() {
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.08 + LINKS.length * 0.05, duration: 0.2 }}
+                transition={{
+                  delay: 0.08 + LINKS.length * 0.05,
+                  duration: 0.2,
+                }}
               >
                 <ButtonLink
                   href="/get-involved"

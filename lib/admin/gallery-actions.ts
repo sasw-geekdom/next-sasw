@@ -5,8 +5,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { syncGalleryThumbnails, type SyncResult } from "@/lib/gallery-sync";
 
 export type GallerySyncResult =
-  | { ok: true; result: SyncResult }
-  | { ok: false; error: string };
+  { ok: true; result: SyncResult } | { ok: false; error: string };
 
 /** Rebuild 15-years thumbnails from whatever's in the Storage folder. */
 export async function syncGallery(): Promise<GallerySyncResult> {

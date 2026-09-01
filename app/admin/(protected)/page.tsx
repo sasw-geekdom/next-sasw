@@ -1,6 +1,10 @@
 import { requireAdmin } from "@/lib/auth/session";
 import { listRegistrations } from "@/lib/admin/queries";
-import { getWebAnalytics, RANGE_OPTIONS, type RangeDays } from "@/lib/analytics/ga4";
+import {
+  getWebAnalytics,
+  RANGE_OPTIONS,
+  type RangeDays,
+} from "@/lib/analytics/ga4";
 import { PageHeader } from "@/components/admin/page-header";
 import { WebAnalytics } from "@/components/admin/dashboard/web-analytics";
 
@@ -13,7 +17,9 @@ export default async function AdminDashboard({
 }) {
   const user = await requireAdmin();
   const { range } = await searchParams;
-  const rangeDays: RangeDays = RANGE_OPTIONS.includes(Number(range) as RangeDays)
+  const rangeDays: RangeDays = RANGE_OPTIONS.includes(
+    Number(range) as RangeDays,
+  )
     ? (Number(range) as RangeDays)
     : 30;
 
@@ -23,7 +29,9 @@ export default async function AdminDashboard({
   ]);
 
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const newThisWeek = registrations.filter((r) => r.createdAt >= weekAgo).length;
+  const newThisWeek = registrations.filter(
+    (r) => r.createdAt >= weekAgo,
+  ).length;
   const firstName = (user.name ?? user.email.split("@")[0]).split(" ")[0];
 
   return (
