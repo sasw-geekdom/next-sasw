@@ -61,6 +61,12 @@ function revalidateActivationPages() {
   // to be looked at straight after the edit.
   revalidatePath("/schedule/day/[iso]", "page");
   revalidatePath("/(site)/schedule/day/[iso]", "page");
+  // And the talk's own page, which is the surface an edit is most obviously
+  // about. Missing this is the failure this helper exists to prevent: an admin
+  // fixes a typo in a title, watches it change on the grid, and finds the page
+  // itself still wrong for five minutes.
+  revalidatePath("/schedule/talk/[slug]", "page");
+  revalidatePath("/(site)/schedule/talk/[slug]", "page");
 }
 
 function revalidateSpeakerPages() {
@@ -335,6 +341,7 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
 
   const parsed = sessionSchema.safeParse({
     title: form.get("title"),
+    slug: form.get("slug") ?? "",
     description: form.get("description"),
     startsAt: form.get("startsAt"),
     endsAt: form.get("endsAt") || null,
@@ -352,8 +359,36 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
   }
   const data = parsed.data;
 
+  const ref = id
+    ? adminDb.collection(COLLECTIONS.sessions).doc(id)
+    : adminDb.collection(COLLECTIONS.sessions).doc();
+
+  // Every other session's claim on a name, this one excluded so a re-save
+  // doesn't collide with itself and walk the slug to `-2` on every edit.
+  const others = await adminDb.collection(COLLECTIONS.sessions).get();
+  const taken = new Set<string>();
+  for (const doc of others.docs) {
+    if (doc.id === ref.id) continue;
+    const current = doc.get("slug");
+    if (typeof current === "string" && current) taken.add(current);
+  }
+
+  // A stored slug outlives a retitled session. There is no slug field in the
+  // session drawer yet, so without this an admin fixing a typo in a title
+  // would silently move the page's URL and break every link already shared —
+  // the failure the speakers form avoids by pre-filling its slug field. New
+  // sessions derive from the title; edits keep what they have.
+  const existingSlug = id ? (await ref.get()).get("slug") : null;
+  const desired =
+    data.slug ||
+    (typeof existingSlug === "string" && existingSlug
+      ? existingSlug
+      : slugify(data.title, "session"));
+  const slug = uniqueSlug(desired, taken);
+
   const payload = {
     title: data.title,
+    slug,
     description: data.description,
     startsAt: data.startsAt,
     endsAt: data.endsAt ?? null,
@@ -362,10 +397,6 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
     activation: data.activation ?? null,
     participants: data.participants,
   };
-
-  const ref = id
-    ? adminDb.collection(COLLECTIONS.sessions).doc(id)
-    : adminDb.collection(COLLECTIONS.sessions).doc();
 
   if (id) {
     await ref.update(payload);

@@ -972,9 +972,9 @@ export function Block({
           around it: the select button lives inside, and a button inside an
           anchor is invalid markup that browsers resolve by dropping one of
           the two behaviours. */}
-      {item.page ? (
+      {item.href ? (
         <Link
-          href={`/schedule/${item.page}`}
+          href={item.href}
           className={cn(
             "text-pretty text-[13px] font-medium leading-tight text-white after:absolute after:inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70",
             // Clear of the select button in the corner, or a title long
@@ -1435,9 +1435,9 @@ export function StackBlock({
           Positioning the copy puts it back in the same phase as the layers,
           where source order decides — and the copy comes last. */}
       <div className="relative min-w-0 flex-1">
-        {item.page ? (
+        {item.href ? (
           <Link
-            href={`/schedule/${item.page}`}
+            href={item.href}
             className="block after:absolute after:inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70"
           >
             {hasMark ? (

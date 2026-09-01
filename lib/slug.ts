@@ -9,8 +9,12 @@ const MAX_LENGTH = 80;
  *
  * Never returns an empty string — a name with no latin characters at all
  * still needs a routable slug, and the collision suffix keeps it unique.
+ *
+ * `fallback` is what that empty case becomes. It defaults to "speaker" because
+ * this started as the speakers' own helper; sessions pass "session", so a talk
+ * titled entirely in non-latin script does not route as /talk/speaker.
  */
-export function slugify(value: string): string {
+export function slugify(value: string, fallback = "speaker"): string {
   const base = value
     .normalize("NFKD")
     .replace(/[̀-ͯ]/g, "") // combining marks left behind by NFKD
@@ -20,7 +24,7 @@ export function slugify(value: string): string {
     .replace(/^-+|-+$/g, "")
     .slice(0, MAX_LENGTH)
     .replace(/-+$/g, "");
-  return base || "speaker";
+  return base || fallback;
 }
 
 /** True for a slug already in the shape `slugify` produces. */

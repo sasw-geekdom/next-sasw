@@ -106,6 +106,16 @@ export async function listSessions(): Promise<SessionRow[]> {
 
   const byId = new Map(speakers.map((s) => [s.id, s]));
 
+  // Stored slugs claim their names first, then the rest derive from the title
+  // in document order — the same two-pass shape `listSpeakers` uses above, and
+  // for the same reason: a derived slug must never take a name a stored one
+  // already owns, whichever order they happen to be read in.
+  const taken = new Set<string>();
+  for (const doc of sessionsSnap.docs) {
+    const stored = doc.get("slug");
+    if (typeof stored === "string" && stored) taken.add(stored);
+  }
+
   return sessionsSnap.docs.map((doc) => {
     const d = doc.data();
     const raw: SessionParticipant[] = Array.isArray(d.participants)
@@ -118,11 +128,17 @@ export async function listSessions(): Promise<SessionRow[]> {
         role: p.role,
         name: speaker?.name ?? "Unknown speaker",
         imageUrl: speaker?.imageUrl || undefined,
+        slug: speaker?.slug ?? "",
       };
     });
 
+    const stored = typeof d.slug === "string" && d.slug ? d.slug : null;
+    const slug = stored ?? uniqueSlug(slugify(d.title ?? "", "session"), taken);
+    if (!stored) taken.add(slug);
+
     return {
       id: doc.id,
+      slug,
       title: d.title ?? "",
       description: d.description ?? "",
       startsAt: toMillis(d.startsAt) ?? 0,

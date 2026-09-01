@@ -178,6 +178,21 @@ const participant = z.object({
 
 export const sessionSchema = z.object({
   title: z.string().trim().min(3, "Give the session a title.").max(200),
+  // The /schedule/talk/[slug] segment, for a session that stands on its own.
+  //
+  // Optional and empty by default because the session drawer has no field for
+  // it yet — the action derives one from the title and, on an edit, keeps
+  // whatever is already stored. Shape only; the action owns uniqueness.
+  slug: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(80)
+    .refine((v) => v === "" || isSlug(v), {
+      message: "Lowercase letters, numbers, and hyphens only.",
+    })
+    .optional()
+    .default(""),
   description: z.string().trim().min(10, "Add a description.").max(3000),
   // ISO strings from <input type="datetime-local">, converted to Date.
   startsAt: z.coerce.date({ message: "Pick a start date and time." }),

@@ -1947,7 +1947,7 @@ export function sessionDay(session: ResolvedSession): DayMeta | null {
   return dayMeta(dayKey(session.when.start));
 }
 
-function dayKey(iso: string): string {
+export function dayKey(iso: string): string {
   // en-CA gives ISO order; bucketing on the venue's clock rather than the
   // reader's is what stops a 6pm Thursday event showing up on Friday for
   // someone browsing from Europe.
@@ -2176,7 +2176,24 @@ export interface CalendarItem {
    * the row breaks where the bento card and the hero already break.
    */
   titleBreak?: string;
+  /**
+   * The activation's page slug, where the block belongs to one.
+   *
+   * Identity as well as address: `Block` keys its brand flourishes off this
+   * (`page === "pysanantonio"` draws the mascot, `"access-granted"` the
+   * cipher), so it stays the activation's name and nothing else. Where a block
+   * links to is `href`.
+   */
   page: string | null;
+  /**
+   * Where the block goes when clicked, or null for a block that goes nowhere.
+   *
+   * Split from `page` when standalone sessions got their own pages. Building
+   * the link as `/schedule/${page}` worked while every linked block was an
+   * activation; a talk lives at `/schedule/talk/<slug>`, and threading that
+   * through `page` would have quietly rewritten the identity checks above.
+   */
+  href: string | null;
   dayIso: string;
   startMin: number;
   endMin: number;
@@ -2366,6 +2383,10 @@ export function standaloneItems(rows: SessionRow[]): CalendarItem[] {
         title: row.title,
         longTitle: row.title,
         page: null,
+        // A session that stands on its own is the one thing on this grid with
+        // no other home: no activation page gathers it, and its block was
+        // inert on every surface until this landed.
+        href: `/schedule/talk/${row.slug}`,
         dayIso: dayKey(startIso),
         startMin,
         endMin,
@@ -2406,6 +2427,7 @@ export function weekCalendar(extra: CalendarItem[] = []): WeekCalendar {
         longTitle: s.title,
         titleBreak: s.titleBreakBefore,
         page: s.page ?? null,
+        href: s.page ? `/schedule/${s.page}` : null,
         dayIso: dayKey(s.when!.start),
         startMin,
         endMin,
@@ -2452,6 +2474,7 @@ export function weekCalendar(extra: CalendarItem[] = []): WeekCalendar {
           slug: s.slug,
           title: s.shortTitle ?? s.title,
           page: s.page ?? null,
+          href: s.page ? `/schedule/${s.page}` : null,
           fromIndex: from,
           toIndex: to,
           // "Sep 28 – 30" rather than "Sep 28 – Sep 30" where the month is

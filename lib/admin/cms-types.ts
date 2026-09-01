@@ -40,10 +40,31 @@ export interface SessionParticipant {
 export interface ResolvedParticipant extends SessionParticipant {
   name: string;
   imageUrl?: string;
+  /**
+   * The speaker's own page, where they have one.
+   *
+   * Empty when the id no longer resolves — a session keeps a participant whose
+   * speaker doc was deleted, and a talk page that printed "Unknown speaker" as
+   * a link would be a dead one.
+   */
+  slug: string;
 }
 
 export interface SessionRow {
   id: string;
+  /**
+   * The public URL segment, for a session that stands on its own.
+   *
+   * Stored once an admin has saved the session; derived from the title at read
+   * time before that, which is how the speakers collection backfilled its own.
+   * A derived slug is provisional — the next save promotes it to stored, and
+   * that is what makes it safe to link to.
+   *
+   * Sessions inside an activation carry one too and simply don't use it: the
+   * activation page is their home, and giving them a second URL would split
+   * content that page deliberately gathers.
+   */
+  slug: string;
   title: string;
   description: string;
   startsAt: number;
