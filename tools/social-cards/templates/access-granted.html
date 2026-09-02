@@ -1,0 +1,284 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* Access Granted's values, from lib/access-granted.ts. The grid line and
+         its mask are lifted verbatim so the card and the band draw the same
+         field. */
+      :root {
+        --green: #00ff66;
+        --grid: rgba(255, 255, 255, 0.055);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* The schematic field — this is the device that says Access Granted
+         before a word is read, the way the wordmark does for PySA. */
+      .grid {
+        position: absolute;
+        inset: -10%;
+        background-image:
+          linear-gradient(var(--grid) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+        background-size: 34px 34px;
+        mask-image: radial-gradient(
+          ellipse 58% 62% at 68% 52%,
+          black 0%,
+          black 20%,
+          transparent 74%
+        );
+        -webkit-mask-image: radial-gradient(
+          ellipse 58% 62% at 68% 52%,
+          black 0%,
+          black 20%,
+          transparent 74%
+        );
+      }
+      /* Tight and weak on purpose. A wider, stronger bloom spread green to
+         rgb(12,49,27) at mid-card and read as a wash — and this brand's own
+         note is that the green stays sparing. */
+      .bloom {
+        position: absolute;
+        right: -170px;
+        top: 360px;
+        width: 620px;
+        height: 620px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(0, 255, 102, 0.2) 0%,
+          transparent 64%
+        );
+        filter: blur(100px);
+      }
+
+      .portrait {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .portrait img {
+        position: absolute;
+        left: {{portraitLeft}}px;
+        bottom: 0;
+        height: {{portraitHeight}}px;
+        width: auto;
+      }
+      .portrait::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(to right, #000 0%, #000 20%, rgba(0, 0, 0, 0) 52%),
+          linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 14%);
+      }
+
+      .frame {
+        position: relative;
+        z-index: 3;
+        height: 100%;
+        padding: 74px 72px 52px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 58px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* Typeset, not a logo file — this event's mark is its name, with
+         everything up to the first space in the green. The same split the band
+         makes off `ACCESS_GRANTED.name`. */
+      .wordmark {
+        margin-top: 50px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 92px;
+        line-height: 0.9;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+      }
+      .wordmark .a {
+        color: var(--green);
+      }
+
+      h1 {
+        margin-top: 30px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      <!--if:subtitle-->
+      /* A rule, not a filled panel. The band's note is explicit that a solid
+         block of #00ff66 shouts at this size. */
+      .subtitle {
+        margin-top: 22px;
+        max-width: 520px;
+        border-left: 2px solid var(--green);
+        padding-left: 20px;
+        font-size: 27px;
+        line-height: 1.34;
+        color: rgba(255, 255, 255, 0.8);
+      }
+      <!--/if:subtitle-->
+
+      .spacer {
+        flex: 1;
+      }
+      .name {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 62px;
+        line-height: 0.98;
+        text-transform: uppercase;
+      }
+      .role {
+        margin-top: 16px;
+        margin-bottom: 4px;
+        font-size: 27px;
+        font-weight: 600;
+        color: var(--green);
+      }
+      <!--if:org-->
+      .org {
+        margin-top: 10px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.2em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+      <!--/if:org-->
+
+      .facts {
+        margin-top: 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--green);
+        flex: none;
+      }
+
+      .powered {
+        margin-top: 40px;
+      }
+      /* This event labels with a terminal prompt, where SASTW and The Model
+         use `//`. */
+      .powered .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.26em;
+        color: #6f6f6f;
+        text-transform: uppercase;
+      }
+      .powered .label span {
+        color: var(--green);
+      }
+      /* Six organisers in two rows of three, not one row of six. One row can
+         only hold them at 34px before it reaches the figure — the other events
+         get a single row because they have three partners, not six. */
+      .logos {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: repeat(3, auto);
+        justify-items: start;
+        align-items: center;
+        gap: 6px 26px;
+        width: fit-content;
+      }
+      .logos img {
+        width: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid"></div>
+    <div class="bloom"></div>
+    <div class="portrait"><img src="{{face}}" alt="" /></div>
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <div class="wordmark"><span class="a">Access</span> Granted</div>
+
+      <h1>{{headline}}</h1>
+      <!--if:subtitle-->
+      <p class="subtitle">{{subtitle}}</p>
+      <!--/if:subtitle-->
+
+      <div class="spacer"></div>
+
+      <div class="name">{{first}}<br />{{last}}</div>
+      <div class="role">{{role}}</div>
+      <!--if:org-->
+      <div class="org">{{org}}</div>
+      <!--/if:org-->
+
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+      </div>
+
+      <div class="powered">
+        <div class="label"><span>&gt;_</span> Powered by</div>
+        <div class="logos">{{logos}}</div>
+      </div>
+    </div>
+  </body>
+</html>

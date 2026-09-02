@@ -1,0 +1,249 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* The Model's palette, from lib/the-model.ts. */
+      :root {
+        --lav: #c0b4fc;
+        --cyan: #00b4fc;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+      }
+      .frame {
+        height: 100%;
+        padding: 74px 72px 60px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 40px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+      .eyebrow {
+        margin-top: 46px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 20px;
+        letter-spacing: 0.26em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin-top: 18px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 66px;
+        line-height: 1.02;
+        text-transform: uppercase;
+      }
+      h1 .hit {
+        background: var(--lav);
+        color: #000;
+        padding: 1px 12px 5px;
+        margin-left: -12px;
+        display: inline-block;
+      }
+
+      .pair {
+        margin-top: 40px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+      }
+      /* No frame. Both headshots are true RGBA cutouts, so a box ground here
+         is the only thing that would draw a square around them — #0b0b0d
+         against a pure-black card is an 11-point difference, invisible as a
+         colour and unmistakable as an edge. */
+      .who .shot {
+        position: relative;
+        height: 408px;
+        overflow: hidden;
+      }
+      .who .shot img {
+        filter: grayscale(1);
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: auto;
+      }
+
+      /* Two values per portrait, and both have to be solved rather than
+         reused: `height` matches the head sizes, `top` aligns the crowns.
+         Their crops start at different depths — she begins 76px into a 1350px
+         frame, he begins 130px — so equal offsets sit one of them lower and
+         read as them being different heights.
+
+         Solved against Daniel as the reference: both heads render ~284px with
+         the crown 14px below the frame. */
+      .who.a .shot img {
+        /* 740, not the 651 the measurement gave. The heuristic reads
+           head-plus-neck, and her hair hides the shoulder line that ends it,
+           so her head measured larger than it draws and the derived height
+           came out ~15% short. Sized by eye; the offset is then solved to put
+           her crown back on his. */
+        height: {{heightA}}px;
+        top: {{topA}}px;
+      }
+      .who.b .shot img {
+        height: {{heightB}}px;
+        top: {{topB}}px;
+      }
+
+      /* Load-bearing, not decorative: with no frame, the crop at 408px would
+         end each figure on a hard horizontal line. */
+      .who .shot::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0) 58%,
+          rgba(0, 0, 0, 0.72) 84%,
+          #000 100%
+        );
+      }
+      .who .nm {
+        margin-top: 18px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 42px;
+        line-height: 0.98;
+        text-transform: uppercase;
+      }
+      .who .rl {
+        margin-top: 9px;
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--cyan);
+      }
+      .who .og {
+        margin-top: 6px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.18em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      .spacer {
+        flex: 1;
+      }
+      .facts {
+        margin-top: 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 20px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--lav);
+        flex: none;
+      }
+      .powered {
+        margin-top: 34px;
+      }
+      .powered .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.26em;
+        color: #6f6f6f;
+        text-transform: uppercase;
+      }
+      .logos {
+        margin-top: 18px;
+        display: flex;
+        align-items: center;
+        gap: 34px;
+      }
+      .logos img {
+        width: auto;
+      }
+      /* Balanced by area, not by height: Tech Bloc is a solid block and DEVSA
+         a wordmark on open ground, so equal heights read unequal. */
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <div class="eyebrow">// Speakers · The Model</div>
+
+      <h1>{{headline}}</h1>
+
+      <div class="pair">
+        <div class="who a">
+          <div class="shot"><img src="{{faceA}}" alt="" /></div>
+          <div class="nm">{{firstA}}<br />{{lastA}}</div>
+          <div class="rl">{{roleA}}</div>
+          <div class="og">{{orgA}}</div>
+        </div>
+        <div class="who b">
+          <div class="shot"><img src="{{faceB}}" alt="" /></div>
+          <div class="nm">{{firstB}}<br />{{lastB}}</div>
+          <div class="rl">{{roleB}}</div>
+          <div class="og">{{orgB}}</div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+      </div>
+
+      <div class="powered">
+        <div class="label">// Powered by</div>
+        <div class="logos">{{logos}}</div>
+      </div>
+    </div>
+  </body>
+</html>

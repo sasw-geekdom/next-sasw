@@ -1,0 +1,278 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* PySanAntonio's own palette, from lib/pysa.ts. Deliberately not SASTW
+         magenta — this is the one activation with a brand of its own. */
+      :root {
+        --blue: #4a90d9;
+        --gold: #edca00;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* The band's signature: a blue bloom behind the figure. It is what makes
+         the surface read as PySA before a word of it is read. */
+      .bloom {
+        position: absolute;
+        right: -140px;
+        top: 130px;
+        width: 900px;
+        height: 900px;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--blue) 0%, transparent 65%);
+        opacity: 0.3;
+        filter: blur(120px);
+      }
+
+      /* Full-bleed, so its scrim has no edge to show. Boxed to the right half
+         the gradient starts at opaque black against a bloom that carries on
+         past it, and draws a vertical seam down the card. */
+      .portrait {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .portrait img {
+        position: absolute;
+        left: {{portraitLeft}}px;
+        bottom: 0;
+        height: {{portraitHeight}}px;
+        width: auto;
+      }
+      .portrait::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(to right, #000 0%, #000 20%, rgba(0, 0, 0, 0) 52%),
+          linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 14%);
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 74px 72px 64px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 46px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* The wordmark leads, at size. On PySA's own band the mark *is* the
+         headline rather than a label above one. */
+      .wordmark {
+        margin-top: 48px;
+        height: 136px;
+        width: auto;
+        display: block;
+        /* A flex column stretches its children; without this the wordmark
+           centres itself against a page whose every other line is flush
+           left. */
+        align-self: flex-start;
+      }
+
+      h1 {
+        margin-top: 34px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 1;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+      /* A filename is not a word. Uppercased by the transform above it stops
+         reading as a file; given its own line box rather than sitting inline,
+         because the mono has far less ascent than the display face and all of
+         the difference lands above it — 44px of gap over the line and none
+         under it. */
+      h1 code {
+        display: block;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 0.66em;
+        font-weight: 500;
+        line-height: 1;
+        margin: 6px 0 10px;
+        text-transform: none;
+        letter-spacing: -0.01em;
+        color: var(--gold);
+      }
+
+      <!--if:subtitle-->
+      /* The half of the title after the colon. Geist, not the display face, so
+         it reads as explanation under a hook rather than a further line of
+         headline — and capped short of the portrait so it never wraps around
+         a face. */
+      .subtitle {
+        margin-top: 22px;
+        max-width: 560px;
+        font-size: 27px;
+        line-height: 1.34;
+        color: rgba(255, 255, 255, 0.72);
+        text-wrap: balance;
+      }
+      <!--/if:subtitle-->
+
+      .spacer {
+        flex: 1;
+      }
+      .name {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 62px;
+        line-height: 0.98;
+        text-transform: uppercase;
+        letter-spacing: 0.01em;
+      }
+      /* Blue on the role, not on the name. The blue-and-gold split is the
+         wordmark's signature; repeating it on a person makes the name read as
+         a second logo and the logo less singular. */
+      .role {
+        margin-top: 16px;
+        font-size: 27px;
+        font-weight: 600;
+        color: var(--blue);
+      }
+      <!--ifnot:org-->
+      /* Only where the speaker's record carries no company. The block after
+         the flex spacer is bottom-anchored as a group, so a margin added here
+         unconditionally makes the group taller and lifts the *name* by that
+         much on every card that does have an org. */
+      .role {
+        margin-bottom: 4px;
+      }
+      <!--/ifnot:org-->
+      <!--if:org-->
+      .org {
+        margin-top: 10px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.2em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+      <!--/if:org-->
+
+      .facts {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--blue);
+        flex: none;
+      }
+
+      .powered {
+        margin-top: 46px;
+      }
+      /* No slashes. `//` is the SASTW and Model device; PySA's own band labels
+         this plainly. */
+      .powered .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.26em;
+        color: #6f6f6f;
+        text-transform: uppercase;
+      }
+      .logos {
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 34px;
+      }
+      .logos img {
+        width: auto;
+        opacity: 0.95;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bloom"></div>
+    <div class="portrait"><img src="{{face}}" alt="" /></div>
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <img class="wordmark" src="pysa.svg" alt="" />
+
+      <h1>{{headline}}</h1>
+      <!--if:subtitle-->
+      <p class="subtitle">{{subtitle}}</p>
+      <!--/if:subtitle-->
+
+      <div class="spacer"></div>
+
+      <div class="name">{{first}}<br />{{last}}</div>
+      <div class="role">{{role}}</div>
+      <!--if:org-->
+      <div class="org">{{org}}</div>
+      <!--/if:org-->
+
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+      </div>
+
+      <div class="powered">
+        <div class="label">Powered by</div>
+        <div class="logos">{{logos}}</div>
+      </div>
+    </div>
+  </body>
+</html>
