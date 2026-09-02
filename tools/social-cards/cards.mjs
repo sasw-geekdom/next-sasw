@@ -35,7 +35,66 @@
 /** Shared by every card. */
 const WEEK = "Sept 28 – Oct 2";
 
+/**
+ * The six community groups, all on one template.
+ *
+ * They differ only in their mark, their day and their hour — every one runs at
+ * The Rand, none has a palette of its own, and none has a partner coalition
+ * behind it. See the note at the top of community-group.html for why that
+ * makes them one template where PySA, The Model and Access Granted are three.
+ *
+ * `mark.height` is per group because these lockups run from 3.3:1 to 10:1.
+ */
+/**
+ * Day on one line, hour and room on the next — not "day · hour" and then the
+ * room. These are the only cards carrying a time, and "Tuesday, September 29
+ * · 2 – 3 PM" runs 463px, which reaches into the figure. Split this way the
+ * longest line is the second one and it stops short of the jacket.
+ */
+const AT_THE_RAND = (mark, markHeight, day, hours) => ({
+  template: "community-group.html",
+  mark: { repo: `public/activations/${mark}`, height: markHeight },
+  facts: [day, `${hours}  ·  The Rand, 3rd Floor`],
+  logos: [],
+});
+
+export const COMMUNITY = {
+  "dotnet-user-group": AT_THE_RAND(
+    "dotnet-user-group.svg",
+    58,
+    "Tuesday, September 29",
+    "1 – 2 PM",
+  ),
+  "google-developer-groups": AT_THE_RAND(
+    "google-developer-groups.svg",
+    46,
+    "Tuesday, September 29",
+    "2 – 3 PM",
+  ),
+  aitx: AT_THE_RAND("aitx.svg", 62, "Tuesday, September 29", "3 – 4 PM"),
+  datanauts: AT_THE_RAND(
+    "datanauts.webp",
+    62,
+    "Thursday, October 1",
+    "1 – 2 PM",
+  ),
+  "aws-user-group": AT_THE_RAND(
+    "aws-user-group.svg",
+    58,
+    "Thursday, October 1",
+    "2 – 3 PM",
+  ),
+  "linux-satx": AT_THE_RAND(
+    "linux-satx.webp",
+    72,
+    "Thursday, October 1",
+    "3 – 5 PM",
+  ),
+};
+
 export const EVENTS = {
+  ...COMMUNITY,
+
   pysanantonio: {
     template: "pysanantonio.html",
     facts: ["Friday, October 2", "Geekdom, 3rd Floor"],
@@ -203,6 +262,17 @@ export const CARDS = [
     // is the credential that matters for this talk.
     org: "Meta · MoonPay · Acorns · Paxos",
     portrait: { height: 880, left: 500 },
+  },
+
+  // ─── Community groups ─────────────────────────────────────────────────────
+  {
+    id: "gdg-speaker-hastimal-jangid",
+    event: "google-developer-groups",
+    speaker: "hastimal-jangid",
+    headline: "Behind the Answer",
+    headlineSize: 96,
+    subtitle: "How LLMs and Google AI Search Work",
+    portrait: { height: 903, left: 439 },
   },
 
   // ─── Access Granted ───────────────────────────────────────────────────────

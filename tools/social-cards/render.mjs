@@ -200,6 +200,14 @@ async function main() {
       logos.push(`<img src="${as}" style="height:${l.height}px" alt="" />`);
     }
 
+    // The group's own mark, where the event has one.
+    let mark = "";
+    if (event.mark) {
+      const src = join(REPO, event.mark.repo);
+      mark = `mark${extname(src)}`;
+      await stage(work, src, mark);
+    }
+
     // Headshots, always by slug.
     const slugs = card.speakers ?? [card.speaker];
     const people = [];
@@ -228,6 +236,8 @@ async function main() {
       fact1: event.facts[0],
       fact2: event.facts[1],
       logos: logos.join("\n          "),
+      mark,
+      markHeight: event.mark?.height ?? 0,
 
       face: a.file,
       first: a.name.split(" ")[0],

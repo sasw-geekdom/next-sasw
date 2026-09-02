@@ -1,8 +1,22 @@
 # Speaker social cards
 
-1080×1350 cards for the activations that have their own brand — PySanAntonio,
-The Model, Access Granted. One template per event, one entry per card in
+1080×1350 speaker cards. One template per *brand*, one entry per card in
 [cards.mjs](cards.mjs).
+
+Four templates, and the split is by whether the activation has a brand system
+rather than by how many activations there are:
+
+| template | for | why its own |
+| --- | --- | --- |
+| `pysanantonio.html` | PySanAntonio | blackletter wordmark, blue and gold, its own bloom |
+| `the-model.html` / `the-model-pair.html` | The Model | lavender panel, cyan rule, and it is set in Geist where the rest use Oswald |
+| `access-granted.html` | Access Granted | typeset green wordmark, schematic grid, `>_` prompts |
+| `community-group.html` | **all six community groups** | none of them has a palette, a wordmark treatment or a coalition — just a logo |
+
+The six community groups — .NET User Group, Google Developer Groups, AITX,
+Datanauts, AWS User Group, Linux San Antonio — all run at The Rand and differ
+only in their mark, their day and their hour. That is data, so they share one
+template and get one small `COMMUNITY` entry each.
 
 ```bash
 pnpm add -D playwright && pnpm exec playwright install chromium   # once
@@ -123,6 +137,10 @@ from the activation's own source, and a card is wrong if it drifts from it:
 
   If you regenerate it, compare against the PNG before posting. The approved
   file in Downloads remains the better artifact.
+- **The community cards have no partner strip**, because a community group is
+  a single host rather than a coalition. That removed the thing holding the
+  facts clear of the figure, so the template carries deep bottom padding
+  instead — see the note on `.frame`.
 - **Mason Egger's card and his speaker page disagree.** The card says
   *President · PyTexas Foundation*; his CMS record says *Sr Solutions Architect
   · Temporal Technologiues* — note the typo in that record, worth fixing in the

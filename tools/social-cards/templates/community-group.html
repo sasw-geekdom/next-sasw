@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* The house magenta, not a palette of the group's own.
+         PySanAntonio, The Model and Access Granted each get their own template
+         because each has a brand system in the codebase — a palette, its own
+         devices, its own labels. The community groups have a logo and nothing
+         else: no accent, no wordmark treatment, no second colour. So this is a
+         Startup + Tech Week card that carries the group's mark, and one
+         template serves all six. */
+      :root {
+        --magenta: #ff32a0;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* A magenta bloom where the branded events use their own — the same
+         device, in the house colour. */
+      .bloom {
+        position: absolute;
+        right: -150px;
+        top: 200px;
+        width: 820px;
+        height: 820px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          var(--magenta) 0%,
+          transparent 66%
+        );
+        opacity: 0.22;
+        filter: blur(120px);
+      }
+
+      .portrait {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .portrait img {
+        position: absolute;
+        left: {{portraitLeft}}px;
+        bottom: 0;
+        height: {{portraitHeight}}px;
+        width: auto;
+      }
+      .portrait::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(to right, #000 0%, #000 20%, rgba(0, 0, 0, 0) 52%),
+          linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 14%);
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        /* Deep bottom padding, unlike the other templates. They end in a
+           partner strip that holds the facts clear of the figure; with no
+           strip the facts fell to the foot of the card, which is exactly where
+           a seated portrait's shoulder is widest — the time ran into a jacket
+           at x=403. This lifts them to where the silhouette has drawn back. */
+        padding: 74px 72px 150px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 46px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* The group's own mark, in the slot PySA gives its wordmark. Sized by
+         height per group, because these lockups run from 3.3:1 (Linux SA) to
+         10:1 (Google Developer Groups) and a single height would draw one of
+         them a third of the width of another. */
+      .mark {
+        margin-top: 52px;
+        height: {{markHeight}}px;
+        width: auto;
+        display: block;
+        align-self: flex-start;
+      }
+
+      h1 {
+        margin-top: 34px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 1;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+
+      <!--if:subtitle-->
+      .subtitle {
+        margin-top: 22px;
+        max-width: 560px;
+        font-size: 27px;
+        line-height: 1.34;
+        color: rgba(255, 255, 255, 0.72);
+        text-wrap: balance;
+      }
+      <!--/if:subtitle-->
+
+      .spacer {
+        flex: 1;
+      }
+      .name {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 62px;
+        line-height: 0.98;
+        text-transform: uppercase;
+        letter-spacing: 0.01em;
+      }
+      .role {
+        margin-top: 16px;
+        font-size: 27px;
+        font-weight: 600;
+        color: var(--magenta);
+      }
+      <!--ifnot:org-->
+      .role {
+        margin-bottom: 4px;
+      }
+      <!--/ifnot:org-->
+      <!--if:org-->
+      .org {
+        margin-top: 10px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.2em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+      <!--/if:org-->
+
+      .facts {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--magenta);
+        flex: none;
+      }
+
+      /* No partner strip. The branded events carry one because a coalition
+         puts them on; a community group is a single host, and its mark is
+         already at the top of the card. */
+    </style>
+  </head>
+  <body>
+    <div class="bloom"></div>
+    <div class="portrait"><img src="{{face}}" alt="" /></div>
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <img class="mark" src="{{mark}}" alt="" />
+
+      <h1>{{headline}}</h1>
+      <!--if:subtitle-->
+      <p class="subtitle">{{subtitle}}</p>
+      <!--/if:subtitle-->
+
+      <div class="spacer"></div>
+
+      <div class="name">{{first}}<br />{{last}}</div>
+      <div class="role">{{role}}</div>
+      <!--if:org-->
+      <div class="org">{{org}}</div>
+      <!--/if:org-->
+
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+      </div>
+    </div>
+  </body>
+</html>
