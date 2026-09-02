@@ -275,6 +275,24 @@ export const CARDS = [
     portrait: { height: 903, left: 439 },
   },
 
+  {
+    id: "aws-speaker-daniel-morales-yusty",
+    event: "aws-user-group",
+    speaker: "daniel-felipe-morales-yusty",
+    // 78px, not the default 88. At 88 the hook is 924px against a 936px
+    // measure — it fits by 12px, which is not a margin, and breaking it in two
+    // orphans "HACKER".
+    headline: "The Autonomous Hacker",
+    headlineSize: 78,
+    subtitle: "Zero-Trust AI Pentesting on AWS",
+    // Four words. The default split puts three of them on the second line and
+    // runs it into the portrait; balanced two and two, both lines clear.
+    name: ["Daniel Felipe", "Morales Yusty"],
+    // A fuller crop than the rest — his head is 33.8% of the frame against
+    // ~38% — so it takes a taller image to draw the same size head.
+    portrait: { height: 1020, left: 410 },
+  },
+
   // ─── Access Granted ───────────────────────────────────────────────────────
   {
     id: "access-granted-speaker-dante-moreno",

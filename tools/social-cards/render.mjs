@@ -241,8 +241,11 @@ async function main() {
       markHeight: event.mark?.height ?? 0,
 
       face: a.file,
-      first: a.name.split(" ")[0],
-      last: a.name.split(" ").slice(1).join(" "),
+      // Split after the first word unless the card says otherwise. That is
+      // right for two- and three-word names and wrong for four: "Daniel" over
+      // "Felipe Morales Yusty" runs the second line into the portrait.
+      first: card.name?.[0] ?? a.name.split(" ")[0],
+      last: card.name?.[1] ?? a.name.split(" ").slice(1).join(" "),
       // A card may override what the CMS says — see mason-egger.
       role: card.role ?? a.role,
       org: card.org ?? a.org,
