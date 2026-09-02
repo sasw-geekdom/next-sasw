@@ -176,6 +176,7 @@ async function main() {
     "sastw.png",
   );
   await stage(work, join(REPO, "public/pysa/wordmark-dark.svg"), "pysa.svg");
+  await stage(work, join(REPO, "public/brand/sastw-bolt.svg"), "bolt.svg");
 
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: SIZE, deviceScaleFactor: 1 });

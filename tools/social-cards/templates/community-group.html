@@ -40,22 +40,33 @@
         position: relative;
       }
 
-      /* A magenta bloom where the branded events use their own — the same
-         device, in the house colour. */
-      .bloom {
+      /* The house bolt, as a ground rather than a badge.
+         These cards already carry two marks — the week's lockup and the
+         group's — and a third would be clutter competing with the one thing
+         that tells the six apart. But this template also has the weakest
+         signature of the four: no palette, no wordmark treatment, just a
+         bloom. So the bloom takes the bolt's shape instead, which is how the
+         site itself uses it — masked, not placed (see event-particles.tsx).
+         Low enough to read as texture; a bolt you notice is a bolt competing
+         with the speaker. */
+      .bolt {
         position: absolute;
-        right: -150px;
-        top: 200px;
+        /* Above the portrait's scrim, and on the left. Behind it the scrim
+           paints it out entirely; over the figure it would tint a face. The
+           left-middle is the one genuinely empty region on this template —
+           between the talk title and the speaker's name — which is where a
+           ground element belongs. */
+        z-index: 1;
+        left: -190px;
+        top: 330px;
         width: 820px;
-        height: 820px;
-        border-radius: 50%;
-        background: radial-gradient(
-          circle,
-          var(--magenta) 0%,
-          transparent 66%
-        );
-        opacity: 0.22;
-        filter: blur(120px);
+        height: auto;
+        /* Drawn, not masked. The file is already #ff32a0, so it needs no
+           mask — and a CSS mask would not have worked anyway: Chromium treats
+           an external SVG mask over file:// as cross-origin and drops it
+           silently. The renderer's failed-request line is what caught it. */
+        opacity: 0.09;
+        filter: blur(7px);
       }
 
       .portrait {
@@ -98,7 +109,7 @@
         justify-content: space-between;
       }
       .top img {
-        height: 46px;
+        height: 58px;
         width: auto;
       }
       .dates {
@@ -203,7 +214,7 @@
     </style>
   </head>
   <body>
-    <div class="bloom"></div>
+    <img class="bolt" src="bolt.svg" alt="" />
     <div class="portrait"><img src="{{face}}" alt="" /></div>
 
     <div class="frame">
