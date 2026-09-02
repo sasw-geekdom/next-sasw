@@ -46,6 +46,7 @@ import { PYSA } from "@/lib/pysa";
 import { BackLink } from "@/components/site/back-link";
 import { activationEvent, jsonLd } from "@/lib/structured-data";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
+import { PoweredBy } from "@/components/site/powered-by";
 import { GiveALotBand } from "@/components/site/give-a-lot-band";
 import { ModelBand } from "@/components/site/model-band";
 import { PysaBand } from "@/components/site/pysa-band";
@@ -230,6 +231,16 @@ function ActivationPage({
   const isModel = session.page === "the-model";
   const isGiveALot = session.page === "give-a-lot";
   /**
+   * Hero and nothing else.
+   *
+   * College Night has no running order to list and no speakers to add — it is
+   * a room, which is why it carries `spotlight` rather than `programme`. Its
+   * message therefore has somewhere to go other than a band of its own, so it
+   * rides in the hero column and `ActivationDetail` is skipped below. The
+   * copy in lib/schedule.ts is trimmed to one paragraph to pay for it.
+   */
+  const isCollegeNight = session.page === "college-night";
+  /**
    * Not a band — this one keeps the shared hero and only lights what is behind
    * the mark, which is why it is a flag here rather than a fifth entry in the
    * list above.
@@ -280,7 +291,12 @@ function ActivationPage({
         />
       )}
       <section className="border-t border-white/10 bg-black">
-        <div className="mx-auto w-full max-w-7xl px-6 pt-8 lg:pt-10">
+        <div
+          className={cn(
+            "mx-auto w-full max-w-7xl px-6",
+            isCollegeNight ? "pt-5 lg:pt-6" : "pt-8 lg:pt-10",
+          )}
+        >
           <BackLink
             href="/schedule"
             className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none"
@@ -402,7 +418,19 @@ function ActivationPage({
            looks deliberate on a laptop and leaves 700px of footer above the
            fold on a 1440px-tall monitor. Centred rather than top-aligned so
            the copy sits with the picture as the box grows. */
-        <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden bg-black">
+        <section
+          className={cn(
+            "relative flex items-center overflow-hidden bg-black",
+            // The default reserves the header's 4rem and nothing else, which
+            // is a masthead that fills the screen on its own terms. College
+            // Night has to fit the screen instead — everything on it, down to
+            // the hosts, above the fold on a laptop — and the BACK row above
+            // this section costs another ~60px the calc never knew about.
+            isCollegeNight
+              ? "min-h-[calc(100vh-9.5rem)]"
+              : "min-h-[calc(100vh-4rem)]",
+          )}
+        >
           {/* Set into the black, not laid on top of it — the same grammar the
               PySanAntonio band uses for its clip.
     
@@ -490,7 +518,14 @@ function ActivationPage({
             </>
           )}
 
-          <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-16 pt-10 lg:pb-16 lg:pt-14">
+          <div
+            className={cn(
+              "relative z-10 mx-auto w-full max-w-7xl px-6",
+              isCollegeNight
+                ? "pb-10 pt-6 lg:pb-12 lg:pt-8"
+                : "pb-16 pt-10 lg:pb-16 lg:pt-14",
+            )}
+          >
             {/* Two columns only when there is a talk to put in the second one.
                 Without it the copy keeps its own `max-w-3xl` and the hero is
                 unchanged for every other activation. */}
@@ -578,9 +613,33 @@ function ActivationPage({
                     )}
                   </h1>
                 )}
-                <p className="mt-6 max-w-xl text-pretty text-lg text-white/60">
-                  {session.blurb}
-                </p>
+                {/* The line that was heading the section below until that
+                    section went, moved up under the title. It is the only
+                    piece of that block worth carrying: an instruction, where
+                    everything around it describes. Above the hook rather than
+                    between hook and paragraph — title, deck, then body. */}
+                {isCollegeNight && session.detail?.headline && (
+                  <p className="mt-4 text-pretty font-display text-2xl font-bold uppercase leading-[1.05] tracking-tight text-white sm:text-3xl">
+                    {session.detail.headline}
+                  </p>
+                )}
+                {/* One paragraph, not two. College Night's lede opens on the
+                    subjects and closes on the student ID, and the blurb in
+                    front of it was a third thing to read before either. The
+                    blurb still earns its keep off-page — meta description,
+                    calendar details, JSON-LD — it just is not the hero copy
+                    here. */}
+                {isCollegeNight ? (
+                  session.detail?.lede[0] && (
+                    <p className="mt-5 max-w-xl text-pretty text-lg text-white/60">
+                      {session.detail.lede[0]}
+                    </p>
+                  )
+                ) : (
+                  <p className="mt-6 max-w-xl text-pretty text-lg text-white/60">
+                    {session.blurb}
+                  </p>
+                )}
                 {/* A locked slot belongs in the hero, not filed under a
                   "running order" heading further down — once the date, the
                   hour and the room are all fixed, that IS the headline detail
@@ -588,7 +647,12 @@ function ActivationPage({
                   wants to do with it. */}
                 {session.when ? (
                   <>
-                    <dl className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
+                    <dl
+                      className={cn(
+                        "flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55",
+                        isCollegeNight ? "mt-6" : "mt-8",
+                      )}
+                    >
                       <div className="inline-flex items-center gap-2">
                         <CalendarDays
                           className="h-4 w-4 shrink-0 text-magenta"
@@ -620,8 +684,25 @@ function ActivationPage({
                       </div>
                     </dl>
 
+                    {/* Between the slot and the buttons, not after them. The
+                        hosts are part of what the reader is deciding on — who
+                        is running this — so they belong on the way to the CTA
+                        rather than trailing it. Also keeps the buttons as the
+                        last thing before the fold. */}
+                    {isCollegeNight && session.detail?.poweredBy && (
+                      <PoweredBy
+                        orgs={session.detail.poweredBy}
+                        className="mt-7"
+                      />
+                    )}
+
                     {/* Full width below sm — see the note on the banded row. */}
-                    <div className="mt-8 flex flex-wrap items-center gap-3">
+                    <div
+                      className={cn(
+                        "flex flex-wrap items-center gap-3",
+                        isCollegeNight ? "mt-6" : "mt-8",
+                      )}
+                    >
                       {/* See the banded row above — same override, same
                           reason. */}
                       <ButtonLink
@@ -650,7 +731,12 @@ function ActivationPage({
                       given a section of their own — with the slot locked
                       there's nothing else to say, and a whole band under this
                       one to hold two links was padding. */}
-                    <p className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
+                    <p
+                      className={cn(
+                        "flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55",
+                        isCollegeNight ? "mt-6" : "mt-8",
+                      )}
+                    >
                       {session.site &&
                         (session.site.href ? (
                           <a
@@ -733,7 +819,7 @@ function ActivationPage({
         heroTalk ? null : (
           <ActivationSessions sessions={sessions} speakers={speakers} />
         )
-      ) : (
+      ) : isCollegeNight ? null : (
         <ActivationDetail detail={session.detail} speakers={speakers} />
       )}
 

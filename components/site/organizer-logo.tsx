@@ -22,6 +22,17 @@ export function OrganizerLogo({
     logo: string;
     heightClass: string;
     href?: string;
+    /**
+     * Knock the mark back to white.
+     *
+     * `brightness(0)` flattens every opaque pixel to black and `invert(1)`
+     * turns that white, with alpha untouched — so a two-tone mark comes back
+     * as one white silhouette and keeps its transparent gaps. For marks whose
+     * own colour would be the only colour on an otherwise magenta-and-white
+     * surface; Geekdom's current wordmark is red, and it is the one host on
+     * College Night.
+     */
+    white?: boolean;
   };
 }) {
   const { chipRef, probeProps } = useProbeChip();
@@ -31,7 +42,11 @@ export function OrganizerLogo({
     <img
       src={org.logo}
       alt={org.name}
-      className={cn("w-auto object-contain", org.heightClass)}
+      className={cn(
+        "w-auto object-contain",
+        org.heightClass,
+        org.white && "brightness-0 invert",
+      )}
     />
   );
 

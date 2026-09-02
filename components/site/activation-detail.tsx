@@ -1,9 +1,9 @@
 import type { FeaturedSession } from "@/lib/schedule";
 import Image from "next/image";
-import { OrganizerLogo } from "@/components/site/organizer-logo";
 import type { CardSpeaker } from "@/components/site/speaker-card";
 import { SpeakerPeek } from "@/components/site/speaker-peek";
 import { SPEAKERS_ANNOUNCED } from "@/lib/speakers";
+import { PoweredBy } from "@/components/site/powered-by";
 import { cn } from "@/lib/utils";
 
 // An organiser's own account of their activation, from lib/schedule.
@@ -107,19 +107,8 @@ export function ActivationDetail({
       {/* The orgs behind it, under the lede — the same label-over-a-row the
           bands use, so an activation without a band credits its partners the
           same way one with a band does. */}
-      {detail.poweredBy && detail.poweredBy.length > 0 && (
-        <div className="mt-9">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
-            Powered by
-          </p>
-          <ul className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-6 sm:gap-x-10">
-            {detail.poweredBy.map((o) => (
-              <li key={o.name}>
-                <OrganizerLogo org={o} />
-              </li>
-            ))}
-          </ul>
-        </div>
+      {detail.poweredBy && (
+        <PoweredBy orgs={detail.poweredBy} className="mt-9" />
       )}
 
       {/* How to get in, at the foot of the narrative rather than at the foot of

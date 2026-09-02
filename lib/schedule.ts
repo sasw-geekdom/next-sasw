@@ -255,6 +255,8 @@ export interface FeaturedSession {
       logo: string;
       heightClass: string;
       href?: string;
+      /** Draw the mark white — see `OrganizerLogo`. */
+      white?: boolean;
     }[];
     /**
      * Marks to put in front of the reader, where an activation is a room
@@ -1136,15 +1138,46 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       start: "2026-09-29T16:00:00-05:00",
       end: "2026-09-29T18:00:00-05:00",
     },
+    // Not drawn on the page any more — the hero runs one paragraph and the
+    // lede is it. This still feeds the meta description, the .ics details,
+    // the JSON-LD and the admin list, all of which want one short sentence
+    // rather than the three the page shows.
+    //
+    // The hook, and the only line here that says the shape of the night
+    // rather than who it is for. It used to run on to the third floor,
+    // the DEVSA community and the RowdyHacks team — three hosts in the one
+    // sentence meant to tell a student whether this is for them. The marks
+    // below credit all three, and do it better than a clause can.
     blurb:
-      "Every computing student in San Antonio, community college and university alike — two hours on Geekdom's third floor with the DEVSA community, and the RowdyHacks team asking for hands before Saturday.",
+      "Every computing student in San Antonio, community college and university alike. Two hours, one room.",
     detail: {
       eyebrow: "The night",
-      headline: "Bring the whole cohort.",
+      // "Club", not "cohort". Cohort is a real higher-ed word but an
+      // administrative one — IPEDS counts a "first-time, full-time cohort",
+      // and the only other use of it in this file is an accelerator's. It is
+      // said about students more than by them, and this page's whole argument
+      // is that nobody is checking which logo is on your student ID. Club is
+      // also what the page goes on to describe: clubs recruiting, teams
+      // forming, and the student org marks that belong in this hero.
+      headline: "Bring the whole club.",
+      // One paragraph, where every other activation runs two or more. This
+      // page is a hero and nothing else — see `isCollegeNight` in the
+      // activation page — so the copy has to fit one, and this is the
+      // paragraph that says who the night is for. The one dropped with it
+      // made DEVSA's bridge argument; the coda made Geekdom's. Both are true
+      // and neither is what a student needs in the first screen.
+      // Three short sentences, and they have a height budget: everything on
+      // this page has to land above the fold on a laptop, so the paragraph
+      // cannot run six lines. Each sentence answers one question a student
+      // actually has — is it my subject, is it my school, can I just show up
+      // — and the third is the access line folded back in after the section
+      // that used to carry it separately went away.
       lede: [
-        "Computer science, AI, cybersecurity, data engineering, electrical engineering \u2014 if you are studying any of it anywhere in San Antonio, this is the room. The Alamo Colleges, UTSA, St. Mary's, Trinity, Texas A&M-San Antonio, UIW. There is no home campus for this one, and no one is checking which logo is on your student ID.",
-        "The fall semester is still young, which is the point: clubs are recruiting, teams are forming, and nobody has picked their year yet. DEVSA describes itself as the bridge across San Antonio's tech ecosystem, and is careful about how \u2014 it does not replace the communities doing the work, it hosts them and connects them. There are more than twenty of those groups behind this one room.",
+        "Computer science, AI, cybersecurity, data and electrical engineering \u2014 any of it, at any campus in San Antonio. The Alamo Colleges, UTSA, St. Mary's, Trinity, Texas A&M-San Antonio, UIW. Free, no badge, no pitch, and nobody checking which logo is on your student ID.",
       ],
+      // Not rendered right now — the hero drops it pending a row of student
+      // org marks on its right-hand side. Kept rather than deleted because
+      // that row is what these become.
       spotlight: [
         {
           src: "/activations/acm-utsa.webp",
@@ -1165,20 +1198,45 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
           href: "https://rowdyhacks.org/",
         },
       ],
-      coda: "Geekdom's pitch to founders is that people are the unfair advantage \u2014 that a hard problem gets easier with the right person across the table, and that person is hard to find on your own, so they built the room where they already are. That room is the third floor of the Rand, which is the floor you would be standing on. A student who finds it in their first semester has four years of it, and that is the whole reason the community floor gives an evening to people who cannot yet put Geekdom on a r\u00e9sum\u00e9. Nobody has to join anything to talk to anyone.",
-      // Two hosts, two borrowed registers, and both are deliberate. The coda
-      // above is Geekdom's own argument in Geekdom's words — HOOK and MISSION
-      // in next-geekdom's lib/site.ts are "make people your unfair advantage"
-      // and "that person is hard to find on your own, so we built the room
-      // where they already are". This kicker is DEVSA's tagline.
+      // DEVSA's own tagline, extended by one clause at the client's request.
+      // The first two sentences are theirs verbatim — lib/locations.ts drops
+      // this same line from The Rand's description, because there it was the
+      // event borrowing a partner's voice to describe a venue. Here DEVSA
+      // hosts the night, so it reads as the host talking.
       //
-      // DEVSA's own tagline, and used deliberately rather than paraphrased.
-      // lib/locations.ts drops this same line from The Rand's description,
-      // because there it was the event borrowing a partner's brand voice to
-      // describe a venue. Here DEVSA hosts the night, the coda above names
-      // them twice and hands the line over, so it reads as the host talking
-      // rather than as marketing lifted from someone else.
-      kicker: "Find your people. Build your future.",
+      // The third sentence is ours. Punctuated to match: the house pattern is
+      // short declaratives that end in a period, even two-word ones.
+      // The two hosts, in the hero rather than a band — `poweredBy` exists on
+      // this type for exactly the activation that has no band of its own.
+      // Both files and both height classes are the ones ACCESS_ORGANIZERS
+      // already uses, so the same mark is drawn the same size across the site.
+      //
+      // Geekdom's is a 3.7:1 wordmark and DEVSA's a 1.3:1 badge, which is why
+      // the wordmark is set shorter: matched heights would draw it roughly
+      // twice the area and read as the senior partner.
+      poweredBy: [
+        {
+          name: "Geekdom",
+          href: "https://geekdom.com",
+          // Their current mark, off the partner wall. NOT og-geekdom.svg,
+          // which is white already and tempting for that reason — it is the
+          // throwback wordmark from fifteen years ago, and it belongs to the
+          // /15-years surfaces that use it deliberately.
+          logo: "/brand/geekdom.png",
+          // 2.83:1 against the throwback's 3.68:1, so it needs more height to
+          // draw the same width. The crown also sits above the letters, which
+          // makes the wordmark itself smaller than the box.
+          heightClass: "h-10 sm:h-11",
+          white: true,
+        },
+        {
+          name: "DEVSA",
+          href: "https://www.devsa.community/",
+          logo: "/access-granted/orgs/devsa.png",
+          heightClass: "h-11 sm:h-12",
+        },
+      ],
+      kicker: "Find your people. Build your future. Build your network.",
       access:
         "Free, and free of the usual conditions \u2014 no badge, no pitch, no year requirement, and no need to be enrolled anywhere in particular.",
     },
