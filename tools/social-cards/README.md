@@ -108,10 +108,21 @@ from the activation's own source, and a card is wrong if it drifts from it:
 
 ## Known gaps
 
-- **`the-model-keynote-justin-johnson`** predates this tool and has no entry. It
-  was built before the directory existed and its source is gone; the approved
-  PNG was patched in place rather than rebuilt. Rebuilding it means writing a
-  single-speaker Model template, which nothing needs yet.
+- **`the-model-keynote-justin-johnson` is a reconstruction, not a byte match.**
+  Every other card here reproduces its approved PNG exactly; this one differs by
+  about 21% of pixels. It predates the tool, its source was lost, and the
+  template was reverse-engineered from the rendered image — so the layout,
+  colours, copy and portrait match, while the headline and name sit a little
+  heavier than the original.
+
+  Reverse-engineering it did surface something worth knowing: **this card is set
+  in Geist, not the Oswald every later card uses.** It was made before that
+  convention existed. Chasing the reference's measure with tracking on Oswald
+  got the width right and the letterforms wrong — the `O` in "OF" is circular in
+  the original and a condensed oval in Oswald.
+
+  If you regenerate it, compare against the PNG before posting. The approved
+  file in Downloads remains the better artifact.
 - **Mason Egger's card and his speaker page disagree.** The card says
   *President · PyTexas Foundation*; his CMS record says *Sr Solutions Architect
   · Temporal Technologiues* — note the typo in that record, worth fixing in the

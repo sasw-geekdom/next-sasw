@@ -221,6 +221,7 @@ async function main() {
 
     const data = {
       week: WEEK,
+      eyebrow: card.eyebrow ?? "",
       headline: card.headline,
       headlineSize: card.headlineSize ?? 88,
       subtitle: card.subtitle ?? "",

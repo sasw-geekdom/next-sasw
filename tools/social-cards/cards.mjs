@@ -57,6 +57,18 @@ export const EVENTS = {
     ],
   },
 
+  "the-model-keynote": {
+    template: "the-model.html",
+    // The keynote is the one card in the set that carries a time — it is a
+    // fixed slot inside the afternoon rather than the afternoon itself.
+    facts: ["Monday, September 28  ·  1:30 PM", "Geekdom, 3rd Floor"],
+    logos: [
+      { partner: "The Creative Futures", height: 62 },
+      { partner: "Tech Bloc", height: 50 },
+      { repo: "public/access-granted/orgs/devsa.png", height: 46 },
+    ],
+  },
+
   "the-model": {
     template: "the-model-pair.html",
     facts: ["Monday, September 28", "Geekdom, 3rd Floor"],
@@ -175,6 +187,22 @@ export const CARDS = [
       { height: 740, top: -28 },
       { height: 622, top: -46 },
     ],
+  },
+
+  {
+    id: "the-model-keynote-justin-johnson",
+    event: "the-model-keynote",
+    speaker: "justin-johnson",
+    eyebrow: "// Keynote · The Model",
+    headline:
+      'The next era of the<br /><span class="hit">creator economy</span>',
+    headlineSize: 69,
+    subtitle:
+      "What’s changing, where the opportunities are,<br />and what to build next.",
+    // His record carries no company; the card lists where he has worked, which
+    // is the credential that matters for this talk.
+    org: "Meta · MoonPay · Acorns · Paxos",
+    portrait: { height: 880, left: 500 },
   },
 
   // ─── Access Granted ───────────────────────────────────────────────────────
