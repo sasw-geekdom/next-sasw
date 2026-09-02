@@ -14,6 +14,7 @@ under the table:
 | `access-granted.html` | Access Granted | typeset green wordmark, schematic grid, `>_` prompts |
 | `community-group.html` | **all six community groups** | none of them has a palette, a wordmark treatment or a coalition — just a logo |
 | `tpr.html` | Texas Public Radio | *not* a brand — see below |
+| `community-group-wide.html` | the community groups, at 1200x630 | a size, not a brand — see **Two sizes** |
 
 `tpr.html` is the exception to the rule above. TPR is a room, not an
 activation, so by that rule it should ride the community template. It doesn't,
@@ -65,6 +66,31 @@ The six community groups — .NET User Group, Google Developer Groups, AITX,
 Datanauts, AWS User Group, Linux San Antonio — all run at The Rand and differ
 only in their mark, their day and their hour. That is data, so they share one
 template and get one small `COMMUNITY` entry each.
+
+## Two sizes
+
+1080x1350 by default. A card may carry `size` and its own `template`, which is
+how the 1200x630 Meetup cards work — same event, same speaker, same data, a
+different shape. The filename says which you are holding.
+
+`community-group-wide.html` is the first of those, and it is deliberately not
+the portrait card re-cropped: 0.8:1 to 1.9:1 is a different composition, and
+more to the point a different job. **Meetup prints the group name, the event
+title, the date, the time and the venue beside the image**, so a card
+repeating them spends its width on what the reader is already looking at. What
+the platform never says is that the meetup is part of Startup + Tech Week, and
+it never shows the speaker's face. So the wide card carries the co-brand, the
+face, the hook and the name, and drops the facts, the partner strip and the
+role.
+
+Two things it has to respect that the portrait card does not:
+
+- **Meetup re-crops** across its list, page and mobile placements. Nothing that
+  has to survive goes near an edge — 72px in from the sides, and the copy sits
+  below centre rather than on the floor.
+- **The portrait numbers do not carry over.** Bottom-anchored in a 630-tall
+  frame, the portrait card's height puts the crown above the top edge — see
+  `gdg-speaker-hastimal-jangid-wide`, solved from the crown instead.
 
 ```bash
 pnpm add -D playwright && pnpm exec playwright install chromium   # once

@@ -1,5 +1,9 @@
 /**
- * Renders the speaker cards in cards.mjs to 1080x1350 PNGs.
+ * Renders the speaker cards in cards.mjs to PNGs.
+ *
+ * 1080x1350 unless a card or its event says otherwise. The second size is
+ * 1200x630, for Meetup and anywhere else that wants the OG ratio — see
+ * `size` in cards.mjs.
  *
  *   node --env-file=.env.local tools/social-cards/render.mjs            # all
  *   node --env-file=.env.local tools/social-cards/render.mjs <id> [id…] # some
@@ -180,6 +184,7 @@ async function main() {
 
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: SIZE, deviceScaleFactor: 1 });
+  let viewport = SIZE;
 
   for (const card of wanted) {
     const event = EVENTS[card.event];
@@ -233,7 +238,10 @@ async function main() {
 
     const [a, b] = people;
     const html = await readFile(
-      join(HERE, "templates", event.template),
+      // A card may override its event's template. The wide Meetup cards are
+      // the same event's data in a different shape, so they share everything
+      // except the layout.
+      join(HERE, "templates", card.template ?? event.template),
       "utf8",
     );
 
@@ -251,7 +259,10 @@ async function main() {
       fact2: facts[1] ?? "",
       logos: logos.join("\n          "),
       mark,
-      markHeight: event.mark?.height ?? 0,
+      // A card may resize the mark. The wide card has to: the portrait card
+      // sets these against a wordmark slot, and beside the SASTW lockup the
+      // same height reads as the group being the senior partner.
+      markHeight: card.markHeight ?? event.mark?.height ?? 0,
 
       // A pull quote, where a card leads on a line rather than on a person.
       quote: card.quote ?? "",
@@ -306,7 +317,16 @@ async function main() {
     await page.waitForTimeout(900);
     page.off("requestfailed", onFail);
 
-    const out = join(outDir, `${card.id}-1080x1350.png`);
+    // The size travels with the card, and the filename says which it is —
+    // the same speaker now has a portrait card and a wide one, and a name
+    // that does not distinguish them is a paste-the-wrong-file waiting to
+    // happen.
+    const size = card.size ?? event.size ?? SIZE;
+    if (size.width !== viewport.width || size.height !== viewport.height) {
+      await page.setViewportSize(size);
+      viewport = size;
+    }
+    const out = join(outDir, `${card.id}-${size.width}x${size.height}.png`);
     await page.screenshot({ path: out });
     console.log(
       `${card.id}${missing.length ? `  !! failed: ${missing.join(", ")}` : ""}`,

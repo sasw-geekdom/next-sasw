@@ -322,6 +322,30 @@ export const CARDS = [
   },
 
   {
+    id: "gdg-speaker-hastimal-jangid-wide",
+    event: "google-developer-groups",
+    speaker: "hastimal-jangid",
+    // 1200x630, for the Meetup listing. The event's own facts and logos are
+    // ignored by this template — see the note at the top of it for why.
+    size: { width: 1200, height: 630 },
+    template: "community-group-wide.html",
+    headline: "Behind the Answer",
+    headlineSize: 72,
+    subtitle: "How LLMs and Google AI Search Work",
+    // 34, not the portrait card's 46. This is a 10:1 wordmark sitting beside
+    // the SASTW lockup rather than alone in a wordmark slot, and at 46 it drew
+    // 470px against the lockup's 175 — the co-brand read as GDG's event that
+    // Startup + Tech Week was attending.
+    markHeight: 34,
+    // Solved for a 630-tall frame, which the portrait card's numbers do not
+    // survive: bottom-anchored at 903 the crown would sit 273px above the top
+    // edge. His crown is 9.2% into his own frame, so 595 puts it at y=90,
+    // clear under the co-brand row, and draws his head 226px — 36% of the
+    // card's height, against 27% on the portrait card.
+    portrait: { height: 595, left: 752 },
+  },
+
+  {
     id: "aws-speaker-daniel-morales-yusty",
     event: "aws-user-group",
     speaker: "daniel-felipe-morales-yusty",
