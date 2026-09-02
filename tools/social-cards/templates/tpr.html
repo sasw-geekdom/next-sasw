@@ -1,0 +1,358 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* Texas Public Radio is a room, not a brand — which by the rule that
+         governs this directory (one template per brand system) should make it
+         a community-group card. It isn't one, for a reason that rule doesn't
+         cover: that template's whole identity is the group's mark in the
+         wordmark slot, and TPR has no mark to put there. Strip it and what is
+         left is a card with a hole where its only differentiator was.
+
+         What TPR has instead is a device the site already gives it, because
+         it is the one room every circuit runs through — see `tier: "anchor"`
+         and `tag: "5 circuits · main stage"` in lib/locations.ts, drawn as
+         the five-charge pip ramp in room-flow.tsx. That ramp takes the
+         wordmark slot here. Same magenta, no new colour. */
+      :root {
+        --magenta: #ff32a0;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* The bolt leads here — it does not sit behind, the way it does on the
+         community cards. That is the difference between the two templates:
+         those are a group's card carrying the house mark as ground, this is
+         the house's own room, so the house mark is the subject.
+         Full charge, barely blurred, bleeding off two edges at a size no
+         other card gives it. It costs nothing in legibility because the
+         portrait is greyscale — see .portrait img. */
+      .bolt {
+        position: absolute;
+        z-index: 1;
+        /* Placed against two edges it must not touch: it starts below the
+           subtitle so it never crosses the headline, and its right edge stops
+           at x=640 where the figure's face begins — magenta laid over a jaw
+           is the one thing greyscale doesn't rescue. Bleeding off the left
+           and the bottom is what keeps it reading as a mark the card is cut
+           from rather than a shape placed on it. */
+        left: -360px;
+        top: 430px;
+        width: 1000px;
+        height: auto;
+        opacity: 0.62;
+        /* 3px, not the community cards' 7px. Blur is what turned it into a
+           bloom there; here the shape itself is the point. */
+        filter: blur(3px);
+      }
+
+      .portrait {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      /* Greyscale, alone in the set.
+         The bolt at full charge and a colour portrait fight — magenta on a
+         skin tone is the one pairing on these cards that reads as a mistake.
+         Dropping the photo to greyscale leaves exactly one colour on the card
+         and hands it to the house mark, which is also why this template can
+         run the bolt at 0.62 where the community cards run it at 0.17. */
+      .portrait img {
+        filter: grayscale(1) contrast(1.06);
+        position: absolute;
+        left: {{portraitLeft}}px;
+        bottom: 0;
+        height: {{portraitHeight}}px;
+        width: auto;
+      }
+      .portrait::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(to right, #000 0%, #000 16%, rgba(0, 0, 0, 0) 50%),
+          linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 14%);
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        /* Deep bottom padding, as on the community cards and for the same
+           reason: no partner strip to hold the facts clear of the figure. */
+        padding: 74px 72px 150px;
+        display: flex;
+        flex-direction: column;
+      }
+      /* A scrim in the bottom-left corner, under the frame's own text and over
+         the bolt. Running the bolt bright puts its lower arm exactly where the
+         name, role and facts sit, and two of those are magenta — the role and
+         the fact pips vanished into it. Dimming that corner rather than moving
+         the bolt keeps the big upper mass at full charge, which is the half
+         doing the work. z-index:-1 sits inside .frame's stacking context, so
+         it is above the bolt without being above the type. */
+      .frame::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 660px;
+        height: 620px;
+        z-index: -1;
+        background: radial-gradient(
+          125% 95% at 0% 100%,
+          rgba(0, 0, 0, 0.96) 0%,
+          rgba(0, 0, 0, 0.86) 40%,
+          rgba(0, 0, 0, 0) 74%
+        );
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 58px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* The five circuits, landing and connecting.
+         One magenta at five charges — the ramp is lifted from room-flow.tsx
+         unchanged (35 / 50 / 65 / 80 / 100), because the circuits deliberately
+         have no colours of their own. What is added here is the bus they land
+         on: the site draws the pips free-standing, and this card is the one
+         place the connecting is the point. */
+      .circuits {
+        margin-top: 54px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        /* Sized to the slot the other templates give a wordmark — the GDG
+           lockup is 470px across — so the ramp reads as this card's mark
+           rather than as a detail under the header. Wide gaps make it a bus
+           the circuits land on; tight ones made it a row of dots. */
+        gap: 100px;
+        width: max-content;
+      }
+      .circuits::before {
+        content: "";
+        position: absolute;
+        left: 5px;
+        right: 5px;
+        top: 50%;
+        height: 2px;
+        transform: translateY(-1px);
+        background: linear-gradient(
+          to right,
+          rgba(255, 50, 160, 0.35),
+          rgba(255, 50, 160, 1)
+        );
+      }
+      .circuits span {
+        position: relative;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: currentColor;
+        /* The site pairs every pip with a glow of its own colour; at this size
+           that is what keeps the dim end of the ramp from reading as grey. */
+        box-shadow: 0 0 12px currentColor;
+      }
+      .c1 {
+        color: rgba(255, 50, 160, 0.35);
+      }
+      .c2 {
+        color: rgba(255, 50, 160, 0.5);
+      }
+      .c3 {
+        color: rgba(255, 50, 160, 0.65);
+      }
+      .c4 {
+        color: rgba(255, 50, 160, 0.8);
+      }
+      .c5 {
+        color: rgb(255, 50, 160);
+      }
+
+      /* The talk's circuit, sitting with the circuits glyph rather than down
+         in the facts. It started in the facts and had to move: the circuit
+         names and the roles people hold overlap badly — Crystal Poenisch is
+         Founder of Frequency Labs speaking on the Founder circuit, so the card
+         read "Founder" twice, four lines apart, which scans as a duplication
+         bug rather than two different facts.
+         Up here it can't: it is a caption on the five-pip ramp, which is the
+         circuits device, so a track name under it reads as a circuit without
+         having to say the word. "5 circuits · main stage" from
+         lib/locations.ts was the earlier text and the ramp still carries that
+         claim on its own — five pips, and the aria-label says it. */
+      .tag {
+        margin-top: 18px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 20px;
+        letter-spacing: 0.26em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin-top: 34px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 1;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+
+      <!--if:subtitle-->
+      .subtitle {
+        margin-top: 22px;
+        max-width: 560px;
+        font-size: 27px;
+        line-height: 1.34;
+        color: rgba(255, 255, 255, 0.72);
+        text-wrap: balance;
+      }
+      <!--/if:subtitle-->
+
+      .spacer {
+        flex: 1;
+      }
+      .name {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 62px;
+        line-height: 0.98;
+        text-transform: uppercase;
+        letter-spacing: 0.01em;
+      }
+      .role {
+        margin-top: 16px;
+        font-size: 27px;
+        font-weight: 600;
+        color: var(--magenta);
+      }
+      <!--ifnot:org-->
+      .role {
+        margin-bottom: 4px;
+      }
+      <!--/ifnot:org-->
+      <!--if:org-->
+      .org {
+        margin-top: 10px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.2em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+      <!--/if:org-->
+
+      .facts {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--magenta);
+        flex: none;
+      }
+
+      /* No partner strip. TPR's host is the week itself. */
+    </style>
+  </head>
+  <body>
+    <img class="bolt" src="bolt.svg" alt="" />
+    <div class="portrait"><img src="{{face}}" alt="" /></div>
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <div class="circuits" role="img" aria-label="All five circuits run here">
+        <span class="c1"></span><span class="c2"></span><span class="c3"></span
+        ><span class="c4"></span><span class="c5"></span>
+      </div>
+      <div class="tag">{{circuit}} · Main Stage</div>
+
+      <h1>{{headline}}</h1>
+      <!--if:subtitle-->
+      <p class="subtitle">{{subtitle}}</p>
+      <!--/if:subtitle-->
+
+      <div class="spacer"></div>
+
+      <!-- The break and the second line are conditional: Wolfy goes by one
+           name, and the unconditional <br /> left an empty 61px line under it.
+           The block below the spacer is bottom-anchored as a group, so that
+           did not show up as a gap under his name — it lifted the whole group,
+           his name included, off the baseline every other card sits on. The
+           other four templates still carry the unconditional version. -->
+      <div class="name">
+        {{first}}<!--if:last--><br />{{last}}<!--/if:last-->
+      </div>
+      <div class="role">{{role}}</div>
+      <!--if:org-->
+      <div class="org">{{org}}</div>
+      <!--/if:org-->
+
+      <div class="facts">
+        <!-- Venue and street, the way the other templates give venue and
+             floor. Times at TPR are not set yet; when they are they belong
+             here as the card's own facts (see `card.facts` in render.mjs),
+             because speakers sit on different days and the day cannot come
+             from the event. -->
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <!--if:fact2-->
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+        <!--/if:fact2-->
+      </div>
+    </div>
+  </body>
+</html>

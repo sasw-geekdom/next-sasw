@@ -1,0 +1,270 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* The one card in the set with nobody on it.
+         College Night is a room rather than a running order — nothing is
+         programmed between the doors opening and closing — so there is no
+         speaker to carry it and the card leads on the line instead. That
+         changes the composition rather than the palette: the bolt takes the
+         half a portrait holds on every other template, which is what keeps
+         this recognisable as the same family. House magenta, no third colour;
+         both hosts are house too. */
+      :root {
+        --magenta: #ff32a0;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* The bolt where the portrait goes — right half, bleeding off two
+         edges. Bigger and brighter than anywhere else in the set, because
+         nothing here competes with it: the TPR cards run 0.62 against a
+         greyscale figure, and with no figure at all this can carry the side
+         on its own. */
+      .bolt {
+        position: absolute;
+        z-index: 0;
+        /* Sized to sit whole on the card rather than bleeding off it. Every
+           other template crops the bolt deliberately, because there it is a
+           ground behind a figure and a cropped shape reads as texture. Here
+           it is the subject, and a subject cut off at two edges stopped
+           reading as a bolt at all — it came out an abstract diagonal. */
+        right: -40px;
+        /* Centred on the card, and it had to be measured to get there: the
+           shape does not fill its own box, so the box top that centres the
+           drawn bolt is not the one arithmetic suggests. At 287 the bolt runs
+           y 338–1013 — 338px of black above it and 337 below. It was at 380,
+           which put it 93px low and left a 431px void in the upper right
+           beside the headline while crowding the bottom. */
+        top: 287px;
+        width: 780px;
+        height: auto;
+        opacity: 0.72;
+        filter: blur(2px);
+      }
+      /* Back to black under the copy column, so the type never sits on the
+         magenta. The bolt is wide enough to reach the left margin at its
+         waist; this holds the left 58% clear without shrinking it. */
+      .scrim {
+        position: absolute;
+        z-index: 1;
+        inset: 0;
+        background: linear-gradient(
+          to right,
+          #000 0%,
+          #000 36%,
+          rgba(0, 0, 0, 0.8) 50%,
+          rgba(0, 0, 0, 0) 68%
+        );
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 74px 72px 84px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 58px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin-top: 62px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 0.88;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+      /* The accent falls on the second word, matching `titleAccent` on this
+         activation in lib/schedule.ts — so the card and the page wear the
+         same mark rather than two. */
+      h1 .hit {
+        color: var(--magenta);
+      }
+
+      /* The deck sits above the facts rather than under the title, which is
+         where the page puts it. Different surfaces, different job: the page
+         has a register button under it, so the instruction belongs up top
+         where it introduces the copy. A card has no button, so its last
+         chance to say what to do is immediately before the when and the
+         where — the two things a reader acts on. */
+      .deck {
+        margin-bottom: 24px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 46px;
+        line-height: 1;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+
+      <!--if:subtitle-->
+      .subtitle {
+        margin-top: 24px;
+        max-width: 560px;
+        font-size: 28px;
+        line-height: 1.34;
+        color: rgba(255, 255, 255, 0.72);
+        text-wrap: balance;
+      }
+      <!--/if:subtitle-->
+
+      /* The page's own opening line, set as the one piece of quoted voice on
+         the card. A magenta rule, where the speaker cards use a pip. */
+      .quote {
+        margin-top: 42px;
+        /* Narrow enough to clear the bolt, which costs a third line and is
+           worth it. At 680 the hook set in two lines about 630px wide each,
+           and the bolt's diagonal crosses those rows — so the last words of
+           both lines sat on magenta. Pushing the bolt right or shrinking the
+           type only moved the collision; the sentence at this size cannot be
+           two lines AND stay out of the shape. Three balanced lines at 505
+           stop well short of it, and the bolt reads whole. */
+        max-width: 505px;
+        border-left: 3px solid var(--magenta);
+        padding-left: 26px;
+        font-size: 25px;
+        line-height: 1.44;
+        color: rgba(255, 255, 255, 0.9);
+        /* Balanced rather than filled. Left to fill, the last line was the
+           word "ID." on its own — the line breaks land where the column runs
+           out, and this sentence runs out two characters into its third line.
+           `balance` sizes every line to the same measure instead, so the
+           break falls on sense rather than on the edge of the box. */
+        text-wrap: balance;
+      }
+
+      .spacer {
+        flex: 1;
+      }
+
+      .facts {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--magenta);
+        flex: none;
+      }
+      /* The condition that is the whole invitation, so it is on the card and
+         not only on the page. */
+      .access {
+        margin-top: 22px;
+        max-width: 520px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        padding-top: 18px;
+        font-size: 19px;
+        line-height: 1.45;
+        color: rgba(255, 255, 255, 0.55);
+      }
+
+      .powered {
+        margin-top: 40px;
+      }
+      .powered .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.26em;
+        color: #6f6f6f;
+        text-transform: uppercase;
+      }
+      .logos {
+        margin-top: 18px;
+        display: flex;
+        align-items: center;
+        gap: 34px;
+      }
+      .logos img {
+        width: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <img class="bolt" src="bolt.svg" alt="" />
+    <div class="scrim"></div>
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <h1>{{headline}}</h1>
+      <!--if:subtitle-->
+      <p class="subtitle">{{subtitle}}</p>
+      <!--/if:subtitle-->
+      <p class="quote">{{quote}}</p>
+
+      <div class="spacer"></div>
+
+      <p class="deck">{{deck}}</p>
+
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+      </div>
+      <!--if:access-->
+      <p class="access">{{access}}</p>
+      <!--/if:access-->
+
+      <div class="powered">
+        <div class="label">// Powered by</div>
+        <div class="logos">{{logos}}</div>
+      </div>
+    </div>
+  </body>
+</html>

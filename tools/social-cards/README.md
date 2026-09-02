@@ -3,8 +3,9 @@
 1080×1350 speaker cards. One template per *brand*, one entry per card in
 [cards.mjs](cards.mjs).
 
-Four templates, and the split is by whether the activation has a brand system
-rather than by how many activations there are:
+Five templates. The split is by whether the activation has a brand system
+rather than by how many activations there are — with one exception, noted
+under the table:
 
 | template | for | why its own |
 | --- | --- | --- |
@@ -12,6 +13,53 @@ rather than by how many activations there are:
 | `the-model.html` / `the-model-pair.html` | The Model | lavender panel, cyan rule, and it is set in Geist where the rest use Oswald |
 | `access-granted.html` | Access Granted | typeset green wordmark, schematic grid, `>_` prompts |
 | `community-group.html` | **all six community groups** | none of them has a palette, a wordmark treatment or a coalition — just a logo |
+| `tpr.html` | Texas Public Radio | *not* a brand — see below |
+
+`tpr.html` is the exception to the rule above. TPR is a room, not an
+activation, so by that rule it should ride the community template. It doesn't,
+because that template's identity **is** the group's mark in the wordmark slot
+and TPR has no mark — strip it and what's left is a card with a hole where its
+only differentiator was.
+
+What TPR has instead is a device the site already gives it, as the one room
+every circuit runs through: the five-charge pip ramp from
+[room-flow.tsx](../../components/site/room-flow.tsx), and the tag `5 circuits ·
+main stage` from [lib/locations.ts](../../lib/locations.ts). The ramp takes the
+wordmark slot, widened to the ~470px a lockup would occupy so it reads as a
+mark rather than a detail. The circuits deliberately have no colours of their
+own — it is one magenta at five charges, and a card that gives a circuit its
+own hue is wrong.
+
+**The bolt is the subject here, not the ground.** That is the line between
+this template and the community one, and it is the reason they don't look
+alike: a community card is a *group's* card carrying the house mark behind it
+at 0.17, and TPR is the house's own room, so the mark is what the card is
+about — full charge, barely blurred, bleeding off two edges at a size no other
+card gives it.
+
+That buys one thing and costs another. It works because **the portrait is
+greyscale, alone in the set** — magenta at full charge against a skin tone is
+the one pairing on these cards that reads as a mistake, so dropping the photo
+leaves exactly one colour on the card and hands it to the bolt. It costs the
+bottom-left corner: the bolt's lower arm lands precisely where the name, role
+and facts sit, and the role and the fact pips are themselves magenta, so they
+disappeared into it. Hence `.frame::before` — a corner scrim under the type and
+over the bolt, which keeps the upper mass at full charge (the half doing the
+work) while the role comes back to 4.4:1 and the pips to 6.1:1.
+
+TPR cards also carry a `circuit` — one of the five in
+[lib/tracks.ts](../../lib/tracks.ts), never a sixth — which **captions the
+ramp** rather than sitting in the facts. It was a fact first and had to move:
+circuit names and job titles collide badly. Crystal Poenisch is Founder of
+Frequency Labs speaking on the Founder circuit, so the card said "Founder"
+twice four lines apart, which reads as a duplication bug rather than two
+different facts. As a caption on the five-pip ramp it can't — the ramp is the
+circuits device, so a track name under it reads as a circuit without having to
+say the word.
+
+**Times at TPR are not set yet**, and unlike every other event the day can't live on the event
+either — these speakers sit across Tuesday and Thursday. When the slots land
+they go on each card as `facts`, which overrides the event's.
 
 The six community groups — .NET User Group, Google Developer Groups, AITX,
 Datanauts, AWS User Group, Linux San Antonio — all run at The Rand and differ

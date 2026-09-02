@@ -198,7 +198,13 @@ async function main() {
       }
       const as = `logo-${i}${extname(src) || ".png"}`;
       await stage(work, src, as);
-      logos.push(`<img src="${as}" style="height:${l.height}px" alt="" />`);
+      // `white` knocks a mark back to a white silhouette — see OrganizerLogo,
+      // which does the same thing with the same two filters so a mark drawn
+      // white on the site is drawn white here too.
+      const tone = l.white ? ";filter:brightness(0) invert(1)" : "";
+      logos.push(
+        `<img src="${as}" style="height:${l.height}px${tone}" alt="" />`,
+      );
     }
 
     // The group's own mark, where the event has one.
@@ -209,8 +215,9 @@ async function main() {
       await stage(work, src, mark);
     }
 
-    // Headshots, always by slug.
-    const slugs = card.speakers ?? [card.speaker];
+    // Headshots, always by slug. A card need not have one: College Night is
+    // a room rather than a person, so it names no speaker and resolves none.
+    const slugs = card.speakers ?? (card.speaker ? [card.speaker] : []);
     const people = [];
     for (const [i, slug] of slugs.entries()) {
       const s = bySlug.get(slug);
@@ -221,6 +228,8 @@ async function main() {
       await stage(work, src, as);
       people.push({ ...s, file: as });
     }
+
+    const facts = card.facts ?? event.facts;
 
     const [a, b] = people;
     const html = await readFile(
@@ -234,21 +243,35 @@ async function main() {
       headline: card.headline,
       headlineSize: card.headlineSize ?? 88,
       subtitle: card.subtitle ?? "",
-      fact1: event.facts[0],
-      fact2: event.facts[1],
+      circuit: card.circuit ?? "",
+      // A card may carry its own facts. TPR needs it: every other event runs
+      // on one day at one hour, so the day is the event's, but TPR's speakers
+      // sit on different days and its times are not set yet.
+      fact1: facts[0],
+      fact2: facts[1] ?? "",
       logos: logos.join("\n          "),
       mark,
       markHeight: event.mark?.height ?? 0,
 
-      face: a.file,
+      // A pull quote, where a card leads on a line rather than on a person.
+      quote: card.quote ?? "",
+      // The line under the title, where the page runs one — College Night's
+      // `detail.headline`, which is the deck on its hero.
+      deck: card.deck ?? "",
+      // The small print. Data rather than template text so it sits beside the
+      // rest of the card's copy and can be diffed against the page's.
+      access: card.access ?? "",
+
+      // Everything below is absent on a card with no speaker.
+      face: a?.file ?? "",
       // Split after the first word unless the card says otherwise. That is
       // right for two- and three-word names and wrong for four: "Daniel" over
       // "Felipe Morales Yusty" runs the second line into the portrait.
-      first: card.name?.[0] ?? a.name.split(" ")[0],
-      last: card.name?.[1] ?? a.name.split(" ").slice(1).join(" "),
+      first: card.name?.[0] ?? a?.name.split(" ")[0] ?? "",
+      last: card.name?.[1] ?? a?.name.split(" ").slice(1).join(" ") ?? "",
       // A card may override what the CMS says — see mason-egger.
-      role: card.role ?? a.role,
-      org: card.org ?? a.org,
+      role: card.role ?? a?.role ?? "",
+      org: card.org ?? a?.org ?? "",
       portraitHeight: card.portrait?.height,
       portraitLeft: card.portrait?.left,
 

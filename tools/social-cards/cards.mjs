@@ -95,6 +95,23 @@ export const COMMUNITY = {
 export const EVENTS = {
   ...COMMUNITY,
 
+  /**
+   * The anchor room. No mark and no palette — see the note at the top of
+   * tpr.html for why it still gets a template of its own rather than riding
+   * the community one.
+   *
+   * Venue and street, where the other events give venue and floor. No day and
+   * no time: they are not set yet, and the day cannot live here the way it
+   * does for every other event because these speakers sit across Tuesday and
+   * Thursday. When the slots land they go on each card as `facts`, which
+   * overrides this. The talk's circuit is not a fact — it captions the ramp.
+   */
+  tpr: {
+    template: "tpr.html",
+    facts: ["Texas Public Radio", "321 W Commerce St"],
+    logos: [],
+  },
+
   pysanantonio: {
     template: "pysanantonio.html",
     facts: ["Friday, October 2", "Geekdom, 3rd Floor"],
@@ -139,6 +156,35 @@ export const EVENTS = {
       { partner: "The Creative Futures", height: 62 },
       { partner: "Tech Bloc", height: 50 },
       { repo: "public/access-granted/orgs/devsa.png", height: 46 },
+    ],
+  },
+
+  /**
+   * College Night — the one card in the set with no speaker on it.
+   *
+   * It is a room, not a running order: nothing is programmed between the
+   * doors opening and closing, which is why the activation carries `spotlight`
+   * rather than `programme` in lib/schedule.ts. So the card leads on the line
+   * instead of on a face.
+   */
+  "college-night": {
+    template: "college-night.html",
+    facts: ["Tuesday, September 29  ·  4 – 6 PM", "The Rand, 3rd Floor"],
+    // Both hosts are in the CMS partner wall, so both resolve by name.
+    logos: [
+      // Balanced by drawn area, not by height: Geekdom's is a wordmark that
+      // fills its box, DEVSA's is a small glyph sitting in open space, so
+      // matching heights drew DEVSA visibly the lighter of the two.
+      // Geekdom's current mark, drawn white by the renderer rather than
+      // swapped for a white file. The white one in public/brand is
+      // og-geekdom.svg, the throwback wordmark from fifteen years ago — it is
+      // the wrong logo, and being already-white is exactly what makes it a
+      // trap. Same file and same treatment as the slug page.
+      //
+      // 62 against DEVSA's 72: at 2.83:1 this draws 175px wide to DEVSA's 96,
+      // which lands the pair at the 1.55:1 area ratio the page has.
+      { repo: "public/brand/geekdom.png", height: 62, white: true },
+      { partner: "DEVSA", height: 72 },
     ],
   },
 
@@ -291,6 +337,209 @@ export const CARDS = [
     // A fuller crop than the rest — his head is 33.8% of the frame against
     // ~38% — so it takes a taller image to draw the same size head.
     portrait: { height: 1020, left: 410 },
+  },
+
+  // ─── Texas Public Radio ───────────────────────────────────────────────────
+  {
+    id: "tpr-speaker-patrick-robinson",
+    event: "tpr",
+    speaker: "patrick-robinson",
+    // Split at the colon, as on samad-ahmed. "AI PRODUCT THINKING" whole
+    // would wrap the headline to three lines against the ramp above it.
+    headline: "Speed to Value",
+    headlineSize: 106,
+    subtitle: "AI Product Thinking",
+    // One of the five named in lib/tracks.ts — the card must not invent a
+    // sixth. The ramp above says all five land here; this says which one the
+    // talk runs on.
+    circuit: "AI & Applied Innovation",
+    // The tightest crop in the set — his head is 46% of its frame where the
+    // rest run 34–38% — so it takes the shortest image to draw the same size
+    // head. The probe said 615; his beard reaches the collar and delays the
+    // shoulder line it looks for, so it read the head as longer than it draws
+    // and undersized this by about 10%.
+    portrait: { height: 890, left: 430 },
+  },
+
+  {
+    id: "tpr-speaker-sandra-velasquez",
+    event: "tpr",
+    speaker: "sandra-velasquez",
+    // The CMS title, whole — the half after the colon is "A Founder Fireside
+    // Chat with Sandra Velasquez", and her name is already the largest thing
+    // in the lower third, so the subtitle drops it.
+    headline: "Building Nopalera<br />on Her Own Terms",
+    subtitle: "A Founder Fireside Chat",
+    // From her session record's `track`, not read off the title.
+    circuit: "Founder",
+    // Her slot is set — Tuesday 1:00–1:30 PM — and deliberately not on the
+    // card.
+    //
+    // The one portrait in the set the probe cannot read at all: it takes the
+    // crown off the alpha channel, and the top of this frame is the brim of a
+    // hat, so it measured a 521px "head" that is really about 230. Its 736
+    // would have drawn her at roughly half the intended size.
+    //
+    // Nor can she match the set's ~370px head — she is seated and three-
+    // quarter length, so the height that would do it puts the hat off the top
+    // of the card. The hat is the cap: 940 lands its brim at y=483, just
+    // clear of the subtitle. Same compromise as edwin-jung, the set's other
+    // full-body cutout.
+    portrait: { height: 940, left: 470 },
+  },
+
+  {
+    id: "tpr-speaker-crystal-poenisch",
+    event: "tpr",
+    speaker: "crystal-poenisch",
+    // The title is a contrast, so the break falls on the "vs." rather than
+    // mid-clause, and there is no subtitle — the whole line is the hook.
+    headline: "Securing Things<br />vs. Securing People",
+    circuit: "Founder",
+    // No session record yet, so no slot. The circuit is the one you gave.
+    //
+    // The long-hair case the probe warns about, at its worst: her hair covers
+    // the neck completely, so the shoulder line it watches for never arrives
+    // where the chin is. It read a 570px head that is really about 484, and
+    // its 673 would have drawn her a third small.
+    portrait: { height: 940, left: 470 },
+  },
+
+  {
+    id: "tpr-speaker-jennifer-fite",
+    event: "tpr",
+    speaker: "jennifer-fite-ph-d",
+    headline: "Nobody Signed Up<br />to Govern a Robot",
+    circuit: "Tech & Builders",
+    // No session record yet, so no slot; the circuit is the one you gave.
+    // Her framing matches crystal-poenisch closely enough to share her
+    // numbers — same head-and-shoulders crop, crown 107px in against 126,
+    // and the same long hair that makes the probe's 765 unusable.
+    portrait: { height: 940, left: 470 },
+  },
+
+  {
+    id: "tpr-speaker-wolfy",
+    event: "tpr",
+    speaker: "wolfy",
+    headline: "Cybersecurity for<br />Small Businesses",
+    // The longest of the five: the tag runs "SMALL BUSINESS & SOLOPRENEUR ·
+    // MAIN STAGE", ~705px against the 936px measure, and clears.
+    circuit: "Small Business & Solopreneur",
+    // He goes by one name — the first the set has had. See the note on
+    // .name in tpr.html for what the renderer's default split did with that.
+    //
+    // The probe's crown is the brim of a DEF CON cap rather than his head,
+    // which for once is right: the cap is the top of the silhouette, so it is
+    // what has to line up with the other cards. Its 713 is still short.
+    portrait: { height: 940, left: 470 },
+  },
+
+  {
+    id: "tpr-speaker-dirce-hernandez",
+    event: "tpr",
+    speaker: "dirce-eduardo-hernandez",
+    // The longest title in the set at 68 characters, and it does not split:
+    // there is no colon, and the one natural break falls inside the list
+    // "Security Operations, Intelligence, and GRC", which leaves any subtitle
+    // starting on a fragment. So it runs whole, three lines at 68px — the
+    // only card here whose headline is not the set's 88 or larger. The breaks
+    // fall on the commas, so the list reads as a list.
+    headline:
+      "Reinventing Security<br />Operations, Intelligence,<br />and GRC for the AI Era",
+    headlineSize: 68,
+    circuit: "AI & Applied Innovation",
+    // No company on his record, so the card runs the no-org path — the one
+    // that needs `.role`'s conditional margin. jordana-naftali is the other.
+    //
+    // Crown 66px into the frame, the highest in the set, so the same drawn
+    // head takes a shorter image than anyone else here: 845 against the 940
+    // the other long-hair crops use.
+    portrait: { height: 845, left: 500 },
+  },
+
+  {
+    id: "tpr-speaker-daniel-ward",
+    event: "tpr",
+    speaker: "daniel-ward",
+    // Split on the dash, which does the work a colon does on the other cards:
+    // the hook in front, the payoff behind.
+    headline: "Lessons From a Year<br />of AI Coaching",
+    subtitle: "What Actually Changed",
+    circuit: "AI & Applied Innovation",
+    // No session record yet, so no slot. Crown 85px in, a standard
+    // head-and-shoulders crop; 890 lands his head at 320px, the same as
+    // wolfy. The probe's 662 is short by the usual margin — his beard reaches
+    // the collar, which is the case it cannot read.
+    portrait: { height: 890, left: 470 },
+  },
+
+  {
+    id: "tpr-speaker-wes-etheredge",
+    event: "tpr",
+    speaker: "wes-etheredge",
+    // Short enough to run at 106 like speed-to-value, and the ratio is the
+    // hook, so it leads the line rather than getting buried mid-sentence.
+    headline: "The New 80/20<br />of Coding With AI",
+    headlineSize: 106,
+    circuit: "AI & Applied Innovation",
+    // No company on his record, so this is the no-org path again.
+    //
+    // Third headshot, third re-derivation — the numbers are a function of
+    // where he sits in his own frame, so none of them survive a swap. The
+    // first was the widest crop in the set (27% of frame) and had to be
+    // capped by the crown at 950, drawing his head 259px against the set's
+    // ~320. The two since are tight crops that need no compromise: this one
+    // is 37%, and 920 lands the crown at y=518 with the head at 341.
+    portrait: { height: 920, left: 470 },
+  },
+
+  // ─── College Night ────────────────────────────────────────────────────────
+  {
+    id: "college-night",
+    event: "college-night",
+    // No speaker, no portrait. See the event entry above.
+    //
+    // "Night" in magenta, because the site does the same: `titleAccent` on
+    // this activation in lib/schedule.ts puts the accent on the second word,
+    // so the card and the page wear the same mark.
+    headline: 'College<br /><span class="hit">Night</span>',
+    // Back up to 172 now that the hook is off the card. The subtitle was
+    // paying for the smaller title, and with three blocks of prose gone to
+    // two the card can lead on type again.
+    headlineSize: 172,
+    // `detail.headline` on the activation, verbatim — the page sets it under
+    // the title in the same face, so the two open the same way.
+    deck: "Bring the whole club.",
+    // No subtitle. The page's hook — "Every computing student in San
+    // Antonio, community college and university alike. Two hours, one room."
+    // — is right on the page and wrong here: three blocks of prose under a
+    // title made the card read as a paragraph with a headline on it. The deck
+    // says who to bring, the quote says who it is for, and the facts say
+    // when. The hook was the one saying the least the other three did not.
+    // The subjects, not the page's "no home campus … no one is checking which
+    // logo is on your student ID". That line is the warmer one and it stays on
+    // the page, but on the card it argued the same thing as the access line
+    // below it — no gatekeeping, said twice, and said more completely down
+    // there. This answers the question nothing else on the card does: is this
+    // my field. A list also scans in a feed where a sentence does not.
+    //
+    // Not the schools list, which was the other candidate: six proper nouns is
+    // a lot of noise, and naming institutions implies a list you have to be on
+    // — the opposite of the point.
+    // Non-breaking spaces inside "any of it" — at this column the balancer
+    // split the phrase across lines, leaving "— any" hanging. Bound, it moves
+    // whole to the last line and the break falls on the em dash instead.
+    quote:
+      "Computer science, AI, cybersecurity, data and electrical engineering \u2014 any\u00a0of\u00a0it, at any campus in San Antonio.",
+    // Both of the above and this one are the page's words exactly — the two
+    // surfaces are read by the same person, often minutes apart, and a list
+    // that gains or loses an item between them reads as one of the two being
+    // out of date. The page shortened "data engineering, electrical
+    // engineering" to "data and electrical engineering" and traded the long
+    // conditions sentence for this one; the card follows.
+    access:
+      "Free, no badge, no pitch, and nobody checking which logo is on your student ID.",
   },
 
   // ─── Access Granted ───────────────────────────────────────────────────────
