@@ -47,8 +47,13 @@
          signature of the four: no palette, no wordmark treatment, just a
          bloom. So the bloom takes the bolt's shape instead, which is how the
          site itself uses it — masked, not placed (see event-particles.tsx).
-         Low enough to read as texture; a bolt you notice is a bolt competing
-         with the speaker. */
+         0.17, which measures 2.32:1 against the black. Two references set
+         that: at 0.09 it survives feed compression intact but reads as a
+         smudge, and PySanAntonio's bloom — the nearest equivalent device —
+         sits at 3.53:1. Lower than that on purpose, because this is a large
+         hard-edged shape where the bloom is a diffuse glow, so the same
+         luminance carries further. At 0.26 it starts competing with the
+         speaker's name. */
       .bolt {
         position: absolute;
         /* Above the portrait's scrim, and on the left. Behind it the scrim
@@ -65,7 +70,7 @@
            mask — and a CSS mask would not have worked anyway: Chromium treats
            an external SVG mask over file:// as cross-origin and drops it
            silently. The renderer's failed-request line is what caught it. */
-        opacity: 0.09;
+        opacity: 0.17;
         filter: blur(7px);
       }
 
