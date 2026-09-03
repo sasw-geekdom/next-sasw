@@ -1019,17 +1019,43 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
   {
     slug: "give-a-lot",
     page: "give-a-lot",
+    // The band is the page — see `heroOnly`. What the section below it carried
+    // now lives in the band: the drive and the giveaway as `GIVE_A_LOT.ways`,
+    // and the argument as the transform table, which was always making it
+    // better than the prose was.
+    heroOnly: true,
     title: "Give-a-LOT Computer Donation Drive",
     // "Give-a-LOT Computer Donation Drive" is 34 characters and carries a
     // pun that needs its object; as a filter chip beside "Access Granted" the
     // full name swamps the row and the wordmark alone is what people say.
     shortTitle: "Give-a-LOT",
     room: "central-library",
-    venueDetail: "1st Floor",
-    // Sept 28 – 30, from the drop-off row in `detail.programme` below. Stated
-    // here as data so the calendar's all-day rail can span it; the programme
-    // row stays the prose version of the same three days.
-    span: { from: "2026-09-28", to: "2026-09-30" },
+    // Launch SA is the room inside the library, and it is what the
+    // registration page tells people to look for.
+    venueDetail: "Launch SA, 1st Floor",
+    site: {
+      label: "learnopen.tech",
+      href: "https://learnopen.tech/give-a-lot-computer-donation-drive",
+    },
+    // Their registration, not the week's list. A machine is first come first
+    // served and the count happens on their page — sending people to our list
+    // would leave them unregistered for the only thing that is limited.
+    register: {
+      label: "Register for the giveaway.",
+      href: "https://learnopen.tech/event/give-a-lot-computer-donation-giveaway-w-devsa-9/register",
+    },
+    // Monday to Friday. The drive collects Monday to Thursday and the
+    // giveaway is Friday midday, so the activation as a whole runs the week
+    // and the rail says so.
+    //
+    // Deliberately a span and not a `when`, even though Friday's hour is now
+    // fixed. `when` wins over `span` in the projection, so setting it would
+    // take Give-a-LOT off the all-week rail and put a single 12 PM block on
+    // Friday — which loses the four days of collection that are the point,
+    // and drags the week's hour axis back to noon for one event. The rail
+    // already covers Friday; the hour lives in `detail.programme` and on the
+    // registration page the button goes to.
+    span: { from: "2026-09-28", to: "2026-10-02" },
     // Linux and open source software, taught and installed. The room's other
     // two sessions are Small Business & Solopreneur, but a room is not a
     // circuit — The Rand carries three between its three activations.
@@ -1047,31 +1073,32 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       headline: "Nothing here is junk.",
       lede: [
         "A working computer stops being supported on the day its vendor decides it does. That is a business decision, not a technical one \u2014 the hardware is usually fine, and most of it ends up as e-waste anyway.",
-        "DEVSA and learnOPENtech spend the week collecting those machines, rebuilding them on Linux and open source software, and putting them back into the community.",
+        "DEVSA and learnOPENtech collect those machines Monday to Thursday, rebuild them on Linux and open source software, and hand them out on Friday afternoon.",
       ],
+      // Two rows, where this was three. The workshop and the giveaway were
+      // listed as separate Friday items and they are one event: learnOPENtech's
+      // registration page is explicit that attending the 2.5 hours is how you
+      // receive a machine, not something running alongside it.
       programme: [
         {
-          time: "Sept 28 \u2013 30",
+          time: "Sept 28 \u2013 Oct 1",
           title: "Curbside drop-off",
-          body: "Bring working laptops, desktops or components to the collection point. The exact location and hours are announced closer to the week. Nothing needs to be wiped first \u2014 drives are erased as part of the rebuild.",
+          body: "Monday to Thursday at the Central Library. Working laptops and desktops \u2014 dual-core, 4GB of memory and 128GB of storage is the floor, and a quad-core with an SSD is the machine somebody really wants. Monitors, keyboards, mice, drives, chargers and cables too. No printers, no CRTs, nothing broken. Nothing needs wiping first: drives are erased as part of the rebuild, and they will certify it if you need that.",
         },
         {
-          time: "Friday, Oct 2",
-          title: "Intro to Linux & Open Source Software",
-          body: "A hands-on session at Launch SA on what open source actually is, how a machine gets rebuilt on it, and why a computer written off by its manufacturer is usually the fastest one somebody in the room has owned.",
-          feature: true,
-        },
-        {
-          time: "Friday, Oct 2",
-          title: "Community computer giveaway",
-          body: "The machines collected across the week go home with students, families and non-profits, set up and ready to use.",
+          time: "Friday, Oct 2 \u00b7 12 \u2013 2:30 PM",
+          title: "Workshop and giveaway",
+          body: "Two and a half hours on what open source actually is, how a machine gets rebuilt on it, and why a computer written off by its manufacturer is usually the fastest one somebody in the room has owned \u2014 and you leave with one. The session is the requirement, not the queue: the machines collected across the week go home with the people who sat through it.",
           feature: true,
         },
       ],
       coda: "Vendor lock-in is the reason a five-year-old laptop feels slow, and open source is the reason it does not have to. Every machine that leaves this room is one that was headed for a landfill and is now somebody's first computer, running software nobody can switch off remotely.",
       kicker: "Bring a machine. Take one home. Both count.",
+      // The two conditions that actually gate this, and neither is the week's
+      // badge: a seat has to be booked on their page, and booking closes two
+      // days before the giveaway.
       access:
-        "Free with Startup + Tech Week registration. Donations are welcome from anyone, whether or not you are attending the week.",
+        "Free, and separate from the week\u2019s list \u2014 seats for Friday are booked with learnOPENtech and close Wednesday, September 30 at 6 PM. First come, first served. Donations are welcome from anyone, whether or not you are attending the week.",
     },
   },
 

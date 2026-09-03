@@ -59,23 +59,26 @@ export const GIVE_A_LOT = {
   /**
    * Two dates, because this is two things.
    *
-   * The drive runs across the first three days of the week as a drop-off
-   * window; the workshop and the giveaway are one afternoon at the end of it.
-   * A single date line would have to pick one and lose the other, and the one
-   * it would lose is the one that asks the reader to do something.
+   * The drive runs Monday to Thursday as a drop-off window; the workshop and
+   * the giveaway are one afternoon at the end of it. A single date line would
+   * have to pick one and lose the other, and the one it would lose is the one
+   * that asks the reader to do something.
    */
-  driveLabel: "Drop-off · Sept 28 – 30",
+  driveLabel: "Drop-off · Sept 28 – Oct 1",
   dateLabel: "Friday, October 2, 2026",
   /**
-   * No time yet.
+   * Confirmed, from learnOPENtech's registration page.
    *
-   * The brief fixes the day and says the drop-off point and times follow
-   * "as we get closer to the event", so this says so rather than inventing an
-   * afternoon. It is also why GIVE_A_LOT_SESSION carries no `when`: without a
-   * confirmed start and end there is no honest Event markup and no calendar
-   * file, and publishing a guess into both is worse than publishing neither.
+   * This said "Time to be announced" while the brief was still open, and kept
+   * saying it after the hour was fixed — a band stating a day and refusing an
+   * hour, above a programme that printed both.
+   *
+   * GIVE_A_LOT_SESSION still carries no `when`, and that is now a layout
+   * decision rather than an honesty one: `when` wins over `span` in the
+   * calendar projection, so setting it would take the activation off the
+   * all-week rail and reduce four days of collection to one Friday block.
    */
-  timeLabel: "Time to be announced",
+  timeLabel: "12 – 2:30 PM",
   /**
    * The lockup, as supplied by the organisers and used as the band's title —
    * the same bargain PySanAntonio's wordmark makes, where the mark is the
@@ -102,11 +105,38 @@ export const GIVE_A_LOT = {
    * "Back online" is the site's own electrical metaphor doing real work for
    * once rather than being applied to something as decoration; these are
    * literally machines being switched back on.
+   *
+   * The tagline is two imperatives and a thesis, in that order, because this
+   * page asks opposite things of two audiences — somebody with a dead laptop
+   * in a closet, and somebody who needs a computer. Two doors, one each.
+   *
+   * The turn was "Both count.", which granted permission — either door is
+   * enough — but granted it abstractly. "Nothing here is junk." is the
+   * argument the table underneath then proves, and it was the section
+   * heading before the section went away.
    */
   tagline: {
-    setup: "Machines written off as junk, back online.",
-    turn: "In the hands of students, families and non-profits.",
+    setup: "Bring a machine. Take one home.",
+    turn: "Nothing here is junk.",
   },
+  /**
+   * The two ways in, because there are two and they ask different things of
+   * different readers — one is a drop-off across four days, the other is a
+   * booked seat on one afternoon. This was a section below the band; it is
+   * here because the band is now the page.
+   */
+  ways: [
+    {
+      label: "Donate",
+      when: "Mon – Thu · Central Library",
+      body: "Working laptops and desktops, monitors, keyboards, drives, chargers. No printers, no CRTs, nothing broken. Drives are erased as part of the rebuild, and certified if you need that.",
+    },
+    {
+      label: "Receive",
+      when: "Fri · 12 – 2:30 PM",
+      body: "Two and a half hours on Linux and open source, and you leave with a machine — the session is the requirement, not the queue. Seats are booked with learnOPENtech and close Sept 30. First come, first served.",
+    },
+  ],
 } as const;
 
 /**
@@ -127,8 +157,13 @@ export const GIVE_A_LOT_STATES: readonly { before: string; after: string }[] = [
   { before: "unsupported", after: "patched and current" },
   // Both halves are 16 characters, which is not a coincidence: this pair sets
   // the table's width, and the longer draft ("slow, full of telemetry") wrapped
-  // its own cell to two lines while every other row held one.
-  { before: "slow and watched", after: "fast and private" },
+  // its own cell to two lines while every other row held one. "tracked" was
+  // chosen over "watched" for the same length and a plainer word — it is what
+  // telemetry is actually called.
+  //
+  // Copied into tools/social-cards/cards.mjs, which cannot import from here.
+  // Change both or the card and the band disagree.
+  { before: "slow and tracked", after: "fast and private" },
   { before: "headed for landfill", after: "yours to keep" },
 ];
 
@@ -144,18 +179,19 @@ export interface GiveALotOrganizer {
 }
 
 /**
- * The two hosts. learnOPENtech leads, DEVSA follows.
+ * learnOPENtech, then Launch SA, then DEVSA.
  *
  * Not the order the brief credits them in — that reads "DEVSA &
  * learnOPENtech", and this ran that way first. The wall is the one place the
  * programme belongs to learnOPENtech rather than to DEVSA: the Linux and open
  * source work is theirs, and DEVSA convenes the week that it happens inside.
- * Array order is render order, so this is the whole mechanism.
+ * Launch SA sits between them as the room it happens in. Array order is
+ * render order, so this is the whole mechanism.
  *
- * Both carry a local fallback, unlike The Model's wall where only DEVSA does.
- * The Model can afford to lose a mark to a Firestore hiccup because it names
- * three; this names two, and a "powered by" line with one logo under it reads
- * as a mistake rather than as a shorter list.
+ * learnOPENtech and DEVSA carry a local fallback. That was because a wall of
+ * two that loses one to a Firestore hiccup reads as a mistake rather than as a
+ * shorter list; now that Launch SA makes three, it can rely on the CMS the way
+ * The Model's third mark does.
  */
 export const GIVE_A_LOT_ORGANIZERS: readonly GiveALotOrganizer[] = [
   {
@@ -174,6 +210,23 @@ export const GIVE_A_LOT_ORGANIZERS: readonly GiveALotOrganizer[] = [
     // mark going up a step to match would just reintroduce the imbalance from
     // the other side.
     heightClass: "h-5 sm:h-6",
+  },
+  {
+    // The room. Launch SA is inside the Central Library and is what the
+    // registration page tells people to look for, so it belongs on the credit
+    // line with the two running it.
+    name: "Launch SA",
+    partner: "launch sa",
+    href: "https://launchsa.org/",
+    // No local fallback, unlike the two above. Theirs exist because a wall of
+    // two that loses one reads as a mistake; at three, a mark that fails to
+    // resolve drops out and the line still reads as a list. Same bargain The
+    // Model's wall makes.
+    logo: "",
+    // 7.4:1, between learnOPENtech's 10:1 wordmark and DEVSA's badge, so it
+    // sits between their heights too — matched to learnOPENtech it would draw
+    // a third wider and take the line over.
+    heightClass: "h-6 sm:h-7",
   },
   {
     name: "DEVSA",

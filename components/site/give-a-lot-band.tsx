@@ -163,7 +163,14 @@ export async function GiveALotBand({
         // A seam when this is a section among others — see AccessGrantedBand,
         // where the same gap read as a hole without one.
         !masthead && "border-t border-white/10",
-        masthead && "flex min-h-[calc(100vh-4rem)] flex-col justify-center",
+        // 9rem, not 4rem. The 4rem is the header; the BACK row above this
+        // band costs another ~56px that the calc never knew about, so the
+        // section was reserving a viewport's worth of height starting 56px
+        // down one — and overran the fold by exactly that at every size,
+        // whatever the content did. Same arithmetic as the shared hero. The
+        // rest is clearance: at 7.5rem this cleared the fold by six pixels,
+        // which is not a margin, it is a coincidence waiting to be edited.
+        masthead && "flex min-h-[calc(100vh-9rem)] flex-col justify-center",
         // And as a mid-page band, but only where there is screen for it. See
         // the `roomy` note in globals.css.
         !masthead &&
@@ -172,8 +179,13 @@ export async function GiveALotBand({
     >
       <div
         className={cn(
-          "relative z-20 mx-auto w-full max-w-7xl px-6 pb-16 lg:pb-28",
-          masthead ? "pt-6 lg:pt-7" : "pt-16 lg:pt-28",
+          "relative z-20 mx-auto w-full max-w-7xl px-6",
+          // As the page, this has a height budget: everything above the fold
+          // on a laptop, which is the whole reason the section below it went
+          // away. lg:pb-28 was 112px of it.
+          masthead
+            ? "pb-10 pt-6 lg:pb-12 lg:pt-7"
+            : "pb-16 pt-16 lg:pb-28 lg:pt-28",
         )}
       >
         {/* `[auto_1fr]` with the copy capped at the same measure the sibling
@@ -205,11 +217,11 @@ export async function GiveALotBand({
                 alt={GIVE_A_LOT.fullName}
                 width={GIVE_A_LOT.lockupWidth}
                 height={GIVE_A_LOT.lockupHeight}
-                className="h-auto w-full max-w-88 sm:max-w-104 lg:max-w-md"
+                className="h-auto w-full max-w-88 sm:max-w-104 lg:max-w-sm"
               />
             </Heading>
 
-            <p className="order-3 mt-6 border-l-2 border-(--lot-amber) pl-5 text-pretty text-lg text-white/80">
+            <p className="order-3 mt-5 border-l-2 border-(--lot-amber) pl-5 text-pretty text-lg text-white/80">
               {GIVE_A_LOT.tagline.setup}{" "}
               {/* Desktop-only. `hidden` below lg leaves the space above it
                   intact, so the two halves read as one sentence in a narrow
@@ -218,7 +230,7 @@ export async function GiveALotBand({
               {GIVE_A_LOT.tagline.turn}
             </p>
 
-            <dl className="order-5 mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
+            <dl className="order-5 mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
               {META.map(({ Icon, label, value }) => (
                 <div key={label} className="flex items-center gap-2">
                   <dt className="sr-only">{label}</dt>
@@ -234,7 +246,7 @@ export async function GiveALotBand({
             {/* Hidden entirely if neither mark resolved, rather than leaving a
                 "Powered by" label standing over nothing. */}
             {orgs.length > 0 && (
-              <div className="order-8 mt-9">
+              <div className="order-8 mt-7">
                 <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
                   Powered by
                 </p>
@@ -248,7 +260,7 @@ export async function GiveALotBand({
               </div>
             )}
 
-            {actions && <div className="order-9 mt-9">{actions}</div>}
+            {actions && <div className="order-9 mt-7">{actions}</div>}
 
             {detailHref && (
               // Full width below sm, matching the other bands: two controls six
@@ -259,7 +271,7 @@ export async function GiveALotBand({
               // the loudest thing on /schedule — louder than the week's own
               // magenta register CTA — and the lockup above it already spends
               // this band's amber. The arrow takes the colour instead.
-              <div className="order-10 mt-12 flex flex-wrap items-center gap-3">
+              <div className="order-10 mt-7 flex flex-wrap items-center gap-3">
                 <ButtonLink
                   href={detailHref}
                   size="md"
@@ -286,6 +298,24 @@ export async function GiveALotBand({
               strand it away from the copy it belongs to. */}
           <div className="relative order-4 my-10 w-full lg:order-0 lg:my-0">
             <Artwork />
+
+            {/* Under the table, in the space it was leaving. The right column
+                ran ~250px short of the left one, and the two facts a reader
+                needs after "what is this" — what to bring, and what Friday
+                actually costs them — were in a section below the fold. */}
+            <dl className="mx-auto mt-7 grid max-w-lg gap-4 sm:grid-cols-2 lg:mt-8 lg:max-w-none">
+              {GIVE_A_LOT.ways.map((w) => (
+                <div key={w.label} className="border-t border-white/15 pt-4">
+                  <dt className="flex flex-wrap items-baseline gap-x-3 font-mono text-[11px] uppercase tracking-widest">
+                    <span className="text-(--lot-amber)">{w.label}</span>
+                    <span className="text-white/45">{w.when}</span>
+                  </dt>
+                  <dd className="mt-2 text-pretty text-[13px] leading-relaxed text-white/60">
+                    {w.body}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </div>
       </div>

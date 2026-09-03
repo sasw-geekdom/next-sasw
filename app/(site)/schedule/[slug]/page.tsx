@@ -850,8 +850,13 @@ function ActivationPage({
           a promise of times is worth printing until there are times and
           embarrassing after. A confirmed session is otherwise hero and nothing
           else: the date, the room, the two actions and the two links all fit
-          above the fold. */}
-      {!session.when && sessions.length === 0 && (
+          above the fold.
+      
+          A prose programme counts as something real. Give-a-LOT has no `when`
+          because it runs across four days and cannot sit on an hour axis, but
+          its Friday giveaway has a fixed hour and states it two sections up —
+          "times go up as they're confirmed" printed under a confirmed time. */}
+      {!session.when && sessions.length === 0 && !session.detail?.programme && (
         <section className="border-t border-white/10 bg-black">
           <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
             <div className="max-w-2xl">
@@ -940,8 +945,15 @@ function ActivationPage({
       )}
 
       {/* Skipped when the hero already carries a register button — one
-          primary action per page, not the same one twice. */}
-      {!session.when && (
+          primary action per page, not the same one twice.
+      
+          `!session.when` was doing that job on the assumption that the hero
+          only draws its actions for a confirmed slot. A banded activation
+          draws them either way — deliberately, so Give-a-LOT's page has a way
+          in while its hour is unfixed — so this printed a second CTA under
+          the first, and pointed it at the week's list rather than at the
+          activation's own registration. */}
+      {!session.when && !banded && (
         <section className="border-t border-white/10 bg-black">
           <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
             <div className="max-w-2xl">

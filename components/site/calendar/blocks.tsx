@@ -1720,11 +1720,20 @@ export function StackSpanBar({
 
 export function SpanBar({ span }: { span: CalendarSpan }) {
   const lockup = span.brand?.lockup;
-  // Three parts across the bar: the mark, the days it runs, the room it runs
-  // in. The rail spans every column the activation covers — Give-a-LOT holds
-  // Monday to Wednesday, some seven hundred pixels — and the old layout put a
-  // 60px logo and one run-on caption at the left end of it, leaving most of
-  // the bar empty. Spread out, each fact has a place to be looked for.
+  // Two anchors and a rule between them: the mark at one end, the days and the
+  // room together at the other, joined across whatever is left.
+  //
+  // This has now been wrong in both directions. Everything packed left put a
+  // 60px logo and a run-on caption at one end of a seven-hundred-pixel bar and
+  // left the rest empty. Spreading the three facts evenly fixed that until
+  // Give-a-LOT grew from three days to five: at thirteen hundred pixels the
+  // gaps stopped reading as columns and started reading as a mistake, with the
+  // room stranded a screen away from the mark it belongs to.
+  //
+  // The rule is the fix for both, because the emptiness was never the problem
+  // — unexplained emptiness was. A line that runs the width of the bar is the
+  // one piece of furniture that gets better the longer the activation lasts,
+  // and it says the thing the bar exists to say: this covers all of it.
   const body = (
     <>
       {lockup ? (
@@ -1747,13 +1756,16 @@ export function SpanBar({ span }: { span: CalendarSpan }) {
           {span.title}
         </span>
       )}
-      {/* Centred in what the mark and the room leave, so it reads as the middle
-          column of three rather than as text trailing the logo. */}
-      <span className="flex-1 truncate text-center font-mono text-[10px] uppercase tracking-widest text-white/70">
-        {span.dayLabel}
-      </span>
-      <span className="shrink-0 truncate font-mono text-[10px] uppercase tracking-widest text-white/50">
-        {span.venueName}
+      {/* Collapses to nothing in a one-column bar on the day view, which is
+          the right behaviour: there is no distance left to carry. */}
+      <span
+        aria-hidden="true"
+        className="h-px min-w-0 flex-1 bg-gradient-to-r from-white/5 via-white/20 to-white/20"
+      />
+      <span className="shrink-0 truncate font-mono text-[10px] uppercase tracking-widest">
+        <span className="text-white/70">{span.dayLabel}</span>
+        <span className="px-2 text-white/25">·</span>
+        <span className="text-white/50">{span.venueName}</span>
       </span>
     </>
   );
