@@ -746,8 +746,13 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       lede: [
         "Alamo Angels\u2019 biggest gathering of the year. Roughly 100+ investors, portfolio founders, and guests from across Texas come together on the rooftop for mimosas, founder spotlights on stage, and one announcement we\u2019re saving for the room.",
       ],
+      // Alamo Angels' own line, edited in the two respects the Creative
+      // Futures brief already establishes: they write "Startup Week", and
+      // this site cannot refer to itself by a name it uses nowhere else; and
+      // the house spells this family of words the British way — nineteen
+      // "organisers" against one "prioritizing" before this.
       access:
-        "Attendance is by invitation. A limited number of seats are released to the Startup Week community each year, prioritizing founders and active investors.",
+        "Attendance is by invitation. A limited number of seats are released to the Startup + Tech Week community each year, prioritising founders and active investors.",
     },
   },
 
