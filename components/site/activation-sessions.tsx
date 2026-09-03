@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Clock } from "lucide-react";
-import { LinkedInMark } from "@/components/site/linkedin-mark";
+import { ProfileMark, profileLabel } from "@/components/site/profile-mark";
 import type { CardSpeaker } from "@/components/site/speaker-card";
 import type { SessionRow } from "@/lib/admin/cms-types";
 import { SPEAKERS_ANNOUNCED } from "@/lib/speakers";
@@ -358,10 +358,10 @@ function People({
                 href={who.linkedin}
                 target="_blank"
                 rel="noreferrer"
-                aria-label={`${p.name} on LinkedIn`}
+                aria-label={profileLabel(p.name, who.linkedin)}
                 className="relative z-10 -m-1.5 p-1.5 text-white/45 transition-colors duration-200 hover:text-magenta focus-visible:text-magenta focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-magenta"
               >
-                <LinkedInMark className="h-4 w-4" />
+                <ProfileMark href={who.linkedin} className="h-4 w-4" />
               </a>
             )}
           </li>

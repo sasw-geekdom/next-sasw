@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { LinkedInMark } from "@/components/site/linkedin-mark";
+import { ProfileMark, profileLabel } from "@/components/site/profile-mark";
 import { cn } from "@/lib/utils";
 import type { SpeakerRow } from "@/lib/admin/cms-types";
 import type { TrackName } from "@/lib/tracks";
@@ -105,10 +105,10 @@ export function SpeakerCard({
             href={speaker.linkedin}
             target="_blank"
             rel="noreferrer"
-            aria-label={`${speaker.name} on LinkedIn`}
+            aria-label={profileLabel(speaker.name, speaker.linkedin)}
             className="absolute bottom-1 right-1 z-20 p-1.5 text-white opacity-0 transition-[opacity,color] duration-300 ease-in-out motion-reduce:transition-none hover:text-magenta focus-visible:opacity-100 focus-visible:text-magenta focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-magenta group-hover:opacity-100 [@media(hover:none)]:opacity-100"
           >
-            <LinkedInMark className="h-5 w-5" />
+            <ProfileMark href={speaker.linkedin} className="h-5 w-5" />
           </a>
         )}
       </div>

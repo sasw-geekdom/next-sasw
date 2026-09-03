@@ -4,7 +4,7 @@ import Link from "next/link";
 import { BackLink } from "@/components/site/back-link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
-import { LinkedInMark } from "@/components/site/linkedin-mark";
+import { ProfileMark, profileWord } from "@/components/site/profile-mark";
 import { SpeakerCard } from "@/components/site/speaker-card";
 import { ButtonLink } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/format";
@@ -231,8 +231,8 @@ export default async function SpeakerPage({
                 rel="noreferrer"
                 className="group mt-7 inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-white/70 transition-colors duration-300 hover:border-white/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
               >
-                <LinkedInMark className="h-3.5 w-3.5" />
-                LinkedIn
+                <ProfileMark href={speaker.linkedin} className="h-3.5 w-3.5" />
+                {profileWord(speaker.linkedin)}
                 <ArrowUpRight
                   className={ARROW_OUT}
                   strokeWidth={2}

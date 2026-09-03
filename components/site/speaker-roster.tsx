@@ -4,7 +4,7 @@ import * as React from "react";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { LinkedInMark } from "@/components/site/linkedin-mark";
+import { ProfileMark, profileLabel } from "@/components/site/profile-mark";
 import { cn } from "@/lib/utils";
 import type { CardSpeaker } from "@/components/site/speaker-card";
 
@@ -134,7 +134,7 @@ export function SpeakerRoster({ speakers }: { speakers: CardSpeaker[] }) {
                     href={s.linkedin}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={`${s.name} on LinkedIn`}
+                    aria-label={profileLabel(s.name, s.linkedin)}
                     onFocus={() => take(i)}
                     onBlur={release}
                     className={cn(
@@ -142,7 +142,7 @@ export function SpeakerRoster({ speakers }: { speakers: CardSpeaker[] }) {
                       current ? "opacity-100" : "opacity-0",
                     )}
                   >
-                    <LinkedInMark className="h-5 w-5" />
+                    <ProfileMark href={s.linkedin} className="h-5 w-5" />
                   </a>
                 )}
               </div>
