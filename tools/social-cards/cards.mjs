@@ -199,7 +199,7 @@ export const EVENTS = {
    */
   "give-a-lot": {
     template: "give-a-lot.html",
-    mark: { repo: "public/give-a-lot/lockup.svg", height: 200 },
+    mark: { repo: "public/give-a-lot/lockup.svg", height: 216 },
     facts: [
       "Drop-off  ·  Sept 28 – Oct 1",
       "Friday, Oct 2  ·  12 – 2:30 PM",
@@ -604,7 +604,7 @@ export const CARDS = [
     // The page's own line, and the one that speaks to both readers — this
     // event asks two different people to do two different things.
     headline: "Bring a machine.<br />Take one home.",
-    headlineSize: 84,
+    headlineSize: 88,
     // The amber line, and the argument the table under it proves. Same words
     // as GIVE_A_LOT.tagline on the page — the two surfaces open alike.
     subtitle: "Nothing here is junk.",

@@ -261,10 +261,15 @@ async function main() {
       // Give-a-LOT's transform table, built here so the card draws the same
       // four pairs the band does rather than a copy that can drift — see
       // GIVE_A_LOT_STATES in lib/give-a-lot.ts.
+      //
+      // Bare spans, not rows: the template lays the whole table out as one
+      // grid so the column heads and the pairs share column widths. Wrapping
+      // each pair in its own element gave every row its own grid, and `auto`
+      // columns sized per-row — the arrows stopped lining up.
       states: (event.states ?? [])
         .map(
           ([before, after]) =>
-            `<div class="state"><span class="b">${before}</span><span class="x">&#10230;</span><span class="a">${after}</span></div>`,
+            `<span class="b">${before}</span><span class="x">&#10230;</span><span class="a">${after}</span>`,
         )
         .join("\n        "),
       logos: logos.join("\n          "),
