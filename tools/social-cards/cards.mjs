@@ -667,8 +667,16 @@ export const CARDS = [
     // The parenthetical from the title, which is the half that says what the
     // talk is actually about.
     subtitle: "What your box is doing before you ever log in",
-    // No company on his record — the no-org path, like jordana-naftali.
-    portrait: { height: 880, left: 439 },
+    // No company on his record — the no-org path, like jordana-naftali. His
+    // role comes off the CMS, which now reads "Security Engineer · Kernel &
+    // eBPF" rather than "SAP GRC Automation", so the card needs no override.
+    //
+    // Re-derived for a replaced headshot. The new one is a wider crop — his
+    // head is 27% of the frame against 30% — and he is holding a dog, which
+    // is the reason the crop opened up. 860 is the ceiling rather than a
+    // choice: the crown lands at y=556 and the subtitle ends at 535, so
+    // anything taller puts his hair into the type.
+    portrait: { height: 860, left: 439 },
   },
 
   // ─── Give-a-LOT ───────────────────────────────────────────────────────────
