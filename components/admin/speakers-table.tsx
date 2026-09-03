@@ -32,6 +32,8 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
     null,
   );
   const [pending, startTransition] = React.useTransition();
+  /** A status saved but its decision email did not send — see the action. */
+  const [notice, setNotice] = React.useState<string | null>(null);
 
   React.useEffect(() => setItems(rows), [rows]);
 
@@ -114,6 +116,10 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
       const res = await updateSubmissionStatus(id, status);
       if (!res.ok) {
         setItems(previous); // revert
+      } else {
+        // Silence on a failed send would leave the team believing a speaker
+        // had been told when they had not.
+        setNotice(res.warning ?? null);
       }
       router.refresh();
     });
@@ -135,6 +141,14 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
 
   return (
     <div className="flex flex-col gap-4">
+      {notice && (
+        <p
+          role="status"
+          className="rounded border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-200"
+        >
+          {notice}
+        </p>
+      )}
       <div className="flex flex-wrap items-center gap-3">
         <Input
           placeholder="Search name, email, session…"

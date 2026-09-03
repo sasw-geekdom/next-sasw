@@ -7,13 +7,34 @@ import { COLLECTIONS } from "@/lib/firebase/collections";
 import { requireAdmin } from "@/lib/auth/session";
 import { deleteImage } from "@/lib/admin/blob";
 import { SUBMISSION_STATUSES, type SubmissionStatus } from "@/lib/admin/types";
+import { getEmailCopy } from "@/lib/email/copy-store";
+import { renderEmail } from "@/lib/email/templates";
+import { resend, EMAIL_FROM, EMAIL_REPLY_TO } from "@/lib/email/resend";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
+/**
+ * Set a submission's status, and tell the person where they stand.
+ *
+ * Accepted and declined are the two statuses that are an answer rather than a
+ * note to ourselves, so they send. "new" and "reviewing" do not — those are
+ * the queue moving, and the submitter already had a receipt when they pitched.
+ *
+ * Sending is guarded by `decisionEmailedFor`, which records the status the
+ * last email announced. Statuses get toggled — someone re-reads a submission,
+ * flips it back to reviewing, flips it forward again — and without the guard
+ * that is a second "you're in" to somebody who already had one. Changing your
+ * mind the other way does still send, which is correct: accepted-then-declined
+ * is news.
+ *
+ * A failed send never fails the status change. The decision is the thing being
+ * recorded; the email is how it travels, and losing the second is not a reason
+ * to lose the first. It comes back as a warning the table can show.
+ */
 export async function updateSubmissionStatus(
   id: string,
   status: SubmissionStatus,
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true; warning?: string } | { ok: false; error: string }> {
   // Server-side auth — never trust the client for a mutation.
   await requireAdmin();
 
@@ -21,12 +42,51 @@ export async function updateSubmissionStatus(
     return { ok: false, error: "Invalid request." };
   }
 
-  await adminDb
-    .collection(COLLECTIONS.speakerSubmissions)
-    .doc(id)
-    .update({ status });
+  const ref = adminDb.collection(COLLECTIONS.speakerSubmissions).doc(id);
+  const before = await ref.get();
+  const row = before.data() ?? {};
 
+  await ref.update({ status });
   revalidatePath("/admin/speakers");
+
+  const decides = status === "accepted" || status === "declined";
+  if (!decides || row.decisionEmailedFor === status) return { ok: true };
+
+  const to = typeof row.email === "string" ? row.email.trim() : "";
+  if (!to) {
+    return { ok: true, warning: "Status saved. No email on file to notify." };
+  }
+
+  try {
+    const key = status === "accepted" ? "speakerAccepted" : "speakerDeclined";
+    const copy = await getEmailCopy(key);
+    const name = typeof row.name === "string" ? row.name : "";
+    const { subject, html } = renderEmail(copy, {
+      firstName: name.split(" ")[0] || name || "there",
+      sessionTitle:
+        typeof row.sessionTitle === "string"
+          ? row.sessionTitle
+          : "your session",
+    });
+    await resend.emails.send({
+      from: EMAIL_FROM,
+      to,
+      replyTo: EMAIL_REPLY_TO,
+      subject,
+      html,
+    });
+    await ref.update({
+      decisionEmailedFor: status,
+      decisionEmailedAt: FieldValue.serverTimestamp(),
+    });
+  } catch (err) {
+    console.error("Decision email failed:", err);
+    return {
+      ok: true,
+      warning: `Status saved, but the ${status} email did not send.`,
+    };
+  }
+
   return { ok: true };
 }
 

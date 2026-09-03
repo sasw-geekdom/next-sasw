@@ -39,6 +39,8 @@ export interface EmailCopy {
 export type EmailTemplateKey =
   | "registration"
   | "speaker"
+  | "speakerAccepted"
+  | "speakerDeclined"
   | "getInvolvedSponsor"
   | "getInvolvedHost"
   | "getInvolvedGeneral";
@@ -69,6 +71,36 @@ export const DEFAULT_SPEAKER_COPY: EmailCopy = {
     "We read every one. You'll hear back once the Circuit lineup takes shape.",
   ].join("\n\n"),
   ctaIntro: "Block the week so it's on your radar either way:",
+  signoff: "Plug in.",
+};
+
+// The two decision emails, sent from the admin when a submission's status
+// changes — see `updateSubmissionStatus`. Everything before these is a receipt
+// for something the reader did; these are an answer to it, which is why both
+// say what happens next rather than thanking and stopping.
+export const DEFAULT_SPEAKER_ACCEPTED_COPY: EmailCopy = {
+  subject: "You're in the lineup.",
+  heading: "You're in.",
+  body: [
+    "{sessionTitle} is on the schedule for San Antonio Startup + Tech Week, Sept 28 – Oct 2.",
+    "Someone from the team will be in touch directly to lock your day and time. Nothing to do until then \u2014 hold the week and we will come to you with a slot.",
+    "If anything about the session has changed since you pitched it, reply here and tell us.",
+  ].join("\n\n"),
+  ctaIntro: "Hold the week:",
+  signoff: "Plug in.",
+};
+
+// No consolation prize and no vague door-holding. It says the real reason,
+// says what is still open, and stops.
+export const DEFAULT_SPEAKER_DECLINED_COPY: EmailCopy = {
+  subject: "Not this year \u2014 thank you for pitching.",
+  heading: "Not this one.",
+  body: [
+    "Thanks for pitching {sessionTitle}, {firstName}. We read every submission, and we could not fit this one into the 2026 lineup.",
+    "That is a room-and-hours problem rather than a verdict on the talk \u2014 the circuits fill up faster every year.",
+    "You are welcome at the week either way. Registration is free and covers all five days.",
+  ].join("\n\n"),
+  ctaIntro: "The dates, if you want them:",
   signoff: "Plug in.",
 };
 
@@ -140,6 +172,26 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
       "Sent automatically when someone pitches a session via Plug In.",
     tokens: ["{firstName}", "{sessionTitle}"],
     defaults: DEFAULT_SPEAKER_COPY,
+    sample: { firstName: "Alex", sessionTitle: "Scaling AI at the edge" },
+  },
+  {
+    key: "speakerAccepted",
+    label: "Speaker accepted",
+    flow: "Admin decision",
+    description:
+      "Sent when a submission's status is set to Accepted in the admin. The team follows up one-to-one to confirm the slot.",
+    tokens: ["{firstName}", "{sessionTitle}"],
+    defaults: DEFAULT_SPEAKER_ACCEPTED_COPY,
+    sample: { firstName: "Alex", sessionTitle: "Scaling AI at the edge" },
+  },
+  {
+    key: "speakerDeclined",
+    label: "Speaker declined",
+    flow: "Admin decision",
+    description:
+      "Sent when a submission's status is set to Declined in the admin.",
+    tokens: ["{firstName}", "{sessionTitle}"],
+    defaults: DEFAULT_SPEAKER_DECLINED_COPY,
     sample: { firstName: "Alex", sessionTitle: "Scaling AI at the edge" },
   },
   {
@@ -340,7 +392,10 @@ export function renderEmail(
       heading(escapeHtml(applyTokens(copy.heading, vars))) +
         renderBody(copy.body, vars) +
         ctaIntro +
-        calendarBlock() +
+        // Tied to the intro rather than always drawn: a template that clears
+        // `ctaIntro` gets no calendar block either, instead of an unlabelled
+        // pair of buttons under its last line.
+        (copy.ctaIntro.trim() ? calendarBlock() : "") +
         signoff,
     ),
   };
