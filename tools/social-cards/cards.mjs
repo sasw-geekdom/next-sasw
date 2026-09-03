@@ -149,9 +149,9 @@ export const EVENTS = {
     // fixed slot inside the afternoon rather than the afternoon itself.
     facts: ["Monday, September 28  ·  1:30 PM", "Geekdom, 3rd Floor"],
     logos: [
-      { partner: "The Creative Futures", height: 62 },
-      { partner: "Tech Bloc", height: 50 },
-      { repo: "public/access-granted/orgs/devsa.png", height: 46 },
+      { partner: "The Creative Futures", height: 84 },
+      { partner: "Tech Bloc", height: 68 },
+      { repo: "public/access-granted/orgs/devsa.png", height: 62 },
     ],
   },
 
@@ -162,10 +162,16 @@ export const EVENTS = {
     // the repo. Heights are balanced by drawn area rather than by height: a
     // solid block and a wordmark on open ground read very differently at the
     // same height.
+    //
+    // Up by a third. The ratios between the three were right and the whole
+    // strip was small: DEVSA drew at 46 here against 60 on Linux San Antonio,
+    // 62 on Access Granted, 68 on Give-a-LOT and 72 on College Night — the
+    // smallest instance of the same mark anywhere in the set, on the event
+    // with the most partners to credit.
     logos: [
-      { partner: "The Creative Futures", height: 62 },
-      { partner: "Tech Bloc", height: 50 },
-      { repo: "public/access-granted/orgs/devsa.png", height: 46 },
+      { partner: "The Creative Futures", height: 84 },
+      { partner: "Tech Bloc", height: 68 },
+      { repo: "public/access-granted/orgs/devsa.png", height: 62 },
     ],
   },
 
@@ -333,6 +339,27 @@ export const CARDS = [
       { height: 740, top: -28 },
       { height: 622, top: -46 },
     ],
+  },
+
+  {
+    id: "the-model-speaker-jonathan-perry",
+    // The Model's own facts — Monday, no hour — with the single-speaker
+    // template borrowed off the keynote. Justin's card is the only other one
+    // shaped like this, and his event exists to carry the 1:30 slot that is
+    // his alone; Jonathan is a talk inside the afternoon, not a fixed point
+    // in it.
+    event: "the-model",
+    template: "the-model.html",
+    speaker: "jonathan-perry",
+    eyebrow: "// The Model",
+    // The lavender panel on the line that names the subject, which is the
+    // event's signature and the reason its headlines are written to have one.
+    // Here the subject is the machines.
+    headline: 'Let the<br /><span class="hit">machines win</span>',
+    headlineSize: 76,
+    subtitle:
+      "Embracing game engines and AI to accelerate development and content creation.",
+    portrait: { height: 880, left: 500 },
   },
 
   {

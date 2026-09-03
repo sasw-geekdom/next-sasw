@@ -100,10 +100,19 @@
         font-weight: 600;
         font-size: {{headlineSize}}px;
         line-height: 1.13;
-        /* Word-spacing, not letter-spacing. The gaps between words are wide
-           while the letters themselves sit normally — tracking the letters to
-           reach the same measure got the width right and the rhythm wrong. */
-        word-spacing: 0.34em;
+        /* Set normally.
+           This carried word-spacing: 0.34em, measured off Justin Johnson's
+           original card while reverse-engineering it — the note here used to
+           explain that tracking the letters to reach the same measure got the
+           width right and the rhythm wrong, which was true of that card.
+           It was never a decision, though, and it does not survive a second
+           card: his lines run four and five words, where the gaps read as
+           air; Jonathan Perry's run two, where the same value reads as a gap
+           between them. Halving it still looked spaced. The event's signature
+           is the lavender panel, not the word gaps, so both cards are set
+           normally and his drifts a little further from the original — which
+           the README already calls a reconstruction. */
+        word-spacing: normal;
         text-transform: uppercase;
       }
       /* The event's signature: a knocked-out lavender panel on the line that

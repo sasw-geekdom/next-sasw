@@ -35,7 +35,11 @@
       }
       .frame {
         height: 100%;
-        padding: 74px 72px 60px;
+        /* 44 at the foot, not 60. This card carries two names and two roles
+           where its siblings carry one, so when the partner marks went up by a
+           third it was the only one of the three with nothing spare — its
+           strip finished 16px off the bottom edge against their 63. */
+        padding: 74px 72px 44px;
         display: flex;
         flex-direction: column;
       }
@@ -164,7 +168,7 @@
         flex: 1;
       }
       .facts {
-        margin-top: 26px;
+        margin-top: 22px;
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -185,7 +189,7 @@
         flex: none;
       }
       .powered {
-        margin-top: 34px;
+        margin-top: 26px;
       }
       .powered .label {
         font-family: "Geist Mono", ui-monospace, monospace;
