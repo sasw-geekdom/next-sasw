@@ -628,7 +628,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       eyebrow: "The evening",
       headline: "Five nonprofits pitch. The room funds them.",
       lede: [
-        "MissionPitch is an accelerator for nonprofit leaders across greater San Antonio \u2014 Social Venture Partners San Antonio and Geekdom running the startup world\u2019s playbook for organisations that are not startups. This is the night it ends.",
+        "MissionPitch is an accelerator for nonprofit leaders across greater San Antonio \u2014 Social Venture Partners San Antonio and Geekdom running the startup world\u2019s playbook for organizations that are not startups. This is the night it ends.",
         "Five take the stage: ABODE Contemplative Care for the Dying, Bexar Branches Alliance, For Her, the San Antonio Book Festival and Black Outside, Inc. They pitch their work to the room, and the room donates live.",
       ],
       coda: "More than a pitch competition, in their own framing: a bridge. Unrestricted funding on one side, a room of people who can give time and expertise on the other, and a few weeks of coaching to make the ask land. Powered by the San Antonio Area Foundation, with Kronkosky and the H.E. Butt Foundation.",
@@ -746,13 +746,17 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       lede: [
         "Alamo Angels\u2019 biggest gathering of the year. Roughly 100+ investors, portfolio founders, and guests from across Texas come together on the rooftop for mimosas, founder spotlights on stage, and one announcement we\u2019re saving for the room.",
       ],
-      // Alamo Angels' own line, edited in the two respects the Creative
+      // Alamo Angels' own line, edited in one respect, the one the Creative
       // Futures brief already establishes: they write "Startup Week", and
-      // this site cannot refer to itself by a name it uses nowhere else; and
-      // the house spells this family of words the British way — nineteen
-      // "organisers" against one "prioritizing" before this.
+      // this site cannot refer to itself by a name it uses nowhere else.
+      //
+      // "prioritizing" keeps its z. The comments in this repo are written in
+      // British English and the copy is not — the week is in San Antonio and
+      // its readers are American. Counting "organisers" to decide this was
+      // the wrong count: 250-odd of those are in comments, and there are five
+      // British spellings in the whole of the rendered copy.
       access:
-        "Attendance is by invitation. A limited number of seats are released to the Startup + Tech Week community each year, prioritising founders and active investors.",
+        "Attendance is by invitation. A limited number of seats are released to the Startup + Tech Week community each year, prioritizing founders and active investors.",
     },
   },
 
@@ -1459,7 +1463,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // sessions CMS pointed at this slug — not here — which is what makes the
     // speaker page link back, and CMS rows supersede `detail` on the page.
     blurb:
-      "San Antonio\u2019s grassroots gang of data people \u2014 pipelines, dashboards, models, and a mentorship programme that graduates you by putting you on stage.",
+      "San Antonio\u2019s grassroots gang of data people \u2014 pipelines, dashboards, models, and a mentorship program that graduates you by putting you on stage.",
     detail: {
       eyebrow: "The hour",
       // Theirs, trimmed. The full line is "Because nobody gets into tech — or
@@ -1469,7 +1473,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       headline: "Nobody survives tech alone.",
       lede: [
         "SATX Datanauts is San Antonio\u2019s grassroots gang of data people \u2014 engineers, analysts, scientists and the plainly curious \u2014 across business intelligence, pipelines, machine learning and every buzzword in between. Their own reason for existing is one sentence: nobody gets into tech, or survives it, alone.",
-        "The mentorship programme is the part worth knowing. You are paired with a mentor, you build a real portfolio on a track you pick \u2014 analytics, data engineering, ML or AI \u2014 and you graduate by giving a live talk at The Drop, their monthly night. Rolling admissions. In their words: no fluff, just ships.",
+        "The mentorship program is the part worth knowing. You are paired with a mentor, you build a real portfolio on a track you pick \u2014 analytics, data engineering, ML or AI \u2014 and you graduate by giving a live talk at The Drop, their monthly night. Rolling admissions. In their words: no fluff, just ships.",
       ],
       coda: "Every city has people who can build a pipeline. What is rarer is a group that treats teaching one as the point rather than the overflow, and rarer still one whose graduation is a talk \u2014 so the person who was mentored last year is the one at the front this year. That is a mechanism rather than a mission statement, and it is the whole argument for giving this hour to them.",
       // Their three-part line, verbatim. It is the only place on this page
@@ -2884,7 +2888,7 @@ export function resolveSessions(
         slug: "rsvp",
         name: s.venueReveal,
         shortName: "On RSVP",
-        host: s.site?.label ?? "The organisers",
+        host: s.site?.label ?? "The organizers",
         desc: s.blurb,
         tag: s.circuit,
         port: "p0",
