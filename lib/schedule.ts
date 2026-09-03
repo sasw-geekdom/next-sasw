@@ -46,6 +46,46 @@ export interface FeaturedSession {
   venueDetail?: string;
   /** The circuit or strand this runs under. Matches the room's session kind. */
   circuit: TrackName | "Social";
+  /**
+   * Shown in place of a room, for an activation whose location is disclosed
+   * only to people who RSVP.
+   *
+   * Alamo Angels hold their brunch somewhere the invitation names and this
+   * site does not; Luma reveals it on RSVP. That is a real constraint and not
+   * a missing field, so it is stated rather than guessed at — the venue is
+   * absent from this repo entirely, which is the only way it cannot leak from
+   * a bundle, an .ics file or a JSON-LD blob.
+   *
+   * `room` is not looked up when this is set. `resolveSessions` builds a room
+   * out of this string instead, so every surface that prints a venue prints
+   * this without knowing anything special is going on.
+   */
+  venueReveal?: string;
+  /**
+   * Everything on this page fits the screen: the hero carries the message and
+   * `ActivationDetail` is not drawn below it.
+   *
+   * For an activation with no running order and no speakers to add, that band
+   * was a heading over content that belonged in the masthead. "Fits the
+   * screen" is a height budget rather than a DOM shape — see the note on the
+   * hero section in the activation page, which pays for it with tighter
+   * padding and rhythm on these pages only.
+   */
+  heroOnly?: boolean;
+  /**
+   * Force this onto the before-noon rail, even though it ends after twelve.
+   *
+   * The rail exists so a single early event does not stretch the hour axis
+   * across the whole week — see `MORNING_CUTOFF`. That rule reads the end
+   * time, which is right for everything that has been on it: the Thursday
+   * brunch and 1 Million Cups both finish before noon.
+   *
+   * Alamo Angels' brunch runs 10:00–12:30. Thirty minutes past the cutoff put
+   * it on the axis and pulled the axis back three hours, so every day of the
+   * week grew a 10 AM band to hold one Friday event. It is the outlier the
+   * rail was built for; it just does not end when the rule expects.
+   */
+  rail?: boolean;
   blurb: string;
   /**
    * Optional programme lockup, shown in place of the typeset title.
@@ -645,6 +685,73 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     },
   },
   {
+    slug: "alamo-angels-venture-brunch",
+    page: "alamo-angels-venture-brunch",
+    heroOnly: true,
+    title: "Alamo Angels\u2019 5th Annual Venture Brunch",
+    // The block and the filter chip get the event, not the possessive and the
+    // ordinal — the mark beside it already says whose it is.
+    shortTitle: "Venture Brunch",
+    // Not one of the week's rooms, and deliberately not named here: Alamo
+    // Angels are holding this somewhere they are not sharing publicly, and
+    // Luma reveals it to whoever RSVPs. `room` is never looked up when
+    // `venueReveal` is set — see `resolveSessions`.
+    room: "rsvp",
+    venueReveal: "Location shared on RSVP",
+    circuit: "Capital",
+    // On the rail rather than the axis — see `rail`.
+    rail: true,
+    when: {
+      start: "2026-10-02T10:00:00-05:00",
+      end: "2026-10-02T12:30:00-05:00",
+    },
+    // Condensed to the length the cards run at. The full account is in
+    // `detail`, which is where the invitation terms belong too.
+    blurb:
+      "Roughly 100+ investors, portfolio founders and guests on the rooftop for mimosas, founder spotlights, and one announcement saved for the room.",
+    // Seats are held on Alamo Angels\u2019 own page, not ours, and for the
+    // firmest reason of the three activations that override this: a week
+    // badge does not get you in at all. Attendance is by invitation and the
+    // released seats are counted there.
+    register: {
+      label: "Request a seat.",
+      href: "https://luma.com/3i0biwl7",
+    },
+    // The org's mark with the event set under it, because `logo` is the
+    // event's lockup everywhere else on this schedule — Stumberg's carries
+    // "Venture Competition" — and the file they sent carries only the angel
+    // network. Without the second line the week block read "Alamo Angels ·
+    // Capital · 300 Main" and never said what it was.
+    //
+    // Composed rather than typeset live: the grid, the hero, the bento and
+    // the OG card all draw `logo` as one image, and only a file is the same
+    // mark in all four. Built from their artwork plus the site's own Oswald —
+    // see tools/social-cards for the same trick.
+    //
+    // Their file is black on white; this is knocked to white with the star
+    // left in its own blue, the treatment latin-tech-pitch.png already uses.
+    logo: {
+      src: "/activations/alamo-angels-venture-brunch.webp",
+      width: 1041,
+      height: 315,
+      alt: "Alamo Angels\u2019 5th Annual Venture Brunch",
+    },
+    detail: {
+      eyebrow: "The brunch",
+      headline: "One announcement, saved for the room.",
+      // One paragraph, because this page is a hero and nothing else. The one
+      // dropped said Venture Brunch is where Alamo Angels\u2019 investors and
+      // portfolio companies convene, and in its fifth year — which the title
+      // and the lockup above it already carry.
+      lede: [
+        "Alamo Angels\u2019 biggest gathering of the year. Roughly 100+ investors, portfolio founders, and guests from across Texas come together on the rooftop for mimosas, founder spotlights on stage, and one announcement we\u2019re saving for the room.",
+      ],
+      access:
+        "Attendance is by invitation. A limited number of seats are released to the Startup Week community each year, prioritizing founders and active investors.",
+    },
+  },
+
+  {
     slug: "1-million-cups",
     page: "1-million-cups",
     // The chapter is run by Launch SA, who host it at their Central Library
@@ -1126,6 +1233,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
   {
     slug: "college-night",
     page: "college-night",
+    heroOnly: true,
     title: "College Night",
     titleAccent: "Night",
     room: "the-rand",
@@ -1237,8 +1345,10 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         },
       ],
       kicker: "Find your people. Build your future. Build your network.",
-      access:
-        "Free, and free of the usual conditions \u2014 no badge, no pitch, no year requirement, and no need to be enrolled anywhere in particular.",
+      // No `access` here on purpose. "Free, no badge, no pitch" is the third
+      // sentence of the lede above, folded in when this page lost the section
+      // that used to carry it separately — and the hero draws `access` now,
+      // so keeping it would print the condition twice.
     },
   },
   // Thursday on the community floor, in time order: SATX Datanauts at one, the
@@ -2530,7 +2640,7 @@ export function weekCalendar(extra: CalendarItem[] = []): WeekCalendar {
         startMin,
         endMin,
         timeLabel: compactRange(startMin, endMin),
-        morning: endMin <= MORNING_CUTOFF,
+        morning: s.rail ?? endMin <= MORNING_CUTOFF,
         venueSlug: s.venue.slug,
         venueName: s.venue.name,
         venueShort: s.venue.shortName ?? s.venue.name,
@@ -2758,6 +2868,31 @@ export function resolveSessions(
   sessions: FeaturedSession[],
 ): ResolvedSession[] {
   return sessions.flatMap((s) => {
+    // An activation whose location is disclosed on RSVP has no room in the
+    // week's set, and must not borrow one — pointing it at a real venue would
+    // print an address that is wrong on the grid, in the hero, in the .ics and
+    // in the Event markup. It gets a room made out of `venueReveal` instead,
+    // with no `place`, so `eventLocation` and `place()` have nothing to give
+    // away. See `venueReveal`.
+    if (s.venueReveal) {
+      const venue: Room = {
+        slug: "rsvp",
+        name: s.venueReveal,
+        shortName: "On RSVP",
+        host: s.site?.label ?? "The organisers",
+        desc: s.blurb,
+        tag: s.circuit,
+        port: "p0",
+        tier: "single",
+        // Required on a Room and never drawn for this one, which only ever
+        // reaches the surfaces that print a venue's name.
+        ascii: "",
+        // Empty, so "Everything else at …" never offers a room page that
+        // does not exist.
+        sessions: [],
+      };
+      return [{ ...s, venue }];
+    }
     const venue = ROOMS.find((r) => r.slug === s.room);
     return venue ? [{ ...s, venue }] : [];
   });

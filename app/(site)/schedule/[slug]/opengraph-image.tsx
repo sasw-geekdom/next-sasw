@@ -51,7 +51,12 @@ export default async function OgImage({
         : [{ text: name }];
 
     return boltOgImage({
-      eyebrow: s.venue.name,
+      // The venue, except where there isn't one to give. An activation whose
+      // location is disclosed on RSVP would lead every unfurl with "Location
+      // shared on RSVP" — the card's first line spent on what is being
+      // withheld. Its circuit says what kind of thing it is instead, which is
+      // the same fallback the tagline below uses when the hour is unknown.
+      eyebrow: s.venueReveal ? s.circuit : s.venue.name,
       lines,
       // The date earns the space when it's locked; otherwise the circuit says
       // what kind of thing this is.

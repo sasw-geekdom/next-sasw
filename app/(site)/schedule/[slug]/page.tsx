@@ -142,11 +142,17 @@ export async function generateMetadata({
           title: schedule.session.title,
           description: (() => {
             const w = schedule.session.when;
+            // An activation whose location is disclosed on RSVP has no venue
+            // to name here — "at Location shared on RSVP" reads as a bug, and
+            // a description is not the place to advertise what is withheld.
+            const at = schedule.session.venueReveal
+              ? ""
+              : ` at ${schedule.session.venue.name}`;
             if (!w) {
-              return `${schedule.session.blurb} At ${schedule.session.venue.name} during San Antonio Startup + Tech Week, Sept 28 – Oct 2, 2026.`;
+              return `${schedule.session.blurb}${at ? ` At ${schedule.session.venue.name}` : ""} during San Antonio Startup + Tech Week, Sept 28 – Oct 2, 2026.`;
             }
             const { date, time } = whenLabels(w);
-            return `${schedule.session.blurb} ${date}, ${time} at ${schedule.session.venue.name} — part of San Antonio Startup + Tech Week.`;
+            return `${schedule.session.blurb} ${date}, ${time}${at} — part of San Antonio Startup + Tech Week.`;
           })(),
           path: `/schedule/${schedule.session.page}`,
         };
@@ -231,15 +237,14 @@ function ActivationPage({
   const isModel = session.page === "the-model";
   const isGiveALot = session.page === "give-a-lot";
   /**
-   * Hero and nothing else.
+   * Hero and nothing else — declared per activation, see `heroOnly`.
    *
-   * College Night has no running order to list and no speakers to add — it is
-   * a room, which is why it carries `spotlight` rather than `programme`. Its
-   * message therefore has somewhere to go other than a band of its own, so it
-   * rides in the hero column and `ActivationDetail` is skipped below. The
-   * copy in lib/schedule.ts is trimmed to one paragraph to pay for it.
+   * An activation with no running order and no speakers to add has nothing to
+   * put in the band below the masthead, so its message rides in the hero
+   * column and `ActivationDetail` is skipped. The copy in lib/schedule.ts is
+   * trimmed to one paragraph to pay for it.
    */
-  const isCollegeNight = session.page === "college-night";
+  const isHeroOnly = session.heroOnly === true;
   /**
    * Not a band — this one keeps the shared hero and only lights what is behind
    * the mark, which is why it is a flag here rather than a fifth entry in the
@@ -294,7 +299,7 @@ function ActivationPage({
         <div
           className={cn(
             "mx-auto w-full max-w-7xl px-6",
-            isCollegeNight ? "pt-5 lg:pt-6" : "pt-8 lg:pt-10",
+            isHeroOnly ? "pt-5 lg:pt-6" : "pt-8 lg:pt-10",
           )}
         >
           <BackLink
@@ -426,7 +431,7 @@ function ActivationPage({
             // Night has to fit the screen instead — everything on it, down to
             // the hosts, above the fold on a laptop — and the BACK row above
             // this section costs another ~60px the calc never knew about.
-            isCollegeNight
+            isHeroOnly
               ? "min-h-[calc(100vh-9.5rem)]"
               : "min-h-[calc(100vh-4rem)]",
           )}
@@ -521,7 +526,7 @@ function ActivationPage({
           <div
             className={cn(
               "relative z-10 mx-auto w-full max-w-7xl px-6",
-              isCollegeNight
+              isHeroOnly
                 ? "pb-10 pt-6 lg:pb-12 lg:pt-8"
                 : "pb-16 pt-10 lg:pb-16 lg:pt-14",
             )}
@@ -617,8 +622,15 @@ function ActivationPage({
                     section went, moved up under the title. It is the only
                     piece of that block worth carrying: an instruction, where
                     everything around it describes. Above the hook rather than
-                    between hook and paragraph — title, deck, then body. */}
-                {isCollegeNight && session.detail?.headline && (
+                    between hook and paragraph — title, deck, then body.
+                    
+                    Only where the title is typeset. An activation with a logo
+                    has an image for its h1, and these lockups end in a display
+                    line of their own — Alamo Angels' carries "5th Annual
+                    Venture Brunch" — so a deck under it is a second headline
+                    at the same weight rather than a deck. Theirs was also the
+                    last clause of the paragraph below it. */}
+                {isHeroOnly && !session.logo && session.detail?.headline && (
                   <p className="mt-4 text-pretty font-display text-2xl font-bold uppercase leading-[1.05] tracking-tight text-white sm:text-3xl">
                     {session.detail.headline}
                   </p>
@@ -629,7 +641,7 @@ function ActivationPage({
                     blurb still earns its keep off-page — meta description,
                     calendar details, JSON-LD — it just is not the hero copy
                     here. */}
-                {isCollegeNight ? (
+                {isHeroOnly ? (
                   session.detail?.lede[0] && (
                     <p className="mt-5 max-w-xl text-pretty text-lg text-white/60">
                       {session.detail.lede[0]}
@@ -650,7 +662,7 @@ function ActivationPage({
                     <dl
                       className={cn(
                         "flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55",
-                        isCollegeNight ? "mt-6" : "mt-8",
+                        isHeroOnly ? "mt-6" : "mt-8",
                       )}
                     >
                       <div className="inline-flex items-center gap-2">
@@ -684,12 +696,23 @@ function ActivationPage({
                       </div>
                     </dl>
 
+                    {/* The terms the primary action is subject to, and ahead
+                        of it rather than in a band below: "Request a seat." is
+                        a different promise once you know attendance is by
+                        invitation, and that is worth knowing before the click
+                        rather than after it. */}
+                    {isHeroOnly && session.detail?.access && (
+                      <p className="mt-5 max-w-xl text-pretty text-sm text-white/55">
+                        {session.detail.access}
+                      </p>
+                    )}
+
                     {/* Between the slot and the buttons, not after them. The
                         hosts are part of what the reader is deciding on — who
                         is running this — so they belong on the way to the CTA
                         rather than trailing it. Also keeps the buttons as the
                         last thing before the fold. */}
-                    {isCollegeNight && session.detail?.poweredBy && (
+                    {isHeroOnly && session.detail?.poweredBy && (
                       <PoweredBy
                         orgs={session.detail.poweredBy}
                         className="mt-7"
@@ -700,7 +723,7 @@ function ActivationPage({
                     <div
                       className={cn(
                         "flex flex-wrap items-center gap-3",
-                        isCollegeNight ? "mt-6" : "mt-8",
+                        isHeroOnly ? "mt-6" : "mt-8",
                       )}
                     >
                       {/* See the banded row above — same override, same
@@ -734,7 +757,7 @@ function ActivationPage({
                     <p
                       className={cn(
                         "flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55",
-                        isCollegeNight ? "mt-6" : "mt-8",
+                        isHeroOnly ? "mt-6" : "mt-8",
                       )}
                     >
                       {session.site &&
@@ -819,7 +842,7 @@ function ActivationPage({
         heroTalk ? null : (
           <ActivationSessions sessions={sessions} speakers={speakers} />
         )
-      ) : isCollegeNight ? null : (
+      ) : isHeroOnly ? null : (
         <ActivationDetail detail={session.detail} speakers={speakers} />
       )}
 
