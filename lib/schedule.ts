@@ -692,6 +692,14 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // The block and the filter chip get the event, not the possessive and the
     // ordinal — the mark beside it already says whose it is.
     shortTitle: "Venture Brunch",
+    // The same name without the possessive, for the share card only. The
+    // apostrophe is correct — Angels is a plural ending in s — but the card
+    // wraps this title after "ALAMO ANGELS'", which leaves an apostrophe
+    // hanging at the end of a line in all-caps display type, where it reads
+    // as a stray mark rather than a possessive. Read attributively the name
+    // works without it, which is also how the page's own lockup sets it:
+    // the mark over a rule over the event.
+    ogTitle: "Alamo Angels 5th Annual Venture Brunch",
     // Not one of the week's rooms, and deliberately not named here: Alamo
     // Angels are holding this somewhere they are not sharing publicly, and
     // Luma reveals it to whoever RSVPs. `room` is never looked up when
