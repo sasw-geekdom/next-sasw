@@ -257,6 +257,16 @@ async function main() {
       // sit on different days and its times are not set yet.
       fact1: facts[0],
       fact2: facts[1] ?? "",
+      fact3: facts[2] ?? "",
+      // Give-a-LOT's transform table, built here so the card draws the same
+      // four pairs the band does rather than a copy that can drift — see
+      // GIVE_A_LOT_STATES in lib/give-a-lot.ts.
+      states: (event.states ?? [])
+        .map(
+          ([before, after]) =>
+            `<div class="state"><span class="b">${before}</span><span class="x">&#10230;</span><span class="a">${after}</span></div>`,
+        )
+        .join("\n        "),
       logos: logos.join("\n          "),
       mark,
       // A card may resize the mark. The wide card has to: the portrait card

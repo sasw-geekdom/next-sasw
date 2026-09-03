@@ -188,6 +188,37 @@ export const EVENTS = {
     ],
   },
 
+  /**
+   * Give-a-LOT has a brand system of its own — a finished lockup, an amber,
+   * and the transform table — so it gets a template, by the same rule that
+   * gives PySanAntonio and The Model theirs.
+   *
+   * No speaker, like College Night: this is a drive and an afternoon, not a
+   * talk. The four pairs are GIVE_A_LOT_STATES from lib/give-a-lot.ts, copied
+   * here because the card tool does not import from the app.
+   */
+  "give-a-lot": {
+    template: "give-a-lot.html",
+    mark: { repo: "public/give-a-lot/lockup.svg", height: 200 },
+    facts: [
+      "Drop-off  ·  Sept 28 – Oct 1",
+      "Friday, Oct 2  ·  12 – 2:30 PM",
+      "Launch SA, Central Library",
+    ],
+    states: [
+      ["vendor-locked", "linux + open source"],
+      ["unsupported", "patched and current"],
+      ["slow and tracked", "fast and private"],
+      ["headed for landfill", "yours to keep"],
+    ],
+    // The order the band uses: the work, the room, the week.
+    logos: [
+      { repo: "public/give-a-lot/learnopentech.svg", height: 34 },
+      { partner: "Launch SA", height: 40 },
+      { repo: "public/access-granted/orgs/devsa.png", height: 68 },
+    ],
+  },
+
   "access-granted": {
     template: "access-granted.html",
     facts: ["Wednesday, September 30", "Geekdom, 3rd Floor"],
@@ -564,6 +595,19 @@ export const CARDS = [
     // conditions sentence for this one; the card follows.
     access:
       "Free, no badge, no pitch, and nobody checking which logo is on your student ID.",
+  },
+
+  // ─── Give-a-LOT ───────────────────────────────────────────────────────────
+  {
+    id: "give-a-lot",
+    event: "give-a-lot",
+    // The page's own line, and the one that speaks to both readers — this
+    // event asks two different people to do two different things.
+    headline: "Bring a machine.<br />Take one home.",
+    headlineSize: 84,
+    // The amber line, and the argument the table under it proves. Same words
+    // as GIVE_A_LOT.tagline on the page — the two surfaces open alike.
+    subtitle: "Nothing here is junk.",
   },
 
   // ─── Access Granted ───────────────────────────────────────────────────────

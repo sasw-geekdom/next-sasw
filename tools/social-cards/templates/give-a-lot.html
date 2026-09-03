@@ -1,0 +1,222 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* Give-a-LOT's own, from lib/give-a-lot.ts: an amber that appears on one
+         side of the table and nowhere else. That is the whole visual idea on
+         the band — the left column is unpowered and the right one is lit — and
+         it is the reason this card carries the table rather than a paragraph
+         about vendor lock-in. The table demonstrates the argument; the prose
+         only made it. */
+      :root {
+        --amber: #ffb400;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 74px 72px 84px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 58px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* The lockup is the title, the same bargain the band makes. It arrives
+         as finished artwork on its own yellow ground, which is why nothing
+         else on this card is allowed to be loud. */
+      .mark {
+        margin-top: 54px;
+        height: {{markHeight}}px;
+        width: auto;
+        display: block;
+        align-self: flex-start;
+      }
+
+      h1 {
+        margin-top: 36px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 0.98;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+      .subtitle {
+        margin-top: 6px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 0.98;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+        color: var(--amber);
+      }
+
+      .spacer {
+        flex: 1;
+      }
+
+      /* Set in mono, because these are machine states rather than sentences —
+         and because the band sets them that way. */
+      /* The spacer above this is what separates it from the headline, and
+         at the first sizes there was none left to give — "BOTH COUNT." sat on
+         the column heads. The mark and the headline came down to pay for it;
+         everything on this card is short lines, so height is the only thing
+         actually in contention. */
+      .states {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 23px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .heads {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 0 28px;
+        font-size: 19px;
+        color: rgba(255, 255, 255, 0.35);
+        padding-bottom: 18px;
+      }
+      .heads span:first-child {
+        text-align: right;
+      }
+      .state {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 0 28px;
+        align-items: center;
+      }
+      .state .b {
+        text-align: right;
+        color: rgba(255, 255, 255, 0.55);
+      }
+      /* Faint on purpose. It is punctuation between two words, not a third
+         column asking to be read. */
+      .state .x {
+        color: rgba(255, 255, 255, 0.25);
+      }
+      .state .a {
+        color: var(--amber);
+      }
+
+      .facts {
+        margin-top: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--amber);
+        flex: none;
+      }
+
+      .powered {
+        margin-top: 40px;
+      }
+      .powered .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.26em;
+        color: #6f6f6f;
+        text-transform: uppercase;
+      }
+      .logos {
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+      }
+      .logos img {
+        width: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <img class="mark" src="{{mark}}" alt="" />
+
+      <h1>{{headline}}</h1>
+      <p class="subtitle">{{subtitle}}</p>
+
+      <div class="spacer"></div>
+
+      <div class="states">
+        <div class="heads">
+          <span>// donated</span><span></span><span>// rebuilt</span>
+        </div>
+        {{states}}
+      </div>
+
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+        <div class="fact"><span class="pip"></span>{{fact3}}</div>
+      </div>
+
+      <div class="powered">
+        <div class="label">// Powered by</div>
+        <div class="logos">{{logos}}</div>
+      </div>
+    </div>
+  </body>
+</html>
