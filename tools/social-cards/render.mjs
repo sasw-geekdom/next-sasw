@@ -279,6 +279,10 @@ async function main() {
       // same height reads as the group being the senior partner.
       markHeight: card.markHeight ?? event.mark?.height ?? 0,
 
+      // Per card, not per template: TPR greyscales every portrait because its
+      // bolt runs at full charge, but a community card is a colour card and
+      // this is one speaker's choice inside it.
+      greyscale: card.greyscale ? "1" : "",
       // A pull quote, where a card leads on a line rather than on a person.
       quote: card.quote ?? "",
       // The line under the title, where the page runs one — College Night's

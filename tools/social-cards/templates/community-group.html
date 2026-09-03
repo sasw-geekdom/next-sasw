@@ -86,6 +86,13 @@
         height: {{portraitHeight}}px;
         width: auto;
       }
+      <!--if:greyscale-->
+      /* Same treatment tpr.html gives every portrait — greyscale plus a touch
+         of contrast, which stops a desaturated headshot going flat. */
+      .portrait img {
+        filter: grayscale(1) contrast(1.06);
+      }
+      <!--/if:greyscale-->
       .portrait::after {
         content: "";
         position: absolute;
@@ -213,9 +220,45 @@
         flex: none;
       }
 
-      /* No partner strip. The branded events carry one because a coalition
-         puts them on; a community group is a single host, and its mark is
-         already at the top of the card. */
+      /* A partner strip only where the group has partners.
+         Most of these are a single host whose mark is already at the top of
+         the card, which is why there is no strip by default and why the frame
+         above carries the deep bottom padding instead. Linux San Antonio is
+         the exception — three orgs put it on, and its page says so — so the
+         strip comes back and the padding it was standing in for goes away. */
+      <!--if:logos-->
+      .frame {
+        padding-bottom: 62px;
+      }
+      .powered {
+        margin-top: 30px;
+      }
+      .powered .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.26em;
+        color: #6f6f6f;
+        text-transform: uppercase;
+      }
+      /* Wraps, and the width is what forces it to.
+         Three marks in one row reach x=822 and the figure starts around 560,
+         so the last two sat on his jacket. Shrinking them to fit one row put
+         learnOPENtech's 10:1 wordmark at 20px tall — legible, and visibly the
+         smallest thing on any of these cards. Two rows keeps them readable
+         and clear of him, which is the same trade Access Granted's six marks
+         make. */
+      .logos {
+        margin-top: 18px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        max-width: 420px;
+        gap: 16px 34px;
+      }
+      .logos img {
+        width: auto;
+      }
+      <!--/if:logos-->
     </style>
   </head>
   <body>
@@ -237,7 +280,15 @@
 
       <div class="spacer"></div>
 
-      <div class="name">{{first}}<br />{{last}}</div>
+      <!-- The break and the second line are conditional, the same fix tpr.html
+           carries: Beck goes by one name, and an unconditional <br /> leaves an
+           empty 62px line under it. The block below the spacer is bottom-
+           anchored as a group, so that does not show up as a gap under the
+           name — it lifts the whole group, the name included, off the line the
+           other cards sit on. -->
+      <div class="name">
+        {{first}}<!--if:last--><br />{{last}}<!--/if:last-->
+      </div>
       <div class="role">{{role}}</div>
       <!--if:org-->
       <div class="org">{{org}}</div>
@@ -247,6 +298,13 @@
         <div class="fact"><span class="pip"></span>{{fact1}}</div>
         <div class="fact"><span class="pip"></span>{{fact2}}</div>
       </div>
+
+      <!--if:logos-->
+      <div class="powered">
+        <div class="label">// Powered by</div>
+        <div class="logos">{{logos}}</div>
+      </div>
+      <!--/if:logos-->
     </div>
   </body>
 </html>

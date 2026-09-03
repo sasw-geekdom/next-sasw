@@ -84,12 +84,22 @@ export const COMMUNITY = {
     "Thursday, October 1",
     "2 – 3 PM",
   ),
-  "linux-satx": AT_THE_RAND(
-    "linux-satx.webp",
-    72,
-    "Thursday, October 1",
-    "3 – 5 PM",
-  ),
+  // The one community group with a strip. The others are a single host whose
+  // mark is already at the top of the card, which is why the template has no
+  // strip by default — but Linux San Antonio is three, and says so on its own
+  // page: `poweredBy` on the activation in lib/schedule.ts names the same
+  // learnOPENtech, Texas Linux Fest and DEVSA, in the same order.
+  "linux-satx": {
+    ...AT_THE_RAND("linux-satx.webp", 72, "Thursday, October 1", "3 – 5 PM"),
+    // Scaled off the site's classes, which size these by drawn width rather
+    // than height: learnOPENtech is a 10:1 wordmark, TXLF 4.5:1, DEVSA a
+    // badge. Same three heights the Give-a-LOT card settled on.
+    logos: [
+      { repo: "public/give-a-lot/learnopentech.svg", height: 30 },
+      { repo: "public/activations/txlf.webp", height: 50 },
+      { repo: "public/access-granted/orgs/devsa.png", height: 60 },
+    ],
+  },
 };
 
 export const EVENTS = {
@@ -595,6 +605,43 @@ export const CARDS = [
     // conditions sentence for this one; the card follows.
     access:
       "Free, no badge, no pitch, and nobody checking which logo is on your student ID.",
+  },
+
+  {
+    id: "linux-satx-speaker-beck",
+    event: "linux-satx",
+    speaker: "beck",
+    // Tentative — his words. If it firms up, this and the subtitle are the
+    // only two strings that change.
+    headline: "From Closed to Open",
+    headlineSize: 96,
+    subtitle: "The opening keynote",
+    greyscale: true,
+    // The second mononym in the set, after wolfy. See the note on `.name` in
+    // community-group.html for what the default split did with it.
+    //
+    // The probe is unusable here and wrong in the opposite direction to
+    // usual: it reported a 218px head, 16% of frame, because his top knot
+    // widens the silhouette immediately and the shoulder test fires at the
+    // hairline. Its 1759 would have drawn him about twice life size. Solved
+    // from the crown instead — and the crown that matters is the knot, since
+    // that is where the silhouette starts.
+    portrait: { height: 840, left: 470 },
+  },
+
+  {
+    id: "linux-satx-speaker-paul-christiansen",
+    event: "linux-satx",
+    speaker: "paul-christiansen",
+    // Split before the possessive so both halves are a phrase — "I Spy With
+    // My / Kernel Eye" breaks the joke across the line it turns on.
+    headline: "I Spy With<br />My Kernel Eye",
+    headlineSize: 96,
+    // The parenthetical from the title, which is the half that says what the
+    // talk is actually about.
+    subtitle: "What your box is doing before you ever log in",
+    // No company on his record — the no-org path, like jordana-naftali.
+    portrait: { height: 880, left: 439 },
   },
 
   // ─── Give-a-LOT ───────────────────────────────────────────────────────────
