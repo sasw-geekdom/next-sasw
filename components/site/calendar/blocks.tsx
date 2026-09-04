@@ -536,14 +536,14 @@ function BrandMark({
             then read as one line of type continuing into the accent word
             rather than a logo with a headline parked beside it.
 
-            Weight 500 and normal tracking for the same reason, arrived at by
-            rendering both side by side: the wordmark is a condensed sans at a
-            medium stroke, and Oswald 700 with tight tracking sat next to it as
-            a visibly heavier, tighter face — same family, different-looking
-            font. Not 600, which looks like the middle option and is a trap:
-            app/layout.tsx loads Oswald at 400, 500 and 700 only, so 600 is a
-            weight the browser synthesises. */}
-        <span className="font-display text-[13.5px] font-medium uppercase leading-none text-magenta lg:text-[16.5px]">
+            Weight 400 and normal tracking, measured rather than judged. 700
+            with tight tracking sat beside the wordmark as a visibly heavier,
+            tighter face — same family, different-looking font — and 500, the
+            first correction, was still 1.29x the wordmark's stroke: 9px
+            against 7px rendered at 4x. 400 lands on it. Not 600, which looks
+            like the middle option and is a trap: app/layout.tsx loads Oswald
+            at 400, 500 and 700 only, so 600 is synthesised. */}
+        <span className="font-display text-[13.5px] font-normal uppercase leading-none text-magenta lg:text-[16.5px]">
           Bash
         </span>
       </span>

@@ -1,23 +1,45 @@
+import Image from "next/image";
 import Link from "next/link";
 import { HeroShell } from "@/components/site/hero-shell";
-import { mixCircuits } from "@/lib/tracks";
+import { ShaderCanvas } from "@/components/site/shader-canvas";
+import { FeaturedBill } from "@/components/site/featured-bill";
+import { featuredLineup } from "@/lib/featured";
+import { PYSA } from "@/lib/pysa";
+import { HoverPeek } from "@/components/site/hover-peek";
+import { ModelFlow } from "@/components/site/model-flow";
+import { MODEL_INK, MODEL_LAVENDER, MODEL_LAVENDER_LIT } from "@/lib/the-model";
 
 // The schedule hero. Structure comes from HeroShell — only the charge and the
 // copy differ, so the three page heroes read as one system at different points
 // on the grid.
 //
-// Halfway between Tech & Builders and AI & Applied Innovation: #33a2e4.
-const SESSIONS_CURRENT = mixCircuits(
-  "Tech & Builders",
-  "AI & Applied Innovation",
-);
+// House magenta, where the other two heroes mix a circuit colour. This one
+// draws its bolt on the page's own white rather than in the bolt's column,
+// and a cyan bolt there was the only cyan on a page whose every other accent
+// — eyebrow, headline, button, the featured ramp — is `--magenta`. It read as
+// a second brand rather than as the same current behind the type.
+const SESSIONS_CURRENT = "#ff32a0";
 
-// The flow mixes up from this floor toward the colour above, so the floor sits
-// in the same family — a near-black magenta floor under a cyan current reads
-// as two lights fighting.
-const BASE: [number, number, number] = [0.01, 0.05, 0.08];
+// The floor the flow mixes up from, and the only control over how much of the
+// current you can see.
+//
+// This value was written once before and never rendered: the backdrop below
+// carried its own hardcoded `base={[0.9, 0.96, 1]}` — a near-white *blue* —
+// so `BASE` fed only the unused `bolt` prop, and the smoke everyone was
+// looking at was that blue showing wherever the flow ran thin. Which is also
+// why deepening this constant appeared to do nothing.
+//
+// Wired up, the trade it controls is real but narrower than it looks. A flow
+// laid over white at 0.72 is compressed on its dark side and stretched on its
+// light side, so range below the colour barely shows: measured away from the
+// cursor glow, a deep-magenta floor at 0.92 opacity moves the green channel
+// 10 points across the bolt and this one moves it 24. Darkening the floor
+// kills the current; the visible half of the range is the light half. The
+// blue is what made that half read as fog rather than as pink.
+const BASE: [number, number, number] = [1, 0.66, 0.84];
 
-export function SessionsHero() {
+export async function SessionsHero() {
+  const featured = await featuredLineup();
   return (
     <HeroShell
       eyebrow="The schedule · Sept 28 – Oct 2"
@@ -30,17 +52,148 @@ export function SessionsHero() {
       // current." names the shape of the thing the page is, which matters more
       // once the page *is* the calendar; the section below it has no header at
       // all any more.
+      // Shorter than "Five days, one current." was, because the second
+      // column is now a list of four events rather than a graphic, and a
+      // three-line headline beside it pushed the CTA past the fold on a
+      // MacBook Air. The line it replaces named the shape of the week; the
+      // bill beside it now names four specific things, which is the more
+      // useful half of the same job.
       headline={
         <>
-          Five days,{" "}
-          <span className="whitespace-nowrap">
-            one <span className="text-magenta">current.</span>
-          </span>
+          Start <span className="text-magenta">here.</span>
         </>
       }
-      // Merged from the two blurbs that used to say this separately: what the
-      // grid is, and that it is still filling.
-      blurb="Everything confirmed so far, in the hour it runs. More lands on every day as the week locks."
+      // Leads with the fact that moves someone, not with what the page is.
+      // The bill beside it already names four events and the button below it
+      // already says "See the week", so a sentence describing the calendar
+      // was the third thing on screen saying the same thing. Free is the one
+      // claim neither of them makes, and it is the one that decides whether a
+      // stranger scrolls; the scale follows it as evidence, and the close
+      // hands the reader the only decision left — which is also the decision
+      // the grid underneath exists to serve.
+      // Named events here are asserted against lib/schedule.ts, not recalled:
+      // the Bash is Thursday 6–8pm and Friday still runs the Alamo Angels
+      // brunch, the Give-a-LOT giveaway and PySanAntonio II until 6pm, so the
+      // party is the week's Thursday night and PySA — HEADLINE_SESSION, and
+      // the last thing to end — is what closes it. If either moves, this
+      // sentence moves with it.
+      blurb={
+        <>
+          Every session is free. Five circuits, six rooms, five days — the hard
+          part is deciding where to be. Pitch nights, keynotes and community
+          activations across downtown all week,{" "}
+          {/* The Model has no wordmark file to reach for — its mark is
+              typeset. See the `the-model` branch in calendar/blocks.tsx: mono,
+              uppercase, and the second word caught in a selection block, which
+              is the band's own artwork rendered as type. Rebuilt here at
+              sentence scale rather than lifted, because that one reads its
+              colours off a brand record and takes a size meant for a calendar
+              row; the three constants are the shared part.
+
+              0.8em because mono runs wide and tall against Geist at the same
+              size — set at 1em the mark stood a head above the line it was
+              sitting in. `whitespace-nowrap` so "The" never ends a line with
+              its own highlighted noun on the next one.
+
+              The word space is mono's, which is a full 0.6em — wide enough
+              between two words of a two-word mark that they read as two
+              things rather than one. `-ml-[0.34em]` pulls the block back to a
+              gap of about a third of an em without deleting the space itself,
+              which is what a screen reader needs to say "The Model" rather
+              than one word.
+
+              The lit lavender is what the constant exists for: lib/the-model
+              keeps #CBC2FD as "the same lavender lifted about 18% toward
+              white, for one hover state". Both go through custom properties
+              so the hover can be a class while the colours stay sourced from
+              the brand file. */}
+          <HoverPeek
+            // The graph itself, not a picture of it. The Model's hero is
+            // drawn rather than exported — model-band.tsx renders this same
+            // component — so the honest peek is the component.
+            //
+            // Two things it needs to survive a 22rem box. Its type scale is
+            // viewport-driven (`text-[11px]` up to `2xl:text-[19px]`), which
+            // is right in a hero and far too big in a panel a fifth that
+            // width, so every breakpoint is pinned to one size here — twMerge
+            // resolves per-variant, so a bare `text-[7px]` would beat the
+            // base and lose to `lg:text-[13px]`. And it is passed as `node`
+            // rather than rendered inline, so it mounts on the hover: see the
+            // note on that prop for why an always-mounted graph would have
+            // finished its walk before anyone saw it.
+            node={
+              <ModelFlow className="text-[7px] sm:text-[7px] md:text-[7px] lg:text-[7px] xl:text-[7px] 2xl:text-[7px]" />
+            }
+            className="inline-block"
+            panelClassName="w-[17rem]"
+          >
+            <Link
+              href="/schedule/the-model"
+              className="group whitespace-nowrap rounded-sm font-mono text-[0.8em] font-medium uppercase tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2"
+              style={
+                {
+                  "--model-mark": MODEL_LAVENDER,
+                  "--model-mark-lit": MODEL_LAVENDER_LIT,
+                } as React.CSSProperties
+              }
+            >
+              The{" "}
+              <span
+                className="box-decoration-clone -ml-[0.34em] bg-[var(--model-mark)] px-[0.13em] transition-colors duration-200 group-hover:bg-[var(--model-mark-lit)]"
+                style={{ color: MODEL_INK }}
+              >
+                Model
+              </span>
+            </Link>
+          </HoverPeek>{" "}
+          kicks things off on Monday, and{" "}
+          {/* PySA is the one activation in the week with its own brand, so its
+              name is set in its own mark. `wordmarkOnLight` is the cut this
+              ground needs — the deep #0059b7, not the lighter blue PySA's own
+              black band takes.
+
+              Sized and seated off the file rather than by eye: "sanantonio"
+              is 76.7% of the mark's height and its baseline sits 76.7% down
+              the box, so a 1.25em mark wants -0.29em of `vertical-align` to
+              put that baseline on the sentence's. Without it the mark hangs
+              off the line by a quarter of its height, which on a blackletter
+              face reads as a broken image rather than a deliberate one. */}
+          <HoverPeek
+            // The loop, not the still. lib/pysa already trimmed and
+            // re-encoded this to 930KB with a faststart moov precisely so it
+            // could be dropped in somewhere; `preload="none"` plus mounting
+            // on hover means that 930KB is only ever fetched by someone who
+            // pointed at the word.
+            node={
+              <video
+                src={PYSA.video}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="none"
+                className="h-full w-full rounded-lg object-cover"
+              />
+            }
+            className="inline-block align-[-0.29em]"
+            panelClassName="h-[8.5rem] w-[13rem]"
+          >
+            <Link
+              href="/schedule/pysanantonio"
+              className="block rounded-sm transition-opacity duration-200 hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2"
+            >
+              <Image
+                src={PYSA.wordmarkOnLight}
+                alt="PySanAntonio"
+                width={PYSA.wordmarkWidth}
+                height={PYSA.wordmarkHeight}
+                className="block h-[1.25em] w-auto"
+              />
+            </Link>
+          </HoverPeek>{" "}
+          closes out the week on Friday.
+        </>
+      }
       // Points at the calendar, not away from it. "Get on the list." sent the
       // reader to /register from the top of the one page whose whole job is to
       // be scrolled into — the hero's primary action was an exit. Register
@@ -67,6 +220,38 @@ export function SessionsHero() {
         ),
       }}
       bolt={{ color: SESSIONS_CURRENT, base: BASE }}
+      // Takes the bolt's column. See `aside` on HeroShell.
+      aside={<FeaturedBill entries={featured} />}
+      // The bolt, as ground under the featured column.
+      //
+      // The TPR cards run it at 0.62 over black and it burns; the same canvas
+      // laid on this hero's white at an opacity low enough to read type
+      // through came out a flat grey smudge with none of the flow in it. The
+      // fix is the floor, not the alpha: `base` is what the shader mixes *up*
+      // from, and at near-black every low-opacity sample of it is grey. Given
+      // a near-white floor the same flow reads as tinted light on paper —
+      // still the bolt, still moving, and legible under the type it crosses.
+      //
+      // Placed low and right, where the two short titles leave the column
+      // open. Sized off the section's *height*, not its width, which is what
+      // keeps it whole: `overflow-hidden` on the shell cuts anything past the
+      // section, and a width-sized square on a 13-inch screen ran ~50px below
+      // that edge and got a flat horizontal slice taken off the bolt's lower
+      // arm. Height-sized, the silhouette is 0.86 of a box that is itself 72%
+      // of the section, so it clears the edge at every viewport the hero has
+      // to hold. `lg` only: below that the columns stack and there is no dead
+      // corner for it to fill.
+      backdrop={
+        <div className="absolute bottom-[3%] right-[2%] hidden aspect-square h-[72%] opacity-[0.72] lg:block">
+          <ShaderCanvas
+            color={SESSIONS_CURRENT}
+            base={BASE}
+            maskClassName="bolt-mask"
+            fallbackSrc="/brand/sastw-bolt.svg"
+            className="h-full w-full"
+          />
+        </div>
+      }
     />
   );
 }

@@ -198,6 +198,19 @@ export interface FeaturedSession {
    * never show the same running order twice in two formats. That collision is
    * exactly what took Access Granted's hardcoded columns off its page.
    */
+  /**
+   * The partner presenting this activation, credited in its hero.
+   *
+   * Not `detail.poweredBy`, which is a wall of marks under a lede. `detail`
+   * requires a `headline` and a `lede`, so an activation whose page is a hero
+   * plus a running order cannot carry one without switching on a narrative
+   * section it doesn't have — see `PoweredByLine`.
+   *
+   * Names only. Neither of the two using this is in `sponsors` or `partners`,
+   * so there is no mark to draw; hrefs are omitted rather than guessed,
+   * because a wrong outbound link on a sponsor credit is worse than none.
+   */
+  poweredBy?: readonly { name: string; href?: string }[];
   detail?: {
     /**
      * The section's label, above the headline.
@@ -793,6 +806,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // orange square, and a square of brand colour would fight the black.
     // Stacked, so it sits taller and narrower than the wide lockups on the
     // other cards; the slot is height-led, which keeps them on one baseline.
+    poweredBy: [{ name: "PNC Bank" }],
     logo: {
       src: "/activations/1-million-cups.png",
       width: 1072,
@@ -981,6 +995,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       start: "2026-10-01T18:00:00-05:00",
       end: "2026-10-01T20:00:00-05:00",
     },
+    poweredBy: [{ name: "Active Capital" }],
     // Ours, so there is no organiser to hand off to — see `site.href`.
     site: { label: "Startup + Tech Week" },
     // No logo on purpose: this one is the week's own party, not a partner

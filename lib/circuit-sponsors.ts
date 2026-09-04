@@ -1,3 +1,4 @@
+import { sponsorMark } from "@/lib/sponsor-marks";
 import type { TrackName } from "@/lib/tracks";
 
 /**
@@ -49,7 +50,9 @@ export function circuitSponsor(
   return {
     circuit,
     name: row.name,
-    imageUrl: row.imageUrl,
+    // The trimmed cut where we have one — see `sponsorMark`. The row still
+    // decides whether this sponsor appears and where it points.
+    imageUrl: sponsorMark(row.name, row.imageUrl),
     link: row.link,
   };
 }

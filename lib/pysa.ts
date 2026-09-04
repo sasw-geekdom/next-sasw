@@ -25,7 +25,12 @@ export const PYSA = {
   venue: "Geekdom",
   venueDetail: "3rd Floor",
 
+  // Two cuts of one mark, and the names say which *ground* each is for, not
+  // which colour it is: `wordmark` is the lighter blue (#4a90d9) that PySA's
+  // own dark band takes, `wordmarkOnLight` the deep #0059b7 for white. Both
+  // pair that blue with the same #edca00.
   wordmark: "/pysa/wordmark-dark.svg",
+  wordmarkOnLight: "/pysa/wordmark.svg",
   wordmarkWidth: 4066,
   wordmarkHeight: 958,
 

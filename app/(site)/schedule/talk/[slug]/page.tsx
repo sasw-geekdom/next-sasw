@@ -236,10 +236,6 @@ export default async function TalkPage({
               {row.title}
             </h1>
 
-            {sponsor && (
-              <CircuitSponsorLine sponsor={sponsor} className="mt-5" />
-            )}
-
             <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-widest text-white/50">
               <div className="flex items-center gap-2">
                 <dt className="sr-only">When</dt>
@@ -288,7 +284,26 @@ export default async function TalkPage({
               </div>
             )}
 
-            <div className="mt-8 flex shrink-0 flex-wrap items-center gap-x-6 gap-y-3">
+            {/* At the foot, with the other credits, rather than under the
+                title. Two reasons, and the second is the stronger one.
+
+                Consistency: the activation pages put this line below their
+                actions, and the same credit sitting under an H1 on one page
+                and under a button on another reads as two different things.
+
+                And the collision. The one standalone talk on a sponsored
+                circuit is "Building Nopalera on Her Own Terms" — Founder
+                circuit, powered by Nopalera — so under the title the word
+                appeared twice, three lines apart, once as the subject and
+                once as the sponsor. That scans as a duplication bug rather
+                than as two facts, which is the same trap `.tag` on the TPR
+                cards was moved to avoid. Distance doesn't make the two
+                mentions untrue; it stops them reading as one mistake. */}
+            {sponsor && (
+              <CircuitSponsorLine sponsor={sponsor} className="mt-10" />
+            )}
+
+            <div className="mt-6 flex shrink-0 flex-wrap items-center gap-x-6 gap-y-3">
               <Link
                 href={`/schedule/day/${day}`}
                 className="group inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-white/70 transition-colors duration-300 hover:border-white/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"

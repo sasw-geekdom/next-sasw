@@ -48,6 +48,7 @@ import { BackLink } from "@/components/site/back-link";
 import { activationEvent, jsonLd } from "@/lib/structured-data";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
 import { PoweredBy } from "@/components/site/powered-by";
+import { PoweredByLine } from "@/components/site/powered-by-line";
 import { CircuitSponsorLine } from "@/components/site/circuit-sponsor-line";
 import { circuitSponsor, type CircuitSponsor } from "@/lib/circuit-sponsors";
 import { GiveALotBand } from "@/components/site/give-a-lot-band";
@@ -727,9 +728,6 @@ function ActivationPage({
                         className="mt-7"
                       />
                     )}
-                    {sponsor && (
-                      <CircuitSponsorLine sponsor={sponsor} className="mt-7" />
-                    )}
 
                     {/* Full width below sm — see the note on the banded row. */}
                     <div
@@ -762,6 +760,50 @@ function ActivationPage({
                       />
                     </div>
 
+                    {/* Below the buttons, with the organiser, not above them
+                        with the facts.
+                        
+                        A presenting partner is a credit, not something the
+                        reader is deciding on, and above the CTA it stood
+                        between the time and place and the button — the two
+                        things someone who has decided wants next to each
+                        other. The page already had a credit zone down here,
+                        and it was inverted: `Run by`, the operator and the
+                        more useful of the two, sat below the button while the
+                        sponsor sat above it. Nothing is lost by the move —
+                        measured, this whole hero clears the fold on a
+                        MacBook Air and a 13-inch, so the credit is still on
+                        screen.
+
+                        Above `Run by` rather than merged into it: that row is
+                        11px mono, and folding a paying partner into it would
+                        shrink the one line they are named on. */}
+                    {session.poweredBy && (
+                      <PoweredByLine
+                        orgs={session.poweredBy}
+                        className={isHeroOnly ? "mt-6" : "mt-8"}
+                      />
+                    )}
+                    {/* With the presenting partner, not above the buttons.
+                        The banded heroes already put this line below their
+                        actions (see the `mt-9` copy in the band's `actions`),
+                        so the same component was landing on opposite sides of
+                        the same button depending on which hero a reader
+                        happened to open. Below is the one that matches, and
+                        the one the argument favours: a circuit's sponsor is a
+                        credit, not something the reader is deciding on. */}
+                    {sponsor && (
+                      <CircuitSponsorLine
+                        sponsor={sponsor}
+                        className={
+                          session.poweredBy
+                            ? "mt-4"
+                            : isHeroOnly
+                              ? "mt-6"
+                              : "mt-8"
+                        }
+                      />
+                    )}
                     {/* The organiser and the room, kept in the hero rather than
                       given a section of their own — with the slot locked
                       there's nothing else to say, and a whole band under this
@@ -769,7 +811,11 @@ function ActivationPage({
                     <p
                       className={cn(
                         "flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-white/55",
-                        isHeroOnly ? "mt-6" : "mt-8",
+                        session.poweredBy || sponsor
+                          ? "mt-4"
+                          : isHeroOnly
+                            ? "mt-6"
+                            : "mt-8",
                       )}
                     >
                       {session.site &&

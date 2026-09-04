@@ -42,7 +42,19 @@ export interface HeroShellProps {
    * words are wrapped in `whitespace-nowrap` so the accent never orphans.
    */
   headline: React.ReactNode;
-  blurb: string;
+  /**
+   * Optional — it became so when /schedule's second column turned into a list
+   * of four named events and a sentence describing the week was saying what
+   * the list said with specifics. That hero carries a blurb again, but a
+   * different kind: a claim the bill can't make rather than a summary of it.
+   *
+   * A node rather than a string, for the same reason `cta.note` is one: that
+   * blurb names PySanAntonio, and PySA is the one activation in the week with
+   * its own wordmark, so the name is set in its own mark rather than in the
+   * paragraph's grey. Plain strings still pass — home and /speakers are
+   * unchanged.
+   */
+  blurb?: React.ReactNode;
   cta: {
     href: string;
     label: string;
@@ -64,6 +76,37 @@ export interface HeroShellProps {
    * interactive circuits here; the other two heroes have no equivalent.
    */
   children?: React.ReactNode;
+  /**
+   * Takes the bolt's column.
+   *
+   * The schedule hero is the featured lineup now, and the lineup has to sit
+   * beside the headline rather than under it — a hero whose second column is
+   * a graphic has room for four events in that column, and no room for them
+   * anywhere else without pushing the CTA past the fold. The section is
+   * already floored at the viewport, so anything that fits this column fits
+   * the screen.
+   *
+   * `bolt` is still required and still drives the shader's colour on the
+   * pages that draw it; passing an aside simply means this page does not.
+   */
+  aside?: React.ReactNode;
+  /**
+   * A layer behind both columns, bled to the section's edges.
+   *
+   * The bolt is the right column on the two heroes that still have it, so
+   * "no bolt" and "a bill instead" were the same decision — and that is what
+   * made /schedule the one hero on the site with no graphic in it at all.
+   * This is where it comes back: not as a column but as ground the two
+   * columns sit on, which is the only place left once the column is spent.
+   *
+   * The section is `isolate`, so a backdrop can use negative z without
+   * escaping behind the page, and `overflow-hidden`, so it can be sized past
+   * the edges the way the social cards bleed their bolt off two sides.
+   * Anything passed here is decoration: it is `aria-hidden` and takes no
+   * pointer events, because a hero's ground must never eat a click meant for
+   * the CTA behind it.
+   */
+  backdrop?: React.ReactNode;
 }
 
 export function HeroShell({
@@ -73,6 +116,8 @@ export function HeroShell({
   cta,
   bolt,
   children,
+  aside,
+  backdrop,
 }: HeroShellProps) {
   const canvas = (
     <ShaderCanvas
@@ -93,7 +138,15 @@ export function HeroShell({
     "group mx-auto block w-64 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:w-96 lg:w-full";
 
   return (
-    <section className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl grid-cols-1 items-center gap-6 px-6 py-8 lg:grid-cols-2 lg:gap-12 lg:py-0">
+    <section className="relative isolate mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl grid-cols-1 items-center gap-6 overflow-hidden px-6 py-8 lg:grid-cols-2 lg:gap-12 lg:py-0">
+      {backdrop && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10"
+        >
+          {backdrop}
+        </div>
+      )}
       {/*
         `contents` on phones, a real block from lg up. That one switch is what
         lets the bolt sit between the headline and the rest on a phone while
@@ -124,9 +177,11 @@ export function HeroShell({
             provide, which had to move here so the phone's grid gap isn't
             doubled up. */}
         <div className="order-3 text-center lg:mt-5 lg:text-left">
-          <p className="mx-auto max-w-lg text-pretty text-lg text-muted-foreground lg:mx-0">
-            {blurb}
-          </p>
+          {blurb && (
+            <p className="mx-auto max-w-lg text-pretty text-lg text-muted-foreground lg:mx-0">
+              {blurb}
+            </p>
+          )}
 
           {children}
 
@@ -146,17 +201,18 @@ export function HeroShell({
           sibling of the wrapper, not a child, because from lg it has to be
           the second column. */}
       <div className="order-2">
-        {bolt.href ? (
-          <Link
-            href={bolt.href}
-            aria-label={bolt.label}
-            className={`${boltBox} cursor-pointer`}
-          >
-            {canvas}
-          </Link>
-        ) : (
-          <div className={boltBox}>{canvas}</div>
-        )}
+        {aside ??
+          (bolt.href ? (
+            <Link
+              href={bolt.href}
+              aria-label={bolt.label}
+              className={`${boltBox} cursor-pointer`}
+            >
+              {canvas}
+            </Link>
+          ) : (
+            <div className={boltBox}>{canvas}</div>
+          ))}
       </div>
     </section>
   );
