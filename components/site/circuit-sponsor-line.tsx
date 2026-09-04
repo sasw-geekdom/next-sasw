@@ -3,15 +3,14 @@ import type { CircuitSponsor } from "@/lib/circuit-sponsors";
 import { cn } from "@/lib/utils";
 
 /**
- * "Founder circuit, powered by —" and the mark.
+ * "Founder circuit, sponsored by —" and the mark.
  *
- * "Powered by", not "sponsored by", at the week team's request. The code
- * keeps saying sponsor — the rows come from the `sponsors` collection and a
- * circuit sponsor is what this is — so only the words on the page changed.
- * It also means this line and `PoweredByLine` now share a verb: on a page
- * carrying both, the scopes are what separate them ("Powered by Active
- * Capital" is the activation's, "Founder circuit, powered by Nopalera" is the
- * circuit's).
+ * The wording went to "powered by" at the week team's request and back again;
+ * "sponsored by" is what it says. Which is also the more useful of the two
+ * now that `PoweredByLine` exists a few lines below it on the same pages: two
+ * credits sharing one verb left only their scopes to tell them apart, where
+ * "powered by" for an activation's presenting partner and "sponsored by" for
+ * a circuit's names the difference outright.
  *
  * One line, in the mono register the rest of the page's credits use, so it
  * reads as a footnote to the circuit rather than as an ad placed on the
@@ -56,7 +55,7 @@ export function CircuitSponsorLine({
       className={cn("flex flex-wrap items-center gap-x-2.5 gap-y-2", className)}
     >
       <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
-        {sponsor.circuit} circuit, powered by
+        {sponsor.circuit} circuit, sponsored by
       </p>
       {sponsor.link ? (
         <a

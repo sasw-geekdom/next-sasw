@@ -20,23 +20,31 @@ import { MODEL_INK, MODEL_LAVENDER, MODEL_LAVENDER_LIT } from "@/lib/the-model";
 // a second brand rather than as the same current behind the type.
 const SESSIONS_CURRENT = "#ff32a0";
 
-// The floor the flow mixes up from, and the only control over how much of the
-// current you can see.
+// The homepage's floor, so this bolt is the homepage's bolt.
 //
-// This value was written once before and never rendered: the backdrop below
-// carried its own hardcoded `base={[0.9, 0.96, 1]}` — a near-white *blue* —
-// so `BASE` fed only the unused `bolt` prop, and the smoke everyone was
-// looking at was that blue showing wherever the flow ran thin. Which is also
-// why deepening this constant appeared to do nothing.
+// `[0.08, 0, 0.05]` is ShaderCanvas's own default — the near-black plum
+// components/site/hero.tsx gets by passing no `base` at all — and with the
+// opacity below at 100 the two heroes now draw the same magenta at the same
+// depth, rather than one rich mark and one pink wash.
 //
-// Wired up, the trade it controls is real but narrower than it looks. A flow
-// laid over white at 0.72 is compressed on its dark side and stretched on its
-// light side, so range below the colour barely shows: measured away from the
-// cursor glow, a deep-magenta floor at 0.92 opacity moves the green channel
-// 10 points across the bolt and this one moves it 24. Darkening the floor
-// kills the current; the visible half of the range is the light half. The
-// blue is what made that half read as fog rather than as pink.
-const BASE: [number, number, number] = [1, 0.66, 0.84];
+// The versions before it are worth keeping straight, because two of them
+// failed for reasons that were not the value. A near-black floor at *low*
+// opacity greys out, which is what made the first attempt a smudge and sent
+// this constant chasing lighter and lighter floors. And every light floor was
+// judged against a bolt that was not using this constant at all: the backdrop
+// below carried a hardcoded `base={[0.9, 0.96, 1]}`, a near-white *blue*, so
+// the "smoke" was that blue showing wherever the flow ran thin, and deepening
+// this appeared to do nothing.
+//
+// The cost is contrast, and it is a real one. Measured away from the cursor
+// glow — the shader's default `u_mouse` is the canvas centre, so anything
+// sampled near the middle sits in the glow and tells you nothing about the
+// floor — black type over the bolt runs 3.09:1 at its darkest against 8.95:1
+// on the light floor. That clears WCAG's 3:1 for large text, which is all
+// that crosses it: the two display titles, the arrows and the row rules. No
+// body copy sits on the bolt, and none should be allowed to — a row whose
+// small print reached the ink would need 4.5:1 and would not have it.
+const BASE: [number, number, number] = [0.08, 0.0, 0.05];
 
 export async function SessionsHero() {
   const featured = await featuredLineup();
@@ -79,9 +87,18 @@ export async function SessionsHero() {
       // sentence moves with it.
       blurb={
         <>
-          Every session is free. Five circuits, six rooms, five days — the hard
-          part is deciding where to be. Pitch nights, keynotes and community
-          activations across downtown all week,{" "}
+          {/* The scale sentence, phones excepted.
+              
+              `display: none`, so it is out of the accessibility tree on a
+              phone too — this is genuinely dropped there, not visually hidden.
+              What goes with it is the "free" claim, which is the strongest
+              thing this hero says to a stranger; it survives on mobile only in
+              the note under the button. Worth revisiting if the phone hero
+              ever has room again. */}
+          <span className="hidden sm:inline">
+            Every session is free. Five circuits, six rooms, five days across
+            downtown — the hard part is deciding where to be.{" "}
+          </span>
           {/* The Model has no wordmark file to reach for — its mark is
               typeset. See the `the-model` branch in calendar/blocks.tsx: mono,
               uppercase, and the second word caught in a selection block, which
@@ -129,7 +146,7 @@ export async function SessionsHero() {
           >
             <Link
               href="/schedule/the-model"
-              className="group whitespace-nowrap rounded-sm font-mono text-[0.8em] font-medium uppercase tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2"
+              className="group whitespace-nowrap rounded-sm font-mono text-[0.92em] font-bold uppercase sm:text-[0.82em] tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2"
               style={
                 {
                   "--model-mark": MODEL_LAVENDER,
@@ -139,14 +156,14 @@ export async function SessionsHero() {
             >
               The{" "}
               <span
-                className="box-decoration-clone -ml-[0.34em] bg-[var(--model-mark)] px-[0.13em] transition-colors duration-200 group-hover:bg-[var(--model-mark-lit)]"
+                className="box-decoration-clone ml-[-0.34em] bg-(--model-mark) px-[0.13em] transition-colors duration-200 group-hover:bg-(--model-mark-lit)"
                 style={{ color: MODEL_INK }}
               >
                 Model
               </span>
             </Link>
           </HoverPeek>{" "}
-          kicks things off on Monday, and{" "}
+          opens the week on Monday and{" "}
           {/* PySA is the one activation in the week with its own brand, so its
               name is set in its own mark. `wordmarkOnLight` is the cut this
               ground needs — the deep #0059b7, not the lighter blue PySA's own
@@ -175,7 +192,7 @@ export async function SessionsHero() {
                 className="h-full w-full rounded-lg object-cover"
               />
             }
-            className="inline-block align-[-0.29em]"
+            className="inline-block align-[-0.34em]"
             panelClassName="h-[8.5rem] w-[13rem]"
           >
             <Link
@@ -187,11 +204,12 @@ export async function SessionsHero() {
                 alt="PySanAntonio"
                 width={PYSA.wordmarkWidth}
                 height={PYSA.wordmarkHeight}
-                className="block h-[1.25em] w-auto"
+                className="block h-[1.45em] w-auto"
               />
             </Link>
           </HoverPeek>{" "}
-          closes out the week on Friday.
+          closes it on Friday, with pitch nights, keynotes and community
+          activations in between.
         </>
       }
       // Points at the calendar, not away from it. "Get on the list." sent the
@@ -232,17 +250,26 @@ export async function SessionsHero() {
       // a near-white floor the same flow reads as tinted light on paper —
       // still the bolt, still moving, and legible under the type it crosses.
       //
-      // Placed low and right, where the two short titles leave the column
-      // open. Sized off the section's *height*, not its width, which is what
-      // keeps it whole: `overflow-hidden` on the shell cuts anything past the
-      // section, and a width-sized square on a 13-inch screen ran ~50px below
-      // that edge and got a flat horizontal slice taken off the bolt's lower
-      // arm. Height-sized, the silhouette is 0.86 of a box that is itself 72%
-      // of the section, so it clears the edge at every viewport the hero has
-      // to hold. `lg` only: below that the columns stack and there is no dead
-      // corner for it to fill.
+      // Placed low and right, and sized so it stays there.
+      //
+      // Two things fix its position, and both come off the same measurement.
+      // Vertically it has to start below the first row's title: at the old
+      // `h-[72%] bottom-[3%]` the ink ran y283–731 against a title sitting at
+      // y273–299, so the bolt's top tip landed *in* the row that carries the
+      // Nopalera mark, while 80px of its bottom hung below the whole bill in
+      // empty space. It was simply too high. Horizontally it sits in the room
+      // the three short titles leave on the right, which is why the box is
+      // pushed past the section's right edge — `overflow-hidden` clips the
+      // box, but the silhouette is only 70% of it, so what gets cut is
+      // transparent padding and the ink stops 16–23px inside.
+      //
+      // `max-h` because the box is a percentage of the *section*, which grows
+      // with the viewport, while the bill is a fixed height centred in it. On
+      // a 27-inch without the cap the bolt grew until its top rose back into
+      // the first title — 16px above it, where every smaller screen cleared by
+      // 11–22px. Capped, that screen clears by 86px.
       backdrop={
-        <div className="absolute bottom-[3%] right-[2%] hidden aspect-square h-[72%] opacity-[0.72] lg:block">
+        <div className="absolute bottom-[3%] right-[-4%] hidden aspect-square h-[68%] max-h-124 opacity-100 lg:block">
           <ShaderCanvas
             color={SESSIONS_CURRENT}
             base={BASE}

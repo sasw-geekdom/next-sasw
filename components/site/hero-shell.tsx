@@ -166,26 +166,61 @@ export function HeroShell({
           <p className="font-mono text-sm uppercase tracking-widest text-magenta-ink">
             {eyebrow}
           </p>
-          <h1 className="mt-4 font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-foreground sm:text-6xl xl:text-7xl">
+          {/* `text-5xl` on phones, not `text-4xl`.
+
+              The jump from 36px to the 60px it takes at `sm` was the largest
+              step in the scale and it landed at the wrong end: a hero
+              headline in a 342px column was the one place the type was
+              smallest. Oswald is condensed enough to absorb it — the longest
+              of the three, the homepage's, still sets in two lines. */}
+          <h1 className="mt-4 font-display text-5xl font-bold uppercase leading-[0.9] tracking-tight text-foreground sm:text-6xl xl:text-7xl">
             {headline}
           </h1>
         </div>
 
-        {/* The detail. `order-3` puts it after the bolt on a phone; from lg
-            the wrapper is a block again and this simply follows the masthead.
-            `lg:mt-5` carries the spacing the blurb's own top margin used to
-            provide, which had to move here so the phone's grid gap isn't
-            doubled up. */}
-        <div className="order-3 text-center lg:mt-5 lg:text-left">
-          {blurb && (
-            <p className="mx-auto max-w-lg text-pretty text-lg text-muted-foreground lg:mx-0">
+        {/* The blurb, above the aside on a phone.
+            
+            It used to sit below it, with the whole detail block as one
+            `order-3` item — right when the aside was the bolt, since a
+            sentence has no business coming before the graphic it introduces.
+            On /schedule the aside is four named events, and orientation copy
+            landing *after* the list it orients reads as a footnote. So the
+            block splits: the sentence goes up with the masthead, the action
+            stays at the bottom, and the content sits between them.
+
+            `lg:mt-5` moves here with it — it carries the spacing the blurb's
+            own top margin used to provide, kept off the paragraph so the
+            phone's grid gap isn't doubled up. Rendered only when there is a
+            blurb, or an empty div would spend a grid gap on nothing. */}
+        {blurb && (
+          <div className="order-2 text-center lg:mt-5 lg:text-left">
+            {/* `text-base` on phones, `text-lg` from sm.
+
+                Not a space grab — a measure fix. At 18px in the 342px column a
+                390px phone leaves, /schedule's blurb sets 8 lines at 31
+                characters, and comfortable running text wants 45–75. The type
+                was too big for the column, which is what produced both the
+                ragged block and its height. 16px buys back four characters a
+                line and 40px of height, and the two shorter blurbs on / and
+                /speakers get the same better measure at their own lengths. */}
+            <p className="mx-auto max-w-lg text-pretty text-base text-muted-foreground sm:text-lg lg:mx-0">
               {blurb}
             </p>
-          )}
+          </div>
+        )}
 
+        {/* Whatever the page puts between the copy and its action, and the
+            action itself. `order-4` keeps it last on a phone, so the button
+            follows the content rather than the sentence. */}
+        <div className="order-4 text-center lg:text-left">
           {children}
 
-          <div className="mt-6 flex flex-col items-center gap-2.5 sm:mt-8 sm:gap-3 lg:items-start">
+          {/* `lg:mt-8` only. Below lg this is its own grid item and the
+              grid's own `gap-6` already separates it — a margin as well
+              stacked on that gap and made the split layout 24px taller than
+              the block it replaced. From lg the wrapper is a block again and
+              the margin is the only thing holding the button off the copy. */}
+          <div className="flex flex-col items-center gap-2.5 sm:gap-3 lg:mt-8 lg:items-start">
             <ButtonLink href={cta.href} size="lg">
               {cta.label}
             </ButtonLink>
@@ -196,11 +231,11 @@ export function HeroShell({
         </div>
       </div>
 
-      {/* The current. `order-2` drops it between the masthead and the detail
-          on a phone, so it's the thing you scroll into rather than past. A
-          sibling of the wrapper, not a child, because from lg it has to be
-          the second column. */}
-      <div className="order-2">
+      {/* The current. `order-3` on a phone: after the headline and the
+          sentence that frames it, before the button. A sibling of the
+          wrapper, not a child, because from lg it has to be the second
+          column. */}
+      <div className="order-3">
         {aside ??
           (bolt.href ? (
             <Link

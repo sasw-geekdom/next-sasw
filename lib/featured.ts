@@ -105,7 +105,7 @@ export interface FeaturedEntry {
  */
 const BASH_LOGO_H = "h-[2.21em]";
 const BASH_WORD = "font-normal tracking-normal text-[0.79em]";
-const BASH_TRIM = "-mr-[0.43em]";
+const BASH_TRIM = "mr-[-0.43em]";
 
 // Now that the box is the ink, these are the drawn sizes.
 const NOPALERA_H = "h-[0.86em]";

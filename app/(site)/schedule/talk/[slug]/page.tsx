@@ -293,7 +293,7 @@ export default async function TalkPage({
 
                 And the collision. The one standalone talk on a sponsored
                 circuit is "Building Nopalera on Her Own Terms" — Founder
-                circuit, powered by Nopalera — so under the title the word
+                circuit, sponsored by Nopalera — so under the title the word
                 appeared twice, three lines apart, once as the subject and
                 once as the sponsor. That scans as a duplication bug rather
                 than as two facts, which is the same trap `.tag` on the TPR
