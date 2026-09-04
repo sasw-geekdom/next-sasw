@@ -10,6 +10,9 @@ import { ASSUMED_MINUTES, dayKey, eventIso } from "@/lib/schedule";
 import { jsonLd, talkEvent } from "@/lib/structured-data";
 import type { ResolvedParticipant } from "@/lib/admin/cms-types";
 import { listTalks, resolveTalk, type Talk } from "@/lib/talks";
+import { listSponsors } from "@/lib/admin/cms-queries";
+import { circuitSponsor } from "@/lib/circuit-sponsors";
+import { CircuitSponsorLine } from "@/components/site/circuit-sponsor-line";
 import { cn } from "@/lib/utils";
 
 export const revalidate = 300;
@@ -108,6 +111,13 @@ export default async function TalkPage({
 
   const { row, room } = talk;
   const speakers = row.participants.filter((p) => p.name);
+  // A talk carries a track where an activation carries a circuit; they are the
+  // same five names, so the same sponsor answers for both. This is the only
+  // surface the Founder circuit appears on — no activation carries it.
+  const sponsor = circuitSponsor(
+    row.track,
+    await listSponsors().catch(() => []),
+  );
   const day = dayKey(new Date(row.startsAt).toISOString());
 
   // The same markup an activation page carries, which this had no equivalent
@@ -225,6 +235,10 @@ export default async function TalkPage({
             <h1 className="mt-3 text-pretty font-display text-3xl font-bold uppercase leading-[1] tracking-tight text-white sm:text-4xl lg:text-5xl">
               {row.title}
             </h1>
+
+            {sponsor && (
+              <CircuitSponsorLine sponsor={sponsor} className="mt-5" />
+            )}
 
             <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-widest text-white/50">
               <div className="flex items-center gap-2">

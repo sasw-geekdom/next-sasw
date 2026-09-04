@@ -24,6 +24,7 @@ import {
 import type { CardSpeaker } from "@/components/site/speaker-card";
 import {
   listPartners,
+  listSponsors,
   listSessions,
   listSpeakers,
 } from "@/lib/admin/cms-queries";
@@ -47,6 +48,8 @@ import { BackLink } from "@/components/site/back-link";
 import { activationEvent, jsonLd } from "@/lib/structured-data";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
 import { PoweredBy } from "@/components/site/powered-by";
+import { CircuitSponsorLine } from "@/components/site/circuit-sponsor-line";
+import { circuitSponsor, type CircuitSponsor } from "@/lib/circuit-sponsors";
 import { GiveALotBand } from "@/components/site/give-a-lot-band";
 import { ModelBand } from "@/components/site/model-band";
 import { PysaBand } from "@/components/site/pysa-band";
@@ -225,12 +228,15 @@ function ActivationPage({
   session,
   sessions,
   speakers,
+  sponsor,
 }: {
   session: ResolvedSession;
   /** CMS sessions linked to this activation, in start order. */
   sessions: SessionRow[];
   /** Everyone in the CMS, so a session can show who is giving it. */
   speakers: CardSpeaker[];
+  /** The sponsor behind this activation's circuit, where one exists. */
+  sponsor: CircuitSponsor | null;
 }) {
   const isPysa = session.page === "pysanantonio";
   const isAccessGranted = session.page === "access-granted";
@@ -385,6 +391,9 @@ function ActivationPage({
                   />
                 )}
               </div>
+              {sponsor && (
+                <CircuitSponsorLine sponsor={sponsor} className="mt-9" />
+              )}
               {hasMoreAtVenue && (
                 <p className="mt-8">
                   <Link
@@ -718,6 +727,9 @@ function ActivationPage({
                         className="mt-7"
                       />
                     )}
+                    {sponsor && (
+                      <CircuitSponsorLine sponsor={sponsor} className="mt-7" />
+                    )}
 
                     {/* Full width below sm — see the note on the banded row. */}
                     <div
@@ -1014,6 +1026,10 @@ export default async function VenueSchedulePage({
         session={schedule.session}
         sessions={mine}
         speakers={speakers}
+        sponsor={circuitSponsor(
+          schedule.session.circuit,
+          await safeList(listSponsors()),
+        )}
       />
     );
   }
