@@ -568,6 +568,8 @@ export function WeekCalendarGrid({
           }))}
           groupBy={(i) => i.dayIso}
           items={shownItems}
+          // The day heads say the date and stop — see `showCount`.
+          showCount={false}
           spans={
             shownSpans.length > 0 ? (
               <div className="flex flex-col gap-1.5">

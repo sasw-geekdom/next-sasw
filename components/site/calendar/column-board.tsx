@@ -78,17 +78,19 @@ const TYPESET = new Set(["1-million-cups"]);
 function Head({
   col,
   count,
+  showCount,
 }: {
   col: { key: string; label: string; sublabel?: string; href?: string };
   /**
    * How many the column holds — including what is scrolled out of sight.
    *
    * The column bounds itself to the viewport and scrolls, so five of fifteen
-   * cards are visible and the other ten leave no trace. A count is the only
-   * thing on the card stack that says they exist, and it is what tells a
-   * reader whether to scroll this column or move on.
+   * cards are visible and the other ten leave no trace. Where it is drawn, a
+   * count is the only thing on the card stack that says they exist.
    */
   count: number;
+  /** See `showCount` on ColumnBoard. Always in the section's label either way. */
+  showCount: boolean;
 }) {
   const inner = (
     <>
@@ -107,7 +109,9 @@ function Head({
             a date takes the number bare after it ("Sep 15 · 12"); one that
             does not spells the noun out ("12 sessions"), because a lone
             numeral under a room name says nothing. */}
-        {col.sublabel ? (
+        {!showCount ? (
+          col.sublabel
+        ) : col.sublabel ? (
           <>
             {col.sublabel} · <span className="text-white/70">{count}</span>
           </>
@@ -140,6 +144,7 @@ export function ColumnBoard({
   picked,
   onToggle,
   emptyLabel,
+  showCount = true,
   className,
 }: {
   /**
@@ -165,6 +170,22 @@ export function ColumnBoard({
   picked: string[];
   onToggle: (slug: string) => void;
   emptyLabel: string;
+  /**
+   * Whether the head prints how many the column holds.
+   *
+   * On by default, and the day views keep it: their columns are rooms, and
+   * "4 sessions" over a room is the only thing saying how much of a day that
+   * room runs.
+   *
+   * The week view turns it off. Its columns are days, and a day's head
+   * already carries a date — so the count landed as a second number in the
+   * same breath ("Sep 29 · 6"), on the row that has the least width for it
+   * and next to the one thing there a reader is actually scanning for. The
+   * fact is not lost: it stays in the section's accessible name, the agenda
+   * prints it on every pinned day heading, and the column scrolls, which is
+   * itself the sign that there is more below.
+   */
+  showCount?: boolean;
   className?: string;
 }) {
   return (
@@ -241,7 +262,7 @@ export function ColumnBoard({
               {/* Sticky inside its own column, so the day you are reading is
                   still named when you are eight sessions into it. */}
               <header className="sticky top-0 z-10 shrink-0 border-b border-white/15 bg-black pb-2">
-                <Head col={col} count={shown.length} />
+                <Head col={col} count={shown.length} showCount={showCount} />
               </header>
 
               {/* The day, scrolled.
