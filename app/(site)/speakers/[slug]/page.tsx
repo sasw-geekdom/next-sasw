@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { ProfileMark, profileWord } from "@/components/site/profile-mark";
 import { SpeakerCard } from "@/components/site/speaker-card";
 import { ButtonLink } from "@/components/ui/button";
-import { formatDateTime } from "@/lib/format";
+import { sessionWhen } from "@/lib/schedule";
 import { ARROW_MOTION } from "@/lib/motion";
 import { loadLineup, resolveSlug } from "@/lib/speakers";
 import { cn } from "@/lib/utils";
@@ -278,7 +278,9 @@ export default async function SpeakerPage({
                           </p>
                         )}
                         <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-white/55">
-                          {formatDateTime(s.startsAt)}
+                          {/* Same fix as the talk page: the event's zone,
+                              and both ends of the slot. See `sessionWhen`. */}
+                          {sessionWhen(s.startsAt, s.endsAt)}
                           {venueLabel(s.location)
                             ? ` \u00b7 ${venueLabel(s.location)}`
                             : ""}

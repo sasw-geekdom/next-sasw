@@ -102,6 +102,14 @@ export interface LineupSession {
   slug: string;
   title: string;
   startsAt: number;
+  /**
+   * Null where the organiser entered no finish.
+   *
+   * Carried so a speaker's page can print the same slot the schedule does —
+   * without it the page had only an instant to format, so it said "3:30 PM"
+   * for a session the week called "3:30 – 5 PM".
+   */
+  endsAt: number | null;
   location: string;
   track: string | null;
   /** Activation slug this belongs to, so a speaker's page can link to it. */

@@ -82,6 +82,7 @@ export const loadLineup = cache(async (): Promise<LineupSpeaker[]> => {
         slug: session.slug,
         title: session.title,
         startsAt: session.startsAt,
+        endsAt: session.endsAt,
         location: session.location,
         track: session.track,
         activation: session.activation,

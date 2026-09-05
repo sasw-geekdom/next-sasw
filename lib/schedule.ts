@@ -2275,6 +2275,38 @@ export function clockLabel(min: number): string {
   return `${h}${m ? `:${String(m).padStart(2, "0")}` : ""} ${h24 < 12 ? "AM" : "PM"}`;
 }
 
+/**
+ * A CMS session's when, in the week's timezone: "Tue, Sep 29 · 3:30 – 5 PM".
+ *
+ * The slug pages formatted this with `formatDateTime`, which is
+ * `toLocaleString` with no `timeZone` — so it renders in whatever zone the
+ * process is in. Locally that is America/Chicago and the output looked right;
+ * on Vercel it is UTC, and every session on a talk page and a speaker page
+ * was five hours late in production while the grid beside it was correct. The
+ * grid was correct because it goes through `minutesInTz`, which names the
+ * zone. Nothing about a schedule should ever be formatted in the server's
+ * zone, and the way to make that impossible is to have one function.
+ *
+ * It also carries the end. `formatDateTime` takes a single instant, so the
+ * pages printed a start and stopped — "Sep 29, 3:30 PM" for a session the
+ * week view called "3:30 – 5 PM". Same rule as `standaloneItems`: a row with
+ * no `endsAt` states the fact it holds rather than inventing a finish.
+ */
+export function sessionWhen(startsAt: number, endsAt: number | null): string {
+  const startIso = new Date(startsAt).toISOString();
+  const startMin = minutesInTz(startIso);
+  const day = new Date(startsAt).toLocaleDateString("en-US", {
+    timeZone: TZ,
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+  const time = endsAt
+    ? compactRange(startMin, minutesInTz(new Date(endsAt).toISOString()))
+    : clockLabel(startMin);
+  return `${day} · ${time}`;
+}
+
 export function compactRange(startMin: number, endMin: number): string {
   const clock = (min: number, meridiem: boolean) => {
     const h24 = Math.floor(min / 60);

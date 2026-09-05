@@ -5,8 +5,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
 import { BackLink } from "@/components/site/back-link";
 import { ARROW_MOTION } from "@/lib/motion";
-import { formatDateTime } from "@/lib/format";
-import { ASSUMED_MINUTES, dayKey, eventIso } from "@/lib/schedule";
+import { ASSUMED_MINUTES, dayKey, eventIso, sessionWhen } from "@/lib/schedule";
 import { jsonLd, talkEvent } from "@/lib/structured-data";
 import type { ResolvedParticipant } from "@/lib/admin/cms-types";
 import { listTalks, resolveTalk, type Talk } from "@/lib/talks";
@@ -23,12 +22,6 @@ export const revalidate = 300;
 // organiser adding a talk on the Tuesday it happens would get a 404 on their
 // own page, which is the whole failure this route exists to fix. Prerendered
 // where they are known, rendered on demand and cached where they are not.
-
-// Roughly where a description stops fitting the capped column and starts
-// scrolling. Only past this does the cut get a fade — a shorter one never
-// overflows, so hinting at a scroll would be a lie and the padding the hint
-// needs would be dead space. The speakers' bio uses 800 against a taller cap.
-const LONG_DESCRIPTION = 520;
 
 const ARROW = cn(ARROW_MOTION, "h-3.5 w-3.5");
 const ARROW_OUT = cn(
@@ -155,18 +148,26 @@ export default async function TalkPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(event) }}
       />
-      {/* One screen, not a scroll. `100vh-4rem` is the site's own idiom for
-          this — `4rem` is the sticky navbar's `h-16` — and hero-shell,
-          form-page and the two bands all fill the viewport with exactly this
-          calc. `lg:` only: below it the page is one column and forcing a
-          screen-height box just pushes the copy around.
-
-          Flexed rather than sized, because the thing that varies is the one
-          thing this page cannot control. A description is whatever an
-          organiser typed; hand-tuning paddings and a max-height to fit the
-          longest one so far would have to be re-tuned by the next one. The
-          copy column takes the slack instead. */}
-      <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:flex lg:h-[calc(100vh-4rem)] lg:flex-col lg:py-12">
+      {/* It was one screen: `lg:h-[calc(100vh-4rem)]`, with the description
+          capped inside it, scrolling in its own box under a mask fade once it
+          passed ~520 characters.
+          
+          The reasoning was that a description is whatever an organiser typed,
+          so the copy column should absorb the slack rather than the page. But
+          absorbing it meant clipping it — the BDO Alliance launch runs to
+          ~580 characters and arrived with its last two sentences behind a
+          fade, in a box a reader has to notice is scrollable before they can
+          finish reading the one thing the page exists to show.
+          
+          The repo has already settled this argument elsewhere, in the
+          agenda's own note: "nested scroll areas trap the wheel, double the
+          scrollbars, and break the browser's own find-on-page." A page that
+          scrolls is not a design failure; a paragraph that cannot be read
+          without discovering a hidden scroller is. So the page scrolls, and
+          the links below the copy go under the fold on a long one — which is
+          the right thing to lose, since they are onward navigation and the
+          description is the content. */}
+      <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:py-12">
         <BackLink
           // Only the fallback — BackLink prefers router.back(). The anchor is
           // for someone arriving on a shared link with no week behind them:
@@ -191,7 +192,26 @@ export default async function TalkPage({
           Back
         </BackLink>
 
-        <article className="mt-8 grid gap-10 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-16">
+        {/* Two columns only when there is a portrait to put in one.
+            
+            The template was drawn for a talk with a speaker, and the grid
+            named its tracks unconditionally — so a session the admin entered
+            without participants had one child in a two-track grid, and CSS
+            put it in the first: the copy column became `minmax(0, 22rem)`,
+            352px wide, with the whole right half of the page empty beside it.
+            That is the "text is stuck" — a title, a description and a link
+            list all wrapping inside a third of the measure. The BDO Alliance
+            launch is the first session to arrive this way and it will not be
+            the last; a CMS row is not required to have a speaker.
+            
+            With no portrait the copy takes the width and caps at a reading
+            measure of its own, rather than running the full 1,280px. */}
+        <article
+          className={cn(
+            "mt-8 grid gap-10 lg:gap-16",
+            speakers.length > 0 && "lg:grid-cols-[minmax(0,22rem)_1fr]",
+          )}
+        >
           {/* Who is on, at the size the lineup draws them — grayscale for the
               same reason it is grayscale there: headshots shot under wildly
               different light stop announcing the difference.
@@ -219,7 +239,14 @@ export default async function TalkPage({
             </div>
           )}
 
-          <div className="min-w-0 lg:flex lg:min-h-0 lg:flex-col">
+          <div
+            className={cn(
+              "min-w-0",
+              // Alone in the row, the copy needs a measure of its own — see
+              // the note on the article.
+              speakers.length === 0 && "lg:max-w-4xl",
+            )}
+          >
             {/* Circuit and room, in the eyebrow slot. Circuits carry no colour
                 of their own, so this is the magenta the eyebrow already owns
                 rather than anything track-specific. */}
@@ -240,7 +267,12 @@ export default async function TalkPage({
               <div className="flex items-center gap-2">
                 <dt className="sr-only">When</dt>
                 <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
-                <dd>{formatDateTime(row.startsAt)}</dd>
+                {/* The whole slot, in the week's timezone — see
+                    `sessionWhen`. This printed a bare start formatted in the
+                    server's zone, so a session the grid called "3:30 – 5 PM"
+                    read "Sep 29, 3:30 PM" here and, in production, five hours
+                    later than that. */}
+                <dd>{sessionWhen(row.startsAt, row.endsAt)}</dd>
               </div>
               {room && (
                 <div className="flex items-center gap-2">
@@ -264,24 +296,13 @@ export default async function TalkPage({
                 below it off the screen. Below `lg` the page is one column
                 that scrolls as a whole, where a nested scroll box is
                 something to fight past rather than a convenience. */}
+            {/* No scroller, no mask, no focus stop to give a scroller a
+                keyboard route — all three existed to serve the viewport cap
+                that is gone. It is a paragraph. */}
             {row.description && (
-              <div
-                // A scrollable region needs a focus stop, or a keyboard user
-                // can tab past it to the links and never scroll it to read.
-                tabIndex={0}
-                role="region"
-                aria-label={`About ${row.title}`}
-                className={cn(
-                  "mt-7 max-w-2xl lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-4",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta",
-                  row.description.length > LONG_DESCRIPTION &&
-                    "lg:pb-10 lg:[mask-image:linear-gradient(to_bottom,black_calc(100%-2.5rem),transparent)]",
-                )}
-              >
-                <p className="whitespace-pre-line text-pretty text-lg leading-relaxed text-white/70">
-                  {row.description}
-                </p>
-              </div>
+              <p className="mt-7 max-w-2xl whitespace-pre-line text-pretty text-lg leading-relaxed text-white/70">
+                {row.description}
+              </p>
             )}
 
             {/* At the foot, with the other credits, rather than under the
@@ -303,7 +324,7 @@ export default async function TalkPage({
               <CircuitSponsorLine sponsor={sponsor} className="mt-10" />
             )}
 
-            <div className="mt-6 flex shrink-0 flex-wrap items-center gap-x-6 gap-y-3">
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
               <Link
                 href={`/schedule/day/${day}`}
                 className="group inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-white/70 transition-colors duration-300 hover:border-white/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
