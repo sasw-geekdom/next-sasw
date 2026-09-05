@@ -50,11 +50,17 @@ import type { CalendarBrand, CalendarItem } from "@/lib/schedule";
  */
 const SPOTLIT = new Set([
   "the-model",
-  // Tuesday leads on the talk rather than the evening. Both are spotlit, and
-  // a spotlit pair keeps the day's own order, so naming this one is what puts
-  // 1 PM ahead of 4 PM in the column.
+  // Tuesday: the talk at 1 PM, then the pitch competition at 5. Both are
+  // spotlit, and a spotlit pair keeps the day's own order, so naming them is
+  // what fixes which two of the day's six lead the column.
+  //
+  // Stumberg over College Night. The evening social is a good night and it is
+  // not the thing that gets a stranger to the week — five student ventures
+  // pitching for $50,000 is, and it is the only event on the board that puts
+  // Trinity on it. College Night keeps its place on the schedule and in the
+  // day's "+N more".
   "building-nopalera-on-her-own-terms",
-  "college-night",
+  "stumberg-venture-competition",
   // Latin Tech Pitch over 1 Million Cups on the Wednesday. Both run that day
   // and only two lead a column; the pitch competition is the one with $110k
   // on the table and its own lockup, where 1 Million Cups is the weekly format

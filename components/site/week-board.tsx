@@ -6,6 +6,7 @@ import {
   TitleText,
   markKind,
 } from "@/components/site/calendar/marks";
+import { CipherField } from "@/components/site/calendar/event-particles";
 import {
   weekBoard,
   type BoardDay,
@@ -128,6 +129,24 @@ function Entry({ item }: { item: BoardItem }) {
           className="pointer-events-none absolute inset-0 bg-current opacity-0 transition-opacity duration-200 group-hover:opacity-15"
         />
       )}
+      {/* Access Granted's ciphertext, decrypted under the cursor — the same
+          figure the schedule's own card draws.
+          
+          The board is otherwise a server component that ships no JavaScript,
+          and this is the one thing on it that cannot be: the beam is a mask
+          following a pointer. It costs little in practice — `motion/react` is
+          already in the homepage bundle for room-flow and the hero — and
+          `CipherField` is careful about the rest: nothing runs until a
+          pointer arrives, the characters are written to a ref rather than
+          through state, and a touch device is refused outright by a
+          `(hover: hover)` query rather than handed an effect it cannot
+          dismiss.
+          
+          First among the card's children on purpose. It positions itself
+          `absolute inset-0` and measures its own `parentElement`, which here
+          is the card — and later positioned siblings paint over it, so the
+          mark and the meta row stay above the field rather than under it. */}
+      {item.page === "access-granted" && <CipherField />}
       {/* The schedule's title type, verbatim — 13px medium, `text-pretty`,
           tight leading. A typeset brand overrides it from inside `BrandMark`;
           a plain title inherits it, which is how the two stay one design. */}
