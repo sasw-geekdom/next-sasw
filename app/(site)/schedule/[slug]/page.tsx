@@ -263,19 +263,29 @@ function ActivationPage({
   /**
    * The one talk that goes in the hero instead of a section below it.
    *
-   * Exactly one, and only where the hero has room: an activation with a
-   * `hero` photograph already fills its right half, and a band-led one
-   * (PySA, Access Granted, The Model, Give-a-LOT) does not use this hero at
-   * all. Two or more sessions stay a running order — that is a list, and a
-   * list does not belong in a masthead.
+   * One or two, and only where the hero has room: an activation with a `hero`
+   * photograph already fills its right half, and a band-led one (PySA, Access
+   * Granted, The Model, Give-a-LOT) does not use this hero at all.
+   *
+   * Two, not one, since Datanauts landed a pair. The old rule was that
+   * anything past one is a running order and a list does not belong in a
+   * masthead — true of a twelve-slot afternoon, and not of two half-hour
+   * talks that between them *are* the hour. What a reader came to a community
+   * page for is what is on, and with a pair the second one sat below the fold
+   * under a heading, which is the scroll `HeroTalk` exists to remove.
+   *
+   * Three would be a list. The card carries a time, a title and the people
+   * for each, so two is roughly 320px of panel and three would outgrow the
+   * hero it is meant to fit inside.
    */
-  const heroTalk =
+  const heroTalks =
     !banded &&
     !session.hero &&
     !session.detail?.ownProgramme &&
-    sessions.length === 1
-      ? sessions[0]
-      : null;
+    sessions.length > 0 &&
+    sessions.length <= 2
+      ? sessions
+      : [];
 
   /**
    * "Everything else at X" has to actually be true.
@@ -441,7 +451,14 @@ function ActivationPage({
             // Night has to fit the screen instead — everything on it, down to
             // the hosts, above the fold on a laptop — and the BACK row above
             // this section costs another ~60px the calc never knew about.
-            isHeroOnly
+            // The tighter calc is not College Night's alone any more. A page
+            // whose hero carries the talks is making the same promise —
+            // everything on it above the fold on a laptop — and the default
+            // 4rem reserve does not know about the BACK row above this
+            // section, which costs ~60px. Measured on a 1440x789 Air, GDG's
+            // hero ran to y855 against a 789 fold; on this calc it lands
+            // inside it.
+            isHeroOnly || heroTalks.length > 0
               ? "min-h-[calc(100vh-9.5rem)]"
               : "min-h-[calc(100vh-4rem)]",
           )}
@@ -536,7 +553,10 @@ function ActivationPage({
           <div
             className={cn(
               "relative z-10 mx-auto w-full max-w-7xl px-6",
-              isHeroOnly
+              // Same reserve as the calc above, and for the same reason: a
+              // hero carrying the talks has to fit the laptop, and 56px of
+              // top padding it does not need is 56px the panel does.
+              isHeroOnly || heroTalks.length > 0
                 ? "pb-10 pt-6 lg:pb-12 lg:pt-8"
                 : "pb-16 pt-10 lg:pb-16 lg:pt-14",
             )}
@@ -546,7 +566,7 @@ function ActivationPage({
                 unchanged for every other activation. */}
             <div
               className={cn(
-                heroTalk &&
+                heroTalks.length > 0 &&
                   "grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start lg:gap-14 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]",
               )}
             >
@@ -865,16 +885,19 @@ function ActivationPage({
                   </p>
                 )}
               </div>
-              {heroTalk && (
+              {heroTalks.length > 0 && (
                 <HeroTalk
-                  session={heroTalk}
+                  sessions={heroTalks}
                   speakers={speakers}
                   // Only where the talk does not simply fill the activation.
+                  // Moot for a pair — that card always prints its own times,
+                  // because the hour on the left cannot say when either of
+                  // two talks inside it starts.
                   showTime={
                     !session.when ||
                     new Date(session.when.start).getTime() !==
-                      heroTalk.startsAt ||
-                    new Date(session.when.end).getTime() !== heroTalk.endsAt
+                      heroTalks[0].startsAt ||
+                    new Date(session.when.end).getTime() !== heroTalks[0].endsAt
                   }
                 />
               )}
@@ -894,10 +917,11 @@ function ActivationPage({
           The row still exists and still feeds the speaker pages; it just does
           not get to speak for the morning here. */}
       {sessions.length > 0 && !session.detail?.ownProgramme ? (
-        // Suppressed when the hero already carries it — see `heroTalk`. The
-        // same talk in a masthead and again under a rule is the collision this
-        // page has avoided everywhere else.
-        heroTalk ? null : (
+        // Suppressed when the hero has already said everything this would —
+        // which is the single-talk case, where the card carries the abstract
+        // whole. A pair rides in the hero as a bill with no abstracts, so the
+        // order below still runs and is where they live. See `HeroTalk`.
+        heroTalks.length === 1 ? null : (
           <ActivationSessions sessions={sessions} speakers={speakers} />
         )
       ) : isHeroOnly ? null : (

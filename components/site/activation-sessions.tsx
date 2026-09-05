@@ -73,9 +73,7 @@ export function ActivationSessions({
             <p className="mt-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
               <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               {TIME.format(new Date(solo.startsAt))}
-              {solo.endsAt
-                ? ` \u2013 ${TIME.format(new Date(solo.endsAt))}`
-                : ""}
+              {solo.endsAt ? ` – ${TIME.format(new Date(solo.endsAt))}` : ""}
             </p>
             {/* The talk's own title carries the section. In the list it is an
                 h3 under "What's on, in order"; alone, that heading would be
@@ -167,11 +165,19 @@ export function ActivationSessions({
  * right half is empty: they carry no `hero` photograph, so a third of the frame
  * is black. Putting the talk there costs nothing and removes the scroll.
  *
- * Only ever one. Two talks side by side with the activation's mark is three
- * subjects competing in one frame, and five is a running order, which is what
- * the section below is for. `ActivationPage` renders this *instead of* that
- * section, never as well — the same "one programme or the other" rule the CMS
- * and `detail` already follow.
+ * One or two, never more. Five is a running order, which is what the section
+ * below is for — but two half-hour talks inside a single community hour are
+ * not a running order, they are the hour, and sending a reader past the fold
+ * to find the second one is the scroll this component exists to remove.
+ *
+ * What changes at two is what the card can carry. One talk gets its abstract
+ * whole, and the section below is suppressed because the hero has said
+ * everything it would. Two get a bill — time, title, who — and the section
+ * below still renders, because the abstracts have to live somewhere and a
+ * hero is not where anyone finishes reading two of them. That is not the
+ * collision the "one programme or the other" rule guards against: a bill and
+ * a detailed order are different statements, the way the week board and this
+ * page are.
  *
  * Below `lg` the hero is a single column and this simply stacks under the
  * copy, which is where the section put it anyway — minus the rule and the
@@ -179,11 +185,12 @@ export function ActivationSessions({
  * section boundary.
  */
 export function HeroTalk({
-  session,
+  sessions,
   speakers = [],
   showTime = true,
 }: {
-  session: SessionRow;
+  /** One or two. See the note above for what changes between them. */
+  sessions: SessionRow[];
   speakers?: CardSpeaker[];
   /**
    * Whether the talk's own hours are worth printing.
@@ -197,6 +204,51 @@ export function HeroTalk({
   showTime?: boolean;
 }) {
   const byId = new Map(speakers.map((s) => [s.id, s]));
+  const [session] = sessions;
+
+  if (sessions.length > 1) {
+    return (
+      // The same surface, carrying a bill. Times always, unlike the solo
+      // card: two talks inside one activation hour is exactly the case where
+      // the hour on the left does not tell you when either of them starts.
+      <div className="flex flex-col bg-white/5 p-6 lg:max-w-md lg:p-7">
+        <p className="font-mono text-xs uppercase tracking-widest text-magenta">
+          The talks
+        </p>
+        <ol className="mt-1 flex flex-col">
+          {sessions.map((s) => (
+            <li
+              key={s.id}
+              className="border-t border-white/10 pb-5 pt-5 last:pb-0"
+            >
+              <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
+                <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                {TIME.format(new Date(s.startsAt))}
+                {s.endsAt ? ` – ${TIME.format(new Date(s.endsAt))}` : ""}
+              </p>
+              {/* No abstract. Two of them is the whole card and then some,
+                  and this is the one case where the section below still
+                  runs — so the ellipsis has somewhere to lead. */}
+              <h2 className="mt-2 text-pretty text-lg font-medium leading-snug text-white">
+                {s.title}
+              </h2>
+              {/* Names, not faces. The solo card gives a speaker a portrait,
+                  a role and a link, because it has one talk's worth of room
+                  and that is the payoff for a speaker CMS. Two portraits cost
+                  ~120px here, which is the difference between this hero
+                  fitting a laptop and not — and the faces are on the running
+                  order directly below, where the abstracts are. */}
+              {s.participants.length > 0 && (
+                <p className="mt-2 font-mono text-[11px] uppercase tracking-widest text-magenta">
+                  {s.participants.map((who) => who.name).join(", ")}
+                </p>
+              )}
+            </li>
+          ))}
+        </ol>
+      </div>
+    );
+  }
 
   return (
     // A card, not a second masthead.
