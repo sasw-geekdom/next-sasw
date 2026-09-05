@@ -15,6 +15,7 @@ under the table:
 | `community-group.html` | **all six community groups** | none of them has a palette, a wordmark treatment or a coalition — just a logo |
 | `tpr.html` | Texas Public Radio | *not* a brand — see below |
 | `community-group-wide.html` | the community groups, at 1200x630 | a size, not a brand — see **Two sizes** |
+| `community-group-bill.html` | a community session with more than one talk, at 1200x630 | a shape, not a brand — see **Two sizes** |
 
 `tpr.html` is the exception to the rule above. TPR is a room, not an
 activation, so by that rule it should ride the community template. It doesn't,
@@ -83,7 +84,62 @@ it never shows the speaker's face. So the wide card carries the co-brand, the
 face, the hook and the name, and drops the facts, the partner strip and the
 role.
 
-Two things it has to respect that the portrait card does not:
+`community-group-bill.html` is the second, and it is a different *card* at
+the same size rather than a different size of the same one. The wide card is
+one speaker's — co-brand, face, hook, name, no facts — on the reasoning that
+Meetup prints the date, time and venue beside the image. That holds for a
+single talk announced on its own page. It stops holding the moment a group
+wants one image for a session carrying two talks, and posts it somewhere that
+is not Meetup: a Slack, a newsletter, a story. So the bill card keeps the
+co-brand, drops the face, and carries **both talks and the slot**.
+
+No face is the point rather than an omission. There are two speakers, and
+picking one of them is an editorial decision the group has not made — while
+two portraits at 1.9:1 is the pair template's problem at a size it was never
+drawn for. The marks carry the card instead, which is what the group asked
+for.
+
+It takes a `talks` array rather than `headline`/`subtitle`, built into markup
+in `render.mjs` the same way Give-a-LOT's `states` is, because the template
+engine substitutes and branches but does not loop. Each entry is
+`{ title, subtitle?, who? }` — the same three fields a speaker card carries.
+One entry or several: the bill and its facts are centred in what is left
+under the marks, so a one-talk card composes the same as a two-talk one.
+
+It is also the only card drawn at **`scale: 2`**, so the file is 2400x1260 and
+the filename says so. Every other card goes into an unfurl at its own
+dimensions, where 1x is exactly right. These get posted, resized and
+re-cropped, and 17px mono at 1x has about eleven pixels of x-height to draw a
+letter in — at 2 the type is drawn from twice the information and every
+downscale after that resamples from it rather than from the eleven. The layout
+does not move; only the sample rate does.
+
+Two things are its own and not the other cards':
+
+- **It draws the homepage bolt.** Every other template grounds itself with
+  `sastw-bolt.svg`, the flat `#ff32a0` silhouette, blurred back to 2.3:1 and
+  sat under the copy. This one has no figure and the room to make the bolt a
+  subject, so it uses `bolt-current-og.png` — the still of the live WebGL hero
+  that [lib/og.tsx](../../lib/og.tsx) puts on the site's own share cards —
+  unblurred, at its own gradient, placed inside the right margin rather than
+  bled off it.
+- **The two marks are balanced against each other, per card.** `markHeight`
+  and `lockupHeight` are both set, and "the same size" is a *drawn* size. The
+  lockup is 1600x400 with transparent margin inside it, so a matched file
+  height drew its ink at 50px against the Datanauts helmet's 73. The three
+  cards balance on drawn width instead — ~390px each — which is 108 for the
+  lockup, 78 for Datanauts (4.9:1), 71 for AWS (5.5:1) and 39 for Google
+  Developer Groups (10:1). Matched on height, GDG would draw twice the
+  lockup's width and read as the week appearing at GDG's meetup.
+
+  `markShift` is the other half of that. `align-items: center` centres the two
+  *files*, which is not the same as aligning what is drawn in them: the AWS
+  mark carries the smile below its letters, so its file centre sits lower than
+  its letterforms and "aws User Group" drew 18px above the lockup's caps.
+  Measured, not guessed — the lockup's caps run y92–124 and AWS's ran y74–106
+  on the unshifted card.
+
+Two things the wide cards have to respect that the portrait card does not:
 
 - **Meetup re-crops** across its list, page and mobile placements. Nothing that
   has to survive goes near an edge — 72px in from the sides, and the copy sits

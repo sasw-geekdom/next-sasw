@@ -431,6 +431,142 @@ export const CARDS = [
     portrait: { height: 1020, left: 410 },
   },
 
+  {
+    id: "datanauts-speaker-ednalyn-de-dios",
+    event: "datanauts",
+    speaker: "ednalyn-dd-de-dios",
+    // 78, matching daniel-morales-yusty: same 21 characters, and the note
+    // there is that 88 leaves a 12px margin, which is not a margin.
+    headline: "Move Fast, Break Data",
+    headlineSize: 78,
+    subtitle: "A Situationship With the Truth",
+    // The default split breaks after the quoted middle name and leaves the
+    // opening quote alone at the head of the second line, which reads as a
+    // stray mark rather than as part of her name.
+    name: ["Ednalyn \u201cDd\u201d", "De Dios"],
+    // The probe said 1261, and it is the worst miss in the set — it drew her
+    // head at 42% of the card where the others run 21–30%. Her collar and
+    // vest are near-black against a black ground, so the shoulder line it
+    // watches for never arrives and it read most of her torso as head.
+    //
+    // Solved from the crown instead, the way the wide GDG card was. Her crown
+    // is 8.4% into her own frame, so a bottom-anchored image sits it at
+    // `1350 - 0.916 * height`: 900 puts it at 526, which is where Hastimal's
+    // sits on the card this one runs beside.
+    //
+    // That fixes the head at ~400px, larger than his 285, and there is no
+    // height that gives both — hers is a head-and-shoulders crop and his a
+    // half-body, so her head is 46% of her frame against his 21%. 400 is
+    // inside the shipped range: patrick-robinson is 409 off an equally tight
+    // crop. The crown is the number worth matching, because it is the one a
+    // reader compares across two cards in a feed.
+    portrait: { height: 900, left: 439 },
+  },
+
+  {
+    id: "datanauts-speaker-fouzan-aslam",
+    event: "datanauts",
+    speaker: "fouzan-aslam",
+    // Split at the colon, as everywhere else. 72, not the default 88 or the
+    // 78 its neighbours take: at 78 the hook draws 953px against a 936px
+    // measure and wraps, and a two-line hook over a two-line subtitle is the
+    // whole upper third.
+    headline: "Scaling Executive Vision",
+    headlineSize: 72,
+    // The only two-line subtitle in the set, at 71 characters against the
+    // ~30 the others run. It breaks after "with the" and clears his shoulder,
+    // so it stays whole — this is the organiser's title and the half after
+    // the colon is what says the talk is about a tool rather than a theme.
+    subtitle:
+      "Automated C-Suite Insights with the Data Intelligence Hub Deck Generator",
+    // Solved from the crown, like the two cards this runs beside rather than
+    // from the probe's 710. His crown is 6.4% into his frame, so
+    // `1350 - 0.936 * height` puts 881 at y=526 — where Hastimal's and
+    // Ednalyn's sit. The probe's own head reading is trustworthy here (40% of
+    // frame, against the 34–38% the set runs) because his suit separates
+    // cleanly from the ground, and at 881 it draws ~325px, mid-range.
+    portrait: { height: 881, left: 439 },
+  },
+
+  {
+    id: "datanauts-meetup",
+    event: "datanauts",
+    // 1200x630 and no speaker — the group's card for the whole session rather
+    // than either talk's. See the note at the top of the template.
+    size: { width: 1200, height: 630 },
+    template: "community-group-bill.html",
+    // Drawn at 2x — see `scale` in render.mjs. These are posted and re-cropped
+    // rather than unfurled at a fixed size.
+    scale: 2,
+    // 78, against the portrait card's 62 — the mark is the subject here
+    // rather than a badge over a face. The lockup takes the same number:
+    // Datanauts is a helmet and a wordmark at close to the lockup's own
+    // proportion, so equal heights draw an equal pair.
+    markHeight: 78,
+    lockupHeight: 108,
+    talks: [
+      {
+        title: "Move Fast, Break Data",
+        subtitle: "A Situationship With the Truth",
+        who: "Ednalyn \u201cDd\u201d De Dios",
+      },
+      {
+        title: "Scaling Executive Vision",
+        subtitle:
+          "Automated C-Suite Insights with the Data Intelligence Hub Deck Generator",
+        who: "Fouzan Aslam",
+      },
+    ],
+  },
+
+  {
+    id: "gdg-meetup",
+    event: "google-developer-groups",
+    size: { width: 1200, height: 630 },
+    template: "community-group-bill.html",
+    // Drawn at 2x — see `scale` in render.mjs. These are posted and re-cropped
+    // rather than unfurled at a fixed size.
+    scale: 2,
+    // Balanced on drawn width, not height — the pair rule this template's
+    // note sets out. GDG is a 10:1 wordmark, so 39 draws it ~390px, which is
+    // what the lockup draws at 108. Matched on height instead it would be
+    // 780px against 310 and read as the week appearing at GDG's meetup.
+    markHeight: 39,
+    lockupHeight: 108,
+    talks: [
+      {
+        title: "Behind the Answer",
+        subtitle: "How LLMs and Google AI Search Work",
+        who: "Hastimal Jangid",
+      },
+    ],
+  },
+
+  {
+    id: "aws-meetup",
+    event: "aws-user-group",
+    size: { width: 1200, height: 630 },
+    template: "community-group-bill.html",
+    // Drawn at 2x — see `scale` in render.mjs. These are posted and re-cropped
+    // rather than unfurled at a fixed size.
+    scale: 2,
+    // 5.49:1, so 71 draws ~390 — the same width the other two marks take.
+    markHeight: 71,
+    lockupHeight: 108,
+    // Measured, not guessed: on the unshifted card the lockup's caps run
+    // y92–124 and AWS's run y74–106, because the smile hangs below the
+    // letters and pulls the file's centre down past them. 18 puts the two
+    // baselines on the same line.
+    markShift: 18,
+    talks: [
+      {
+        title: "The Autonomous Hacker",
+        subtitle: "Zero-Trust AI Pentesting on AWS",
+        who: "Daniel Felipe Morales Yusty",
+      },
+    ],
+  },
+
   // ─── Texas Public Radio ───────────────────────────────────────────────────
   {
     id: "tpr-speaker-patrick-robinson",

@@ -1,0 +1,232 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* The community-group card at 1200x630, for a meetup with a bill rather
+         than a speaker.
+
+         `community-group-wide.html` is the same size and not the same card. It
+         is one speaker's card — co-brand, face, hook, name, no facts — on the
+         reasoning that Meetup prints the date, time and venue beside the
+         image. That holds for a single talk announced on its own page. It
+         stops holding when the group wants one image for a session carrying
+         two talks and posts it anywhere but Meetup, which is what this is for:
+         a card the Datanauts team can put in a Slack, a newsletter or a story
+         and have it still say what is on and when.
+
+         So: the two marks, both talks, and the slot. No face, because there
+         are two speakers and picking one of them is an editorial decision the
+         group has not made — and a card with two portraits at this ratio is
+         the pair template's problem, at a size it was not drawn for. */
+      :root {
+        --magenta: #ff32a0;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1200px;
+        height: 630px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* The homepage's bolt, whole, in the half the portrait vacated.
+
+         Not `sastw-bolt.svg` at 0.17 — the flat silhouette every other card
+         uses as a ground. This is `bolt-current-og.png`, the still of the
+         live WebGL hero that lib/og.tsx puts on the site's own share cards,
+         so the one card here with room to draw the bolt as a subject draws
+         the same bolt the front page does.
+
+         Which changes what it is doing. A ground gets blurred back to 2.3:1
+         and sits under the copy; this is a graphic, so it keeps its own
+         gradient, takes no blur, and is placed rather than bled — inside the
+         right margin, clear of the 860px the bill runs to, so nothing in it
+         sits in the strip Meetup crops and nothing overlaps a word. */
+      .bolt {
+        position: absolute;
+        z-index: 1;
+        right: 42px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 372px;
+        height: auto;
+        opacity: 0.95;
+      }
+
+      /* Meetup re-crops event images across its list, page and mobile
+         placements, so nothing that has to survive sits near an edge. 72px is
+         6% in from the sides, 54px is 8.5% top and bottom. */
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 54px 72px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* The co-brand, and the subject of this card. A rule between the two
+         marks rather than one above the other, because the fact is that they
+         are running this together.
+
+         Larger than the wide card's fixed 48px, because there it shares the
+         frame with a face and a hook and here it is what the card is about.
+
+         Both heights come from the card, and neither is the other's number.
+         "The same size" is a drawn size, not a file height: the lockup is
+         1600x400 with transparent margin inside it, so at a matched 78 its
+         ink drew 50px against the Datanauts helmet's 73 and read as the
+         junior mark. 108 is that ratio taken out.
+
+         It does not generalise, which is why it is per card. Google Developer
+         Groups is a 10:1 wordmark with no margin to speak of; matched on
+         height it draws twice the lockup's width, so that pair is balanced on
+         drawn width instead — the rule the College Night logo strip already
+         follows. */
+      .brands {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+      }
+      .brands img.sastw {
+        height: {{lockupHeight}}px;
+        width: auto;
+      }
+      .brands .rule {
+        width: 1px;
+        height: 52px;
+        background: rgba(255, 255, 255, 0.22);
+      }
+      /* `align-items: center` centres the two files, which is not the same as
+         aligning what is drawn in them. The AWS mark carries the smile below
+         its letters, so centring the box sits "aws" and "User Group" 18px
+         above the lockup's caps. `markShift` puts the letterforms back on the
+         lockup's baseline; it is 0 for a mark whose ink is centred in its own
+         file, which is most of them. */
+      .brands img.mark {
+        height: {{markHeight}}px;
+        width: auto;
+        transform: translateY({{markShift}}px);
+      }
+
+      /* One above the bill and one below it, so the bill and its facts sit
+         centred in whatever is left under the marks rather than on the floor.
+
+         Bottom-anchored it read fine with two talks and badly with one: the
+         Datanauts card carries a 310px block and the GDG card a 180px one, so
+         the same layout put a 250px hole in the middle of the single-talk
+         card and pushed its only talk into the strip Meetup is likeliest to
+         crop. Centred, both look composed and neither goes near an edge. */
+      .spacer {
+        flex: 1;
+      }
+
+      /* The bill. Two talks, each a hook in the display face over its own
+         second line — the same title/subtitle split the speaker cards make,
+         at the size two of them can share a card. */
+      .bill {
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+        max-width: 860px;
+      }
+      .talk {
+        display: flex;
+        flex-direction: column;
+        border-left: 3px solid var(--magenta);
+        padding-left: 20px;
+      }
+      .talk .t {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 42px;
+        line-height: 1.02;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+      .talk .s {
+        margin-top: 7px;
+        font-size: 21px;
+        line-height: 1.3;
+        color: rgba(255, 255, 255, 0.66);
+      }
+      /* The speaker, in the magenta the portrait cards give the role. Named
+         but not pictured: the ask was no faces, and a talk still belongs to
+         somebody. */
+      .talk .w {
+        margin-top: 7px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 17px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--magenta);
+      }
+
+      /* The slot, on one line at the foot — the two facts the event carries,
+         joined by the separator the site uses in its mono eyebrows. */
+      .facts {
+        margin-top: 34px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.04em;
+        color: rgba(255, 255, 255, 0.82);
+      }
+      .facts .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--magenta);
+        flex: none;
+      }
+      .facts .sep {
+        color: rgba(255, 255, 255, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <img class="bolt" src="bolt-current.png" alt="" />
+
+    <div class="frame">
+      <div class="brands">
+        <img class="sastw" src="sastw.png" alt="" />
+        <span class="rule"></span>
+        <img class="mark" src="{{mark}}" alt="" />
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="bill">{{talks}}</div>
+
+      <div class="facts">
+        <span class="pip"></span>
+        <span>{{fact1}}</span>
+        <span class="sep">·</span>
+        <span>{{fact2}}</span>
+      </div>
+
+      <div class="spacer"></div>
+    </div>
+  </body>
+</html>

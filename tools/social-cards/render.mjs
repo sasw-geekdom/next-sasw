@@ -181,10 +181,53 @@ async function main() {
   );
   await stage(work, join(REPO, "public/pysa/wordmark-dark.svg"), "pysa.svg");
   await stage(work, join(REPO, "public/brand/sastw-bolt.svg"), "bolt.svg");
+  // The homepage's bolt, not the silhouette above it. `sastw-bolt.svg` is a
+  // flat #ff32a0 shape the cards use as a ground at 0.17; this is the still of
+  // the live WebGL hero that lib/og.tsx puts on every share card, so a card
+  // drawing the bolt as a subject rather than a ground draws the same one the
+  // site does.
+  await stage(
+    work,
+    join(REPO, "public/brand/bolt-current-og.png"),
+    "bolt-current.png",
+  );
 
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: SIZE, deviceScaleFactor: 1 });
-  let viewport = SIZE;
+  /**
+   * One page per device pixel ratio.
+   *
+   * `deviceScaleFactor` is fixed when a page is created — `setViewportSize`
+   * cannot change it — so a card that wants 2x needs a page of its own. Kept
+   * in a map rather than made per card, because a browser page is expensive
+   * and the set only ever holds one or two.
+   *
+   * 1 is the default and stays the default: every approved card was rendered
+   * at it, and the check that a refactor changed nothing is that they still
+   * reproduce byte for byte.
+   */
+  const pages = new Map();
+  const pageAt = async (scale, size) => {
+    let entry = pages.get(scale);
+    if (!entry) {
+      entry = {
+        page: await browser.newPage({
+          viewport: size,
+          deviceScaleFactor: scale,
+        }),
+        viewport: size,
+      };
+      pages.set(scale, entry);
+      return entry.page;
+    }
+    if (
+      size.width !== entry.viewport.width ||
+      size.height !== entry.viewport.height
+    ) {
+      await entry.page.setViewportSize(size);
+      entry.viewport = size;
+    }
+    return entry.page;
+  };
 
   for (const card of wanted) {
     const event = EVENTS[card.event];
@@ -272,12 +315,35 @@ async function main() {
             `<span class="b">${before}</span><span class="x">&#10230;</span><span class="a">${after}</span>`,
         )
         .join("\n        "),
+      // A bill: several talks in one card, built here the way `states` is,
+      // because the template engine substitutes and branches but does not
+      // loop. Each entry is a title, an optional second line and an optional
+      // speaker — the same three the speaker cards carry, at the size two of
+      // them share a frame.
+      talks: (card.talks ?? [])
+        .map(
+          (t) =>
+            `<div class="talk"><span class="t">${t.title}</span>` +
+            (t.subtitle ? `<span class="s">${t.subtitle}</span>` : "") +
+            (t.who ? `<span class="w">${t.who}</span>` : "") +
+            `</div>`,
+        )
+        .join("\n        "),
       logos: logos.join("\n          "),
       mark,
       // A card may resize the mark. The wide card has to: the portrait card
       // sets these against a wordmark slot, and beside the SASTW lockup the
       // same height reads as the group being the senior partner.
       markHeight: card.markHeight ?? event.mark?.height ?? 0,
+      // The house lockup's height, where a template sizes it per card.
+      // Defaults to the group's, which is what "the same size" means on the
+      // bill cards — but it cannot be forced there, because the marks are not
+      // the same shape: matched at a height, a 10:1 wordmark draws twice the
+      // lockup's width and the co-brand stops reading as a pair.
+      lockupHeight: card.lockupHeight ?? card.markHeight ?? 0,
+      // Vertical nudge on the group's mark, where its letterforms do not sit
+      // on its file's centre. See `markShift` on the AWS meetup card.
+      markShift: card.markShift ?? 0,
 
       // Per card, not per template: TPR greyscales every portrait because its
       // bolt runs at full charge, but a community card is a colour card and
@@ -328,6 +394,28 @@ async function main() {
     const file = join(work, `${card.id}.html`);
     await writeFile(file, fill(html, data));
 
+    // The size travels with the card, and the filename says which it is —
+    // the same speaker now has a portrait card and a wide one, and a name
+    // that does not distinguish them is a paste-the-wrong-file waiting to
+    // happen.
+    const size = card.size ?? event.size ?? SIZE;
+    /**
+     * How many device pixels a CSS pixel draws.
+     *
+     * 1 everywhere the card is going straight into an unfurl at its own
+     * dimensions, which is what these were all built for. A card a group is
+     * going to post, resize and re-crop is a different thing: 1200x630 is the
+     * platform's minimum rather than a target, and 17px mono at 1x has about
+     * eleven pixels of x-height to draw a letter in. At 2 the type is drawn
+     * from twice the information and every downscale after that resamples
+     * from it instead of from the eleven.
+     *
+     * The layout is unchanged — the CSS box is still `size`. Only the sample
+     * rate moves, and the filename reports what the file actually holds.
+     */
+    const scale = card.scale ?? 1;
+    const page = await pageAt(scale, size);
+
     const missing = [];
     const onFail = (r) => missing.push(r.url().split("/").pop());
     page.on("requestfailed", onFail);
@@ -336,16 +424,10 @@ async function main() {
     await page.waitForTimeout(900);
     page.off("requestfailed", onFail);
 
-    // The size travels with the card, and the filename says which it is —
-    // the same speaker now has a portrait card and a wide one, and a name
-    // that does not distinguish them is a paste-the-wrong-file waiting to
-    // happen.
-    const size = card.size ?? event.size ?? SIZE;
-    if (size.width !== viewport.width || size.height !== viewport.height) {
-      await page.setViewportSize(size);
-      viewport = size;
-    }
-    const out = join(outDir, `${card.id}-${size.width}x${size.height}.png`);
+    const out = join(
+      outDir,
+      `${card.id}-${size.width * scale}x${size.height * scale}.png`,
+    );
     await page.screenshot({ path: out });
     console.log(
       `${card.id}${missing.length ? `  !! failed: ${missing.join(", ")}` : ""}`,
