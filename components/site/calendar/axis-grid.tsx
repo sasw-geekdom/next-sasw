@@ -165,9 +165,23 @@ export function AxisGrid({
             {col.href ? (
               <Link
                 href={col.href}
-                className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
+                className="group inline-flex items-baseline gap-1.5 font-mono text-[11px] uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
               >
-                <span className="text-white transition-colors group-hover:text-magenta">
+                {/* The day name in the display face, not the mono the rest of
+                    the head is set in.
+                    
+                    A week view's primary axis is its days, and these were the
+                    smallest type on the page — 11px mono at weight 400, the
+                    same as a card's meta line and the same as the "Add day"
+                    control beside them, so five columns read as five
+                    undifferentiated stacks. The homepage snapshot sets them at
+                    20px display bold and that is the whole reason it reads as
+                    a week at a glance. Same treatment here.
+
+                    The date stays mono and small: it is the label's
+                    supporting detail, and giving both weight would just move
+                    the problem. */}
+                <span className="font-display text-lg font-bold leading-none tracking-tight text-white transition-colors group-hover:text-magenta xl:text-xl">
                   {col.label}
                 </span>
                 {col.sublabel && (
@@ -196,13 +210,15 @@ export function AxisGrid({
                     right arrow that only slid sideways was a fourth variant of
                     a thing the site had already settled. */}
                 <ArrowUpRight
-                  className="size-3.5 shrink-0 text-white/30 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-magenta"
+                  className="size-3.5 shrink-0 self-center text-white/30 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-magenta"
                   aria-hidden="true"
                 />
               </Link>
             ) : (
-              <p className="truncate font-mono text-[11px] uppercase tracking-widest">
-                <span className="text-white">{col.label}</span>
+              <p className="flex items-baseline gap-1.5 truncate font-mono text-[11px] uppercase tracking-widest">
+                <span className="font-display text-lg font-bold leading-none tracking-tight text-white xl:text-xl">
+                  {col.label}
+                </span>
                 {col.sublabel && (
                   <span
                     className={cn(
@@ -245,7 +261,7 @@ export function AxisGrid({
               columns.map((col) => (
                 <div
                   key={col.key}
-                  className="flex flex-col gap-1.5 border-b border-l border-white/10 p-1.5"
+                  className="flex flex-col gap-1.5 border-b border-l border-white/15 p-1.5"
                 >
                   {rail.byColumn?.[col.key]}
                 </div>
@@ -293,7 +309,12 @@ export function AxisGrid({
             // final hour had a label and no rule to belong to.
             <div
               key={col.key}
-              className="relative border-b border-l border-white/10"
+              // `border-l` at 15%, not 10%. The column separators were the
+              // faintest rules on a page whose whole job is five columns, so
+              // the eye had nothing to track down. The *hour* rules inside a
+              // column stay at 10%: they are the grid's ruled paper and should
+              // sit under the thing that divides the days, not level with it.
+              className="relative border-b border-l border-white/15"
             >
               {/* The rules, as a layer behind the blocks. Drawing them as real
                   boxes is what gives the column its height, so the grid can't

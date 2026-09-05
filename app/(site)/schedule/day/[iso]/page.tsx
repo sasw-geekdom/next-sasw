@@ -3,12 +3,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { BackLink } from "@/components/site/back-link";
-import { DayRail } from "@/components/site/calendar/day-rail";
 import { DayCalendarGrid } from "@/components/site/day-calendar-grid";
 import type { Option } from "@/components/site/calendar/controls";
 import { EVENT_DAYS } from "@/lib/event";
 import { dayCalendar } from "@/lib/schedule";
-import { liveCalendarItems } from "@/lib/live-schedule";
+import { liveSchedule } from "@/lib/live-schedule";
 import { TRACK_NAMES } from "@/lib/tracks";
 
 // One day of the week, at full resolution.
@@ -35,12 +34,13 @@ export async function generateMetadata({
   params: Promise<{ iso: string }>;
 }): Promise<Metadata> {
   const { iso } = await params;
-  const data = dayCalendar(iso, await liveCalendarItems());
+  const live = await liveSchedule();
+  const data = dayCalendar(iso, live.items, live.attached);
   if (!data) return {};
 
   const rooms = data.venues.map((v) => v.name).join(", ");
   const description = data.venues.length
-    ? `${data.day.weekday}, ${data.day.label} at San Antonio Startup + Tech Week — every room, hour by hour. ${rooms}.`
+    ? `${data.day.weekday}, ${data.day.label} at San Antonio Startup + Tech Week — every room, side by side. ${rooms}.`
     : `${data.day.weekday}, ${data.day.label} at San Antonio Startup + Tech Week.`;
 
   return {
@@ -61,7 +61,8 @@ export default async function ScheduleDayPage({
   params: Promise<{ iso: string }>;
 }) {
   const { iso } = await params;
-  const data = dayCalendar(iso, await liveCalendarItems());
+  const live = await liveSchedule();
+  const data = dayCalendar(iso, live.items, live.attached);
   if (!data) notFound();
 
   const { day, venues, items, spans, axis, index } = data;
@@ -104,7 +105,12 @@ export default async function ScheduleDayPage({
           Back
         </BackLink>
 
-        <div className="mt-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-6">
+        {/* The rail used to sit at the right of this row, on the standfirst's
+            baseline — one control alone at x=870 with the filters starting
+            240px lower and 770px to its left. It is a control, not a header,
+            so it has moved into the control bar with the others, where it
+            takes the position the week view gives its view toggle. */}
+        <div className="mt-8">
           <div className="max-w-2xl">
             <p className="font-mono text-xs uppercase tracking-widest text-magenta">
               Day {index + 1} of {EVENT_DAYS.length} · {day.label}
@@ -115,20 +121,18 @@ export default async function ScheduleDayPage({
             {/* Keyed on timed sessions, not on `venues`. A room counts as
                 present there if it has anything at all, and a multi-day drive
                 is enough — so Tuesday, which has only Give-a-LOT running
-                through it, was promising "every room running, hour by hour"
-                above an axis with no hours on it. */}
+                through it, was promising a room-by-room read above nothing.
+
+                "Side by side", not "hour by hour": the day dropped its axis
+                with the week, so there are no hours on the page to promise. */}
             <p className="mt-4 text-pretty text-white/60">
               {items.length > 0
-                ? "Every room running, hour by hour."
+                ? "Every room, side by side."
                 : spans.length > 0
                   ? "Nothing on the clock yet — what runs all week is below."
                   : "Nothing confirmed on this day yet. It fills as the week locks."}
             </p>
           </div>
-
-          {/* See week-calendar.tsx — beside the heading where there's width,
-              in the control block below where there isn't. */}
-          <DayRail active={iso} className="hidden lg:block" />
         </div>
 
         <Suspense fallback={<div className="mt-10 h-[42rem]" />}>

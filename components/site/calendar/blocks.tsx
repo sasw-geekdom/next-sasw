@@ -12,7 +12,14 @@ import {
   PysaMascot,
 } from "@/components/site/calendar/event-particles";
 import { cn } from "@/lib/utils";
-import type { CalendarBrand, CalendarItem, CalendarSpan } from "@/lib/schedule";
+import {
+  BrandMark,
+  MARK_TARGET,
+  TitleText,
+  lockupHeight,
+  markKind,
+} from "@/components/site/calendar/marks";
+import type { CalendarItem, CalendarSpan } from "@/lib/schedule";
 
 // What a calendar draws inside a column: one activation, a venue's whole run
 // of them, or a bar on the all-day rail. Shared by the week view and the day
@@ -197,437 +204,6 @@ export function axisMarkCap(
  * the height follow its ratio, bounded at both ends so a very tall mark can't
  * push the block's copy out and a very wide one can't shrink to a hairline.
  */
-/**
- * The width every lockup is drawn toward, before its own ratio sets the height.
- *
- * One number for the axis blocks, where a lane is 100–300px and the mark is
- * competing with a strand label and a room. The agenda overrides it — see
- * `STACK_MARK_TARGET`.
- */
-export const MARK_TARGET = 150;
-
-/**
- * The height ceiling for an image lockup, scaled to the width it aims for.
- *
- * `markKind` and `BrandMark` both need this and both have to say the same
- * thing — see the note on `markKind`. It used to be three literals, which was
- * right while every axis block aimed at `MARK_TARGET`: a bigger target then
- * bought nothing, because the ceiling clamped the result back to 56 before the
- * extra width could be drawn. Scaling it keeps the default identical (150
- * returns exactly 56/50/44) and lets a caller that has genuinely more room ask
- * for more and get it.
- */
-function lockupCeiling(size: "sm" | "md" | "lg", markTarget: number): number {
-  const base = size === "lg" ? 56 : size !== "sm" ? 50 : 44;
-  return Math.round(base * (markTarget / MARK_TARGET));
-}
-
-export function lockupHeight(
-  lockup: { width: number; height: number },
-  targetWidth: number,
-  max: number,
-): number {
-  const ratio = lockup.width / lockup.height;
-  return Math.min(max, Math.max(14, Math.round(targetWidth / ratio)));
-}
-
-/**
- * An activation's own mark, at block size.
- *
- * The activations with a brand split into two kinds. Only Access Granted and
- * The Model are set in type at all, and both use faces the site already loads
- * (Oswald and Geist Mono); PySanAntonio, the pitch events and Give-a-LOT are
- * lockup files, where the letterforms are artwork rather than a font. So this
- * draws the two typeset marks and places the images for the rest — the same
- * split session-bento's `BrandLockup` makes, keyed the same way (`page`, not
- * title).
- *
- * Returns null where an activation has no mark, and the caller typesets the
- * plain title instead.
- */
-/**
- * The narrowest a lockup can draw and still be a lockup.
- *
- * A wordmark needs width, and width is what a squarish mark runs out of first:
- * height-capped by its block and then multiplied by its own ratio, Open
- * Circuit's 1.65:1 mark comes out 33px wide in a one-hour week block. At that
- * size it is a coloured smudge — not a small logo, an unreadable one — and the
- * activation's name, which the typeset fallback would have shown, is gone.
- *
- * 56 rather than something tighter because the number has to have margin in
- * it. AITX is the next-squarest mark that lives in a one-hour block and lands
- * at 74; a floor set just under Open Circuit's failure point would sit a few
- * pixels from flipping AITX to type on a rounding change nobody would connect
- * to this.
- */
-const MARK_MIN_W = 56;
-
-/**
- * Which mark this brand can draw here, or null for none.
- *
- * Computed rather than inferred from a null render, because the caller has to
- * typeset the title in the same slot when there is nothing to draw — and the
- * answer depends on size, not just on what the brand owns. Startup Bash's mark
- * is set in Geist Pixel, which model-band measured as only resolving as a
- * pixel face above ~22px; below that it is a mono wearing a display face's
- * costs. So it draws at row scale and nowhere else.
- *
- * Image lockups have the same problem for a different reason, which is why
- * `markMax` is threaded in here as well as into `BrandMark`. Both have to
- * agree: this decides whether a mark is drawn, that decides how big, and if
- * only one of them knows the block's height cap the caller can commit to a
- * lockup the block cannot actually show.
- */
-export function markKind(
-  brand: CalendarBrand | undefined,
-  dense: boolean,
-  size: "sm" | "md" | "lg",
-  /** The block's own height cap, where it has one. See `axisMarkCap`. */
-  markMax?: number,
-  /** The width the mark aims for. See `MARK_TARGET`. */
-  markTarget: number = MARK_TARGET,
-): "wordmark" | "lockup" | null {
-  if (!brand) return null;
-  if (brand.wordmark === "startup-bash")
-    return size === "sm" ? null : "wordmark";
-  // The file first, and the typeset mark as its fallback — an order that only
-  // means anything for Open Circuit, the one brand that owns both. Every other
-  // wordmark here belongs to an activation with no logo file at all, so they
-  // fall straight through. Reversing the two would take the agenda's perfectly
-  // legible 94px lockup away in order to show type instead.
-  if (brand.lockup && !dense) {
-    const lg = size === "lg";
-    // The same call `BrandMark` makes, including the 1.5x it takes at `lg` —
-    // predicting a different number here is how the two would disagree.
-    const h =
-      lockupHeight(
-        brand.lockup,
-        markTarget,
-        Math.min(lockupCeiling(size, markTarget), markMax ?? Infinity),
-      ) * (lg ? 1.5 : 1);
-    const ratio = brand.lockup.width / brand.lockup.height;
-    if (h * ratio >= MARK_MIN_W) return "lockup";
-  }
-  if (brand.wordmark) return "wordmark";
-  return null;
-}
-
-function BrandMark({
-  brand,
-  title,
-  dense,
-  markMax,
-  markTarget = MARK_TARGET,
-  size = "sm",
-  kind,
-  canWrap = false,
-}: {
-  brand: CalendarBrand;
-  title: string;
-  /** A lane too narrow to draw an image lockup in. */
-  dense: boolean;
-  /**
-   * Whether the block has vertical room for a typeset mark to take two lines.
-   *
-   * Only the axis blocks set it, and only the ones with a balanced middle —
-   * see `TALL_BLOCK_MIN` in `Block`. An agenda row is a fixed 83px with the
-   * mark and the meta side by side, so a wrapped mark there costs the row's
-   * height rather than filling space it already has.
-   */
-  canWrap?: boolean;
-  /**
-   * The width the mark aims for, before its ratio sets the height.
-   *
-   * Has to match whatever `markKind` was given, for the same reason `markMax`
-   * does: one decides that a lockup fits, the other decides how big, and a
-   * disagreement puts a mark in a slot sized for something else.
-   */
-  markTarget?: number;
-  /**
-   * A hard ceiling from the block's own height, where it has one.
-   *
-   * Overrides the size bucket when it is smaller. See `axisMarkCap`.
-   */
-  markMax?: number;
-  /**
-   * How much room the mark has.
-   *
-   * "lg" is the mobile stack and a block with a lane to itself. "md" is a lane
-   * shared with one other — the common case on Monday and Wednesday, and
-   * previously lumped in with "sm", which sized every mark for the worst case
-   * a quarter-width lane presents. "sm" is that genuine worst case.
-   *
-   * Only the typeset marks really need the distinction: they wrap, so an
-   * oversized cut spills out of a narrow lane. Image lockups clamp instead,
-   * and only take the step up in their height cap.
-   */
-  size?: "sm" | "md" | "lg";
-  /**
-   * Which mark to draw, from `markKind`.
-   *
-   * Passed in rather than worked out again here, and that is not tidiness. The
-   * branches below are ordered wordmark-first, so a brand holding both — Open
-   * Circuit is the only one — drew its typeset mark even in the rows where
-   * `markKind` had already decided the file fits and the caller had reserved
-   * room for it. The two have to answer to one decision, and `markKind` is
-   * where it is made, because the caller needs the same answer to know whether
-   * to typeset the title instead.
-   *
-   * Optional so the call sites that only ever have one kind stay unchanged;
-   * absent, the old order applies.
-   */
-  kind?: "wordmark" | "lockup" | null;
-}) {
-  const lg = size === "lg";
-  const roomy = size !== "sm";
-  if (brand.wordmark === "access-granted") {
-    return (
-      // The same split the band and the social graphics carry: the first word
-      // in the green, the rest in white.
-      <span
-        className={cn(
-          "font-display font-bold uppercase leading-tight tracking-tight text-white",
-          lg ? "text-2xl lg:text-3xl" : roomy ? "text-lg" : "text-sm",
-        )}
-      >
-        <span style={{ color: brand.accent }}>Access</span> Granted
-      </span>
-    );
-  }
-
-  if (brand.wordmark === "college-night") {
-    return (
-      // Set in type, like Access Granted, and for the same reason: this is a
-      // house night rather than a partner's event, so there is no logo to
-      // defer to and the mark is the house display face.
-      //
-      // Magenta on the second word, following Startup Bash rather than Access
-      // Granted's green-on-the-first. Both are ours, both are Social, and the
-      // accent belongs on the word that says what the evening is.
-      //
-      // Two lines where the block has the height for them, one line
-      // everywhere else.
-      //
-      // It used to be one line at every size, on the reasoning that a wrapped
-      // mark costs more height than the larger type wins — true while the mark
-      // sat at the top of the block with the whole middle empty beneath it.
-      // Now that a balanced block centres its mark, the height is already
-      // spent: the two lines land in space that was doing nothing, and the
-      // word that names the evening gets a line of its own instead of trailing
-      // the one that qualifies it.
-      //
-      // Still one line in an agenda row and in a block too short to earn the
-      // room — see `canWrap`.
-      //
-      // The break is forced rather than allowed. Left to wrap on its own the
-      // mark stayed on one line, because at this cut "COLLEGE NIGHT" fits the
-      // lane it is in — the two lines are the point here, not a consequence of
-      // running out of width, so each word is given its own block.
-      //
-      // A step up in size comes with them. The one-line cut was sized to fit
-      // the lane's width; split, the constraint moves to the block's height,
-      // which a centred mark has to spare.
-      <span
-        className={cn(
-          "font-display font-bold uppercase leading-tight tracking-tight text-white",
-          canWrap
-            ? lg
-              ? "text-2xl lg:text-3xl"
-              : roomy
-                ? "text-xl"
-                : "text-base"
-            : lg
-              ? "text-xl lg:text-2xl"
-              : roomy
-                ? "text-base"
-                : "text-sm",
-        )}
-      >
-        <span className={cn("whitespace-nowrap", canWrap && "block")}>
-          College
-        </span>{" "}
-        <span
-          className={cn("whitespace-nowrap text-magenta", canWrap && "block")}
-        >
-          Night
-        </span>
-      </span>
-    );
-  }
-
-  // Guarded on `kind`, alone among the branches here, because Open Circuit is
-  // alone in owning both a wordmark and a file. The branches run
-  // wordmark-first, so without this it drew type even in the rows where
-  // `markKind` had already chosen the lockup and the caller had sized the slot
-  // for it.
-  if (kind !== "lockup" && brand.wordmark === "open-circuit") {
-    return (
-      // The logo's wordmark, redrawn in type for the blocks the logo cannot
-      // fit in. All caps and magenta because that is what the file is — this
-      // is not a house mark like Access Granted's or College Night's, where
-      // the type *is* the brand and the register was a free choice; here there
-      // is a real logo one click away, and the job is to be recognisably the
-      // same thing when the reader gets there.
-      //
-      // Oswald over Geist for the same reason. The mark is set in a heavy
-      // condensed grotesque, and the display face is the only condensed thing
-      // this site loads; Geist bold at block size reads as a different logo
-      // rather than as a smaller one.
-      //
-      // No split colour. Access Granted and College Night each put one word in
-      // an accent because their two words do different work — "Open Circuit"
-      // is one object in the file, and picking a word to highlight would
-      // invent a hierarchy the brand does not have.
-      //
-      // `whitespace-nowrap` with a step-down cut rather than a wrap, following
-      // College Night: two lines of display type in a block that also has to
-      // hold a time and a room cost more height than the larger face wins.
-      <span
-        className={cn(
-          "whitespace-nowrap font-display font-bold uppercase leading-tight tracking-tight text-magenta",
-          lg ? "text-xl lg:text-2xl" : roomy ? "text-base" : "text-sm",
-        )}
-      >
-        Open Circuit
-      </span>
-    );
-  }
-
-  if (brand.wordmark === "startup-bash") {
-    return (
-      // The week's own logo and the word that makes it a party. Startup Bash
-      // is the one activation SASTW runs itself, so its mark is the house
-      // mark — there is no partner brand to defer to, and a plain typeset
-      // title said nothing about what the evening is.
-      //
-      // Oswald, not Geist Pixel. The pixel face was tried here because it was
-      // already vendored and unused, and it read as a borrowed voice: it
-      // belonged to The Model's retired brand sheet, not to SASTW. The house
-      // event should wear the house display face — set beside the logo, the
-      // two read as one lockup finishing the wordmark rather than as a logo
-      // with a graphic next to it. app/fonts/pixel.ts goes back to being dead
-      // code; see the note in globals.css.
-      //
-      // The logo leads on size and the word follows. Reversed, a 36px "BASH"
-      // beside a 24px logo made the word the mark and the logo its footnote.
-      // `items-center`, not `items-baseline`. The logo is the tallest thing on
-      // the line, so baseline alignment pinned the word's baseline to the
-      // line's and left its centre 7px above the logo's — measured, not
-      // guessed. Two all-caps marks side by side want their centres matched,
-      // not their baselines, because the logo's baseline is buried inside a
-      // PNG the layout can't see.
-      <span className="inline-flex items-center gap-1.5 lg:gap-2">
-        <Image
-          src="/brand/sastw-horizontal-white.png"
-          alt="Startup + Tech Week"
-          width={1600}
-          height={400}
-          // The PNG carries 56px of transparent margin past the wordmark —
-          // 5px rendered at h-9, 6.2px at h-11 — which was stacking on top of
-          // the flex gap and putting "BASH" 15px clear of "WEEK". Cancelled
-          // here so the gap in the class above is the whole visual gap and
-          // reads as a word space rather than a paragraph break.
-          className="-mr-[5px] h-9 w-auto shrink-0 lg:-mr-[6px] lg:h-11"
-        />
-        {/* Sized to the logo's own wordmark, not chosen. Measured off the
-            PNG: "STARTUP + TECH WEEK" occupies 122 of its 400px height, so
-            30.5%, and Oswald 500's cap height is 0.819em. At a 36px logo that
-            is an 11px cap and a 13.5px font; at 44px, 13.4 and 16.5. The two
-            then read as one line of type continuing into the accent word
-            rather than a logo with a headline parked beside it.
-
-            Weight 400 and normal tracking, measured rather than judged. 700
-            with tight tracking sat beside the wordmark as a visibly heavier,
-            tighter face — same family, different-looking font — and 500, the
-            first correction, was still 1.29x the wordmark's stroke: 9px
-            against 7px rendered at 4x. 400 lands on it. Not 600, which looks
-            like the middle option and is a trap: app/layout.tsx loads Oswald
-            at 400, 500 and 700 only, so 600 is synthesised. */}
-        <span className="font-display text-[13.5px] font-normal uppercase leading-none text-magenta lg:text-[16.5px]">
-          Bash
-        </span>
-      </span>
-    );
-  }
-
-  if (brand.wordmark === "the-model") {
-    return (
-      // Mono, and the second word caught in a selection block — the band's
-      // mark at block scale. `box-decoration-clone` so the highlight survives
-      // a wrap in a narrow lane.
-      <span
-        className={cn(
-          "font-mono font-medium uppercase leading-tight tracking-tight text-white/85",
-          // Bigger than it was. Every other row leads with an image lockup
-          // drawn to a 150px target; "The Model" set at text-lg came out
-          // around 130px and read as the one activation whose mark had been
-          // shrunk. At 2xl/3xl it carries the same weight in the row as the
-          // files beside it.
-          lg ? "text-2xl lg:text-3xl" : "text-[13px]",
-        )}
-      >
-        The{" "}
-        <span
-          className="box-decoration-clone px-1"
-          style={{ backgroundColor: brand.accent, color: brand.ink }}
-        >
-          Model
-        </span>
-      </span>
-    );
-  }
-
-  // An image lockup needs width the way type doesn't, so a narrow lane falls
-  // back to the typeset title and keeps only the keyline.
-  if (brand.lockup && !dense) {
-    return (
-      <Image
-        src={brand.lockup.src}
-        alt={brand.lockup.alt || title}
-        width={brand.lockup.width}
-        height={brand.lockup.height}
-        // Roughly half again as wide in the stack. A phone row is the full
-        // width of the screen and the mark is the only thing in its half of
-        // it — at the axis's 96px target it was a caption on a card built to
-        // hold a wordmark.
-        // The height goes in a custom property and the class reads it, rather
-        // than `style={{ height }}` — an inline declaration beats every class
-        // including the responsive one, which is how the roomy axis scale sat
-        // dead on the element for a whole pass.
-        style={
-          {
-            // One target at every size, and `max-w-full` below does the
-            // rest. The 96px small target was a second, quieter cap on top of
-            // the lane's own: on a two-lane Monday the marks came out 60–80px
-            // inside a ~111px lane, so mark size tracked lane *count* rather
-            // than lane width, and PySanAntonio — alone on Friday — was three
-            // times the size of Latin Tech for no reason a reader could see.
-            // Aiming high and letting the lane clamp makes every mark as wide
-            // as its lane allows, which is the honest invariant.
-            //
-            // Typeset marks still switch on `size`; they wrap rather than
-            // clamp, so a narrow lane genuinely needs the smaller cut.
-            "--mark-h": `${lockupHeight(
-              brand.lockup,
-              markTarget,
-              Math.min(lockupCeiling(size, markTarget), markMax ?? Infinity),
-            )}px`,
-          } as React.CSSProperties
-        }
-        // Half again on a wide screen. The agenda row is the full width of the
-        // right-hand column — around 770px at 1440 — and a mark sized for a
-        // 342px phone left a void between it and the meta on the far edge.
-        // The ratio-correct height is computed once; this only scales it.
-        className={cn(
-          "h-[var(--mark-h)] w-auto max-w-full object-contain object-left",
-          lg && "lg:h-[calc(var(--mark-h)*1.5)]",
-        )}
-      />
-    );
-  }
-
-  return null;
-}
 
 /**
  * A block's charge, from its room's tier.
@@ -660,6 +236,9 @@ export function Block({
   showAction = true,
   fullTitle = false,
   showcaseArt = false,
+  flat = false,
+  offAxis = false,
+  preferTypeset = false,
 }: {
   item: CalendarItem;
   picked: boolean;
@@ -760,6 +339,38 @@ export function Block({
    * the block is roughly 1016x495 and nothing else on the route decodes.
    */
   showcaseArt?: boolean;
+  /**
+   * Drop the coloured ground and keep everything drawn on it.
+   *
+   * A block normally takes a fill from its room's tier, or from its own brand
+   * accent where it has one — the signal that survives a quarter-width lane
+   * with no room for a lockup. The week columns do not need it: they are wide
+   * enough to draw every mark, and five columns of tinted cards side by side
+   * read as a colour system to be decoded rather than as five days. They take
+   * the homepage snapshot's ground instead.
+   *
+   * The accent still reaches `color`, so the brand-tinted hover, the marks
+   * and the circuit strand all keep it. Only the resting fill goes.
+   */
+  flat?: boolean;
+  /**
+   * This block is not on an hour axis.
+   *
+   * `spare` normally means "tall enough for the circuit strand instead of the
+   * time" — a fair trade on the axis, where a block's *position* already says
+   * when it runs. The week columns have no axis, so position says nothing and
+   * the time has to be printed. Without this, asking for `spare` silently
+   * took the times off every card.
+   */
+  offAxis?: boolean;
+  /**
+   * Set the name in type even where a lockup exists.
+   *
+   * One activation asks for it: 1 Million Cups' lockup is a wide letterbox
+   * that takes a card's whole width, where the featured bill sets it as
+   * display type and reads better for it.
+   */
+  preferTypeset?: boolean;
 }) {
   const brand = item.brand;
   const accent = brand?.accent;
@@ -788,7 +399,9 @@ export function Block({
   // the column ever narrows below that.
   const markTarget = pysaShowcase ? 260 : MARK_TARGET;
 
-  const kind = markKind(brand, dense, markSize, markMax, markTarget);
+  const kind = preferTypeset
+    ? null
+    : markKind(brand, dense, markSize, markMax, markTarget);
   const hasMark = kind !== null;
 
   /**
@@ -873,7 +486,10 @@ export function Block({
                 : "line-clamp-4",
         )}
       >
-        {fullTitle && !dense && !splitMark ? item.longTitle : item.title}
+        <TitleText
+          text={fullTitle && !dense && !splitMark ? item.longTitle : item.title}
+          href={item.href}
+        />
       </span>
     );
 
@@ -887,7 +503,10 @@ export function Block({
         // inline colour and a `hover:bg-*` utility can't co-exist, since the
         // inline style wins even on hover, which is why branded blocks get
         // the overlay below instead.
-        !accent && (TIER_CHARGE[item.venueTier] ?? TIER_CHARGE.single),
+        !flat && !accent && (TIER_CHARGE[item.venueTier] ?? TIER_CHARGE.single),
+        flat &&
+          !picked &&
+          "border-white/15 bg-white/[0.05] hover:bg-white/[0.09]",
         // Selection outranks tier and brand alike.
         //
         // 25, not 30. At /30 the fill is rgb(76,15,48) and magenta type on it
@@ -906,21 +525,26 @@ export function Block({
       )}
       style={
         accent && !picked
-          ? {
-              // Hex with an alpha suffix rather than `color-mix`, because
-              // every accent in the schedule is a 6-digit hex and this stays
-              // legible next to the values in lib/pysa and friends.
-              //
-              // The heavy left edge is the calendar convention for "this
-              // belongs to another calendar", and it is the part that
-              // survives a quarter-width lane where no lockup fits.
-              borderColor: `${accent}66`,
-              borderLeftColor: accent,
-              borderLeftWidth: 3,
-              backgroundColor: `${accent}1a`,
-              // Inherited by the hover overlay's `bg-current`.
-              color: accent,
-            }
+          ? flat
+            ? // Colour without the fill: the hover overlay is `bg-current` and
+              // the marks and strand inherit it, so handing over the colour
+              // alone keeps every brand signal except the resting tint.
+              { color: accent }
+            : {
+                // Hex with an alpha suffix rather than `color-mix`, because
+                // every accent in the schedule is a 6-digit hex and this stays
+                // legible next to the values in lib/pysa and friends.
+                //
+                // The heavy left edge is the calendar convention for "this
+                // belongs to another calendar", and it is the part that
+                // survives a quarter-width lane where no lockup fits.
+                borderColor: `${accent}66`,
+                borderLeftColor: accent,
+                borderLeftWidth: 3,
+                backgroundColor: `${accent}1a`,
+                // Inherited by the hover overlay's `bg-current`.
+                color: accent,
+              }
           : undefined
       }
     >
@@ -955,7 +579,9 @@ export function Block({
           is 83px of which the mark takes 57, so the same mascot there would be
           a thumbnail wedged behind the type. */}
       {spare && item.page === "pysanantonio" && (
-        <PysaMascot animated={pysaShowcase} />
+        // `compact` off the axis: a week column card is 237x176, where the
+        // standing figure is the card rather than a flourish on it.
+        <PysaMascot animated={pysaShowcase} compact={offAxis} />
       )}
 
       {/* Access Granted's ciphertext, decrypted under the cursor. `spare` for
@@ -1051,7 +677,8 @@ export function Block({
           the whole reason the time row below tests for it. A block on an hour
           axis has already stated when it runs by where it sits and how far it
           reaches; the speaker is the one fact the geometry cannot supply. On a
-          taller block both fit and both are drawn. */}
+          taller block both fit and both are drawn — as they do on every card
+          off the axis, where nothing is stating the time but the time. */}
       {people && (
         <p className="mt-1.5 shrink-0 truncate text-[11px] leading-tight text-white/70">
           {people}
@@ -1072,8 +699,35 @@ export function Block({
           `shrink-0` so this can never be the thing that gives. If the budget
           is ever wrong again the mark clips — visible, and obviously a bug —
           rather than the text compressing into itself. */}
-      {!spare && showTime && !people && (
-        <p className="mt-1.5 shrink-0 truncate font-mono text-[9px] uppercase tracking-widest text-white/60">
+      {/* The presenting partner, directly under the mark it belongs to.
+          
+          Only where the block has room — a quarter-width lane on the axis has
+          none, and a credit is the first thing that should give. `text-white/55`
+          rather than the magenta the circuit strand uses: this is a fact about
+          who paid for the room, not a track the reader can filter on, and two
+          magenta lines under one mark read as one thing broken in half. */}
+      {item.poweredBy && spare && !dense && (
+        <p className="relative z-10 mt-1.5 shrink-0 truncate font-mono text-[9px] uppercase tracking-widest text-white/55">
+          Powered by {item.poweredBy}
+        </p>
+      )}
+
+      {/* `!people` no longer applies off the axis.
+          
+          On an hour axis the speaker outranks the time, because the block has
+          already said when it runs by where it sits and how far it reaches —
+          so one line goes to the fact the geometry cannot supply. A column
+          card has no geometry saying anything: drop the time and a session
+          states neither when it starts nor how long it lasts. It has the
+          height for both, so it draws both. */}
+      {(!spare || offAxis) && showTime && (offAxis || !people) && (
+        // `relative z-10`, not `relative` alone. Both this and the figure end
+        // up positioned with `z-index: auto`, so source order should decide
+        // and this comes second — but the mariachi is a stack of its own
+        // absolutely positioned layers, and one of them wins that tie. An
+        // explicit layer settles it: PySA's block was drawing its performer
+        // over its own time and room.
+        <p className="relative z-10 mt-1.5 shrink-0 truncate font-mono text-[9px] uppercase tracking-widest text-white/60">
           {item.timeLabel}
           {showVenue && (
             <span className="text-white/55"> · {item.venueShort}</span>
@@ -1099,7 +753,7 @@ export function Block({
           "truncate font-mono text-[9px] uppercase tracking-widest text-white/55",
           // Hidden without height to spare — the time row above has already
           // said the room, inline, because that is all one line affords.
-          (!showVenue || !spare) && "hidden",
+          (!showVenue || !spare || offAxis) && "hidden",
           // Anchored to the foot rather than left under the blurb: a
           // five-hour takeover is 360px tall and its copy rarely fills that,
           // so the venue was stranded mid-block above a void. The circuit
@@ -1324,10 +978,13 @@ export function StackBlock({
   picked,
   onToggle,
   showAction = true,
+  flat = false,
 }: {
   item: CalendarItem;
   picked: boolean;
   onToggle: (slug: string) => void;
+  /** See `flat` on Block — the same ground, for the same reason. */
+  flat?: boolean;
   /**
    * Whether the row carries its own add-to-calendar control.
    *
@@ -1383,7 +1040,10 @@ export function StackBlock({
         // down but leaves the short-mark rows sitting on the meta floor. The
         // floor is what lifts those to meet them.
         "group relative flex min-h-[75px] items-center gap-2 overflow-hidden rounded border px-3 py-3 transition-colors duration-200 lg:min-h-[83px]",
-        !accent && (TIER_CHARGE[item.venueTier] ?? TIER_CHARGE.single),
+        !flat && !accent && (TIER_CHARGE[item.venueTier] ?? TIER_CHARGE.single),
+        flat &&
+          !picked &&
+          "border-white/15 bg-white/[0.05] hover:bg-white/[0.09]",
         // A ring, not a fill. On the axis a picked block flooding magenta is
         // right — it has to survive a glance across five columns. Here, where
         // "Add day" picks every row at once, the same treatment turned a whole
@@ -1394,13 +1054,16 @@ export function StackBlock({
       )}
       style={
         accent
-          ? {
-              borderColor: `${accent}66`,
-              borderLeftColor: accent,
-              borderLeftWidth: 3,
-              backgroundColor: `${accent}1a`,
-              color: accent,
-            }
+          ? flat
+            ? // Colour without the fill — see the same branch on Block.
+              { color: accent }
+            : {
+                borderColor: `${accent}66`,
+                borderLeftColor: accent,
+                borderLeftWidth: 3,
+                backgroundColor: `${accent}1a`,
+                color: accent,
+              }
           : undefined
       }
     >
@@ -1451,7 +1114,7 @@ export function StackBlock({
                 kind={kind}
               />
             ) : (
-              <RowTitle head={titleHead} tail={titleTail} />
+              <RowTitle head={titleHead} tail={titleTail} href={item.href} />
             )}
           </Link>
         ) : hasMark ? (
@@ -1465,7 +1128,7 @@ export function StackBlock({
             kind={kind}
           />
         ) : (
-          <RowTitle head={titleHead} tail={titleTail} />
+          <RowTitle head={titleHead} tail={titleTail} href={item.href} />
         )}
 
         {/* Who is on, under the title. A row is 768px wide at 1440 and the
@@ -1581,11 +1244,32 @@ export function DayToggle({
   slugs,
   picked,
   onToggle,
+  compact = false,
+  name,
 }: {
   /** The day's exportable activations, as currently filtered. */
   slugs: string[];
   picked: string[];
   onToggle: (slug: string) => void;
+  /**
+   * Icon only, for the week grid's column heads.
+   *
+   * The label is 90px of a 235px cell, in a pill, immediately right of the day
+   * name — so the head read as two controls of equal weight rather than a day
+   * with an action on it. Dropping the words gives the column back to the day.
+   * The stacked view keeps the full label: a phone row is the full width of
+   * the screen and has nothing to compete with.
+   */
+  compact?: boolean;
+  /**
+   * The day or room this belongs to, for the accessible name.
+   *
+   * Worth passing whether or not it is compact, and more so when it is: five
+   * heads currently expose five buttons all reading "Add day", which is a
+   * screen reader's version of the same collision the layout has. With it they
+   * read "Add Mon", "Add Tue".
+   */
+  name?: string;
 }) {
   if (slugs.length === 0) return null;
 
@@ -1606,8 +1290,23 @@ export function DayToggle({
         // — calling it on an already-picked slug would remove it.
         for (const slug of all ? slugs : missing) onToggle(slug);
       }}
+      title={
+        compact
+          ? all
+            ? "Added"
+            : partial
+              ? `Add ${missing.length} more`
+              : "Add day"
+          : undefined
+      }
+      aria-label={
+        compact || name
+          ? `${all ? "Remove" : "Add"} ${name ?? "day"}${all ? " from" : " to"} your calendar`
+          : undefined
+      }
       className={cn(
-        "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest transition-colors",
+        "inline-flex shrink-0 items-center rounded-full border font-mono text-[9px] uppercase tracking-widest transition-colors",
+        compact ? "gap-0 p-1.5" : "gap-1.5 px-2.5 py-1",
         all
           ? "border-magenta bg-magenta text-black"
           : partial
@@ -1622,28 +1321,46 @@ export function DayToggle({
       {all ? (
         <>
           <Check className="size-3" strokeWidth={3} />
-          Added
+          {!compact && "Added"}
         </>
       ) : (
         <>
           <CalendarPlus className="size-3" />
-          {partial ? `Add ${missing.length} more` : "Add day"}
+          {!compact && (partial ? `Add ${missing.length} more` : "Add day")}
         </>
       )}
     </button>
   );
 }
 
-function RowTitle({ head, tail }: { head: string; tail: string }) {
+function RowTitle({
+  head,
+  tail,
+  href,
+}: {
+  head: string;
+  tail: string;
+  /**
+   * Only for `TitleText`, which keys the inline mark off the URL slug.
+   *
+   * This row was the one calendar surface still setting its title as plain
+   * text, so the Nopalera talk carried its wordmark on the week card and the
+   * day block and reverted to the word in the agenda — the surface a phone
+   * reads the whole week on. Both halves are offered it: a title that breaks
+   * puts the mark in whichever half holds the name, and `TitleText` returns
+   * the text untouched when neither does.
+   */
+  href: string | null;
+}) {
   return (
     <span className="text-pretty text-base font-medium leading-tight text-white lg:text-lg">
-      {head}
+      <TitleText text={head} href={href} />
       {tail && (
         <>
           {/* Only from lg. A narrow row already wraps a long title, and forcing
               the split there just adds a stub line. */}
           <br className="hidden lg:inline" />
-          {tail}
+          <TitleText text={tail} href={href} />
         </>
       )}
     </span>
@@ -1701,8 +1418,11 @@ export function StackSpanBar({
       {reserveAction && <div className="w-8 shrink-0" />}
     </>
   );
+  // The same ground as a flat row beside it. `white/25` on `white/[0.06]`
+  // was the axis-era value and sat a shade off the cards it now shares a
+  // list with.
   const className =
-    "flex items-center gap-2 rounded border border-white/25 bg-white/[0.06] px-3 py-3 transition-colors duration-200 hover:bg-white/[0.11]";
+    "flex items-center gap-2 rounded border border-white/15 bg-white/[0.05] px-3 py-3 transition-colors duration-200 hover:bg-white/[0.09]";
   return span.page ? (
     <Link
       href={`/schedule/${span.page}`}
@@ -1718,7 +1438,23 @@ export function StackSpanBar({
   );
 }
 
-export function SpanBar({ span }: { span: CalendarSpan }) {
+export function SpanBar({
+  span,
+  flat = false,
+}: {
+  span: CalendarSpan;
+  /**
+   * Match the week columns' cards rather than announce itself.
+   *
+   * The bar went magenta when the blocks around it were tinted by room tier
+   * and it was the faintest furniture on the grid. The columns are flat and
+   * dark now, so the same magenta makes it the only coloured object in the
+   * view — which reads as a warning rather than as the week's one all-day
+   * activation. Flat, it sits in the same material as the cards under it and
+   * the rule keeps doing the work of saying "all of this".
+   */
+  flat?: boolean;
+}) {
   const lockup = span.brand?.lockup;
   // Two anchors and a rule between them: the mark at one end, the days and the
   // room together at the other, joined across whatever is left.
@@ -1760,7 +1496,12 @@ export function SpanBar({ span }: { span: CalendarSpan }) {
           the right behaviour: there is no distance left to carry. */}
       <span
         aria-hidden="true"
-        className="h-px min-w-0 flex-1 bg-gradient-to-r from-white/5 via-white/20 to-white/20"
+        className={cn(
+          "h-px min-w-0 flex-1 bg-gradient-to-r",
+          flat
+            ? "from-white/5 via-white/20 to-white/20"
+            : "from-magenta/10 via-magenta/40 to-magenta/40",
+        )}
       />
       <span className="shrink-0 truncate font-mono text-[10px] uppercase tracking-widest">
         <span className="text-white/70">{span.dayLabel}</span>
@@ -1769,8 +1510,19 @@ export function SpanBar({ span }: { span: CalendarSpan }) {
       </span>
     </>
   );
-  const className =
-    "flex items-center gap-4 rounded border border-white/25 bg-white/[0.06] px-3 py-1.5 transition-colors duration-200 hover:bg-white/[0.11]";
+  // Magenta, at a tint. The bar was the faintest furniture in the grid —
+  // `white/25` on `white/[0.06]` — while standing for the only activation
+  // true of every column behind it, so the row it occupies read as empty
+  // rather than as spanning. A tint rather than the homepage snapshot's solid
+  // fill, because this bar carries the activation's own lockup and a solid
+  // house colour behind Give-a-LOT's yellow-and-magenta mark would be two
+  // brands arguing. The rule keeps its job: see the note above.
+  const className = cn(
+    "flex items-center gap-4 rounded border px-3 py-1.5 transition-colors duration-200",
+    flat
+      ? "border-white/15 bg-white/[0.05] hover:bg-white/[0.09]"
+      : "border-magenta/35 bg-magenta/[0.08] hover:bg-magenta/[0.14]",
+  );
   return span.page ? (
     <Link
       href={`/schedule/${span.page}`}

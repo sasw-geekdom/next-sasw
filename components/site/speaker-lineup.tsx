@@ -45,9 +45,17 @@ export function SpeakerLineup({
             Who carries the current.
           </h2>
 
+          {/* The mix, not the maths.
+              
+              A count read as a scoreboard — a number small enough to be a
+              disappointment on a page whose job is to make the lineup look
+              worth the trip — and "more land as the week fills" was an
+              apology for it. Neither says anything about who is actually
+              coming, which is the only thing this section is for. */}
           <p className="mt-4 max-w-xl text-pretty text-white/60 lg:col-start-1 lg:row-start-3">
-            The founders, builders, and operators taking the stage — five
-            circuits, six rooms.
+            Founders and operators, engineers and security researchers, the
+            people running the rooms and the ones who fund what happens in them
+            — five circuits, and a stage in each.
           </p>
 
           <ButtonLink

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { CalendarPlus } from "lucide-react";
+import { CalendarPlus, Search, X } from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
 import { cn } from "@/lib/utils";
 
@@ -183,16 +183,29 @@ export function Filters({
   venues,
   circuit,
   venue,
+  query = null,
   onCircuit,
   onVenue,
+  onQuery,
   layout = "auto",
 }: {
   circuits: Option[];
   venues: Option[];
   circuit: string | null;
   venue: string | null;
+  /**
+   * The free-text cut, where the caller has one.
+   *
+   * Optional because the speakers page shares this component and does not
+   * search: its haystack is a person's name, role and company, which is a
+   * different index from a session's, and one field that means two things
+   * would be worse than two fields that each mean one. Without `onQuery` no
+   * box is drawn — the schedule opts in, the speaker wall does not.
+   */
+  query?: string | null;
   onCircuit: (next: string | null) => void;
   onVenue: (next: string | null) => void;
+  onQuery?: (next: string | null) => void;
   /**
    * "auto" is the full-width case: selects on a phone, chips from lg, where
    * there is room to show the vocabulary.
@@ -211,47 +224,100 @@ export function Filters({
   // width is not the same as it being worth the height.
   if (layout === "compact") {
     return (
-      <div className="flex max-w-md gap-2">
-        <FilterSelect
-          label="Circuit"
-          placeholder="All circuits"
-          options={circuits}
-          value={circuit}
-          onChange={onCircuit}
-        />
-        <FilterSelect
-          label="Venue"
-          placeholder="All rooms"
-          options={venues}
-          value={venue}
-          onChange={onVenue}
-        />
+      // `max-w-md` was sized for a control block that had the row to itself.
+      // In the merged bar the two selects share the row with the view toggle,
+      // and 28rem across two of them clipped the longer label to "All
+      // circui…". They size to their own content now; the row wraps if it
+      // ever has to.
+      // A column on a phone, a row from lg.
+      //
+      // Wrapping was the wrong mechanism below lg. Three controls each sized
+      // to their own content — 256px for the search, 248px for either select
+      // — do not fit a 342px content box, so every one of them took a line of
+      // its own and none of them reached the right edge: three boxes of two
+      // different widths stacked down the left, 124px of ragged controls
+      // before the first session. Stated as a column instead, the search takes
+      // the full measure and the two selects share one row, which is 82px and
+      // has an edge.
+      <div className="flex w-full flex-col gap-2 lg:w-auto lg:flex-row lg:flex-wrap">
+        {/* From lg it is wider than the selects and does not shrink to match
+            them: what is typed here is a name, and a name clipped to "sandra
+            vela…" in the field that found it is a control arguing with its own
+            result. On a phone it takes the whole measure for the same reason. */}
+        {onQuery && (
+          <SearchField
+            value={query}
+            onChange={onQuery}
+            className="w-full lg:w-64"
+          />
+        )}
+        <div className="flex gap-2 lg:contents">
+          <FilterSelect
+            label="Circuit"
+            placeholder="All circuits"
+            options={circuits}
+            value={circuit}
+            onChange={onCircuit}
+            // Half the row each below lg, where the 15.5rem floor cannot hold
+            // — two of those is 496px on a 342px screen. At 167px apiece the
+            // triggers still clear "All circuits" and "All rooms" unclipped;
+            // a long selection truncates, which the magenta edge covers for.
+            // From lg the wrapper is `contents`, so these become children of
+            // the row itself again and take the floor back.
+            className="min-w-0 flex-1 lg:min-w-[15.5rem] lg:flex-none"
+          />
+          <FilterSelect
+            label="Venue"
+            placeholder="All rooms"
+            options={venues}
+            value={venue}
+            onChange={onVenue}
+            className="min-w-0 flex-1 lg:min-w-[15.5rem] lg:flex-none"
+          />
+        </div>
       </div>
     );
   }
   if (layout === "stacked") {
     return (
       <div className="flex flex-col gap-2">
-        <FilterSelect
-          label="Circuit"
-          placeholder="All circuits"
-          options={circuits}
-          value={circuit}
-          onChange={onCircuit}
-        />
-        <FilterSelect
-          label="Venue"
-          placeholder="All rooms"
-          options={venues}
-          value={venue}
-          onChange={onVenue}
-        />
+        {onQuery && <SearchField value={query} onChange={onQuery} />}
+        {/* Stacked is the 20rem sticky column's shape, and only from lg does
+            the column exist. Below it this block runs the full measure, where
+            three boxes down the page is 124px for what fits in 82 — so the
+            selects share a row there, exactly as they do in `compact`. */}
+        <div className="flex gap-2 lg:contents">
+          <FilterSelect
+            label="Circuit"
+            placeholder="All circuits"
+            options={circuits}
+            value={circuit}
+            onChange={onCircuit}
+            className="min-w-0 flex-1 lg:min-w-[15.5rem] lg:flex-none"
+          />
+          <FilterSelect
+            label="Venue"
+            placeholder="All rooms"
+            options={venues}
+            value={venue}
+            onChange={onVenue}
+            className="min-w-0 flex-1 lg:min-w-[15.5rem] lg:flex-none"
+          />
+        </div>
       </div>
     );
   }
 
   return (
     <>
+      {/* Its own row at every width here. Below lg the two selects already
+          share one 36px line and a third control on it would leave each about
+          110px; from lg the filters are chips, and a text field parked at the
+          end of a chip row reads as another chip. */}
+      {onQuery && (
+        <SearchField value={query} onChange={onQuery} className="max-w-md" />
+      )}
+
       <div className="flex gap-2 lg:hidden">
         <FilterSelect
           label="Circuit"
@@ -287,18 +353,101 @@ export function Filters({
   );
 }
 
+/**
+ * The free-text cut, in the same 36px row the selects run at.
+ *
+ * A third control is not free, and it earns the room by doing the thing the
+ * other two cannot: the selects narrow by circuit and by room, and on a day
+ * where twenty sessions share one room and two circuits, both of them return
+ * almost everything. See lib/calendar-search for what it matches and why it
+ * is not fuzzy.
+ *
+ * First in every layout, ahead of the selects. It is the broadest cut of the
+ * three — it can reach a speaker, a room, a strand and a sponsor at once —
+ * and the row should read from wide to narrow.
+ */
+function SearchField({
+  value,
+  onChange,
+  className,
+}: {
+  value: string | null;
+  onChange: (next: string | null) => void;
+  className?: string;
+}) {
+  const id = React.useId();
+  return (
+    <div className={cn("relative", className)}>
+      <label htmlFor={id} className="sr-only">
+        Search sessions
+      </label>
+      <Search
+        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-white/60"
+        strokeWidth={1.5}
+        aria-hidden="true"
+      />
+      <input
+        id={id}
+        type="search"
+        value={value ?? ""}
+        // The empty string is "no filter" — the same contract the selects
+        // keep, so an emptied box drops out of the URL instead of leaving
+        // `?q=` on the address people copy.
+        onChange={(e) =>
+          onChange(e.target.value === "" ? null : e.target.value)
+        }
+        onKeyDown={(e) => {
+          // Escape clears rather than blurring. A reader who has narrowed the
+          // week to one speaker wants the week back, and the browser's own
+          // search-input clear button is invisible until the field is hovered.
+          if (e.key === "Escape" && value !== null) {
+            e.preventDefault();
+            onChange(null);
+          }
+        }}
+        placeholder="Search speakers, sessions"
+        className={cn(
+          // Matched to Combobox's `sm` trigger, down to the /40 border —
+          // WCAG 1.4.11 wants 3:1 on a boundary that identifies a control.
+          "h-9 w-full rounded-md border bg-black pl-9 pr-9 text-sm text-white transition-colors",
+          "border-white/40 placeholder:text-white/60 hover:border-magenta/60",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-1",
+          // The magenta edge a set filter takes, the same as FilterSelect's.
+          value !== null && "border-magenta",
+          // Safari draws its own clear affordance inside a `type="search"`
+          // field, which would sit under ours.
+          "[&::-webkit-search-cancel-button]:appearance-none",
+        )}
+      />
+      {value !== null && (
+        <button
+          type="button"
+          onClick={() => onChange(null)}
+          aria-label="Clear search"
+          className="absolute right-1 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-sm text-white/60 transition-colors hover:text-magenta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
+        >
+          <X className="size-4" strokeWidth={1.5} aria-hidden="true" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 function FilterSelect({
   label,
   placeholder,
   options,
   value,
   onChange,
+  className,
 }: {
   label: string;
   placeholder: string;
   options: Option[];
   value: string | null;
   onChange: (next: string | null) => void;
+  /** Overrides the width floor below — see the note on it. */
+  className?: string;
 }) {
   const id = React.useId();
   // The empty string is "no filter". Combobox speaks in strings and `null`
@@ -309,7 +458,19 @@ function FilterSelect({
     [options, placeholder],
   );
   return (
-    <div className="min-w-0 flex-1">
+    // `flex-1` and `min-w-0` were for the old block, where two selects split
+    // a `max-w-md` row and had to share it evenly. In the merged control bar
+    // they made each one shrink to half of whatever was left, which is what
+    // clipped "All circuits" to "All circui…". They size to their label now.
+    // A floor, so picking a filter doesn't move the one beside it.
+    //
+    // The trigger sizes to its content, which is why nothing was clipping —
+    // but it also means the box grows when a value is chosen: measured, the
+    // circuits trigger goes from "All circuits" to 242px on "Small Business &
+    // Solopreneur", shoving the rooms select 80px to the right as you use it.
+    // 15.5rem clears the longest option in either list, so both boxes are the
+    // width they will ever need and the row holds still.
+    <div className={cn("min-w-[15.5rem]", className)}>
       {/* The trigger's text is the placeholder or the selection, so "All
           circuits" and "All rooms" already read as names — but only while
           nothing is chosen. Once one is, the trigger says "Capital" and
@@ -444,7 +605,19 @@ export function ViewToggle({
   return (
     <div
       className={cn(
-        "hidden overflow-hidden rounded-md border border-white/20 font-mono text-[10px] uppercase tracking-widest lg:inline-flex",
+        // 12px, not 10, and a wider pill. This is the primary view switch for
+        // the whole schedule — it decides which of two layouts the page is —
+        // and it was the smallest type on it: 10px against 16px filter
+        // selects, 16px intro copy and 20px day names. The one control that
+        // changes everything was set below the things it changes.
+        //
+        // The size also settles a question the colour kept raising. `magenta`
+        // at 53×31px on pure black reads red: a small, highly saturated patch
+        // loses its hue, and the surrounding black pushes what is left warm.
+        // It is the same #ff32a0 as the headline accent, which reads pink
+        // because it is larger and has white around it. More area is the fix
+        // that keeps the value.
+        "hidden overflow-hidden rounded-md border border-white/20 font-mono text-xs uppercase tracking-widest lg:inline-flex",
         className,
       )}
       role="group"
@@ -459,7 +632,7 @@ export function ViewToggle({
             aria-pressed={current}
             onClick={() => onChange(option.value)}
             className={cn(
-              "px-3 py-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-magenta",
+              "whitespace-nowrap px-4 py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-magenta",
               i > 0 && "border-l border-white/20",
               current
                 ? "bg-magenta text-black"

@@ -2349,7 +2349,7 @@ export interface CalendarBrand {
  * lockup comes off the session's own `logo`, so an activation that gains one
  * in the data gains it here with no change.
  */
-function brandFor(session: ResolvedSession): CalendarBrand | undefined {
+export function brandFor(session: ResolvedSession): CalendarBrand | undefined {
   const accent =
     session.page === "access-granted"
       ? ACCESS_GREEN
@@ -2467,8 +2467,35 @@ export interface CalendarItem {
    * re-deriving a timezone.
    */
   people?: string;
+  /**
+   * The activation's presenting partner, already joined.
+   *
+   * On the block because the week columns have no axis and so no second
+   * surface to say it on — the credit that sits under the title on a slug
+   * page has nowhere else to go there. Absent for CMS talks, which have no
+   * partner of their own.
+   */
+  poweredBy?: string;
   /** The activation's own brand, where it has one. */
   brand?: CalendarBrand;
+  /**
+   * Extra text the block should be findable by, drawn nowhere.
+   *
+   * An activation's own fields say almost nothing about who is inside it. Its
+   * `title` is the host organisation, its `people` is deliberately empty —
+   * see the note there — and the talk the CMS has attached to it, with its
+   * speaker, exists only on the activation's page. So Google Developer Groups
+   * was reachable by searching "google" and not by searching the name of the
+   * one person speaking there, which is the more likely thing to type.
+   *
+   * A separate field rather than filling in `people`, because the two want
+   * opposite things. `people` is printed on the card and has to stay a byline:
+   * an activation is an afternoon with a running order, and five names
+   * truncated to "Ana Ruiz, Marcus…" would be worse than none. This is index
+   * only, so it can hold every name and every attached talk title without
+   * costing the card a pixel.
+   */
+  searchText?: string;
   /** Whether a calendar file can be built for it — drives the export toggle. */
   exportable: boolean;
 }
@@ -2623,6 +2650,35 @@ export function eventIso(ms: number): string {
  * the client components that read `CalendarItem` off it. The Firestore read
  * lives in lib/live-schedule.
  */
+/**
+ * Activation page slug → the text of everything the CMS has attached to it.
+ *
+ * The other half of `standaloneItems`. That one takes the rows with no
+ * activation and turns them into their own blocks; this one takes the rows
+ * that *have* an activation, which draw no block of their own, and hands
+ * their titles and speakers back to the block that gathers them.
+ *
+ * Keyed on `page`, which is what a session row's `activation` field stores —
+ * the same join /schedule/[slug] makes to render an activation's talks.
+ */
+export function activationSearchText(
+  rows: SessionRow[],
+): Record<string, string> {
+  const out: Record<string, string[]> = {};
+  for (const row of rows) {
+    if (!row.activation) continue;
+    const bucket = (out[row.activation] ??= []);
+    // The talk's own title as well as its people. "Behind the Answer: How
+    // LLMs and Google AI Search Work" is a thing a reader may well have seen
+    // announced elsewhere and typed a few words of.
+    bucket.push(row.title);
+    for (const who of row.participants) bucket.push(who.name);
+  }
+  return Object.fromEntries(
+    Object.entries(out).map(([slug, parts]) => [slug, parts.join(" ")]),
+  );
+}
+
 export function standaloneItems(rows: SessionRow[]): CalendarItem[] {
   return rows.flatMap((row) => {
     if (row.activation) return [];
@@ -2677,7 +2733,11 @@ export function standaloneItems(rows: SessionRow[]): CalendarItem[] {
   });
 }
 
-export function weekCalendar(extra: CalendarItem[] = []): WeekCalendar {
+export function weekCalendar(
+  extra: CalendarItem[] = [],
+  /** From `activationSearchText` — what the CMS has hung off each activation. */
+  attached: Record<string, string> = {},
+): WeekCalendar {
   const resolved = resolveSessions(allSessions());
 
   const items: CalendarItem[] = resolved
@@ -2700,11 +2760,13 @@ export function weekCalendar(extra: CalendarItem[] = []): WeekCalendar {
         endMin,
         timeLabel: compactRange(startMin, endMin),
         morning: s.rail ?? endMin <= MORNING_CUTOFF,
+        poweredBy: s.poweredBy?.map((o) => o.name).join(" and "),
         venueSlug: s.venue.slug,
         venueName: s.venue.name,
         venueShort: s.venue.shortName ?? s.venue.name,
         venueTier: s.venue.tier,
         circuit: s.circuit,
+        searchText: s.page ? attached[s.page] : undefined,
         brand: brandFor(s),
         // Only activations with a page have a per-session .ics route, and only
         // those with `when` have anything to put in one.
@@ -2823,6 +2885,7 @@ export interface DayCalendar {
 export function dayCalendar(
   iso: string,
   extra: CalendarItem[] = [],
+  attached: Record<string, string> = {},
 ): DayCalendar | null {
   const index = EVENT_DAYS.findIndex((d) => d.iso === iso);
   if (index === -1) return null;
@@ -2830,7 +2893,7 @@ export function dayCalendar(
 
   // The day view is a filter over the week, so a standalone session reaches it
   // by the same route and lands in its room's lane with no extra wiring.
-  const all = weekCalendar(extra);
+  const all = weekCalendar(extra, attached);
   const items = all.items.filter((i) => i.dayIso === iso);
   const spans = all.spans.filter(
     (s) => index >= s.fromIndex && index <= s.toIndex,

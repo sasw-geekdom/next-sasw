@@ -1,21 +1,13 @@
 "use client";
 
 import * as React from "react";
+import { matchesQuery } from "@/lib/calendar-search";
 import type { CalendarItem, CalendarSpan, DayVenue } from "@/lib/schedule";
+import { ColumnBoard } from "@/components/site/calendar/column-board";
 import {
-  AxisGrid,
-  type AxisPlacement,
-  type AxisRail,
-} from "@/components/site/calendar/axis-grid";
-import {
-  Block,
   SpanBar,
   StackBlock,
   StackSpanBar,
-  axisMarkCap,
-  fitsTimeRow,
-  hasSpareRows,
-  placeLanes,
 } from "@/components/site/calendar/blocks";
 import { DayRail } from "@/components/site/calendar/day-rail";
 import {
@@ -25,55 +17,11 @@ import {
   usePicked,
   type Option,
 } from "@/components/site/calendar/controls";
-
-// One day, with the venues as columns.
-//
-// This is where the detail lives. The week view fits five days across the page
-// and therefore gives every simultaneous venue an eighty-pixel lane; here a
-// day has the full width and TPR gets a column to itself. Three venues on a
-// max-w-7xl is roughly 400px each — wider than a *day* column in the week
-// view — and lanes almost never collide, because a room can only overlap
-// itself if it is running two rooms inside one room.
-//
-// The venue filter is still here and still useful (one column, full width),
-// but it is no longer load-bearing: the layout already did what filtering used
-// to have to do.
-
-/**
- * Pixels per hour, chosen from what the day actually contains.
- *
- * A day of five-hour takeovers wants to draw compact — at the fine scale it
- * would run to two thousand pixels of mostly one block. A day carrying a
- * thirty-minute speaker track wants the opposite: at the week's 72px an
- * half-hour slot is 36px, which holds no line of type at all. So the scale
- * follows the shortest thing on the day, and the axis is as tall as it needs
- * to be rather than as tall as a constant says.
- */
-/**
- * Grid height past which a day stops taking the roomy boost — about a
- * screenful under the header on the laptop this view is read on.
- */
-const ROOMY_CEILING = 700;
-
-function scaleFor(items: CalendarItem[]): number {
-  if (items.length === 0) return 80;
-  const shortest = Math.min(...items.map((i) => i.endMin - i.startMin));
-  if (shortest <= 30) return 132;
-  // No tier for the hour. The week view draws a 60-minute block at 60px and it
-  // carries title, speaker and time without strain, so an hour needs nothing
-  // finer than the base scale to stay legible — and buying it 104px charged
-  // the same 1.7x to every long block on the day. Thursday's four-hour brunch
-  // went to 416px and pushed the whole afternoon under the fold, which is the
-  // opposite of what this scale is for.
-  return 80;
-}
-
 export function DayCalendarGrid({
   activeDay,
   venues,
   items,
   spans,
-  axis,
   circuits,
 }: {
   /** This day's ISO date, for the rail's active segment. */
@@ -86,14 +34,27 @@ export function DayCalendarGrid({
 }) {
   const [circuit, setCircuit] = useUrlFilter("circuit");
   const [venue, setVenue] = useUrlFilter("venue");
+  // Same key the week uses, so a search survives clicking through to a day.
+  const [query, setQuery] = useUrlFilter("q");
   const { picked, toggle, clear } = usePicked();
-  const filtering = circuit !== null || venue !== null;
+  const filtering = circuit !== null || venue !== null || query !== null;
 
   const matches = React.useCallback(
-    (s: { circuit: string; venueSlug: string }) =>
+    (s: {
+      circuit: string;
+      venueSlug: string;
+      title: string;
+      longTitle?: string;
+      people?: string;
+      venueName: string;
+      venueShort?: string;
+      poweredBy?: string;
+      searchText?: string;
+    }) =>
       (circuit === null || s.circuit === circuit) &&
-      (venue === null || s.venueSlug === venue),
-    [circuit, venue],
+      (venue === null || s.venueSlug === venue) &&
+      matchesQuery(s, query),
+    [circuit, venue, query],
   );
 
   const shownItems = React.useMemo(
@@ -113,12 +74,13 @@ export function DayCalendarGrid({
       venues
         .filter((v) => venue === null || v.slug === venue)
         .map((v) => {
-          // Spans count too. A room whose only entry that day is a multi-day
-          // drive was reporting "0 sessions" directly above the bar showing
-          // the thing it was denying.
-          const count =
-            shownItems.filter((i) => i.venueSlug === v.slug).length +
-            shownSpans.filter((s) => s.venueSlug === v.slug).length;
+          // Only what the column draws. Spans used to count here, because
+          // they used to sit *in* the column — a room whose one entry was a
+          // multi-day drive would otherwise have reported "0 sessions" above
+          // the bar showing it. They ride above all the columns now, so
+          // counting them put "1 session" over a column reading "Nothing
+          // here", which is a straight contradiction.
+          const count = shownItems.filter((i) => i.venueSlug === v.slug).length;
           return {
             key: v.slug,
             label: v.short,
@@ -126,117 +88,11 @@ export function DayCalendarGrid({
             href: `/schedule/${v.slug}`,
           };
         }),
-    [venues, venue, shownItems, shownSpans],
+    [venues, venue, shownItems],
   );
 
   // The same split the week makes: a 7:30 AM brunch belongs on a rail, not on
   // an axis five hours of which would then be empty.
-  const morningItems = React.useMemo(
-    () => shownItems.filter((i) => i.morning),
-    [shownItems],
-  );
-  const axisItems = React.useMemo(
-    () => shownItems.filter((i) => !i.morning),
-    [shownItems],
-  );
-
-  const hourPx = React.useMemo(() => scaleFor(axisItems), [axisItems]);
-  const axisHours = (axis.endMin - axis.startMin) / 60;
-
-  const placements = React.useMemo(() => {
-    const out: Record<string, AxisPlacement[]> = {};
-    for (const col of columns) {
-      const inColumn = axisItems
-        .filter((i) => i.venueSlug === col.key)
-        .sort((a, b) => a.startMin - b.startMin);
-      out[col.key] = placeLanes(inColumn).map((item) => ({
-        key: item.slug,
-        startMin: item.startMin,
-        endMin: item.endMin,
-        lane: item.lane,
-        lanes: item.lanes,
-        node: (
-          <Block
-            item={item}
-            picked={picked.includes(item.slug)}
-            onToggle={toggle}
-            showVenue={false}
-            dense={item.lanes >= 2}
-            lanes={item.lanes}
-            spare={hasSpareRows(item.startMin, item.endMin, hourPx)}
-            showTime={fitsTimeRow(item.startMin, item.endMin, hourPx)}
-            // The day column is the full width of its room, so a name reads
-            // here where it would be four characters in a week lane.
-            showPeople
-            markMax={axisMarkCap(item.startMin, item.endMin, hourPx)}
-            // Stumberg is the only activation carrying `blockArt`, and it is
-            // the one this was asked for: on the day axis its mark was a 24px
-            // thumbnail wedged beside the title with 190px of empty block
-            // under it, where the week centres it. Same card, both views.
-            splitArt
-            // The one block on 2026-10-02 that has a clip, on the one view
-            // with the room to play it.
-            showcaseArt
-            fill
-            // A venue column here is 367px against a week lane's 240, so the
-            // day view prints the whole title — the same one the week's
-            // morning rail prints, so the brunch reads the same on both.
-            fullTitle
-          />
-        ),
-      }));
-    }
-    return out;
-  }, [columns, axisItems, picked, toggle, hourPx]);
-
-  const rails = React.useMemo(() => {
-    const list: AxisRail[] = [];
-
-    if (shownSpans.length > 0) {
-      const byColumn: Record<string, React.ReactNode> = {};
-      for (const span of shownSpans) {
-        byColumn[span.venueSlug] = <SpanBar key={span.slug} span={span} />;
-      }
-      // Per column here, not spanning: on one day a multi-day drive belongs to
-      // the room running it, and the week's "which days" question is already
-      // answered by being on this page.
-      list.push({ label: "All day", byColumn });
-    }
-
-    if (morningItems.length > 0) {
-      const byColumn: Record<string, React.ReactNode> = {};
-      for (const col of columns) {
-        const inColumn = morningItems
-          .filter((i) => i.venueSlug === col.key)
-          .sort((a, b) => a.startMin - b.startMin);
-        if (inColumn.length === 0) continue;
-        byColumn[col.key] = (
-          <>
-            {inColumn.map((item) => (
-              <Block
-                key={item.slug}
-                item={item}
-                picked={picked.includes(item.slug)}
-                onToggle={toggle}
-                showVenue={false}
-                // The rail is a full-width column with no height budget, so
-                // the block carries the whole title and the speaker, same as
-                // the axis blocks below it.
-                showPeople
-                fullTitle
-              />
-            ))}
-          </>
-        );
-      }
-      // Below the all-day rail and immediately above 1 PM, so the column reads
-      // top to bottom in time order.
-      list.push({ label: "Before noon", byColumn });
-    }
-
-    return list;
-  }, [shownSpans, morningItems, columns, picked, toggle]);
-
   const hidden = picked.filter(
     (slug) => !shownItems.some((i) => i.slug === slug),
   ).length;
@@ -247,16 +103,46 @@ export function DayCalendarGrid({
           the chips narrow it. Moved off the headline row for the same reason:
           on a phone it landed under the display type with nothing to tie it
           to, and it belongs with the other controls. */}
-      <div className="mt-6 flex flex-col gap-3 lg:mt-8">
-        <DayRail active={activeDay} className="lg:hidden" />
-        <Filters
-          circuits={circuits}
-          venues={venues.map((v) => ({ value: v.slug, label: v.name }))}
-          circuit={circuit}
-          venue={venue}
-          onCircuit={setCircuit}
-          onVenue={setVenue}
-        />
+      {/* Pinned under the navbar below lg — the same reason the week's is.
+          A Tuesday runs past three screens on a phone and the control that
+          moves to another day was at the top of the first one. */}
+      <div className="sticky top-16 z-30 -mx-6 mt-6 bg-black px-6 pb-2.5 lg:hidden">
+        <DayRail active={activeDay} />
+      </div>
+
+      {/* One bar, the shape the week view uses: what is being shown on the
+          left, which day on the right.
+          
+          These were three separate things at three different left edges — a
+          search box, then a "Circuit" row of five chips, then a "Venue" row of
+          four, with their legends hanging in the margin at a fourth. 155px of
+          controls in four alignments above a grid whose whole design is that
+          it fits one screen. The chips said the vocabulary out loud, which is
+          worth something; it is not worth a third of the viewport on the page
+          that has the least of it to spare, and the week view settled the same
+          trade the same way. */}
+      <div className="mt-4 flex flex-col items-start gap-3 lg:mt-8">
+        {/* Which day, then what within it — the order the rail's own note
+            argues for and the order the phone gets. Its own line rather than
+            the right end of the filters' row: at 1440 the two together are
+            1,264px against 1,232 of measure, so `justify-between` dropped the
+            rail to a second line anyway and would put it back on the right on
+            a wider screen. A control that changes position with the window is
+            worse than one that always starts where everything else does. */}
+        <DayRail active={activeDay} className="hidden lg:block" />
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3 max-lg:w-full">
+          <Filters
+            layout="compact"
+            circuits={circuits}
+            venues={venues.map((v) => ({ value: v.slug, label: v.name }))}
+            circuit={circuit}
+            venue={venue}
+            query={query}
+            onCircuit={setCircuit}
+            onVenue={setVenue}
+            onQuery={setQuery}
+          />
+        </div>
       </div>
 
       {columns.length === 0 || shownItems.length === 0 ? (
@@ -275,25 +161,42 @@ export function DayCalendarGrid({
         </div>
       ) : (
         <>
-          <AxisGrid
+          {/* The same board the week view draws, with rooms for columns.
+              
+              The hour axis is gone from here too, and with it the "All day"
+              and "Before noon" rails and the hour gutter — all three existed
+              to hold what the axis could not place, so removing it removes
+              them. What is lost is simultaneity: an axis shows two takeovers
+              overlapping, and a column of cards can only state their times.
+              This was the last surface drawing one.
+              
+              What is gained is that a day reads the way the week does, and
+              that a room with fourteen sessions scrolls inside its column
+              instead of running the page to three screens. */}
+          <ColumnBoard
             className="mt-10 hidden lg:block"
-            columns={columns}
-            axis={axis}
-            hourPx={hourPx}
-            // A quarter more on a roomy display, but only on a day short
-            // enough to have spare height to fill. The boost exists to use a
-            // tall screen, and on a long day it does the opposite: Thursday
-            // runs 7:30 AM to 8 PM, so the quarter added 260px to a grid that
-            // was already twice a viewport and pushed the whole afternoon
-            // under the fold. Past roughly a screenful the day is long enough
-            // on its own.
-            roomyHourPx={
-              axisHours * hourPx < ROOMY_CEILING
-                ? Math.round(hourPx * 1.25)
-                : hourPx
+            /* No `sublabel` — the board counts the column itself, and the
+               room's own count is exactly what that sublabel was. Passing it
+               would print the number twice. The stack below lg still uses it,
+               because nothing counts for it there. */
+            columns={columns.map((c) => ({
+              key: c.key,
+              label: c.label,
+              href: c.href,
+            }))}
+            groupBy={(i) => i.venueSlug}
+            items={shownItems}
+            spans={
+              shownSpans.length > 0 ? (
+                <div className="flex flex-col gap-1.5">
+                  {shownSpans.map((span) => (
+                    <SpanBar key={span.slug} span={span} flat />
+                  ))}
+                </div>
+              ) : null
             }
-            placements={placements}
-            rails={rails}
+            picked={picked}
+            onToggle={toggle}
             emptyLabel={filtering ? "Nothing matching" : "Nothing here"}
           />
 
@@ -309,9 +212,23 @@ export function DayCalendarGrid({
               );
               return (
                 <div key={col.key} className="flex flex-col gap-3">
-                  <p className="font-mono text-[11px] uppercase tracking-widest">
-                    <span className="text-white">{col.label}</span>{" "}
-                    <span className="text-white/45">{col.sublabel}</span>
+                  {/* Matching the column heads above — the room in the
+                      display face, its count in mono. */}
+                  <p className="flex items-baseline gap-2">
+                    <span className="font-display text-xl font-bold uppercase leading-none tracking-tight text-white">
+                      {col.label}
+                    </span>
+                    {/* Counted here rather than taken from `col.sublabel`.
+                        That count excludes the all-week bars, which is right
+                        for the desktop board — there they ride above every
+                        column rather than inside one. In this stack they are
+                        inside the room, so the borrowed number put "0
+                        sessions" directly above a Give-a-LOT card. */}
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-white/45">
+                      {inColumn.length + colSpans.length === 1
+                        ? "1 session"
+                        : `${inColumn.length + colSpans.length} sessions`}
+                    </span>
                   </p>
                   {colSpans.map((span) => (
                     <StackSpanBar key={span.slug} span={span} />
@@ -320,6 +237,7 @@ export function DayCalendarGrid({
                     <StackBlock
                       key={item.slug}
                       item={item}
+                      flat
                       picked={picked.includes(item.slug)}
                       onToggle={toggle}
                     />

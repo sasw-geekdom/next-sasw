@@ -1,7 +1,11 @@
 import "server-only";
 
 import { listSessions } from "@/lib/admin/cms-queries";
-import { standaloneItems, type CalendarItem } from "@/lib/schedule";
+import {
+  activationSearchText,
+  standaloneItems,
+  type CalendarItem,
+} from "@/lib/schedule";
 
 /**
  * The CMS's own sessions, as calendar blocks.
@@ -33,9 +37,32 @@ import { standaloneItems, type CalendarItem } from "@/lib/schedule";
  * in code rather than moving all of it here.
  */
 export async function liveCalendarItems(): Promise<CalendarItem[]> {
+  return (await liveSchedule()).items;
+}
+
+/**
+ * Both halves of what the CMS contributes to the grid, from one read.
+ *
+ * `standaloneItems` needs the rows with no activation and
+ * `activationSearchText` needs the rows that have one, so they want the same
+ * query and would otherwise each make it. `listSessions` is not memoised — it
+ * hits Firestore every call — and the two surfaces that draw a calendar want
+ * both halves, so they take them together.
+ *
+ * `liveCalendarItems` above is what /schedule/[slug] still uses: that page
+ * lists a room's standalone talks and has no block to attach anything to.
+ */
+export async function liveSchedule(): Promise<{
+  items: CalendarItem[];
+  attached: Record<string, string>;
+}> {
   try {
-    return standaloneItems(await listSessions());
+    const rows = await listSessions();
+    return {
+      items: standaloneItems(rows),
+      attached: activationSearchText(rows),
+    };
   } catch {
-    return [];
+    return { items: [], attached: {} };
   }
 }

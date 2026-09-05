@@ -6,6 +6,7 @@ import { FeaturedBill } from "@/components/site/featured-bill";
 import { featuredLineup } from "@/lib/featured";
 import { PYSA } from "@/lib/pysa";
 import { HoverPeek } from "@/components/site/hover-peek";
+import { cn } from "@/lib/utils";
 import { ModelFlow } from "@/components/site/model-flow";
 import { MODEL_INK, MODEL_LAVENDER, MODEL_LAVENDER_LIT } from "@/lib/the-model";
 
@@ -68,7 +69,48 @@ export async function SessionsHero() {
       // useful half of the same job.
       headline={
         <>
-          Start <span className="text-magenta">here.</span>
+          Start{" "}
+          {/* The bolt, in the line rather than behind the bill.
+              
+              It spent this whole design as a `backdrop` in the featured
+              column: 496px of shader sitting under four event rows, where it
+              had to be positioned around their titles — the note that used to
+              live here worked out that its top tip landed *in* the row
+              carrying the Nopalera mark, and capped its height so a 27-inch
+              screen would not push it back up there. That is a graphic
+              fighting the content on top of it.
+              
+              In the headline it fights nothing. The left column is two words
+              and the right is a list of four events; the bolt is what gives
+              the left side the weight to hold that, and it lands in the first
+              thing a reader looks at rather than behind the last.
+              
+              It also settles the contrast question the backdrop raised.
+              Black display type crossing the ink measured 3.09:1 — clearing
+              WCAG's 3:1 for large text and nothing more, with a standing rule
+              that no body copy may ever be allowed over it. Beside the type
+              instead of behind it, nothing crosses it at all. */}
+          <span
+            className={cn(
+              // Square, because the mask is: the silhouette fills about
+              // two-thirds of a 375×375 viewBox, so a box at cap height would
+              // draw a bolt two-thirds the height of the letters beside it.
+              // 1.5em puts its ink at roughly the caps' own height.
+              "relative inline-block aspect-square h-[1.5em] w-[1.5em] align-[-0.34em]",
+              // The transparent margin inside the SVG, taken back out. Left
+              // alone it reads as two word-spaces around the mark.
+              "-mx-[0.18em]",
+            )}
+          >
+            <ShaderCanvas
+              color={SESSIONS_CURRENT}
+              base={BASE}
+              maskClassName="bolt-mask"
+              fallbackSrc="/brand/sastw-bolt.svg"
+              className="h-full w-full"
+            />
+          </span>
+          <span className="text-magenta">here.</span>
         </>
       }
       // Leads with the fact that moves someone, not with what the page is.
@@ -252,33 +294,6 @@ export async function SessionsHero() {
       //
       // Placed low and right, and sized so it stays there.
       //
-      // Two things fix its position, and both come off the same measurement.
-      // Vertically it has to start below the first row's title: at the old
-      // `h-[72%] bottom-[3%]` the ink ran y283–731 against a title sitting at
-      // y273–299, so the bolt's top tip landed *in* the row that carries the
-      // Nopalera mark, while 80px of its bottom hung below the whole bill in
-      // empty space. It was simply too high. Horizontally it sits in the room
-      // the three short titles leave on the right, which is why the box is
-      // pushed past the section's right edge — `overflow-hidden` clips the
-      // box, but the silhouette is only 70% of it, so what gets cut is
-      // transparent padding and the ink stops 16–23px inside.
-      //
-      // `max-h` because the box is a percentage of the *section*, which grows
-      // with the viewport, while the bill is a fixed height centred in it. On
-      // a 27-inch without the cap the bolt grew until its top rose back into
-      // the first title — 16px above it, where every smaller screen cleared by
-      // 11–22px. Capped, that screen clears by 86px.
-      backdrop={
-        <div className="absolute bottom-[3%] right-[-4%] hidden aspect-square h-[68%] max-h-124 opacity-100 lg:block">
-          <ShaderCanvas
-            color={SESSIONS_CURRENT}
-            base={BASE}
-            maskClassName="bolt-mask"
-            fallbackSrc="/brand/sastw-bolt.svg"
-            className="h-full w-full"
-          />
-        </div>
-      }
     />
   );
 }

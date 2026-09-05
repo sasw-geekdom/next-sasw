@@ -69,7 +69,14 @@ export function DayRail({
         // Never wraps. A segmented control that breaks across rows stops
         // reading as one control; if it can't fit it scrolls, which at least
         // keeps the shape honest.
-        className="flex overflow-x-auto rounded-md border border-white/20 font-mono text-[10px] uppercase tracking-widest [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        // 12px, with the view toggle. This is the day pages' primary
+        // navigation — six destinations and the way back to the week — and it
+        // was set at 10px, smaller than the filter chips beside it and less
+        // than half the room heads it sits above. The one control that changes
+        // which day you are reading should not be the quietest thing on the
+        // page. Matched to ViewToggle, which had the same problem for the same
+        // reason.
+        className="flex overflow-x-auto rounded-md border border-white/20 font-mono text-xs uppercase tracking-widest [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {segments.map((segment, i) => {
           const current = segment.key === active;
@@ -88,7 +95,7 @@ export function DayRail({
                 <span
                   aria-current="page"
                   className={cn(
-                    "w-full whitespace-nowrap bg-magenta px-2 py-2 text-center text-black sm:px-3",
+                    "w-full whitespace-nowrap bg-magenta px-3 py-2.5 text-center text-black sm:px-4",
                     i > 0 && "border-l border-white/20",
                   )}
                 >
@@ -101,7 +108,7 @@ export function DayRail({
                 <Link
                   href={segment.href}
                   className={cn(
-                    "w-full whitespace-nowrap px-2 py-2 text-center text-white/65 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-magenta sm:px-3",
+                    "w-full whitespace-nowrap px-3 py-2.5 text-center text-white/65 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-magenta sm:px-4",
                     i > 0 && "border-l border-white/20",
                   )}
                 >

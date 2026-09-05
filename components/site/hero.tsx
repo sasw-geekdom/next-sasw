@@ -31,7 +31,13 @@ export function Hero() {
       headline={
         <>
           The current{" "}
-          <span className="whitespace-nowrap">
+          {/* `sm:` only. Held together at every width it set "RUNS THROUGH
+              SA." as one 48px line in a 342px column — 40px wider than the
+              screen, so the city's own name ran off the right edge of the
+              homepage on a phone. It was hidden while the block was centred,
+              because the overflow split either side of the middle; ranged
+              left it all lands on one side. Below sm the line may break. */}
+          <span className="sm:whitespace-nowrap">
             runs through <span className="text-magenta">SA.</span>
           </span>
         </>
@@ -71,7 +77,20 @@ export function Hero() {
       // paragraph — "one current" is the h1 directly above, the five circuits
       // are the list directly below, the five days are the eyebrow, and the
       // full line still runs in the footer, the metadata and the OG cards.
-      blurb="San Antonio Startup + Tech Week — keynotes, pitch stages, workshops and the nights after, for everyone from pre-seed to Series A, solopreneur to scale-up, local to regional."
+      //
+      // The format list came off next, and for a plainer reason: the week
+      // board 700px down this same page opens "Keynotes and pitch nights,
+      // workshops and community meetups, and the socials after". Two lists of
+      // the same four things on one page, and the board's is the one doing
+      // work — it introduces the thing it sits above, and it carries "free",
+      // which is the claim that decides whether a stranger reads on.
+      //
+      // So the hero says what only the hero can. The board covers what kinds
+      // of thing are on, the lineup covers who, room-flow covers where; scale
+      // and audience were the two nobody else was stating, and the ranges at
+      // the end were always this paragraph's best line. "Free" leads because
+      // on the page's first sentence it is worth more than anywhere else.
+      blurb="San Antonio Startup + Tech Week — five days, six rooms downtown, and every session free. For everyone from pre-seed to Series A, solopreneur to scale-up, local to regional."
       cta={{
         href: "/register",
         label: "Get on the list.",
@@ -84,8 +103,20 @@ export function Hero() {
         label: "Run the current — a hidden page",
       }}
     >
-      {/* Five circuits — who it's for, and what tints the bolt */}
-      <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:mt-6 lg:justify-start">
+      {/* Five circuits — who it's for, and what tints the bolt.
+      
+          Ranged left with the copy above it — see the note in HeroShell. This
+          kept its own centring below lg, so left-aligning the shell left the
+          five circuits as the one row still centred under it.
+          
+          Desktop only, because the bolt is. Every one of these is a control
+          whose entire effect is tinting that bolt, so on a phone they were
+          five buttons that changed nothing on screen — and the last 76px
+          holding the hero's own CTA below the fold. The circuits are not lost
+          on a phone: the week board's headline names them, the schedule
+          filters by them, and every card on both pages prints the one it
+          belongs to. */}
+      <ul className="mt-5 hidden flex-wrap items-center gap-x-4 gap-y-2 sm:mt-6 lg:flex">
         {TRACK_NAMES.map((name) => {
           const on = active === name;
           return (

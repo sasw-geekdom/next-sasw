@@ -52,11 +52,20 @@ export function SpeakersHero({ hasLineup }: { hasLineup: boolean }) {
       // "Every name on the grid" until the lineup went live, when it became a
       // claim the page couldn't back: six faces under "every name" says the
       // lineup is six people, and it argued with the section directly beneath
-      // it saying more were landing. "First" fixes that and keeps working all
-      // the way to the last name.
+      // it saying more were landing. "First" fixed that.
+      //
+      // "First" is now the thing that undersells it. Twenty-nine names are on
+      // this page, across three circuits and three rooms, with a filter for
+      // each — that is a lineup, and "first names" tells a reader they have
+      // arrived early for something that has barely started. It is also the
+      // wrong shape for what the page does now: it is a directory to be
+      // searched, not an announcement to be read.
+      //
+      // "Who's" says that, and pairs with the homepage band's "Who carries
+      // the current." rather than repeating it.
       headline={
         <>
-          First names{" "}
+          Who&rsquo;s{" "}
           <span className="whitespace-nowrap">
             on the <span className="text-magenta">grid.</span>
           </span>
@@ -64,12 +73,25 @@ export function SpeakersHero({ hasLineup }: { hasLineup: boolean }) {
       }
       // The blurb used to promise "five circuits and five downtown rooms".
       // True of the week, but read as a description of the people underneath
-      // it — none of whom carries a circuit or a room until their sessions are
-      // entered. This says who they are and answers the question the page
-      // otherwise leaves hanging: when is any of this happening?
+      // it — none of whom carries a circuit or a room until their sessions
+      // are entered. So it became "sessions, times and rooms go up as they're
+      // locked", which answered the question the page left hanging: when is
+      // any of this happening?
+      //
+      // They are up. Sessions carry rooms and times, the wall filters by
+      // circuit and by venue off the back of them, and a speaker's own page
+      // links to what they are speaking on — so the line was promising a
+      // thing the page had already delivered, which reads as a page that has
+      // not been touched since it shipped. It names the mix and the controls
+      // instead.
+      //
+      // Deliberately not the homepage band's sentence, which lists the same
+      // people at more length. That one introduces a lineup to someone who
+      // has not asked for it; this one is read by someone already on the
+      // page, for whom "how do I find my person" is the live question.
       blurb={
         hasLineup
-          ? "The founders, builders, and operators taking the stage. Sessions, times and rooms go up as they're locked."
+          ? "Founders and operators, engineers and security researchers. Filter by circuit or by room, and open anyone to see what they're speaking on."
           : "Five circuits, six rooms, five days. The names go up as they're confirmed."
       }
       // Follows the lineup, like the blurb does.

@@ -480,7 +480,23 @@ export function MascotBurst() {
  * Sized as a percentage of the block, not in pixels, for that same reason: the
  * week draws this block 300px tall and the day view 660.
  */
-export function PysaMascot({ animated = false }: { animated?: boolean }) {
+export function PysaMascot({
+  animated = false,
+  compact = false,
+}: {
+  animated?: boolean;
+  /**
+   * A smaller figure in the lower-right, for a card rather than a block.
+   *
+   * The default is a standing figure centred across the block, which is right
+   * where the block is a five-hour takeover with an empty middle. A week
+   * column card is 237px wide and about 176 tall: centred and full height he
+   * fills it, and the time and room read across his shoulder. Moved to one
+   * corner at half the width he is a flourish on the card instead of its
+   * subject, and the copy keeps a clear left edge to sit against.
+   */
+  compact?: boolean;
+}) {
   const reduce = useReducedMotion();
   const clip = React.useRef<HTMLVideoElement>(null);
 
@@ -525,7 +541,11 @@ export function PysaMascot({ animated = false }: { animated?: boolean }) {
       // hover, and matched again if the accent ever changes. The mascot is the
       // bright half of a high-contrast studio shot and passes through.
       style={{ mixBlendMode: "lighten" }}
-      className="pointer-events-none absolute inset-x-0 bottom-9 top-0 flex items-end justify-center overflow-hidden rounded"
+      className={
+        compact
+          ? "pointer-events-none absolute bottom-1 right-1 top-auto flex h-[74%] w-[52%] items-end justify-end overflow-hidden rounded"
+          : "pointer-events-none absolute inset-x-0 bottom-9 top-0 flex items-end justify-center overflow-hidden rounded"
+      }
     >
       {animated ? (
         <video
@@ -603,7 +623,12 @@ export function PysaMascot({ animated = false }: { animated?: boolean }) {
           //
           // Bottom-anchored by the wrapper's flex rather than by his own box, so
           // he stands on the meta rows whatever height is left above him.
-          className="h-full max-h-[190px] w-auto object-contain opacity-90 motion-safe:animate-[pysaSway_7s_ease-in-out_infinite]"
+          className={cn(
+            "h-full w-auto object-contain opacity-90 motion-safe:animate-[pysaSway_7s_ease-in-out_infinite]",
+            // The 190px ceiling draws him the same size in the week and the
+            // day. A card is neither, and the cap there is the box itself.
+            compact ? "max-h-full" : "max-h-[190px]",
+          )}
         />
       )}
     </div>

@@ -2,6 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ShaderCanvas } from "@/components/site/shader-canvas";
 import { ButtonLink } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // The shell every page hero is built from: full viewport minus the navbar,
 // copy on the left and the bolt on the right from lg, one column before that.
@@ -134,11 +135,30 @@ export function HeroShell({
   // 13px between w-64 and w-48, because `min-h` floors the section and
   // `items-center` turns anything reclaimed past that into centred
   // whitespace — w-64 is where content stops driving the height.
+  // No `mx-auto`. With the copy ranged left below lg (see the note on the
+  // masthead) a centred graphic was the one element in the column with a
+  // different axis — the bolt floated while everything above and below it
+  // started at the same 24px.
   const boltBox =
-    "group mx-auto block w-64 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:w-96 lg:w-full";
+    "group block w-64 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:w-96 lg:w-full";
 
   return (
-    <section className="relative isolate mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl grid-cols-1 items-center gap-6 overflow-hidden px-6 py-8 lg:grid-cols-2 lg:gap-12 lg:py-0">
+    <section
+      className={cn(
+        "relative isolate mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl grid-cols-1 items-center gap-6 overflow-hidden px-6 py-8 lg:grid-cols-2 lg:gap-12 lg:py-0",
+        // Rows packed, not stretched, below lg.
+        //
+        // `min-h` floors the section at a viewport and auto rows stretch to
+        // fill whatever is left, so `items-center` centres each block inside
+        // its own oversized row. With the bolt in the column that surplus was
+        // small; with the bolt gone the homepage had three blocks sharing
+        // 716px and ~120px of air opening between each — a hero that read as
+        // three unrelated things rather than one. `content-center` sizes the
+        // rows to their content and centres the group, so the only space
+        // between them is the `gap-6` that was asked for.
+        "max-lg:content-center",
+      )}
+    >
       {backdrop && (
         <div
           aria-hidden="true"
@@ -162,7 +182,20 @@ export function HeroShell({
       <div className="contents lg:block lg:text-left">
         {/* Masthead — eyebrow and headline. First thing on a phone, so the
             page says what it is before it shows the graphic. */}
-        <div className="order-1 text-center lg:text-left">
+        {/* Ranged left at every width.
+            
+            It was centred below lg, which is the convention for a hero and
+            was wrong for these pages. Nothing else on any of them is centred:
+            the featured bill, the week board, the room cards and every
+            section heading below the fold all start at the same 24px, so the
+            hero was the one block on a phone with no shared left edge and the
+            page read as two documents.
+            
+            The blurbs are the other half of it. /schedule's runs to five
+            lines on a 390px screen, and centred running text starts every one
+            of them at a different x — the reader's eye has to find the start
+            of each line instead of returning to a known one. */}
+        <div className="order-1">
           <p className="font-mono text-sm uppercase tracking-widest text-magenta-ink">
             {eyebrow}
           </p>
@@ -193,7 +226,7 @@ export function HeroShell({
             phone's grid gap isn't doubled up. Rendered only when there is a
             blurb, or an empty div would spend a grid gap on nothing. */}
         {blurb && (
-          <div className="order-2 text-center lg:mt-5 lg:text-left">
+          <div className="order-2 lg:mt-5">
             {/* `text-base` on phones, `text-lg` from sm.
 
                 Not a space grab — a measure fix. At 18px in the 342px column a
@@ -203,7 +236,7 @@ export function HeroShell({
                 ragged block and its height. 16px buys back four characters a
                 line and 40px of height, and the two shorter blurbs on / and
                 /speakers get the same better measure at their own lengths. */}
-            <p className="mx-auto max-w-lg text-pretty text-base text-muted-foreground sm:text-lg lg:mx-0">
+            <p className="max-w-lg text-pretty text-base text-muted-foreground sm:text-lg">
               {blurb}
             </p>
           </div>
@@ -212,7 +245,7 @@ export function HeroShell({
         {/* Whatever the page puts between the copy and its action, and the
             action itself. `order-4` keeps it last on a phone, so the button
             follows the content rather than the sentence. */}
-        <div className="order-4 text-center lg:text-left">
+        <div className="order-4">
           {children}
 
           {/* `lg:mt-8` only. Below lg this is its own grid item and the
@@ -220,7 +253,7 @@ export function HeroShell({
               stacked on that gap and made the split layout 24px taller than
               the block it replaced. From lg the wrapper is a block again and
               the margin is the only thing holding the button off the copy. */}
-          <div className="flex flex-col items-center gap-2.5 sm:gap-3 lg:mt-8 lg:items-start">
+          <div className="flex flex-col items-start gap-2.5 sm:gap-3 lg:mt-8">
             <ButtonLink href={cta.href} size="lg">
               {cta.label}
             </ButtonLink>
@@ -235,9 +268,28 @@ export function HeroShell({
           sentence that frames it, before the button. A sibling of the
           wrapper, not a child, because from lg it has to be the second
           column. */}
-      <div className="order-3">
-        {aside ??
-          (bolt.href ? (
+      {aside ? (
+        <div className="order-3">{aside}</div>
+      ) : (
+        /* Desktop only.
+           
+           The bolt is the second column, and below lg there is no second
+           column — it becomes 256px of graphic wedged between the sentence
+           and the button. Measured on the homepage that put the hero at 832px
+           in a 780px viewport with "Get on the list." starting at y=783:
+           three pixels below the fold, so the page's one action was
+           unreachable without scrolling past the decoration that hid it.
+           
+           Hidden rather than moved into the headline, which is what
+           /schedule's hero did with its own bolt. That headline is two words
+           and had the room; this one already sets three lines at 390px and a
+           1.5em glyph would make it four. The problem here is height, and the
+           answer to height is removing something, not relocating it.
+           
+           An `aside` is not the bolt and stays: /schedule's is the featured
+           bill, which is content. */
+        <div className="order-3 max-lg:hidden">
+          {bolt.href ? (
             <Link
               href={bolt.href}
               aria-label={bolt.label}
@@ -247,8 +299,9 @@ export function HeroShell({
             </Link>
           ) : (
             <div className={boltBox}>{canvas}</div>
-          ))}
-      </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }

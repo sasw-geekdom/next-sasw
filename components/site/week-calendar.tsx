@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { weekCalendar } from "@/lib/schedule";
-import { liveCalendarItems } from "@/lib/live-schedule";
+import { liveSchedule } from "@/lib/live-schedule";
 import { TRACK_NAMES } from "@/lib/tracks";
 import { WeekCalendarGrid } from "@/components/site/week-calendar-grid";
 import type { Option } from "@/components/site/calendar/controls";
@@ -17,7 +17,8 @@ import type { Option } from "@/components/site/calendar/controls";
 // are documented in week-calendar-grid.tsx, next to the code that makes them.
 
 export async function WeekCalendar() {
-  const { days, items, spans, axis } = weekCalendar(await liveCalendarItems());
+  const live = await liveSchedule();
+  const { days, items, spans, axis } = weekCalendar(live.items, live.attached);
 
   // Only what the week actually contains. A chip for a circuit or a venue with
   // nothing behind it is a control whose only outcome is an empty grid, and
@@ -27,12 +28,17 @@ export async function WeekCalendar() {
   const circuits: Option[] = dedupe(present.map((s) => s.circuit))
     .sort((a, b) => trackOrder(a) - trackOrder(b))
     .map((c) => ({ value: c, label: c }));
-  const venues: Option[] = dedupe(present.map((s) => s.venueSlug)).map(
-    (slug) => ({
+  const venues: Option[] = dedupe(present.map((s) => s.venueSlug))
+    // Not the RSVP room. It is the one entry in this list that is not a
+    // place: `resolveSessions` mints it from `venueReveal` for an activation
+    // whose address is disclosed on RSVP, so filtering by it would mean "show
+    // me the things whose location I am not being told" — a control with one
+    // member and no outcome worth the click. See the note by `slug: "rsvp"`.
+    .filter((slug) => slug !== "rsvp")
+    .map((slug) => ({
       value: slug,
       label: present.find((s) => s.venueSlug === slug)!.venueName,
-    }),
-  );
+    }));
 
   return (
     <section

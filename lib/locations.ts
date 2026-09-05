@@ -111,7 +111,20 @@ export const ROOMS: Room[] = [
     // crediting a partner inside it read as DEVSA operating the main stage
     // rather than programming into it. The fact survives without the name,
     // and the phrasing leaves room for the keynotes still to be added.
-    desc: "The anchor. Mission Pitch and Latin Tech Pitch take the main stage, and the days between fill with technical sessions — security, AI, and design.",
+    //
+    // Rewritten once the programme was real. "The days between fill with
+    // technical sessions — security, AI, and design" was written from the
+    // circuits rather than from the schedule, and the schedule disagreed: the
+    // day between the two pitch events is Sandra Velasquez on building
+    // Nopalera, which is a founder's story and not a technical session. What
+    // the room actually has in common across three confirmed events is money
+    // on the table, so that is what it says.
+    //
+    // Deliberately not a list. TPR is about to take eighteen to twenty more
+    // sessions, and a blurb that enumerates three of them would be wrong the
+    // week they land — this names the character of the room instead, which
+    // survives them.
+    desc: "The anchor, and the room with money on the table. Mission Pitch funds five San Antonio nonprofits on the night, Latin Tech Pitch puts $110k behind Latino-led startups, and founders take the stage in between.",
     tag: "5 circuits · main stage",
     port: "p1",
     tier: "anchor",
@@ -147,7 +160,15 @@ export const ROOMS: Room[] = [
     // marketing when it's the event doing the describing. Naming the groups
     // instead matches how DEVSA positions itself anyway — "we don't replace
     // the communities doing the work, we host them, connect them".
-    desc: "The community floor. The partners and grassroots groups that run all year, together in one room for the week — connected by DEVSA.",
+    //
+    // The groups, by name, now that all ten sessions are confirmed. The line
+    // said "the partners and grassroots groups that run all year" and left
+    // the reader to take it on trust; naming six of them is the difference
+    // between a claim and evidence, and every one is a group a San Antonio
+    // engineer will recognise. It is also the busiest room of the week —
+    // four sessions on Tuesday, four on Thursday — which is the single most
+    // useful thing this card can say about it.
+    desc: "The community floor, and the busiest room of the week. .NET and Google Developer Groups, AITX and Datanauts, AWS and Linux San Antonio run back to back — the groups DEVSA hosts all year, in one place for five days.",
     tag: "Tech & Builders",
     port: "p2",
     tier: "day",
@@ -191,7 +212,13 @@ export const ROOMS: Room[] = [
     // "No-cost" is the fact worth surfacing: it's the site's own framing, and
     // it tells a small-business owner scanning the section whether the room
     // is for them.
-    desc: "Launch SA HQ — the City of San Antonio and Geekdom's no-cost resource center for small business. Programming built for owners and solopreneurs.",
+    //
+    // Second sentence added once both things running here were locked. The
+    // blurb described the venue and stopped at "programming built for owners
+    // and solopreneurs", which is a category rather than a plan — and this is
+    // the one room whose headline activation runs across all five days, a
+    // fact no card in the section could otherwise carry.
+    desc: "Launch SA HQ — the City of San Antonio and Geekdom's no-cost resource center for small business. 1 Million Cups brings its weekly founder format here on Wednesday, and the Give-a-LOT donation drive runs all five days.",
     tag: "Small Business & Solopreneur",
     port: "p3",
     tier: "day",
