@@ -1,0 +1,284 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* DEVSA's card: the collaboration, announced.
+
+         An earlier cut drew this as a circuit — a trunk off the DEVSA mark
+         with a tap per activation. It was a good diagram of a claim this card
+         is not making. A circuit says "these run off one thing", which put
+         DEVSA above the groups; what the week is actually announcing is that
+         they came together, and a field of marks at one size says that where
+         a hierarchy of taps could not.
+
+         It also could not hold the partners. The activations' own "powered
+         by" lines name nine more organisations — Access Granted's coalition,
+         PySanAntonio's organisers, Linux San Antonio's three — none of which
+         is on the schedule, so none of which could hang off a schedule's
+         trunk without claiming to be a session.
+
+         So: the bolt in the corner, every mark under it, and the two marks
+         that convened it at the top at the same size as each other.
+
+         1920x1080, and not the portrait card stretched — four columns of
+         marks across 1760px would draw each one 420px wide and leave the
+         card two rows of enormous logos with nothing else in it. Six and
+         five is what fills this ratio. */
+      :root {
+        --magenta: #ff32a0;
+        --lav: #c0b4fc;
+        --green: #00ff66;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1920px;
+        height: 1080px;
+        background: #000;
+        color: #fff;
+        font-family:
+          "Geist",
+          -apple-system,
+          system-ui,
+          sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* The homepage's bolt, whole and inside the margin.
+
+         Not the flat silhouette the other cards ground themselves with — this
+         is `bolt-current-og.png`, the still of the live WebGL hero that
+         lib/og.tsx puts on the site's own share cards. On this card it is the
+         house's half of the co-brand: the marks are what DEVSA brought, and
+         this is what they are powering.
+
+         Whole, because at full charge it is a subject rather than a texture,
+         and the site draws it whole wherever it is one — the hero, every OG
+         card, the community meetup card. A bleed reads as intentional only
+         when the mark has been dimmed back into the ground, which is exactly
+         what `sastw-bolt.svg` at 0.17 is for. Cropped at full charge it reads
+         as a mark that did not fit. */
+      .bolt {
+        position: absolute;
+        z-index: 1;
+        right: 108px;
+        top: 44px;
+        width: 274px;
+        opacity: 0.95;
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 62px 80px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Equal, and equal by what is drawn rather than by file height. DEVSA's
+         mark is a 1.3:1 badge and the lockup a 4:1 wordmark, so a shared
+         height draws one at a third of the other's width — these are solved
+         to the same ~250px across. */
+      .brands {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+      }
+      .brands img.devsa {
+        height: 90px;
+      }
+      .brands .rule {
+        width: 1px;
+        height: 64px;
+        background: rgba(255, 255, 255, 0.22);
+      }
+      .brands img.sastw {
+        height: 62px;
+      }
+
+      .eyebrow {
+        margin-top: 40px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--magenta);
+      }
+      h1 {
+        margin-top: 14px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 68px;
+        line-height: 0.98;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+      h1 .hit {
+        color: var(--magenta);
+      }
+
+      /* Three bands, not two — see the note on the labels. The rhythm comes
+         down to pay for the third: two of the three are a single row of six
+         and five at this ratio, so what is lost is space between groups
+         rather than size of mark. */
+      .band {
+        margin-top: 34px;
+      }
+      .band .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 15px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.42);
+        padding-bottom: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      }
+
+      /* One box per mark, and each mark takes what it can of it.
+
+         That is what "equal size" has to mean across ratios running 1:1 to
+         10:1. Matched on height, Google Developer Groups draws five times
+         DEF CON's width; matched on width, DEF CON draws five times GDG's
+         height. A shared box with a cap on both axes is the only rule under
+         which a badge and a wordmark read as peers. */
+      /* Six across in both bands. Eleven activations and eleven partners
+         each fill two rows of six and five, which is the one arrangement at
+         this ratio that leaves no ragged third row. */
+      .grid {
+        margin-top: 24px;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 34px 30px;
+      }
+      .cell {
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        list-style: none;
+      }
+      .cell img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+      }
+
+      .typeset {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 30px;
+        line-height: 1;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .typeset .lav {
+        background: var(--lav);
+        color: #000;
+        padding: 0 7px;
+      }
+      .typeset .green {
+        color: var(--green);
+      }
+      /* The prompt runs a step smaller and a step back — it is a label device
+         rather than part of the name, and at full weight it read as the first
+         word of the mark. */
+      .typeset .prompt {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 0.72em;
+        color: var(--green);
+        opacity: 0.75;
+      }
+      .typeset .mag {
+        color: var(--magenta);
+      }
+
+      /* A floor under the last row rather than `margin-top: auto` alone: the
+         partners' second row is four marks in a five-column grid, so the row
+         box ends where the marks do and the auto margin let the date creep up
+         under them. */
+      .foot {
+        margin-top: auto;
+        padding-top: 34px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 20px;
+        letter-spacing: 0.04em;
+        color: rgba(255, 255, 255, 0.82);
+      }
+      .foot .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--magenta);
+        flex: none;
+      }
+      .foot .sep {
+        color: rgba(255, 255, 255, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <img class="bolt" src="bolt-current.png" alt="" />
+
+    <div class="frame">
+      <div class="brands">
+        <img class="devsa" src="devsa.png" alt="" />
+        <span class="rule"></span>
+        <img class="sastw" src="sastw.png" alt="" />
+      </div>
+
+      <p class="eyebrow">{{eyebrow}}</p>
+      <h1>{{headline}}</h1>
+
+      <div class="band">
+        <p class="label">Built for the week</p>
+        <ul class="grid">
+          {{marksA}}
+        </ul>
+      </div>
+
+      <div class="band">
+        <p class="label">Invited to the week</p>
+        <ul class="grid">
+          {{marksB}}
+        </ul>
+      </div>
+
+      <div class="band">
+        <p class="label">The partners behind them</p>
+        <ul class="grid">
+          {{marksC}}
+        </ul>
+      </div>
+
+      <div class="foot">
+        <span class="pip"></span>
+        <span>{{fact1}}</span>
+        <span class="sep">·</span>
+        <span>{{fact2}}</span>
+      </div>
+    </div>
+  </body>
+</html>

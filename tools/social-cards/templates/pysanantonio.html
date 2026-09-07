@@ -74,6 +74,75 @@
           linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 14%);
       }
 
+      <!--if:transparent-->
+      /* A motion card's overlay. The PNG is composited over the event's own
+         footage, so the ground has to go — `omitBackground` only reaches
+         transparent where the page is, and every template paints `body`
+         black.
+
+         The scrim stays, and does the job `.portrait::after` does on the
+         still card: the copy sits on the left third, and without a gradient
+         holding that side down the type would run over a moving figure. Same
+         two gradients, same stops, now over video instead of a photograph. */
+      body {
+        background: transparent;
+      }
+      .scrim {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+          linear-gradient(to right, #000 0%, #000 20%, rgba(0, 0, 0, 0) 52%),
+          linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 14%);
+      }
+      /* No bloom on the motion card.
+
+         This is the whole of what makes the composite work, and it took
+         three passes to arrive at. The bloom is a blue radial across the
+         card's right side; the clip's ground is flat black. Laid over the
+         footage at its own size the tint stopped partway down and the card
+         switched from graded to flat in a single line where the footage
+         began — a rectangle, not a background.
+
+         Two fixes were tried and both were wrong in the same way: they
+         changed the figure to fix the ground. Crushing the clip's blacks
+         matched the two sides at black — throwing the gradient away rather
+         than continuing it, and darkening the luchador to do it. Growing the
+         bloom to cover the whole frame continued the gradient, and hazed him
+         blue, because a translucent wash over a subject is what it is.
+
+         A bloom belongs *behind* a matted figure. Nothing here is matted —
+         not the footage, not the mascot on the still card — so the card
+         drops it and runs a flat ground the clip's own black already
+         matches. See `if:artBlock` for the still card's half of this. */
+      .bloom {
+        display: none;
+      }
+      <!--/if:transparent-->
+
+      <!--if:artBlock-->
+      /* The still card's half of the motion card's problem.
+
+         The mascot is a block, not a cutout: opaque out to a feathered edge,
+         where every headshot in this set is matted. Drawn over the bloom it
+         paints the gradient out inside its own rectangle and the card goes
+         from graded to flat along the picture's edge — the same switch the
+         footage made, on a photograph.
+
+         Same answer, for the same reason: the bloom goes, and the ground is
+         matched to the picture instead. #0d0d0d is the median of the block's
+         own opaque ground (it runs 10–17 across the frame), so the largest
+         disagreement anywhere is about four levels, under a feathered edge —
+         which is no edge at all. The scrim still holds the copy side down to
+         black, so the card reads as black with the figure sitting in it. */
+      body {
+        background: #0d0d0d;
+      }
+      .bloom {
+        display: none;
+      }
+      <!--/if:artBlock-->
+
       .frame {
         position: relative;
         z-index: 2;
@@ -87,8 +156,17 @@
         align-items: center;
         justify-content: space-between;
       }
+      /* 58, matching access-granted, community-group and college-night. It
+         was 46 — the smallest lockup in the set, with nothing on the card
+         saying why, and beside the blackletter wordmark below it read as an
+         afterthought rather than as the week this event belongs to.
+
+         This moves all seven PySanAntonio cards, not just the event card:
+         the lockup is a property of the template, and a speaker card and an
+         event card posted in the same series with the house mark at two
+         sizes is the drift these templates exist to prevent. */
       .top img {
-        height: 46px;
+        height: 58px;
         width: auto;
       }
       .dates {
@@ -240,8 +318,13 @@
     </style>
   </head>
   <body>
+    <!--if:transparent-->
+    <div class="scrim"></div>
+    <!--/if:transparent-->
     <div class="bloom"></div>
+    <!--if:face-->
     <div class="portrait"><img src="{{face}}" alt="" /></div>
+    <!--/if:face-->
 
     <div class="frame">
       <div class="top">
@@ -258,11 +341,13 @@
 
       <div class="spacer"></div>
 
+      <!--if:first-->
       <div class="name">{{first}}<br />{{last}}</div>
       <div class="role">{{role}}</div>
       <!--if:org-->
       <div class="org">{{org}}</div>
       <!--/if:org-->
+      <!--/if:first-->
 
       <div class="facts">
         <div class="fact"><span class="pip"></span>{{fact1}}</div>

@@ -73,6 +73,26 @@
         opacity: 0.17;
         filter: blur(7px);
       }
+      <!--ifnot:face-->
+      /* No figure on this card — it is an event card rather than a speaker's,
+         and the guard below drops the portrait column entirely. That leaves
+         the half a person would have filled, so the bolt takes it.
+         
+         Not the flat silhouette brightened: raising `sastw-bolt.svg` from
+         0.17 to 0.42 draws a large dull magenta shape, which is a texture
+         being asked to do a mark's job. This is the same swap the DEVSA card
+         makes — `bolt-current-og.png`, the still of the live WebGL hero, at
+         its own charge and placed rather than bled. Ground and subject are
+         different objects, not the same object at two opacities. */
+      .bolt-hero {
+        position: absolute;
+        z-index: 1;
+        right: 84px;
+        top: 566px;
+        width: 404px;
+        opacity: 0.95;
+      }
+      <!--/ifnot:face-->
 
       .portrait {
         position: absolute;
@@ -262,8 +282,15 @@
     </style>
   </head>
   <body>
+    <!--if:face-->
     <img class="bolt" src="bolt.svg" alt="" />
+    <!--/if:face-->
+    <!--ifnot:face-->
+    <img class="bolt-hero" src="bolt-current.png" alt="" />
+    <!--/ifnot:face-->
+    <!--if:face-->
     <div class="portrait"><img src="{{face}}" alt="" /></div>
+    <!--/if:face-->
 
     <div class="frame">
       <div class="top">
@@ -286,6 +313,7 @@
            anchored as a group, so that does not show up as a gap under the
            name — it lifts the whole group, the name included, off the line the
            other cards sit on. -->
+      <!--if:first-->
       <div class="name">
         {{first}}<!--if:last--><br />{{last}}<!--/if:last-->
       </div>
@@ -293,6 +321,7 @@
       <!--if:org-->
       <div class="org">{{org}}</div>
       <!--/if:org-->
+      <!--/if:first-->
 
       <div class="facts">
         <div class="fact"><span class="pip"></span>{{fact1}}</div>

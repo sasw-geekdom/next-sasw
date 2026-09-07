@@ -247,7 +247,9 @@
   <body>
     <div class="grid"></div>
     <div class="bloom"></div>
+    <!--if:face-->
     <div class="portrait"><img src="{{face}}" alt="" /></div>
+    <!--/if:face-->
 
     <div class="frame">
       <div class="top">
@@ -264,11 +266,13 @@
 
       <div class="spacer"></div>
 
+      <!--if:first-->
       <div class="name">{{first}}<br />{{last}}</div>
       <div class="role">{{role}}</div>
       <!--if:org-->
       <div class="org">{{org}}</div>
       <!--/if:org-->
+      <!--/if:first-->
 
       <div class="facts">
         <div class="fact"><span class="pip"></span>{{fact1}}</div>

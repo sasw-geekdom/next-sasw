@@ -102,8 +102,127 @@ export const COMMUNITY = {
   },
 };
 
+/**
+ * Everything DEVSA brought to the week, in three groups, because they are
+ * three different claims.
+ *
+ * `BUILT` is what did not exist before this week: The Model, Access Granted,
+ * College Night, Linux San Antonio, Open Circuit and PySanAntonio were
+ * programmed for it.
+ *
+ * `INVITED` is the opposite relationship. Give-a-LOT is a drive DEVSA and
+ * learnOPENtech already run, and the AWS User Group, Datanauts, Google
+ * Developer Groups, AITX and .NET already meet every month — DEVSA did not
+ * activate any of them, it brought them into the week. Calling both
+ * halves "activations" made a standing community group sound like a brand
+ * campaign, and it argued against DEVSA's own line: "we don't replace the
+ * communities doing the work — we host them, connect them, and help them
+ * grow". One label over all twelve makes DEVSA the producer of all twelve.
+ *
+ * `PARTNERS` are the organisations named in those activations' own "powered
+ * by" lines. None of them has a slot on the schedule.
+ *
+ * `repo` where the mark is vendored here; `url` where it is not — Alamo Python
+ * and PyTexas live on DEVSA's own S3 and lib/pysa.ts reads them from there, so
+ * this reads them from there too rather than committing a copy that can drift.
+ * `partner` resolves from the CMS partner wall by name, which is the same
+ * bargain lib/the-model.ts makes for Tech Bloc and The Creative Futures.
+ * `html` for the three that own no logo at all: their mark is the display face
+ * in their own accent, from lib/the-model.ts, lib/access-granted.ts and the
+ * house magenta.
+ */
+const DEVSA_BUILT = [
+  // Its penguin and two-line lockup fill their box corner to corner where the
+  // wordmarks beside it do not, so at 1.0 it draws heavier than the row.
+  { repo: "public/activations/linux-satx.webp", scale: 0.86 },
+  { html: '<span class="typeset">The <span class="lav">Model</span></span>' },
+  {
+    // The terminal prompt, which is Access Granted's own label device — it
+    // opens "&gt;_ access granted /" on the padlock, and its social card sets
+    // every label with it where the other events use "//". Two characters,
+    // and the cell goes from a green wordmark to something a reader clocks as
+    // a security event without a logo to tell them.
+    //
+    // This is what a still card can do instead of the hover the block on the
+    // schedule gets: `CipherField` decrypts a patch of ciphertext under the
+    // pointer, and a PNG has no pointer. Its reduced-motion state — the field
+    // written once, holding still — was the other candidate and does not
+    // survive the shrink: a cell is 210x66, where a field of characters is a
+    // smudge behind the one thing that has to stay legible, and it would give
+    // one cell a background treatment no other mark here has.
+    html: '<span class="typeset"><span class="prompt">&gt;_</span> <span class="green">Access</span> Granted</span>',
+  },
+  {
+    html: '<span class="typeset">College <span class="mag">Night</span></span>',
+  },
+  { repo: "public/activations/open-circuit.webp" },
+  { repo: "public/pysa/wordmark-dark.svg" },
+];
+
+const DEVSA_INVITED = [
+  // Its own lockup, the one lib/give-a-lot.ts names.
+  { repo: "public/give-a-lot/lockup.svg" },
+  // The smile hangs below the letters, so a box centred on the file sits
+  // "aws" above the wordmark beside it. Nudged onto its line.
+  { repo: "public/activations/aws-user-group.svg", shift: 6 },
+  { repo: "public/activations/datanauts.webp" },
+  { repo: "public/activations/google-developer-groups.svg" },
+  // Smaller than its box allows: at 3.7:1 it is width-constrained and draws
+  // larger than the wordmarks either side of it.
+  { repo: "public/activations/aitx.svg", scale: 0.78 },
+  { repo: "public/activations/dotnet-user-group.svg" },
+];
+
+const DEVSA_PARTNERS = [
+  // Access Granted's coalition leads, in the order that activation names
+  // them, then PySanAntonio's organisers, then the rest.
+  //
+  // A 1:1 badge with wide transparent margin, so it draws small against the
+  // wordmarks at a shared box.
+  { repo: "public/access-granted/orgs/bsides.png", scale: 1.28 },
+  { repo: "public/access-granted/orgs/defcon.png" },
+  { repo: "public/access-granted/orgs/saha.png" },
+  { repo: "public/access-granted/orgs/cyberjedis.png" },
+  // The thinnest drawing in the set — line art inside a 265x260 canvas — so
+  // it needs the most of its box back.
+  { repo: "public/access-granted/orgs/locksport.png", scale: 1.5 },
+  { repo: "public/give-a-lot/learnopentech.svg" },
+  {
+    url: "https://devsa-assets.s3.us-east-2.amazonaws.com/pysa/flyers-46-alamo-py-white.png",
+  },
+  { url: "https://devsa-assets.s3.us-east-2.amazonaws.com/pytexas.png" },
+  // Same as Linux San Antonio's: heavy display type plus a badge, filling
+  // its box where its neighbours' wordmarks leave air.
+  { repo: "public/activations/txlf.webp", scale: 0.86 },
+  { partner: "Tech Bloc" },
+  // Line art in a circle, like Alamo City Locksport above — a hairline ring
+  // with the name set around it, where its neighbours in this row fill the
+  // same box with solid ink. It measured 104x126 against Tech Bloc's 172x110
+  // and read as the smallest mark on the card. At 1.25 it draws 157 tall,
+  // level with Locksport's 159, which is the other mark solved this way.
+  { partner: "The Creative Futures", scale: 1.25 },
+];
+
+const DEVSA_MARKS = [...DEVSA_BUILT, ...DEVSA_INVITED, ...DEVSA_PARTNERS];
+const DEVSA_SPLITS = [
+  DEVSA_BUILT.length,
+  DEVSA_BUILT.length + DEVSA_INVITED.length,
+];
+
 export const EVENTS = {
   ...COMMUNITY,
+
+  /**
+   * DEVSA, which is a partner rather than an activation — the one entry here
+   * that is not a thing on the schedule. It carries no mark of its own in the
+   * template's sense (the card stages DEVSA's logo directly, the way it does
+   * the house lockup) and no logo strip, because the strip *is* the bus.
+   */
+  devsa: {
+    template: "devsa-partners.html",
+    facts: ["Sept 28 – Oct 2", "Downtown San Antonio"],
+    logos: [],
+  },
 
   /**
    * The anchor room. No mark and no palette — see the note at the top of
@@ -565,6 +684,263 @@ export const CARDS = [
         who: "Daniel Felipe Morales Yusty",
       },
     ],
+  },
+
+  /**
+   * The four event cards.
+   *
+   * Every other card for these activations is one speaker's. That is right
+   * for a speaker announcement and wrong for the post that says what the week
+   * *is*: four speaker cards in a carousel read as four people, and they spend
+   * the cards you were holding for later. College Night and Give-a-LOT have
+   * had event cards from the start — they have no speaker to lead with — so
+   * the shape was already proven; these four just needed the templates to
+   * tolerate a card that names nobody.
+   *
+   * Copy comes from each event's own source, not from new writing: Access
+   * Granted's and The Model's two-part hooks are in lib/access-granted.ts and
+   * lib/the-model.ts, and the other two come off their `blurb` in
+   * lib/schedule.ts.
+   *
+   * `facts` are per card because three of these events carry a day and a floor
+   * and no hour, which is the one fact a "come to this" post needs. Their
+   * venue strings are left as each event has them — Geekdom for three of
+   * these, The Rand for Linux San Antonio — so an event's own cards agree with
+   * each other. They are the same floor of the same building and the two
+   * spellings are worth reconciling, but not silently and not here, because
+   * the speaker cards already shipped with them.
+   */
+  {
+    id: "access-granted-event",
+    event: "access-granted",
+    art: "public/access-granted/padlock.png",
+    // Their own one-liner, split across the two slots it was written for.
+    headline: "Taking it<br />apart.",
+    headlineSize: 118,
+    subtitle: "Every other room this week is people talking about technology.",
+    facts: ["Wednesday, September 30  ·  1 – 6 PM", "Geekdom, 3rd Floor"],
+    portrait: { height: 980, left: 470 },
+  },
+
+  {
+    id: "the-model-event",
+    event: "the-model",
+    art: "public/the-model/key-art.png",
+    // Explicit, because The Model's *event* default is `the-model-pair.html`
+    // — the two-speaker layout — and its single-speaker cards each name
+    // `the-model.html` themselves. Without this the event card renders through
+    // the pair template, which hardcodes its own eyebrow, positions portraits
+    // by `top` rather than `left`, and drops the blurb.
+    template: "the-model.html",
+    // "// The Model", like every card on this template — the eyebrow is where
+    // it names itself, since the template draws no wordmark of its own.
+    eyebrow: "// The Model",
+    headline: "What comes<br />next.",
+    // 76, the size its speaker cards use. 118 is Access Granted's, and this
+    // template's measure is narrower.
+    headlineSize: 76,
+    subtitle: "Creatives, founders and developers in the same room.",
+    facts: ["Monday, September 28  ·  1 – 6 PM", "Geekdom, 3rd Floor"],
+    // Not a person's numbers. The key art is a wide illustration with deep
+    // transparent margin, and the template's scrim runs solid black to 20% of
+    // the width and clears at 52% — so at a portrait's `left: 500` the art was
+    // half painted out and half off the right edge. Placed clear of both.
+    portrait: { height: 690, left: 452 },
+  },
+
+  {
+    id: "pysanantonio-event",
+    event: "pysanantonio",
+    art: "public/pysa/mascot-block.webp",
+    // A block, not a cutout. Every other `art` and every headshot here is
+    // matted; this one is a rectangle of opaque #0a0a0a with a feathered
+    // edge, so it lands on the card as flat black over a graded ground and
+    // paints the bloom out where it covers it. The flag lifts the bloom over
+    // the picture instead of behind it — the same fix, and the same numbers,
+    // as the motion card, whose footage has the same flat ground.
+    artBlock: true,
+    headline: "Back for a<br />second run.",
+    headlineSize: 104,
+    subtitle:
+      "The city\u2019s Python conference \u2014 talks, workshops, and the people who build with it every day.",
+    facts: ["Friday, October 2  ·  1 – 6 PM", "Geekdom, 3rd Floor"],
+    portrait: { height: 760, left: 520 },
+  },
+
+  {
+    id: "pysanantonio-motion",
+    event: "pysanantonio",
+    // 1, not the 2 the stills take. A still is posted and re-cropped, so it
+    // wants the sample rate; a video is transcoded by every platform it
+    // touches, so the extra pixels buy nothing and cost 12MB against 3.
+    scale: 1,
+    headline: "Back for a<br />second run.",
+    headlineSize: 104,
+    subtitle:
+      "The city\u2019s Python conference \u2014 talks, workshops, and the people who build with it every day.",
+    facts: ["Friday, October 2  ·  1 – 6 PM", "Geekdom, 3rd Floor"],
+    /**
+     * The one card here that moves.
+     *
+     * `pysa2-loop.mp4` is 1114x720 and this frame is 1080x1350, so the clip
+     * is placed rather than fitted: scaled to 1000 tall and offset left, it
+     * puts the figure in the right half where the still event card puts the
+     * mascot, with its feet near the floor. The numbers are the same kind of
+     * thing as `portrait.height` and `portrait.left` and solved the same way
+     * — by eye, against the card.
+     *
+     * Two plays of a seven-second loop. Long enough to read the card, short
+     * enough that a feed will loop it rather than treat it as a video someone
+     * has to choose to watch.
+     */
+    video: {
+      src: "public/pysa/pysa2-loop.mp4",
+      // Solved against the still card rather than against the frame, and
+      // measured rather than judged: the mascot's sombrero brim is 404px
+      // across on `pysanantonio-event`, spanning x598–1002, and these three
+      // numbers put the clip's brim at 405px across x599–1004. The two cards
+      // carry the same figure at the same size in the same place, which is
+      // the point of running them as a pair.
+      //
+      // The first pass drew him at 600 tall — 314px of brim, 78% of the
+      // still's — which left a wide field of empty black down the right of
+      // the card and made the video read as the smaller of the two. Before
+      // that, at 1000, his sombrero ran into the headline.
+      height: 772,
+      x: 110,
+      y: 588,
+      loops: 1,
+      seconds: 14.2,
+    },
+  },
+
+  {
+    id: "linux-satx-event",
+    event: "linux-satx",
+    // No art: Linux San Antonio has no figure or key image in the repo, and
+    // the guard drops the portrait column rather than drawing a hole. Its
+    // mark already leads the card from the wordmark slot.
+    headline: "The people who<br />actually run Linux.",
+    headlineSize: 82,
+    subtitle:
+      "Two hours on the community floor \u2014 the environment, the tooling, the config you keep tuning.",
+  },
+
+  // ─── DEVSA ────────────────────────────────────────────────────────────────
+  {
+    id: "devsa-powers-the-week",
+    event: "devsa",
+    size: { width: 1080, height: 1350 },
+    scale: 2,
+    // "Community-driven activations" once, and the noun was the same
+    // over-claim the bands below exist to avoid: five of these marks are
+    // standing groups that meet every month, and calling them activations
+    // makes DEVSA the producer of all twelve. The adjective is the true half
+    // and carries the card on its own.
+    eyebrow: "Community-driven",
+    // No count. An earlier cut led on "Eleven activations", and a number is
+    // the wrong subject for this card: it invites the reader to check it, it
+    // goes stale the week another lands, and it says nothing about who
+    // convened them. The claim is the collaboration, and the field of marks
+    // below is the evidence — which is a stronger argument than counting it.
+    // "Tech Week", not "the week". Every mark below it is a tech group or
+    // a tech partner, so the specific name is the true one — and the lockup
+    // directly above still carries "Startup + Tech Week" whole, so the card
+    // is not dropping half the event's name, only using the half these
+    // twenty-three belong to.
+    headline: 'DEVSA powers<br /><span class="hit">Tech Week.</span>',
+    marks: DEVSA_MARKS,
+    splits: DEVSA_SPLITS,
+  },
+
+  {
+    id: "devsa-powers-the-week-wide",
+    event: "devsa",
+    size: { width: 1920, height: 1080 },
+    template: "devsa-partners-wide.html",
+    scale: 2,
+    eyebrow: "Community-driven",
+    headline: 'DEVSA powers <span class="hit">Tech Week.</span>',
+    marks: DEVSA_MARKS,
+    splits: DEVSA_SPLITS,
+  },
+
+  /**
+   * The same poster, for the groups to post.
+   *
+   * The announcement card says DEVSA powers the week, which is the right
+   * claim from DEVSA's account and the wrong one from anybody else's — a
+   * group resharing it is posting a card about its host. This one moves the
+   * subject to the collective, so the same twenty-three marks work under a
+   * caption that begins "proud to be part of this".
+   *
+   * The co-brand stays. DEVSA convened these and the week is the week; what
+   * changes is the sentence, not who is credited.
+   */
+  {
+    id: "devsa-community-reshare",
+    event: "devsa",
+    size: { width: 1080, height: 1350 },
+    template: "devsa-partners.html",
+    scale: 2,
+    eyebrow: "Community-driven",
+    headline: 'The community<br /><span class="hit">powers Tech Week.</span>',
+    marks: DEVSA_MARKS,
+    splits: DEVSA_SPLITS,
+  },
+
+  /**
+   * The carousel, one band a slide.
+   *
+   * `devsa-powers-the-week` is the poster and stays slide one. These are for
+   * the swipe after it: at 1080 wide a mark on the poster draws ~66px, which
+   * in a feed rendering ~400px across is 20px — the wordmarks survive and the
+   * badges do not. A band with the frame to itself draws its marks about
+   * three times larger.
+   *
+   * Each also stands alone, which is the point for the groups: reposting
+   * "Invited to the week" is posting a card about yourself rather than a crop
+   * of somebody else's.
+   */
+  {
+    id: "devsa-slide-built",
+    event: "devsa",
+    size: { width: 1080, height: 1350 },
+    template: "devsa-band.html",
+    scale: 2,
+    eyebrow: "DEVSA powers Tech Week",
+    headline: 'Built for<br /><span class="hit">the week.</span>',
+    marks: DEVSA_BUILT,
+    cols: 2,
+    cellH: 112,
+  },
+
+  {
+    id: "devsa-slide-invited",
+    event: "devsa",
+    size: { width: 1080, height: 1350 },
+    template: "devsa-band.html",
+    scale: 2,
+    eyebrow: "DEVSA powers Tech Week",
+    headline: 'Invited to<br /><span class="hit">the week.</span>',
+    marks: DEVSA_INVITED,
+    cols: 2,
+    cellH: 112,
+  },
+
+  {
+    id: "devsa-slide-partners",
+    event: "devsa",
+    size: { width: 1080, height: 1350 },
+    template: "devsa-band.html",
+    scale: 2,
+    eyebrow: "DEVSA powers Tech Week",
+    // Eleven, so three across rather than two — at two it is six rows and the
+    // marks come back down to the poster's size, which defeats the slide.
+    headline: 'The partners<br /><span class="hit">behind them.</span>',
+    marks: DEVSA_PARTNERS,
+    cols: 3,
+    cellH: 96,
   },
 
   // ─── Texas Public Radio ───────────────────────────────────────────────────

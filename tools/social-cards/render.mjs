@@ -26,6 +26,10 @@ import { existsSync } from "node:fs";
 import { join, dirname, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const run = promisify(execFile);
 import { CARDS, EVENTS, WEEK } from "./cards.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -191,6 +195,11 @@ async function main() {
     join(REPO, "public/brand/bolt-current-og.png"),
     "bolt-current.png",
   );
+  await stage(
+    work,
+    join(REPO, "public/access-granted/orgs/devsa.png"),
+    "devsa.png",
+  );
 
   const browser = await chromium.launch();
   /**
@@ -277,6 +286,79 @@ async function main() {
       people.push({ ...s, file: as });
     }
 
+    /**
+     * The marks in a field: every activation and every partner behind them.
+     *
+     * `repo` for one vendored here, `url` for one that is not — Alamo Python
+     * and PyTexas live on DEVSA's own S3 and are read by lib/pysa.ts from
+     * there, so the card reads them from there too rather than committing a
+     * second copy that can go stale against the site. `html` for the three
+     * activations that own no logo at all.
+     *
+     * No height per mark. The grid gives every cell the same box and each
+     * mark takes what it can of it, which is what "equal size" has to mean
+     * across ratios running 1:1 to 10:1 — matched on height a wordmark draws
+     * five times a badge's width, and matched on width a badge draws five
+     * times a wordmark's height.
+     */
+    const markFiles = [];
+    for (const [i, m] of (card.marks ?? []).entries()) {
+      if (m.html) {
+        markFiles.push({ mark: m, file: null });
+        continue;
+      }
+      let src;
+      if (m.repo) src = join(REPO, m.repo);
+      else if (m.partner) {
+        const url = byPartner.get(m.partner.toLowerCase());
+        if (!url) throw new Error(`${card.id}: no partner "${m.partner}"`);
+        src = await fetchCached(url);
+      } else src = await fetchCached(m.url);
+      const as = `mark-${i}${extname(src) || ".png"}`;
+      await stage(work, src, as);
+      markFiles.push({ mark: m, file: as });
+    }
+    const cells = markFiles.map(({ mark, file }) => {
+      if (!file) return `<li class="cell">${mark.html}</li>`;
+      // Two per-mark overrides, and both are properties of a *file* rather
+      // than of the design — which is why they live on the mark and not in
+      // the template.
+      //
+      // `scale` is the answer to a logo drawn small inside its own canvas:
+      // Alamo City Locksport is a thin line drawing with wide transparent
+      // margin, so at the same box as its neighbours it reads as half their
+      // size. `shift` is the answer to ink that is not centred in its canvas
+      // — the AWS mark hangs its smile below the letters, so a box centred on
+      // the file sits "aws" above the wordmarks either side of it.
+      const style = [
+        mark.scale && `max-width:${100 * mark.scale}%`,
+        mark.scale && `max-height:${100 * mark.scale}%`,
+        mark.shift && `transform:translateY(${mark.shift}px)`,
+      ]
+        .filter(Boolean)
+        .join(";");
+      return `<li class="cell"><img src="${file}"${style ? ` style="${style}"` : ""} alt="" /></li>`;
+    });
+
+    /**
+     * The event's own artwork, where a card names no speaker.
+     *
+     * These templates were drawn around a figure — the portrait column is
+     * half the composition — so an event card with the slot empty is a hole
+     * rather than a simpler card. Access Granted has its padlock, The Model
+     * its key art and PySanAntonio its mascot, all already in the repo and
+     * all portrait-ish, so the slot takes the event's art instead of a
+     * person's. Staged as `face` so the templates need no second code path:
+     * as far as the layout is concerned it is the same picture in the same
+     * place, sized by the same two numbers.
+     */
+    if (card.art && people.length === 0) {
+      const src = join(REPO, card.art);
+      const as = `face-art${extname(src) || ".png"}`;
+      await stage(work, src, as);
+      people.push({ file: as, name: "", title: "", company: "" });
+    }
+
     const facts = card.facts ?? event.facts;
 
     const [a, b] = people;
@@ -320,6 +402,44 @@ async function main() {
       // loop. Each entry is a title, an optional second line and an optional
       // speaker — the same three the speaker cards carry, at the size two of
       // them share a frame.
+      // The circuit's nodes, staged and built here for the same reason
+      // `talks` and `states` are: the engine substitutes and branches, it
+      // does not loop. A node is either a file — most of the community
+      // marks — or a scrap of type, which is what the three house-branded
+      // activations are: The Model, Access Granted and College Night own no
+      // logo, their mark *is* the display face in their own accent, and
+      // rebuilding those here would be a fourth copy of a treatment
+      // components/site/calendar/marks.tsx already owns.
+      // Split where the card says to, so a template can label each group.
+      // One undifferentiated field of twenty-two marks says less than three
+      // labelled bands — and on the DEVSA card the labels are the argument:
+      // what it built, what it invited, and who stands behind both.
+      // How many across, and how tall a cell, where a template lets the card
+      // decide. A slide carrying six marks and a poster carrying twenty-three
+      // want different grids out of the same layout.
+      // Whether the card is drawn for compositing rather than for viewing.
+      // A motion card's PNG is an overlay: no ground, so the footage shows
+      // through wherever the design does not paint.
+      transparent: card.video ? "1" : "",
+      // Whether the card's art is a block rather than a cutout — an opaque
+      // ground the bloom has to be carried over. See `pysanantonio-event`.
+      artBlock: card.artBlock ? "1" : "",
+      // Where the footage's top edge lands, so the overlay can feather it.
+      videoTop: card.video ? card.video.y : 0,
+      cols: card.cols ?? 4,
+      cellH: card.cellH ?? 66,
+      marksA: cells
+        .slice(0, card.splits?.[0] ?? cells.length)
+        .join("\n            "),
+      marksB: cells
+        .slice(
+          card.splits?.[0] ?? cells.length,
+          card.splits?.[1] ?? cells.length,
+        )
+        .join("\n            "),
+      marksC: cells
+        .slice(card.splits?.[1] ?? cells.length)
+        .join("\n            "),
       talks: (card.talks ?? [])
         .map(
           (t) =>
@@ -428,7 +548,96 @@ async function main() {
       outDir,
       `${card.id}-${size.width * scale}x${size.height * scale}.png`,
     );
-    await page.screenshot({ path: out });
+    // `omitBackground` only reaches transparent where the page actually is:
+    // every template paints `body` black, so a motion card's own CSS has to
+    // clear it. See the `if:transparent` block in pysanantonio.html.
+    await page.screenshot({ path: out, omitBackground: !!card.video });
+
+    /**
+     * A motion card: the same design, composited over its event's own footage.
+     *
+     * PySanAntonio is the one activation with a video asset, and a still cut
+     * from it would only repeat `mascot-block.webp`, which its event card
+     * already uses — the value in the file is the movement. So the PNG above
+     * is rendered without a ground and ffmpeg lays it over the clip.
+     *
+     * Two overlays, not one. The clip is landscape (1114x720) and the card is
+     * portrait, so it is first placed on a canvas at the size and offset the
+     * card names — which is how the figure lands in the right half where the
+     * still card puts it — and the design goes over that.
+     *
+     * `-stream_loop` rather than a longer source: the file is a 7-second loop
+     * and repeating it is free, where re-encoding a longer cut would not be.
+     *
+     * The ground above the clip is the clip's own top rows, stretched, and
+     * that is the whole of the background story — four attempts' worth,
+     * recorded because three of them were wrong.
+     *
+     * The card's ground was a blue bloom and the clip's is flat, so
+     * composited the tint stopped at the clip's top edge and the card went
+     * from graded to flat in one line. Crushing the clip's blacks matched
+     * the two sides at black — it threw the gradient away rather than
+     * continuing it, and darkened the luchador to do it. Growing the bloom
+     * over the whole frame continued the gradient and hazed him blue. So the
+     * bloom goes (see `if:transparent` in pysanantonio.html) and both sides
+     * are flat — except that the clip's ground is not one value: across its
+     * top edge it runs #040404 to #0b0b0b, brighter behind the figure and
+     * darker at the corners. No flat canvas matches a ground that moves, and
+     * the fourth attempt, feathering the clip's top edge into the canvas,
+     * turned out to be the worst of them: the clip has no headroom. At the
+     * top of the luchador's bob his sombrero reaches within 10px of the
+     * frame, so an alpha ramp deep enough to hide the seam faded the crown
+     * of his hat for part of the loop.
+     *
+     * Replicating the edge needs none of that. The clip's own top rows are
+     * stretched to fill the space above it, so at the seam the background is
+     * the footage's ground by construction — the same value in every column,
+     * with nothing done to the picture and nothing to line up by eye. What
+     * fills the card above the figure is the footage's own near-black,
+     * #040404 to #0b0b0b left to right, and the scrim covers the copy side
+     * of it.
+     */
+    if (card.video) {
+      const v = card.video;
+      const mp4 = out.replace(/\.png$/, ".mp4");
+      const W = size.width * scale;
+      const H = size.height * scale;
+      await run("ffmpeg", [
+        "-y",
+        "-v",
+        "error",
+        "-stream_loop",
+        String(v.loops ?? 1),
+        "-i",
+        join(REPO, v.src),
+        "-i",
+        out,
+        "-filter_complex",
+        `[0:v]scale=-2:${v.height * scale},split[clip][edge];` +
+          `[edge]crop=iw:4:0:0,scale=iw:${v.y * scale}[fill];` +
+          `[fill][clip]vstack[fig];` +
+          `color=c=${v.canvas ?? "black"}:s=${W}x${H}[bg];` +
+          `[bg][fig]overlay=${v.x * scale}:0[b];` +
+          `[b][1:v]overlay=0:0,format=yuv420p[o]`,
+        "-map",
+        "[o]",
+        "-t",
+        String(v.seconds ?? 14),
+        "-r",
+        "24",
+        "-an",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "slow",
+        "-crf",
+        "20",
+        "-movflags",
+        "+faststart",
+        mp4,
+      ]);
+      console.log(`${card.id}  -> ${mp4.split("/").pop()}`);
+    }
     console.log(
       `${card.id}${missing.length ? `  !! failed: ${missing.join(", ")}` : ""}`,
     );
