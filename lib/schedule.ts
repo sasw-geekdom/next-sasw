@@ -672,8 +672,45 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     blurb:
       "Latino-led startups from across Texas, pitching for $110k in prizes and mentorship — presented with the Consulate General of Israel.",
     when: {
-      start: "2026-09-30T14:00:00-05:00",
-      end: "2026-09-30T18:00:00-05:00",
+      start: "2026-09-30T18:00:00-05:00",
+      end: "2026-09-30T21:00:00-05:00",
+    },
+    // Their own form, not the week's list. The page it points at is headed
+    // "RSVP for LatinTech Pitch 2026" — an audience RSVP rather than a call
+    // for applications — and it collects things our registration does not,
+    // including a plus-one and an opt-in for the Consulate General of Israel.
+    // Sending people to `/register` would put them on the week's list without
+    // seating them here.
+    //
+    // "Save a seat." is Mission Pitch's label too, and shared on purpose: the
+    // labels on this field describe the mechanic, not the organiser. A free
+    // RSVP saves a seat, an invitation-only room requests one, Trinity's
+    // Eventbrite gets a ticket. Naming the organiser instead — which this said
+    // at first — was both the longest label of the five and ambiguous in the
+    // one place ambiguity costs something: on a pitch competition, "register"
+    // reads as entering your startup, and this form is for the audience.
+    register: {
+      label: "Save a seat.",
+      href: "https://www.latintechpitch.com/event-details/latintech-pitch-2026/form",
+    },
+    // A real section, because `access` cannot exist without one — it lives
+    // inside `detail`, and `detail` requires a headline and a lede. This page
+    // is not `heroOnly`, so `ActivationDetail` renders below the hero; a lede
+    // that merely repeated the blurb would print the same sentence twice on
+    // one page, and the eyebrow would default to "The morning" for a 6pm
+    // event.
+    detail: {
+      eyebrow: "The evening",
+      // Not "$110k" — the cash placings total far less than that and the
+      // blurb above already carries their own framing. What a finalist
+      // actually leaves with is the room, which their material says plainly:
+      // 4th and 5th place get mentorship and nothing else.
+      headline: "Ten finalists pitch. The room is the prize.",
+      lede: [
+        "Ten Latino-led companies from across Texas pitch to a room of investors, mentors, accelerators, media and diplomatic leaders. First through third take cash and mentorship; every finalist leaves with a certificate of recognition from the Government of Israel.",
+      ],
+      access:
+        "RSVP through Latin Tech Pitch rather than the week\u2019s list \u2014 theirs is the form that seats you, and it takes a plus-one.",
     },
     // The mark reads "LatinTECH PITCH 2026" — the only version they publish
     // that carries the full name; the plain "LatinTECH" wordmark drops
