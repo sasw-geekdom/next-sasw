@@ -1,0 +1,233 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* The turn.
+
+         `devsa-partners.html` announces the programme and
+         `devsa-statement.html` argues the collaboration. This one carries the
+         only DEVSA message that has two halves — what the week was for ten
+         years, and what changed — and a card that sets both halves at the
+         same size says neither.
+
+         So the card is staged rather than stacked. The claim runs at the top
+         at display size, the pivot sits on the floor behind a magenta rule,
+         and the space between them is empty on purpose: it is the pause
+         before "this year", and it is the only device here doing the work
+         that a band label does on the poster.
+
+         No marks. The other two cards prove their claims by showing
+         twenty-three logos; this one is about a room being opened, and a
+         field of logos would answer it with a headcount. */
+      :root {
+        --magenta: #ff32a0;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family:
+          "Geist",
+          -apple-system,
+          system-ui,
+          sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Ground, not subject — which is the opposite of what the other two
+         DEVSA cards do, and the right call here for a reason the system
+         already states: a subject is `bolt-current-og.png` at full charge,
+         *placed inside the margin*, and this card has no margin left to place
+         it in. The headline runs the full measure, the body reaches x740 and
+         the pivot paragraph x763, so every position for a 260px mark either
+         floated in the empty middle or crowded the type — which is what the
+         first two passes did in turn.
+
+         So it becomes what community-group.html makes it when a card has no
+         room: `sastw-bolt.svg`, the flat #ff32a0 silhouette, large, bled off
+         the right edge, at 0.17 and blurred. Behind the frame rather than
+         beside it, so the type can cross it freely and the pivot paragraph
+         gets its full measure back. Same two objects the rest of the set
+         uses, and the choice between them is whether the card has somewhere
+         to put a mark. This one does not. */
+      .bolt {
+        position: absolute;
+        /* Behind `.frame`, which is z-index 2. That is the whole fix: at 0.17
+           under blur, type crossing it loses nothing, so nothing has to be
+           held clear of it. */
+        z-index: 1;
+        right: -200px;
+        top: 470px;
+        width: 880px;
+        height: auto;
+        opacity: 0.17;
+        filter: blur(7px);
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 64px 72px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Carried from the poster unchanged, so the three DEVSA cards read as
+         one set: equal by what is drawn rather than by file height. */
+      .brands {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+      }
+      .brands img.devsa {
+        height: 92px;
+      }
+      .brands .rule {
+        width: 1px;
+        height: 64px;
+        background: rgba(255, 255, 255, 0.22);
+      }
+      .brands img.sastw {
+        height: 64px;
+      }
+
+      .eyebrow {
+        margin-top: 46px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--magenta);
+      }
+      h1 {
+        margin-top: 16px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        /* Per card, because the two cards on this template carry headlines
+           of very different lengths and a shared size would set one of them
+           badly. The ceiling is the measure: this face draws 0.468em per
+           character, so the longest line can run 936 / (0.468 x size)
+           characters before it overruns. "THIS WEEK WASN'T" is 16 and fills
+           899px at 120; "ZERO-PITCH" is 10 and fills 655 at 140. */
+        font-size: {{headlineSize}}px;
+        line-height: 0.94;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+      h1 .hit {
+        color: var(--magenta);
+      }
+
+      /* The specifics under the claim, and the reason the claim is fair: a
+         reader who spent ten years at this week can check "founders, pitch
+         decks, capital" against their own memory of it. Held to 620 so it
+         stops well clear of the bolt below it. */
+      .body {
+        margin-top: 30px;
+        /* 780. There is no mark beside this column any more — the bolt is a
+           ground behind the frame — so the only limit is the orphan it
+           creates: at 700 the longer of the two subtitles broke to four lines
+           and left "rooms." alone on the last. */
+        max-width: 780px;
+        font-size: 30px;
+        line-height: 1.42;
+        color: rgba(255, 255, 255, 0.62);
+      }
+
+      /* On the floor, behind a rule. `margin-top: auto` is what opens the gap
+         above it — the pause is the design, so it is taken from whatever the
+         headline leaves rather than set as a fixed value that a longer
+         headline would eat. */
+      .turn {
+        margin-top: auto;
+        padding-left: 34px;
+        border-left: 4px solid var(--magenta);
+      }
+      .turn .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 17px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--magenta);
+      }
+      .turn p {
+        margin-top: 18px;
+        /* Full measure. It was held to 660 to clear a bolt that used to sit
+           beside it; the bolt is behind the frame now, so the only limit is
+           the line length that stays readable. */
+        max-width: 800px;
+        font-size: 34px;
+        line-height: 1.38;
+        color: #fff;
+      }
+
+      .foot {
+        margin-top: 56px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 20px;
+        letter-spacing: 0.04em;
+        color: rgba(255, 255, 255, 0.82);
+      }
+      .foot .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--magenta);
+        flex: none;
+      }
+      .foot .sep {
+        color: rgba(255, 255, 255, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <img class="bolt" src="bolt.svg" alt="" />
+
+    <div class="frame">
+      <div class="brands">
+        <img class="devsa" src="devsa.png" alt="" />
+        <span class="rule"></span>
+        <img class="sastw" src="sastw.png" alt="" />
+      </div>
+
+      <p class="eyebrow">{{eyebrow}}</p>
+      <h1>{{headline}}</h1>
+      <p class="body">{{subtitle}}</p>
+
+      <div class="turn">
+        <p class="label">{{turnLabel}}</p>
+        <p>{{turnBody}}</p>
+      </div>
+
+      <div class="foot">
+        <span class="pip"></span>
+        <span>{{fact1}}</span>
+        <span class="sep">·</span>
+        <span>{{fact2}}</span>
+      </div>
+    </div>
+  </body>
+</html>

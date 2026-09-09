@@ -610,16 +610,19 @@ export const MODEL_ORGANIZERS: readonly ModelOrganizer[] = [
     name: "The Creative Futures",
     partner: "creative futures",
     href: "https://www.thecreativefutures.com/",
-    // The tallest of the three, because it is a fine-lined circular badge with
-    // its wordmark set around the ring — matched to the flat 36px these all
-    // started on, the ring collapsed and the name in it was unreadable. A
-    // near-square mark needs more height than a wide wordmark to carry the same
-    // weight, and a detailed one needs more still.
+    // The smallest of the three, and it used to be the tallest — the file
+    // changed underneath the reasoning. This was a fine-lined circular badge
+    // with its wordmark set around a ring, so it was sized up twice: a
+    // near-square mark needs more height than a wide wordmark to carry the
+    // same weight, and a detailed one needs more still.
     //
-    // 56px, not the 80 this briefly ran at. At 80 the row stopped being a
-    // credit line and started competing with the wordmark above it; the test
-    // for this wall is whether the ring reads, and it does here.
-    heightClass: "h-12 sm:h-14",
+    // The partner record now holds the full lockup — the badge with THE
+    // CREATIVE FUTURES set beside it, solid, at 3.2:1. That inverts every
+    // clause above. It is now the widest mark in the row rather than the most
+    // compact, so the height that made the ring legible makes the lockup draw
+    // 178px across against Tech Bloc's 75, and the credit line reads as one
+    // partner and two footnotes.
+    heightClass: "h-7 sm:h-8",
   },
   {
     // No fallback href: satechbloc.com is the obvious guess and a guess is not

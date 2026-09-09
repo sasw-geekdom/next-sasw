@@ -1,0 +1,286 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* The poster shape, for the two cards that had none.
+         ─────────────────────────────────────────────────────────────────────
+         Access Granted's poster and The Model's node-graph card were both made
+         before this directory existed, and both were the only copy of
+         themselves — a change to either meant editing a PNG, which is how the
+         Creative Futures logo came to be swapped by compositing rather than by
+         re-rendering. This template is what makes them cards.
+
+         It is deliberately not a third brand template. `access-granted.html`
+         and `the-model.html` are portrait cards — a figure in a column on the
+         right, a name block on the floor — and these two are posters: the art
+         is centred and large, there is no person, and the strip runs full
+         width under a rule. Same devices, different composition, which is the
+         same reason `community-group-wide.html` exists beside the portrait
+         one.
+
+         What it does not do is reproduce those two PNGs pixel for pixel. They
+         were rebuilt rather than traced, and the brief asked for changes on
+         the way — see `access-granted-poster` for the two the strip needed. */
+      :root {
+        --accent: {{accent}};
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family:
+          "Geist",
+          -apple-system,
+          system-ui,
+          sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 56px 72px 60px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* One row, one axis. On the poster this replaced a co-brand whose two
+         marks centred 4px apart — small, but the row is the first thing read
+         and the two marks are the two organisations, so an axis they do not
+         share is the one misalignment a reader can name. `align-items:
+         center` puts both file centres on it; the marks below get `shift`
+         where their file centre and their ink disagree. */
+      .brands {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+      }
+      .brands img.devsa {
+        height: {{devsaHeight}}px;
+      }
+      .brands .x {
+        font-size: 26px;
+        color: rgba(255, 255, 255, 0.35);
+        font-weight: 500;
+      }
+      .brands img.sastw {
+        height: {{lockupHeight}}px;
+      }
+      <!--if:week-->
+      /* The dates ride the same row when the card carries no partner mark,
+         which is what The Model's poster does with the space Access Granted
+         gives to DEVSA. */
+      .brands .week {
+        margin-left: auto;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+      <!--/if:week-->
+
+      <!--if:eyebrow-->
+      .eyebrow {
+        margin-top: 44px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #8b8b8b;
+      }
+      <!--/if:eyebrow-->
+
+      /* The display face, with the accent carried by a span rather than by a
+         rule about which word gets it — Access Granted colours its first word,
+         The Model reverses figure and ground on its second, and both are
+         written into the headline itself. */
+      h1 {
+        /* 46, not 26. The Model's headline knocks its second word out of a
+           filled panel, and a panel's box is taller than the glyphs it holds
+           — at 26 it climbed into the eyebrow above it. Access Granted's
+           headline is ink on black and would have been fine either way. */
+        margin-top: 46px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 0.9;
+        letter-spacing: -0.005em;
+        text-transform: uppercase;
+      }
+      h1 .hit {
+        color: var(--accent);
+      }
+      /* The Model's device: the accent as ground with the type knocked out of
+         it, where Access Granted uses the accent as ink. A filled panel of
+         #00ff66 at this size shouts, which is why the green card never does
+         this and the lavender one can. */
+      h1 .panel {
+        background: var(--accent);
+        color: #000;
+        padding: 0 18px;
+      }
+
+      <!--if:subtitle-->
+      /* A rule, not a filled panel — carried over from access-granted.html,
+         where the note is explicit that a solid block of the accent shouts at
+         poster size. Set in Geist semibold rather than the display face: it is
+         the event's own one-liner, and in Oswald it reads as a second
+         headline arguing with the first. */
+      .quote {
+        margin-top: 30px;
+        max-width: 880px;
+        border-left: 3px solid var(--accent);
+        padding-left: 24px;
+        font-size: 31px;
+        font-weight: 600;
+        line-height: 1.36;
+        color: #fff;
+      }
+      <!--/if:subtitle-->
+
+      /* The art takes what is left, and is centred in it. `min-height: 0` so a
+         tall image shrinks to the space rather than pushing the strip off the
+         card — the flex default would let it overflow, and on a poster the
+         thing that overflows is always the one at the bottom. */
+      <!--if:face-->
+      .art {
+        flex: 1;
+        min-height: 0;
+        margin-top: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .art img {
+        max-height: 100%;
+        max-width: {{artWidth}}px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+      }
+      <!--/if:face-->
+
+      <!--if:fact1-->
+      .facts {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--accent);
+        flex: none;
+      }
+      <!--/if:fact1-->
+
+      .powered {
+        margin-top: 34px;
+        padding-top: 26px;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+      }
+      .powered .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.26em;
+        color: var(--accent);
+        text-transform: uppercase;
+      }
+      /* Evenly spaced, on one axis.
+         The poster this replaces distributed five marks by hand and the gaps
+         came out 69, 55, 81 and 96 — a spread wide enough to read as grouping
+         where none was meant. `space-between` in a fixed row makes the gaps a
+         consequence of the widths instead of a decision, and `align-items:
+         center` puts every file on one axis. What that cannot fix is a file
+         whose ink is not centred in it, which is what `shift` is for. */
+      .logos {
+        margin-top: 22px;
+        display: flex;
+        align-items: center;
+        /* A fixed gap, left-grouped, rather than `space-between`. The two
+           cards carry five marks and three: distributed, the three strand
+           themselves at opposite ends of a 936px measure and read as a row
+           with something missing from the middle. At 88 the five draw 548 of
+           ink plus 352 of gap and finish 36px short of the right margin,
+           which is as close to filling it as a fixed gap gets. */
+        gap: 88px;
+      }
+      .logos img {
+        width: auto;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="brands">
+        <!--if:cobrand-->
+        <img class="devsa" src="devsa.png" alt="" />
+        <span class="x">&times;</span>
+        <!--/if:cobrand-->
+        <img class="sastw" src="sastw.png" alt="" />
+        <!--if:week-->
+        <div class="week">{{week}}</div>
+        <!--/if:week-->
+      </div>
+
+      <!--if:eyebrow-->
+      <p class="eyebrow">{{eyebrow}}</p>
+      <!--/if:eyebrow-->
+
+      <h1>{{headline}}</h1>
+
+      <!--if:subtitle-->
+      <p class="quote">{{subtitle}}</p>
+      <!--/if:subtitle-->
+
+      <!--if:face-->
+      <div class="art"><img src="{{face}}" alt="" /></div>
+      <!--/if:face-->
+
+      <!--if:fact1-->
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+      </div>
+      <!--/if:fact1-->
+
+      <div class="powered">
+        <div class="label">{{poweredLabel}}</div>
+        <div class="logos">{{logos}}</div>
+      </div>
+    </div>
+  </body>
+</html>

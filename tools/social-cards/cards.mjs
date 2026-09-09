@@ -28,8 +28,14 @@
  * ─── Headshots ─────────────────────────────────────────────────────────────
  *
  * Resolved from the CMS by speaker slug at render time, never pinned as a URL.
- * A replaced photo changes its blob URL, and both times that happened the card
+ * A replaced photo has changed its blob URL twice, and both times the card
  * silently kept rendering the old one.
+ *
+ * It does not always change it. Mason Egger's replacement kept the same
+ * address, which the render cache treated as proof nothing had moved — so the
+ * card drew the old photograph until the cache was cleared by hand. That is
+ * fixed in `fetchCached`, which now revalidates rather than trusting a hit,
+ * but the rule to remember is that the URL is not the version.
  */
 
 /** Shared by every card. */
@@ -195,12 +201,19 @@ const DEVSA_PARTNERS = [
   // its box where its neighbours' wordmarks leave air.
   { repo: "public/activations/txlf.webp", scale: 0.86 },
   { partner: "Tech Bloc" },
-  // Line art in a circle, like Alamo City Locksport above — a hairline ring
-  // with the name set around it, where its neighbours in this row fill the
-  // same box with solid ink. It measured 104x126 against Tech Bloc's 172x110
-  // and read as the smallest mark on the card. At 1.25 it draws 157 tall,
-  // level with Locksport's 159, which is the other mark solved this way.
-  { partner: "The Creative Futures", scale: 1.25 },
+  // Vendored, not resolved from this repo's partner wall — and that is a
+  // correction rather than a preference. The two sites read different
+  // Firestore projects, so "The Creative Futures" resolved to a different
+  // upload in each: this repo's record is the hairline ring on its own,
+  // DEVSA's is the full lockup, badge and wordmark, solid white at 1405x442.
+  // DEVSA convened this partner, so DEVSA's file is the correct one, and it
+  // is committed here rather than read from their storage because that URL
+  // carries an upload timestamp and dies on their next re-upload.
+  //
+  // No `scale`. The ring needed 1.25 because a hairline drawing reads light
+  // at a box its neighbours fill with solid ink; a 3.2:1 wordmark fills its
+  // box the way the other wordmarks in this band do.
+  { repo: "public/activations/the-creative-futures.webp" },
 ];
 
 const DEVSA_MARKS = [...DEVSA_BUILT, ...DEVSA_INVITED, ...DEVSA_PARTNERS];
@@ -268,7 +281,10 @@ export const EVENTS = {
     // fixed slot inside the afternoon rather than the afternoon itself.
     facts: ["Monday, September 28  ·  1:30 PM", "Geekdom, 3rd Floor"],
     logos: [
-      { partner: "The Creative Futures", height: 84 },
+      // 40, where the CMS ring took 84. Different file, different shape: the
+      // lockup is 3.2:1, so 40 draws it 127 across — beside Tech Bloc rather
+      // than over it, which is what a shared strip has to mean.
+      { repo: "public/activations/the-creative-futures.webp", height: 40 },
       { partner: "Tech Bloc", height: 68 },
       { repo: "public/access-granted/orgs/devsa.png", height: 62 },
     ],
@@ -288,7 +304,10 @@ export const EVENTS = {
     // smallest instance of the same mark anywhere in the set, on the event
     // with the most partners to credit.
     logos: [
-      { partner: "The Creative Futures", height: 84 },
+      // 40, where the CMS ring took 84. Different file, different shape: the
+      // lockup is 3.2:1, so 40 draws it 127 across — beside Tech Bloc rather
+      // than over it, which is what a shared strip has to mean.
+      { repo: "public/activations/the-creative-futures.webp", height: 40 },
       { partner: "Tech Bloc", height: 68 },
       { repo: "public/access-granted/orgs/devsa.png", height: 62 },
     ],
@@ -432,10 +451,18 @@ export const CARDS = [
     id: "pysanantonio-speaker-mason-egger",
     event: "pysanantonio",
     speaker: "mason-egger",
-    // No title yet, so the headline says the news. When one lands it takes
-    // this slot and "Opening Keynote" becomes a marker above it.
-    headline: "Opening Keynote",
-    headlineSize: 106,
+    // The title landed, so it takes the headline and "Opening Keynote" drops
+    // to the marker slot — which is the subtitle here, the same place
+    // `linux-satx-speaker-beck` puts its own.
+    //
+    // Four lines, and the break splits "Software Engineering" because the
+    // measure leaves no choice: at the set's 88 the longest line here is
+    // "ADAPTING TO THE" at 618px, which is where `jordana-naftali` sits and
+    // as far right as a headline goes before it reaches the figure. Held on
+    // one line the phrase draws 824 and lands across his shoulder.
+    headline:
+      "Adapting to the<br />Evolution of<br />Software<br />Engineering",
+    subtitle: "The opening keynote",
     // His CMS record says Sr Solutions Architect at Temporal; for a
     // PySanAntonio keynote the PyTexas hat is the relevant one, and PyTexas is
     // in the strip below him. Overridden here rather than in the CMS, so his
@@ -832,12 +859,18 @@ export const CARDS = [
     event: "devsa",
     size: { width: 1080, height: 1350 },
     scale: 2,
-    // "Community-driven activations" once, and the noun was the same
-    // over-claim the bands below exist to avoid: five of these marks are
-    // standing groups that meet every month, and calling them activations
-    // makes DEVSA the producer of all twelve. The adjective is the true half
-    // and carries the card on its own.
-    eyebrow: "Community-driven",
+    // "Community-driven activations" first, then "Community-driven" — the
+    // noun was the over-claim the bands below exist to avoid, since five of
+    // these marks are standing groups that meet every month.
+    //
+    // What replaced it is the fact the card could not previously state. The
+    // "+ Tech" is new this year; DEVSA was brought in to run it; the twelve
+    // activations below are its first programme. Without that, "DEVSA powers
+    // Tech Week" over a field of marks reads as a sponsorship claim on an
+    // event that has always existed. With it, the same headline is a
+    // division of labour and the card becomes news. "Year one" also answers
+    // the week's own hero, which leads on "Year 11".
+    eyebrow: "Year one of the + Tech",
     // No count. An earlier cut led on "Eleven activations", and a number is
     // the wrong subject for this card: it invites the reader to check it, it
     // goes stale the week another lands, and it says nothing about who
@@ -859,7 +892,7 @@ export const CARDS = [
     size: { width: 1920, height: 1080 },
     template: "devsa-partners-wide.html",
     scale: 2,
-    eyebrow: "Community-driven",
+    eyebrow: "Year one of the + Tech",
     headline: 'DEVSA powers <span class="hit">Tech Week.</span>',
     marks: DEVSA_MARKS,
     splits: DEVSA_SPLITS,
@@ -883,7 +916,7 @@ export const CARDS = [
     size: { width: 1080, height: 1350 },
     template: "devsa-partners.html",
     scale: 2,
-    eyebrow: "Community-driven",
+    eyebrow: "Year one of the + Tech",
     headline: 'The community<br /><span class="hit">powers Tech Week.</span>',
     marks: DEVSA_MARKS,
     splits: DEVSA_SPLITS,
@@ -902,6 +935,89 @@ export const CARDS = [
    * "Invited to the week" is posting a card about yourself rather than a crop
    * of somebody else's.
    */
+  /**
+   * The other half of the turn card's argument, on the same template.
+   *
+   * `devsa-a-seat-at-the-table` says the room opened. This one says what is
+   * in it, and then how it got there — the reader-facing claim on top, the
+   * organisational story behind the rule, which is the shape that template
+   * exists for.
+   *
+   * It carries no marks, and that is the point of the rewrite. An earlier cut
+   * led on "23 organizations said yes" over a field of all twenty-three
+   * logos; `devsa-powers-the-week`, its reshare and the three carousel slides
+   * already do exactly that, four times over. A fifth card of logos adds a
+   * fifth copy of one argument where the set is short of the other one.
+   */
+  {
+    id: "devsa-zero-pitch",
+    event: "devsa",
+    template: "devsa-turn.html",
+    size: { width: 1080, height: 1350 },
+    scale: 2,
+    eyebrow: "What the “+ Tech” actually means",
+    // 168, the largest headline in the set, where the other card on this
+    // template runs 120. Eleven characters is what buys it: this face draws
+    // 0.468em each, so "HARD PARTS." fills 865 of the 936px measure at 168.
+    headlineSize: 168,
+    // "Zero-pitch sessions." was the headline, and it was the one line on
+    // these cards that could be read backwards. In the technical community
+    // zero-pitch means no vendor deck inside the talk; on a card carrying the
+    // Startup + Tech Week lockup, "pitch" means Mission Pitch, Latin Tech
+    // Pitch and Stumberg — three stages this week actually runs, none of them
+    // DEVSA's. At 140px the wrong reading won, and it read as the week having
+    // dropped its pitch competitions.
+    //
+    // So the phrase moves into the subtitle, where "zero-pitch technical
+    // talks" carries its own qualifier, and the sentence after it says the
+    // pitch stages run. The headline takes the positive half of the same
+    // message, which cannot be read two ways.
+    // An invitation, not a claim — which is what makes it safe on a card
+    // co-branded with a week that runs three pitch stages. "Pure technical
+    // depth" was accurate and was a category label; this names the thing a
+    // technical speaker has spent ten years cutting out of a talk. It also
+    // answers the card beside it: `devsa-a-seat-at-the-table` says the week
+    // wasn't built for you, and this one says what to bring now that it is.
+    headline: 'Bring the<br /><span class="hit">hard parts.</span>',
+    subtitle:
+      "Real workflows and zero-pitch technical talks, no longer re-framed for a founder audience. The week’s pitch stages still run — these are the tech rooms.",
+    turnLabel: "How it happened",
+    // "It didn't take a multi-million dollar budget" was here, and it was the
+    // one ungenerous line on a card whose argument is generosity — a reader
+    // asks who it is aimed at, four lines above the organisations that made
+    // it happen. "It didn't need another room" makes the same point about
+    // organising rather than spending, and it is DEVSA's own line: the
+    // coworking letter says putting up more square footage downtown would
+    // only fragment a community trying to consolidate.
+    turnBody:
+      "DEVSA didn’t build a new conference. We mobilized our community into an existing 11-year platform because 23 local organizations said yes. It didn’t need another room — just one dedicated bridge, organizing from the frontlines.",
+  },
+
+  {
+    id: "devsa-a-seat-at-the-table",
+    event: "devsa",
+    template: "devsa-turn.html",
+    size: { width: 1080, height: 1350 },
+    scale: 2,
+    eyebrow: "Developers · hackers · active learners",
+    headlineSize: 120,
+    headline:
+      'For 10 years,<br />this week wasn’t<br /><span class="hit">built for you.</span>',
+    subtitle:
+      "Startup Week was geared toward founders, pitch decks, capital and small business strategy.",
+    // Sourced, clause by clause. An earlier cut read "Geekdom recognized the
+    // gap: San Antonio's technical ecosystem needed its own dedicated seat at
+    // the table" — true as far as DEVSA knows, and nowhere in anything
+    // Geekdom has published, which makes it DEVSA narrating a partner's
+    // reasoning on DEVSA's own channel. What Geekdom has said publicly is
+    // the club and its audience, in those words; what DEVSA can assert is
+    // its own invitation. The card now claims only those two things, and
+    // together they say more than the sentence they replaced.
+    turnLabel: "This year",
+    turnBody:
+      "Geekdom is becoming a membership club for serious founders and builders. Startup + Tech Week is the first event of that new direction, and they tagged DEVSA in so the technical community was in it from the start.",
+  },
+
   {
     id: "devsa-slide-built",
     event: "devsa",
@@ -1205,6 +1321,109 @@ export const CARDS = [
   },
 
   // ─── Access Granted ───────────────────────────────────────────────────────
+  /**
+   * The two posters, rebuilt as cards.
+   *
+   * Both existed only as exported PNGs from before this directory did, which
+   * cost exactly what that always costs: when The Creative Futures logo turned
+   * out to be wrong, the fix was compositing a new one into a JPEG rather than
+   * changing a line and re-rendering. These are the same two designs on a
+   * shared template so the next change is a line.
+   *
+   * They are rebuilt, not traced. The originals are the reference for
+   * composition and copy; the numbers were re-solved against the layout, and
+   * the strip's alignment was fixed on the way rather than reproduced.
+   */
+  {
+    id: "access-granted-poster",
+    event: "access-granted",
+    template: "activation-poster.html",
+    accent: "#00ff66",
+    art: "public/access-granted/padlock.png",
+    artWidth: 470,
+    // DEVSA and the lockup, where the other poster carries the dates.
+    cobrand: true,
+    week: false,
+    devsaHeight: 52,
+    // 56, where the original drew 40. The brief was "larger" and this is the
+    // ceiling that still reads as a co-brand rather than a title: at 56 the
+    // lockup draws 274 across against DEVSA's 80, which is the widest it can
+    // go before the row reads as the week's poster carrying a partner mark
+    // instead of the two organisations standing together.
+    lockupHeight: 56,
+    headline: '<span class="hit">Access</span><br />Granted',
+    headlineSize: 138,
+    subtitle:
+      "Every other room this week is people talking about technology. This one is people taking it apart.",
+    poweredLabel: "Powered by San Antonio’s security community",
+    // The coalition without DEVSA — it is in the co-brand row above, and a
+    // mark that appears twice on one card reads as two organisations.
+    //
+    // Heights are drawn heights, evened to ~92 for the dense badges and held
+    // higher for the two that carry a caption under a light graphic. The two
+    // `shift` values are the measured error on the original: CyberJedis sat
+    // 7.5px below the row's axis and Locksport 3px above it, because both
+    // files centre on a box that includes their caption.
+    logos: [
+      { repo: "public/access-granted/orgs/bsides.png", height: 92 },
+      { repo: "public/access-granted/orgs/defcon.png", height: 90 },
+      { repo: "public/access-granted/orgs/saha.png", height: 68 },
+      // 117 and 110 against the 92 above them, because `height` is the file's
+      // and these two files are mostly margin: at a shared 90 CyberJedis drew
+      // 74 of ink and Locksport 48, against BSides' 92. Solved to the drawn
+      // sizes the original poster was approved at — 93 and 66 tall.
+      // …and then `shift`, because sizing them correctly is what exposes the
+      // original defect: both files put a caption under the graphic, so the
+      // box centres 11.5px and 3px away from what a reader sees as the mark.
+      // Measured off the render, not guessed.
+      {
+        repo: "public/access-granted/orgs/cyberjedis.png",
+        height: 117,
+        shift: -11,
+      },
+      {
+        repo: "public/access-granted/orgs/locksport.png",
+        height: 110,
+        shift: 3,
+      },
+    ],
+  },
+
+  {
+    id: "the-model-poster",
+    event: "the-model",
+    template: "activation-poster.html",
+    accent: "#c0b4fc",
+    // A still of the live component, not a picture of one — `ModelFlow` on
+    // the activation's own page, captured at 2x. The same relationship
+    // `bolt-current-og.png` has to the WebGL hero, and the reason this poster
+    // could not be rebuilt until now: its art was never a file. What is in
+    // `public/the-model/` is `code-select.png`, a different graphic.
+    art: "public/the-model/node-graph.png",
+    artWidth: 880,
+    eyebrow: "// The Rand · AI & Applied Innovation",
+    // The lockup is this poster's only mark — Access Granted gives the row's
+    // left half to DEVSA, and this one gives its right half to the dates.
+    lockupHeight: 40,
+    // Figure and ground, not two colours of ink: "MODEL" is knocked out of a
+    // lavender panel, which is this event's own device and the reason the
+    // template carries `.panel` as well as `.hit`.
+    headline: 'The <span class="panel">Model</span>',
+    headlineSize: 130,
+    subtitle:
+      "Creatives, founders and developers in the same room. An afternoon of showing each other what comes next.",
+    facts: [
+      "Monday, September 28, 2026  ·  1:00 – 6:00 PM",
+      "Geekdom, 3rd Floor",
+    ],
+    poweredLabel: "// Powered by",
+    logos: [
+      { repo: "public/activations/the-creative-futures.webp", height: 40 },
+      { partner: "Tech Bloc", height: 60 },
+      { repo: "public/access-granted/orgs/devsa.png", height: 56 },
+    ],
+  },
+
   {
     id: "access-granted-speaker-dante-moreno",
     event: "access-granted",

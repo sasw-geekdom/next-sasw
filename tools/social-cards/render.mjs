@@ -93,18 +93,51 @@ async function loadSpeakers() {
 // ─── assets ─────────────────────────────────────────────────────────────────
 
 /** Remote files land in a gitignored cache so a re-render costs no network. */
+/**
+ * Fetch once, then revalidate — not fetch once and trust it forever.
+ *
+ * The cache is keyed on the URL, and the blob store hands out URLs that are
+ * stable across a replacement: Mason Egger's headshot was re-uploaded to the
+ * same address, so every render after it kept drawing the old photograph and
+ * nothing said so. The card comment in cards.mjs asserted that a replaced
+ * photo changes its URL, which is what made this invisible — it was written
+ * from two incidents where the URL *did* change, and the opposite case never
+ * came up until it did.
+ *
+ * So each cached file keeps an `.etag` beside it and the next run asks the
+ * server whether it still holds. A 304 costs one round trip and no transfer;
+ * anything else rewrites the file. A server that sends no validator is
+ * re-fetched every time, which is the safe way to be wrong.
+ */
 async function fetchCached(url) {
   await mkdir(CACHE, { recursive: true });
   const ext = extname(new URL(url).pathname) || ".png";
-  const file = join(
+  const stem = join(
     CACHE,
-    createHash("sha1").update(url).digest("hex").slice(0, 16) + ext,
+    createHash("sha1").update(url).digest("hex").slice(0, 16),
   );
-  if (!existsSync(file)) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`${res.status} fetching ${url}`);
-    await writeFile(file, Buffer.from(await res.arrayBuffer()));
+  const file = stem + ext;
+  const tagFile = stem + ".etag";
+
+  const tag =
+    existsSync(file) && existsSync(tagFile)
+      ? await readFile(tagFile, "utf8")
+      : "";
+
+  const res = await fetch(
+    url,
+    tag ? { headers: { "If-None-Match": tag } } : {},
+  );
+  if (res.status === 304) return file;
+  if (!res.ok) {
+    // A cached copy is better than a failed render when the network is the
+    // thing that broke, but only when there is one.
+    if (existsSync(file)) return file;
+    throw new Error(`${res.status} fetching ${url}`);
   }
+  await writeFile(file, Buffer.from(await res.arrayBuffer()));
+  const etag = res.headers.get("etag");
+  if (etag) await writeFile(tagFile, etag);
   return file;
 }
 
@@ -243,8 +276,12 @@ async function main() {
     if (!event) throw new Error(`${card.id}: unknown event ${card.event}`);
 
     // Logos, resolved from wherever each one lives.
+    //
+    // `card.logos` overrides the event's, for the same reason `card.template`
+    // and `card.facts` do: the poster carries the coalition without DEVSA,
+    // because DEVSA is in its co-brand row rather than its strip.
     const logos = [];
-    for (const [i, l] of event.logos.entries()) {
+    for (const [i, l] of (card.logos ?? event.logos).entries()) {
       let src;
       if (l.repo) src = join(REPO, l.repo);
       else if (l.url) src = await fetchCached(l.url);
@@ -259,8 +296,14 @@ async function main() {
       // which does the same thing with the same two filters so a mark drawn
       // white on the site is drawn white here too.
       const tone = l.white ? ";filter:brightness(0) invert(1)" : "";
+      // `shift` is the strip's version of the one `marks` carries, and it is
+      // needed here for the same reason: a mark with a caption under its
+      // graphic — CyberJedis, Alamo City Locksport — has its file centre
+      // below its visual mass, so a row that centres the files does not
+      // centre what a reader sees.
+      const nudge = l.shift ? `;transform:translateY(${l.shift}px)` : "";
       logos.push(
-        `<img src="${as}" style="height:${l.height}px${tone}" alt="" />`,
+        `<img src="${as}" style="height:${l.height}px${tone}${nudge}" alt="" />`,
       );
     }
 
@@ -371,7 +414,10 @@ async function main() {
     );
 
     const data = {
-      week: WEEK,
+      // Blank unless a card asks for it — `activation-poster` guards its dates
+      // row on this token, and Access Granted's poster gives that corner to
+      // DEVSA instead.
+      week: card.week === false ? "" : WEEK,
       eyebrow: card.eyebrow ?? "",
       headline: card.headline,
       headlineSize: card.headlineSize ?? 88,
@@ -420,12 +466,36 @@ async function main() {
       // Whether the card is drawn for compositing rather than for viewing.
       // A motion card's PNG is an overlay: no ground, so the footage shows
       // through wherever the design does not paint.
+      // The activation's own colour, for the one template shared across two
+      // brands. Every other template hardcodes its palette because it serves
+      // one event; the poster serves Access Granted's green and The Model's
+      // lavender off the same layout.
+      accent: card.accent ?? "#ff32a0",
+      // The poster's co-brand row and its hero. `cobrand` is a flag rather
+      // than a mark, because the only partner that appears there is DEVSA and
+      // the alternative is the dates — see `if:week` in activation-poster.
+      cobrand: card.cobrand ? "1" : "",
+      devsaHeight: card.devsaHeight ?? 0,
+      artWidth: card.artWidth ?? 0,
+      // The strip's own line. Every other template writes its label into the
+      // markup because it serves one event; this one serves two, and Access
+      // Granted's names the coalition where The Model's is the house "//".
+      poweredLabel: card.poweredLabel ?? "",
       transparent: card.video ? "1" : "",
       // Whether the card's art is a block rather than a cutout — an opaque
       // ground the bloom has to be carried over. See `pysanantonio-event`.
       artBlock: card.artBlock ? "1" : "",
       // Where the footage's top edge lands, so the overlay can feather it.
       videoTop: card.video ? card.video.y : 0,
+      // The label over a single undifferentiated field of marks. The poster
+      // splits into three and labels each; a card whose claim is the count
+      // wants one field and one line saying what is in it.
+      marksLabel: card.marksLabel ?? "",
+      // The two halves of a before/after card. Separate tokens rather than a
+      // second `subtitle`, because the label is the hinge: it is what tells a
+      // reader the paragraph under it is answering the one above it.
+      turnLabel: card.turnLabel ?? "",
+      turnBody: card.turnBody ?? "",
       cols: card.cols ?? 4,
       cellH: card.cellH ?? 66,
       marksA: cells
