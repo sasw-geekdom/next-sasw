@@ -31,6 +31,9 @@ export const EVENT_DAYS: EventDay[] = [
   { iso: "2026-10-02", label: "Oct 2" },
 ];
 
+/** The five day keys, for validating what a door device sends. */
+export const EVENT_DAY_KEYS = new Set(EVENT_DAYS.map((d) => d.iso));
+
 /** Local YYYY-MM-DD for an epoch-ms timestamp. */
 export function localDayKey(ms: number): string {
   const d = new Date(ms);

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Oswald } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import { SiteAnalytics } from "@/components/site-analytics";
 import { SITE_URL } from "@/lib/event";
 import "./globals.css";
 
@@ -89,11 +88,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
-        <Analytics />
+        {/* Inside `<body>`. The GA tag used to sit after `</body>` as a sibling
+            of it, which is invalid placement — browsers relocate stray content
+            back into the body, so it ran, but nothing guaranteed it. */}
+        <SiteAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
       </body>
-      {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
-      )}
     </html>
   );
 }

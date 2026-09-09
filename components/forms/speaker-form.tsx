@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { TRACKS, CIRCUIT_COLORS, DEFAULT_CIRCUIT_COLOR } from "@/lib/tracks";
 import { useBoltColor } from "@/components/site/bolt-color";
+import { CONVERSIONS, trackConversion } from "@/lib/analytics/track";
 
 type FieldErrors = Record<string, string[] | undefined>;
 
@@ -40,6 +41,7 @@ export function SpeakerForm() {
         setError(body.error ?? "Something went wrong.");
         return;
       }
+      trackConversion(CONVERSIONS.speaker);
       setDone(true);
     } catch {
       setError("Network error. Try again.");

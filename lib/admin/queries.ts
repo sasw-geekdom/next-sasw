@@ -77,6 +77,24 @@ export async function listGetInvolved(): Promise<GetInvolvedRow[]> {
   });
 }
 
+/**
+ * Just the names on the speaker roster, for the door.
+ *
+ * A speaker is not a registration — they were invited, and plenty of them never
+ * filled in the public form — so searching the check-in list for one finds
+ * nothing. This gives the door something to match against, and checking one in
+ * writes a door registration for them.
+ */
+export async function listSpeakerNames(): Promise<
+  { id: string; name: string }[]
+> {
+  const snap = await adminDb.collection(COLLECTIONS.speakers).get();
+  return snap.docs
+    .map((doc) => ({ id: doc.id, name: (doc.data().name ?? "") as string }))
+    .filter((s) => s.name)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export async function listRegistrations(): Promise<RegistrationRow[]> {
   const snap = await adminDb
     .collection(COLLECTIONS.registrations)
@@ -107,7 +125,10 @@ export async function listRegistrations(): Promise<RegistrationRow[]> {
       checkedIn: Boolean(d.checkedIn),
       checkedInAt: toMillis(d.checkedInAt),
       checkedInBy: d.checkedInBy ?? null,
+      checkedInDays: Array.isArray(d.checkedInDays) ? d.checkedInDays : [],
       createdAt: toMillis(d.createdAt) ?? 0,
+      source: d.source === "door" ? "door" : undefined,
+      attendeeType: d.attendeeType ?? undefined,
     };
   });
 }

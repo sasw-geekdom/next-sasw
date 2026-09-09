@@ -15,6 +15,7 @@ import {
   SCHEDULE_CAVEAT,
   type GetInvolvedPath,
 } from "@/lib/get-involved";
+import { CONVERSIONS, trackConversion } from "@/lib/analytics/track";
 
 type FieldErrors = Record<string, string[] | undefined>;
 
@@ -80,6 +81,10 @@ export function GetInvolvedForm() {
         setError(body.error ?? "Something went wrong.");
         return;
       }
+      // Sponsor, partner and volunteer inbound — the sales pipeline. `path`
+      // rides along so the report can separate a sponsor enquiry from a
+      // volunteer sign-up.
+      trackConversion(CONVERSIONS.getInvolved, { path });
       setDone(path);
     } catch {
       setError("Network error. Try again.");

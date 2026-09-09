@@ -1,17 +1,26 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { listGetInvolved } from "@/lib/admin/queries";
+import {
+  applyGetInvolvedFilters,
+  isGetInvolvedFiltered,
+  parseGetInvolvedFilters,
+} from "@/lib/admin/get-involved-filters";
 import { toCsv, csvResponse } from "@/lib/admin/csv";
 import { formatDateTime } from "@/lib/format";
 import { PATH_LABELS } from "@/lib/get-involved";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const rows = await listGetInvolved();
+  // Export the view, not the table. The link carries whatever the table put in
+  // the URL, so narrowing to sponsor inquiries and hitting Export returns those
+  // and not all three paths.
+  const filters = parseGetInvolvedFilters(req.nextUrl.searchParams);
+  const rows = applyGetInvolvedFilters(await listGetInvolved(), filters);
   const csv = toCsv(
     [
       "Path",
@@ -59,5 +68,10 @@ export async function GET() {
     ]),
   );
 
-  return csvResponse("sastw-get-involved.csv", csv);
+  return csvResponse(
+    isGetInvolvedFiltered(filters)
+      ? "sastw-get-involved-filtered.csv"
+      : "sastw-get-involved.csv",
+    csv,
+  );
 }

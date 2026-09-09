@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth/session";
-import { listRegistrations } from "@/lib/admin/queries";
+import { listRegistrations, listSpeakerNames } from "@/lib/admin/queries";
 import { CheckinPortal } from "@/components/admin/checkin-portal";
 import { PageHeader } from "@/components/admin/page-header";
 
@@ -14,15 +14,19 @@ export default async function CheckinPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   await requireAdmin();
-  const [rows, { q }] = await Promise.all([listRegistrations(), searchParams]);
+  const [rows, speakers, { q }] = await Promise.all([
+    listRegistrations(),
+    listSpeakerNames(),
+    searchParams,
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Check-in"
-        description="Search a name. Tap to check them in. Coffee's on."
+        description="Search a name. Tap to check them in. Not on the list? Add them at the door."
       />
-      <CheckinPortal rows={rows} initialQuery={q ?? ""} />
+      <CheckinPortal rows={rows} speakers={speakers} initialQuery={q ?? ""} />
     </div>
   );
 }

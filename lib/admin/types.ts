@@ -45,11 +45,58 @@ export interface RegistrationRow {
   volunteerDays: string[];
   volunteerNotes?: string;
   sponsorConsent: boolean;
+  /**
+   * Attended at least one day. Kept alongside `checkedInDays` because it is
+   * what the attendance rate and the registrations filter mean by "checked in",
+   * and because every row written before per-day check-in existed has only this.
+   */
   checkedIn: boolean;
+  /** Most recent check-in, not the first — it is what "Recent" is sorted on. */
   checkedInAt: number | null;
   checkedInBy: string | null;
+  /**
+   * Which event days this person actually turned up for, as `YYYY-MM-DD`.
+   *
+   * The week is five separate events and people come to some and not others, so
+   * one boolean could not describe attendance: somebody checked in on the
+   * Monday was permanently "in" and could not be checked in again on the
+   * Thursday, and the by-day counts credited everyone to whichever day they
+   * first appeared. Days 2 to 5 therefore read close to zero however busy they
+   * were.
+   *
+   * Empty on rows written before this existed; the door falls back to
+   * `checkedInAt` for those, which is the day they came.
+   */
+  checkedInDays: string[];
   createdAt: number;
+  /**
+   * How this record came to exist. Absent for the 274 who filled in the public
+   * form; "door" for someone added at check-in, which is the only way to tell a
+   * walk-up apart from a pre-registration afterwards.
+   */
+  source?: "door";
+  /** Set at the door for anyone who is not a plain attendee. */
+  attendeeType?: AttendeeType;
 }
+
+/**
+ * What somebody is, when it is not "attendee".
+ *
+ * Recorded only at the door. The public form does not ask — a speaker or a
+ * sponsor who registers through the site is an attendee like anyone else, and
+ * this exists so the person on the door can say who walked up without inventing
+ * a second collection for them.
+ */
+export const ATTENDEE_TYPES = [
+  "attendee",
+  "speaker",
+  "sponsor",
+  "volunteer",
+  "staff",
+  "press",
+] as const;
+
+export type AttendeeType = (typeof ATTENDEE_TYPES)[number];
 
 export interface GetInvolvedRow {
   id: string;

@@ -14,6 +14,7 @@ import {
   VOLUNTEER_DAYS,
   SPONSOR_CONSENT_LABEL,
 } from "@/lib/registration";
+import { CONVERSIONS, trackConversion } from "@/lib/analytics/track";
 
 type FieldErrors = Record<string, string[] | undefined>;
 
@@ -72,6 +73,14 @@ export function RegistrationForm() {
         setError(body.error ?? "Something went wrong.");
         return;
       }
+      // The conversion. GA ties this to the session's source, medium and
+      // campaign, which is what turns "415 sessions from Email" into "and this
+      // many of them registered".
+      trackConversion(CONVERSIONS.register, {
+        circuits: circuits.length,
+        volunteer,
+        first_time: firstTime,
+      });
       setDone(true);
     } catch {
       setError("Network error. Try again.");

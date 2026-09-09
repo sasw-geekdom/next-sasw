@@ -9,7 +9,35 @@ interface Point {
 }
 
 /** Sessions-by-day line + area, space-blue, with a hover crosshair + tooltip. */
-export function SessionsTrend({ data }: { data: Point[] }) {
+/**
+ * Two tones, because the card now draws two series.
+ *
+ * The colour was hardcoded to `space-blue` on the svg and on the hover marker,
+ * so a caller could not distinguish a second curve by wrapping it — the
+ * registrations trend came out the same navy as sessions and the two read as
+ * one chart split in half.
+ */
+const TONES = {
+  blue: {
+    line: "text-space-blue",
+    rule: "bg-space-blue/30",
+    dot: "bg-space-blue",
+  },
+  magenta: {
+    line: "text-magenta",
+    rule: "bg-magenta/30",
+    dot: "bg-magenta",
+  },
+} as const;
+
+export function SessionsTrend({
+  data,
+  tone = "blue",
+}: {
+  data: Point[];
+  tone?: keyof typeof TONES;
+}) {
+  const t = TONES[tone];
   const ref = React.useRef<HTMLDivElement>(null);
   const [hover, setHover] = React.useState<number | null>(null);
 
@@ -54,7 +82,7 @@ export function SessionsTrend({ data }: { data: Point[] }) {
         <svg
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
-          className="h-full w-full text-space-blue"
+          className={`h-full w-full ${t.line}`}
           aria-hidden="true"
         >
           <path d={area} fill="currentColor" opacity={0.08} />
@@ -72,11 +100,11 @@ export function SessionsTrend({ data }: { data: Point[] }) {
         {active && hover !== null && (
           <>
             <div
-              className="pointer-events-none absolute inset-y-0 w-px bg-space-blue/30"
+              className={`pointer-events-none absolute inset-y-0 w-px ${t.rule}`}
               style={{ left: `${xAt(hover)}%` }}
             />
             <div
-              className="pointer-events-none absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-space-blue ring-2 ring-white"
+              className={`pointer-events-none absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white ${t.dot}`}
               style={{
                 left: `${xAt(hover)}%`,
                 top: `${yAt(active.sessions)}%`,

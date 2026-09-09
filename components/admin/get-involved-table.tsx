@@ -1,14 +1,32 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Trash2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Drawer } from "@/components/ui/drawer";
-import { cn } from "@/lib/utils";
+import { ButtonLink } from "@/components/ui/button";
+import { AdminInput } from "@/components/admin/ui/controls";
+import { FilterChips, ToggleChip } from "@/components/admin/ui/filter-chips";
+import {
+  applyGetInvolvedFilters,
+  OPEN_STATUSES,
+  getInvolvedSearchParams,
+  isGetInvolvedFiltered,
+  parseGetInvolvedFilters,
+  type GetInvolvedFilters,
+} from "@/lib/admin/get-involved-filters";
 import { formatDate, formatDateTime } from "@/lib/format";
-import { deleteGetInvolved } from "@/lib/admin/actions";
-import type { GetInvolvedRow } from "@/lib/admin/types";
+import {
+  deleteGetInvolved,
+  updateGetInvolvedStatus,
+} from "@/lib/admin/actions";
+import {
+  SUBMISSION_STATUSES,
+  type GetInvolvedRow,
+  type SubmissionStatus,
+} from "@/lib/admin/types";
+import { StatusBadge } from "@/components/admin/status-badge";
+import { Combobox } from "@/components/ui/combobox";
 import { PATH_LABELS, type GetInvolvedPath } from "@/lib/get-involved";
 
 type View = "all" | GetInvolvedPath;
@@ -19,6 +37,19 @@ const VIEWS: { key: View; label: string }[] = [
   { key: "host", label: "Host" },
   { key: "general", label: "General" },
 ];
+
+/**
+ * The header cell, pinned.
+ *
+ * Nineteen rows sounds like too few to need this, and it would be if they were
+ * one line each — but the Details column carries up to 180 characters of a
+ * sponsor's goals or a host's event concept, so a row runs three or four lines
+ * and the table is well over a screen. The negative offset matches `<main>`'s
+ * padding: sticky pins to the scroll container's content box, so without it the
+ * top of the first row shows above the pinned header.
+ */
+const TH =
+  "sticky -top-5 z-10 bg-muted px-4 py-3 font-medium shadow-[inset_0_-1px_0_var(--border)] sm:-top-6";
 
 /** The path-specific gist of a submission, for the Details column. */
 function details(r: GetInvolvedRow): { headline?: string; body?: string } {
@@ -41,9 +72,11 @@ function details(r: GetInvolvedRow): { headline?: string; body?: string } {
 
 export function GetInvolvedTable({ rows }: { rows: GetInvolvedRow[] }) {
   const router = useRouter();
+  const params = useSearchParams();
   const [items, setItems] = React.useState(rows);
-  const [query, setQuery] = React.useState("");
-  const [view, setView] = React.useState<View>("all");
+  const [filters, setFilters] = React.useState<GetInvolvedFilters>(() =>
+    parseGetInvolvedFilters(params),
+  );
   const [selected, setSelected] = React.useState<GetInvolvedRow | null>(null);
   const [confirm, setConfirm] = React.useState(false);
   const [pending, startTransition] = React.useTransition();
@@ -68,17 +101,41 @@ export function GetInvolvedTable({ rows }: { rows: GetInvolvedRow[] }) {
     });
   }
 
-  const filtered = React.useMemo(() => {
-    let list = items;
-    if (view !== "all") list = list.filter((r) => r.path === view);
-    const q = query.trim().toLowerCase();
-    if (!q) return list;
-    return list.filter((r) =>
-      [r.name, r.email, r.company, r.role, r.eventConcept, r.question]
-        .filter(Boolean)
-        .some((v) => v!.toLowerCase().includes(q)),
+  /**
+   * Filters go to the URL with `history.replaceState`, not `router.replace`.
+   *
+   * `router.replace` would re-run the server component and refetch every row on
+   * each keystroke. Nothing on this page reads the params after mount — the
+   * initial state is seeded from them once — so the URL here is for linking and
+   * for the export button to read, not a source of truth to round-trip through.
+   */
+  function update(patch: Partial<GetInvolvedFilters>) {
+    const next = { ...filters, ...patch };
+    setFilters(next);
+    const qs = getInvolvedSearchParams(next).toString();
+    window.history.replaceState(
+      null,
+      "",
+      qs ? `${window.location.pathname}?${qs}` : window.location.pathname,
     );
-  }, [items, query, view]);
+  }
+
+  function changeStatus(id: string, status: SubmissionStatus) {
+    const previous = items;
+    // Optimistic: the drawer is open in front of the person who just chose it.
+    setItems((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+    setSelected((sel) => (sel && sel.id === id ? { ...sel, status } : sel));
+    startTransition(async () => {
+      const res = await updateGetInvolvedStatus(id, status);
+      if (!res.ok) setItems(previous); // revert
+      router.refresh();
+    });
+  }
+
+  const filtered = React.useMemo(
+    () => applyGetInvolvedFilters(items, filters),
+    [items, filters],
+  );
 
   const counts = React.useMemo(() => {
     const c: Record<View, number> = {
@@ -91,63 +148,81 @@ export function GetInvolvedTable({ rows }: { rows: GetInvolvedRow[] }) {
     return c;
   }, [items]);
 
+  const openCount = React.useMemo(
+    () => items.filter((r) => OPEN_STATUSES.has(r.status)).length,
+    [items],
+  );
+
+  const view: View = filters.path === "" ? "all" : filters.path;
+  const narrowed = isGetInvolvedFiltered(filters);
+  const qs = getInvolvedSearchParams(filters).toString();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
-        <Input
+        <AdminInput
           placeholder="Search name, company, event…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          value={filters.q}
+          onChange={(e) => update({ q: e.target.value })}
           className="max-w-xs"
         />
-        <div className="flex gap-1 rounded-md border border-border bg-muted/40 p-1">
-          {VIEWS.map((v) => (
-            <button
-              key={v.key}
-              onClick={() => setView(v.key)}
-              aria-pressed={view === v.key}
-              className={cn(
-                "rounded px-3 py-1.5 text-xs font-medium transition-colors",
-                view === v.key
-                  ? "bg-foreground text-white"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {v.label}
-              <span
-                className={cn(
-                  "ml-1.5 tabular-nums",
-                  view === v.key ? "text-white/60" : "text-muted-foreground/60",
-                )}
-              >
-                {counts[v.key]}
-              </span>
-            </button>
-          ))}
+        <FilterChips
+          value={view}
+          onChange={(v) => update({ path: v === "all" ? "" : v })}
+          options={VIEWS.map((v) => ({ ...v, count: counts[v.key] }))}
+        />
+        {/* Only once something has been worked. Before that every row is open
+            and the chip would filter nineteen rows down to nineteen. */}
+        {openCount < items.length && (
+          <ToggleChip
+            label="Open"
+            count={openCount}
+            pressed={filters.open === "yes"}
+            onClick={() => update({ open: filters.open ? "" : "yes" })}
+          />
+        )}
+        <div className="ml-auto flex items-center gap-3">
+          {/* What the table is showing, beside the controls that decided it. */}
+          <p className="text-sm tabular-nums text-muted-foreground">
+            {narrowed
+              ? `Showing ${filtered.length} of ${items.length}`
+              : `${items.length} submission${items.length === 1 ? "" : "s"}`}
+          </p>
+          {/* Carries the filters, so it exports the view rather than the
+              collection — see lib/admin/get-involved-filters. */}
+          <ButtonLink
+            href={`/api/admin/get-involved/export${qs ? `?${qs}` : ""}`}
+            prefetch={false}
+            variant="outline"
+            size="sm"
+          >
+            Export CSV
+          </ButtonLink>
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-border">
+      <div className="overflow-x-auto rounded-lg border border-border lg:overflow-visible">
         <table className="w-full text-sm">
-          <thead className="border-b border-border bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
+          <thead className="text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-4 py-3 font-medium">Contact</th>
-              <th className="px-4 py-3 font-medium">Company</th>
-              <th className="px-4 py-3 font-medium">Path</th>
-              <th className="px-4 py-3 font-medium">Details</th>
-              <th className="px-4 py-3 font-medium">Received</th>
+              <th className={TH}>Contact</th>
+              <th className={TH}>Company</th>
+              <th className={TH}>Path</th>
+              <th className={TH}>Status</th>
+              <th className={TH}>Details</th>
+              <th className={TH}>Received</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-4 py-10 text-center text-muted-foreground"
                 >
-                  {view === "all"
-                    ? "No submissions yet."
-                    : "Nothing on this path yet."}
+                  {narrowed
+                    ? "Nothing matches this view."
+                    : "No submissions yet."}
                 </td>
               </tr>
             ) : (
@@ -181,6 +256,9 @@ export function GetInvolvedTable({ rows }: { rows: GetInvolvedRow[] }) {
                       <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-foreground">
                         {PATH_LABELS[r.path]}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={r.status} />
                     </td>
                     <td className="px-4 py-3">
                       {d.headline && (
@@ -223,6 +301,31 @@ export function GetInvolvedTable({ rows }: { rows: GetInvolvedRow[] }) {
               <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
                 {PATH_LABELS[selected.path]}
               </span>
+            </div>
+
+            {/* Set here rather than inline in the row, the same as the speakers
+                drawer: changing where a sponsor stands is a decision you make
+                having read what they wrote, and this is where you have read it.
+                No email is sent — see `updateGetInvolvedStatus`. */}
+            <div>
+              <label className="text-xs uppercase tracking-wide text-muted-foreground">
+                Status
+              </label>
+              <div className="mt-1 flex items-center gap-3">
+                <Combobox
+                  value={selected.status}
+                  disabled={pending}
+                  onChange={(v) =>
+                    changeStatus(selected.id, v as SubmissionStatus)
+                  }
+                  options={SUBMISSION_STATUSES.map((st) => ({
+                    value: st,
+                    label: st[0].toUpperCase() + st.slice(1),
+                  }))}
+                  className="w-44"
+                />
+                <StatusBadge status={selected.status} />
+              </div>
             </div>
 
             <Detail label="Email" value={selected.email} />

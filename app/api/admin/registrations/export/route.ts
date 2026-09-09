@@ -1,10 +1,24 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { listRegistrations } from "@/lib/admin/queries";
 import { toCsv, csvResponse } from "@/lib/admin/csv";
 import { formatDateTime } from "@/lib/format";
+import {
+  applyFilters,
+  isFiltered,
+  parseFilters,
+} from "@/lib/admin/registration-filters";
 
-export async function GET() {
+/**
+ * The CSV of whatever the table is showing.
+ *
+ * It used to be the CSV of everything, always: narrowing to the volunteers on
+ * screen and hitting Export handed back all 274 rows. The filters and this
+ * route now read the same params off the same URL — see
+ * `lib/admin/registration-filters` — so the button exports the view rather
+ * than the collection.
+ */
+export async function GET(req: NextRequest) {
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -13,7 +27,8 @@ export async function GET() {
   const yn = (v: boolean | undefined) =>
     v === undefined ? "" : v ? "yes" : "no";
 
-  const rows = await listRegistrations();
+  const filters = parseFilters(req.nextUrl.searchParams);
+  const rows = applyFilters(await listRegistrations(), filters);
   const csv = toCsv(
     [
       "Name",
@@ -57,5 +72,12 @@ export async function GET() {
     ]),
   );
 
-  return csvResponse("sastw-registrations.csv", csv);
+  // The filename says which it is, because a folder of `sastw-registrations
+  // (3).csv` is how a filtered export gets mistaken for the whole list.
+  return csvResponse(
+    isFiltered(filters)
+      ? "sastw-registrations-filtered.csv"
+      : "sastw-registrations.csv",
+    csv,
+  );
 }

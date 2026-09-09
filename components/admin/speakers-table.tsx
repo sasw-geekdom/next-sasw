@@ -3,10 +3,11 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
+import { AdminInput } from "@/components/admin/ui/controls";
+import { FilterChips } from "@/components/admin/ui/filter-chips";
 import { Drawer } from "@/components/ui/drawer";
 import { StatusBadge } from "@/components/admin/status-badge";
 import {
@@ -15,19 +16,37 @@ import {
   deleteSpeakerSubmission,
 } from "@/lib/admin/actions";
 import { formatDate, formatDateTime } from "@/lib/format";
-import { toCsv } from "@/lib/admin/csv";
 import { TRACK_NAMES } from "@/lib/tracks";
+import {
+  applySpeakerFilters,
+  isSpeakerFiltered,
+  parseSpeakerFilters,
+  speakerSearchParams,
+  stageCounts,
+  type SpeakerFilters,
+  type SpeakerStage,
+} from "@/lib/admin/speaker-filters";
 import {
   SUBMISSION_STATUSES,
   type SpeakerSubmissionRow,
   type SubmissionStatus,
 } from "@/lib/admin/types";
 
+/**
+ * The header cell, pinned. The offset matches `<main>`'s padding — sticky pins
+ * to the scroll container's content box, so without it the first row shows a
+ * sliver above the header.
+ */
+const TH =
+  "sticky -top-5 z-10 bg-muted px-4 py-3 font-medium shadow-[inset_0_-1px_0_var(--border)] sm:-top-6";
+
 export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
   const router = useRouter();
+  const params = useSearchParams();
   const [items, setItems] = React.useState(rows);
-  const [query, setQuery] = React.useState("");
-  const [trackFilter, setTrackFilter] = React.useState("all");
+  const [filters, setFilters] = React.useState<SpeakerFilters>(() =>
+    parseSpeakerFilters(params),
+  );
   const [selected, setSelected] = React.useState<SpeakerSubmissionRow | null>(
     null,
   );
@@ -35,61 +54,36 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
   /** A status saved but its decision email did not send — see the action. */
   const [notice, setNotice] = React.useState<string | null>(null);
 
-  React.useEffect(() => setItems(rows), [rows]);
-
-  const filtered = React.useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return items.filter((r) => {
-      if (trackFilter !== "all" && r.track !== trackFilter) return false;
-      if (!q) return true;
-      return [r.name, r.email, r.sessionTitle, r.company]
-        .filter(Boolean)
-        .some((v) => v!.toLowerCase().includes(q));
-    });
-  }, [items, query, trackFilter]);
-
-  // Export exactly what's shown — respects search + track filter.
-  function exportCsv() {
-    const csv = toCsv(
-      [
-        "Name",
-        "Email",
-        "Company",
-        "Track",
-        "Session title",
-        "Abstract",
-        "Bio",
-        "Website",
-        "LinkedIn",
-        "Availability",
-        "Status",
-        "Submitted",
-      ],
-      filtered.map((r) => [
-        r.name,
-        r.email,
-        r.company ?? "",
-        r.track,
-        r.sessionTitle,
-        r.abstract,
-        r.bio,
-        r.website ?? "",
-        r.linkedin ?? "",
-        r.availability ?? "",
-        r.status,
-        formatDateTime(r.createdAt),
-      ]),
-    );
-    const url = URL.createObjectURL(
-      new Blob([csv], { type: "text/csv;charset=utf-8" }),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sastw-speaker-submissions.csv";
-    a.click();
-    URL.revokeObjectURL(url);
+  // Sync when the server sends fresh rows (after revalidate) — render-phase
+  // derived state, not an effect, which is what the other two admin tables do
+  // and what `react-hooks/set-state-in-effect` was objecting to here.
+  const [prevRows, setPrevRows] = React.useState(rows);
+  if (prevRows !== rows) {
+    setPrevRows(rows);
+    setItems(rows);
   }
 
+  /** Filters go to the URL with `replaceState` — see the registrations table. */
+  function update(patch: Partial<SpeakerFilters>) {
+    const next = { ...filters, ...patch };
+    setFilters(next);
+    const qs = speakerSearchParams(next).toString();
+    window.history.replaceState(
+      null,
+      "",
+      qs ? `${window.location.pathname}?${qs}` : window.location.pathname,
+    );
+  }
+
+  const filtered = React.useMemo(
+    () => applySpeakerFilters(items, filters),
+    [items, filters],
+  );
+
+  const counts = React.useMemo(() => stageCounts(items), [items]);
+  const qs = speakerSearchParams(filters).toString();
+
+  // Export exactly what's shown — respects search + track filter.
   // Two-step, the same as the registrations table: the first click arms it,
   // the second commits. A pitch is somebody's work, so the destructive action
   // shouldn't be reachable by one stray click.
@@ -150,39 +144,58 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
         </p>
       )}
       <div className="flex flex-wrap items-center gap-3">
-        <Input
+        <AdminInput
           placeholder="Search name, email, session…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          value={filters.q}
+          onChange={(e) => update({ q: e.target.value })}
           className="max-w-xs"
         />
+        {/* Work remaining, not status — see lib/admin/speaker-filters. Open is
+            the landing view: the page opens on what is left to do rather than
+            on every pitch of the season at once. */}
+        <FilterChips
+          value={filters.stage}
+          onChange={(v) => update({ stage: v as SpeakerStage })}
+          options={[
+            { key: "open", label: "Open", count: counts.open },
+            { key: "done", label: "Done", count: counts.done },
+            { key: "all", label: "All", count: counts.all },
+          ]}
+        />
         <Combobox
-          value={trackFilter}
-          onChange={setTrackFilter}
+          value={filters.track || "all"}
+          onChange={(v) => update({ track: v === "all" ? "" : v })}
           options={[
             { value: "all", label: "All tracks" },
             ...TRACK_NAMES.map((t) => ({ value: t, label: t })),
           ]}
           className="w-52"
         />
-        <Button
-          variant="outline"
-          onClick={exportCsv}
-          disabled={filtered.length === 0}
-          className="ml-auto"
-        >
-          Export {filtered.length}
-        </Button>
+        <div className="ml-auto flex items-center gap-3">
+          <p className="text-sm tabular-nums text-muted-foreground">
+            {isSpeakerFiltered(filters)
+              ? `Showing ${filtered.length} of ${items.length}`
+              : `${items.length} pitch${items.length === 1 ? "" : "es"}`}
+          </p>
+          <ButtonLink
+            href={`/api/admin/speakers/export${qs ? `?${qs}` : ""}`}
+            prefetch={false}
+            variant="outline"
+            size="sm"
+          >
+            Export CSV
+          </ButtonLink>
+        </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-border">
+      <div className="overflow-x-auto rounded-lg border border-border lg:overflow-visible">
         <table className="w-full text-sm">
-          <thead className="border-b border-border bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
+          <thead className="text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-4 py-3 font-medium">Name</th>
-              <th className="px-4 py-3 font-medium">Session</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Submitted</th>
+              <th className={TH}>Name</th>
+              <th className={TH}>Session</th>
+              <th className={TH}>Status</th>
+              <th className={TH}>Submitted</th>
             </tr>
           </thead>
           <tbody>
@@ -192,7 +205,11 @@ export function SpeakersTable({ rows }: { rows: SpeakerSubmissionRow[] }) {
                   colSpan={4}
                   className="px-4 py-10 text-center text-muted-foreground"
                 >
-                  No submissions yet.
+                  {items.length === 0
+                    ? "No pitches yet."
+                    : filters.stage === "open"
+                      ? "Nothing left to review. Switch to All to see them."
+                      : "Nothing matches this view."}
                 </td>
               </tr>
             ) : (

@@ -52,7 +52,22 @@ export function AdminShell({
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="flex h-full flex-1">
+      {/* `h-dvh flex-none`, not `h-full flex-1`.
+
+          `<main>` below is `overflow-y-auto`, which never did anything: the
+          shell is a flex item of `<body>`, and `<body>` is `min-h-full` — so
+          its height is content-driven, `flex-1` resolves `flex-basis: 0%`, and
+          an item whose basis wins over its height never gets a definite one to
+          pass down. `<main>` therefore grew with its content and the document
+          did the scrolling, while still being a scroll container as far as the
+          browser was concerned. Anything `position: sticky` inside it bound to
+          a scrollport that could not move, which is why the registrations
+          table's header would not stick.
+
+          The height has to be stated here and the flex basis has to get out of
+          its way — `h-dvh` alone is ignored while `flex-1` is on. Not on
+          `<body>`, which the public site shares. */}
+      <div className="flex h-dvh flex-none overflow-hidden">
         <Sidebar user={user} collapsed={collapsed} onToggle={toggleCollapsed} />
         <MobileNav
           open={mobileOpen}
