@@ -134,17 +134,18 @@ export async function featuredLineup(): Promise<FeaturedEntry[]> {
   /*
    * Rows carry the day they happen, and the bill is sorted on it at the end.
    *
-   * The order the week's team sent these in was Nopalera, Bon Sethi, 1 Million
-   * Cups, Bash — which renders as SEP 29, OCT 1, SEP 30, OCT 1. Every row
-   * leads with its date, so a list that announces four dates and then doesn't
-   * run in order reads as a bug rather than as billing, and this is the top of
-   * the page whose whole job is telling you when things are.
+   * The order the week's team sent these in was Nopalera, the Google for
+   * Startups talk, 1 Million Cups, Bash — which renders as SEP 29, OCT 1,
+   * SEP 30, OCT 1. Every row leads with its date, so a list that announces
+   * four dates and then doesn't run in order reads as a bug rather than as
+   * billing, and this is the top of the page whose whole job is telling you
+   * when things are.
    *
    * The key is the calendar day, not a timestamp, because one of these has no
-   * time to sort on: Bon Sethi has no session record yet, only a day. Sorting
-   * by day and letting `sort`'s stability hold the team's order inside a day
-   * puts him ahead of the 6pm Bash without inventing an hour for him. When his
-   * session lands this can take `startsAt` like the others.
+   * time to sort on: the Google for Startups talk has no session record yet,
+   * only a day. Sorting by day and letting `sort`'s stability hold the team's
+   * order inside a day puts it ahead of the 6pm Bash without inventing an hour
+   * for it. When the session lands this can take `startsAt` like the others.
    */
   const out: { day: string; entry: FeaturedEntry }[] = [];
   const dayOf = (iso: string | number) =>
@@ -191,9 +192,9 @@ export async function featuredLineup(): Promise<FeaturedEntry[]> {
   out.push({
     day: "2026-10-01",
     entry: {
-      key: "bon-sethi",
+      key: "vibha-kurpad",
       meta: "Thu, Oct 1 · Texas Public Radio",
-      title: [{ text: "Bon Sethi" }],
+      title: [{ text: "Vibha Kurpad" }],
       credit: google
         ? [
             { text: "with" },
