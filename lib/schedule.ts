@@ -883,7 +883,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // previous copy didn't: the floor, the DJ, both conversations by name,
     // and the fact that it costs nothing extra. The rest is on the page.
     blurb:
-      "Espresso, brunch and DJ Novasoul on the 25th floor, plus two live conversations with the people building here. Included with your registration.",
+      "Espresso, brunch and DJ Novasoul on the 25th floor, plus two live conversations with the people building here. Room for 90, included with your registration.",
     // Doors 7:30. The organisers' first brief said "programme through 11:00",
     // but their revised running order ends the coffeehouse set at 11:30 — so
     // the event runs to 11:30 here. Leaving 11:00 would have put a hero that
@@ -991,8 +991,18 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       // programming, which the 10:35 entry demonstrates and nothing states.
       // Last line in the section, in display type, after the coda.
       kicker: "Community all morning.",
+      // Leads with the cap now, at the Creative Futures team's request. What it
+      // does not say is "register to secure your spot", which is how the ask
+      // arrived and is not true of this site: the week's form is one
+      // registration for five days and records circuits, not activations, so
+      // nothing about registering holds a seat here or identifies who the
+      // first 90 are. Registration is the prerequisite and arriving early is
+      // what gets you in, and the copy says exactly that rather than implying
+      // a reservation the system cannot honour. If Creative Futures want a
+      // real one, this takes a `register` override pointing at their own
+      // capped RSVP — the arrangement Mission Pitch and Latin Tech Pitch use.
       access:
-        "No separate RSVP. Access is included with your Startup + Tech Week registration \u2014 register, then check in with your badge to join us on the 25th floor at 300 Main, Skylounge and rooftop patio.",
+        "Room for 90, and it fills on the morning. Access is included with your Startup + Tech Week registration \u2014 register first, then come early and check in with your badge on the 25th floor at 300 Main, Skylounge and rooftop patio.",
     },
     // No logo: the title already carries both brands in full — "The Creative
     // Futures ™ Brunch powered by The Down Market" — so a mark would be the
