@@ -423,6 +423,21 @@ export interface FeaturedSession {
    */
   register?: { label: string; href: string };
   /**
+   * How many the room holds, when that is a limit worth stating.
+   *
+   * Printed in the hero beside the date, the time and the room — with the
+   * other facts, and above the button. A capacity buried in prose further
+   * down is read after the decision it should inform: on the Creative Futures
+   * Brunch the only mention above the CTA was the tail of a sentence about
+   * espresso and a DJ, and the sentence that said it plainly sat three
+   * hundred characters below the button.
+   *
+   * Set it only where the number changes what someone does. Most rooms this
+   * week comfortably hold everyone who wants them, and a capacity on every
+   * page would say "this might fill" about rooms that will not.
+   */
+  capacity?: number;
+  /**
    * Confirmed start and end, once the organiser has fixed them.
    *
    * ISO 8601 with an explicit offset, not display strings: the page label, the
@@ -883,7 +898,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // previous copy didn't: the floor, the DJ, both conversations by name,
     // and the fact that it costs nothing extra. The rest is on the page.
     blurb:
-      "Espresso, brunch and DJ Novasoul on the 25th floor, plus two live conversations with the people building here. Room for 90, included with your registration.",
+      "Espresso, brunch and DJ Novasoul on the 25th floor, plus two live conversations with the people building here. Ninety seats, included with your registration.",
     // Doors 7:30. The organisers' first brief said "programme through 11:00",
     // but their revised running order ends the coffeehouse set at 11:30 — so
     // the event runs to 11:30 here. Leaving 11:00 would have put a hero that
@@ -894,6 +909,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       start: "2026-10-01T07:30:00-05:00",
       end: "2026-10-01T11:30:00-05:00",
     },
+    capacity: 90,
 
     site: {
       label: "thecreativefutures.com",
@@ -1002,7 +1018,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       // real one, this takes a `register` override pointing at their own
       // capped RSVP — the arrangement Mission Pitch and Latin Tech Pitch use.
       access:
-        "Room for 90, and it fills on the morning. Access is included with your Startup + Tech Week registration \u2014 register first, then come early and check in with your badge on the 25th floor at 300 Main, Skylounge and rooftop patio.",
+        "The Skylounge seats ninety, and the good seats go early. Access is included with your Startup + Tech Week registration \u2014 register, then come up and check in with your badge on the 25th floor at 300 Main, Skylounge and rooftop patio.",
     },
     // No logo: the title already carries both brands in full — "The Creative
     // Futures ™ Brunch powered by The Down Market" — so a mark would be the

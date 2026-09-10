@@ -726,6 +726,28 @@ function ActivationPage({
                       </div>
                     </dl>
 
+                    {/* Not a fourth item in the row above.
+                        
+                        It was one, and it read as more chrome: that row is
+                        11px mono at 55% white because a date and a room are
+                        facts nobody has to act on, and dressing a limit the
+                        same way says it matters as little as they do. It also
+                        wrapped onto a line of its own at narrow widths, which
+                        is how a constraint ends up looking like a footnote.
+                        
+                        So it leaves the row and takes the one thing the row
+                        cannot give it — weight — directly above the button,
+                        where the decision is. "First come" only when the
+                        week's own list is the way in; where `register` points
+                        at somebody else's capped RSVP, a seat is reserved
+                        rather than raced for. */}
+                    {session.capacity ? (
+                      <p className="mt-5 border-l-2 border-magenta pl-4 font-mono text-xs uppercase tracking-widest text-white">
+                        {session.capacity} seats
+                        {session.register ? null : " · first come"}
+                      </p>
+                    ) : null}
+
                     {/* The terms the primary action is subject to, and ahead
                         of it rather than in a band below: "Request a seat." is
                         a different promise once you know attendance is by
