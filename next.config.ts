@@ -37,10 +37,16 @@ const nextConfig: NextConfig = {
     // itself. Case-only redirects live in proxy.ts, which compares exactly.
     // Every source below differs from its destination by more than case.
     return [
-      // The Call for Speakers page became the Plug In hub.
+      // The speaker call is closed — every slot for 2026 is filled — so
+      // /plug-in is gone and both of its addresses land on the lineup it was
+      // asking people to join. /call-for-speakers pointed at /plug-in and
+      // would have chained into a 404 otherwise; the page itself was drawing
+      // around a hundred views a month and is in the sitemap, so neither one
+      // is left to 404 on its own.
+      { source: "/plug-in", destination: "/speakers", permanent: true },
       {
         source: "/call-for-speakers",
-        destination: "/plug-in",
+        destination: "/speakers",
         permanent: true,
       },
 

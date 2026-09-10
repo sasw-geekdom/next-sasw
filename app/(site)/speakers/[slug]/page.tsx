@@ -6,7 +6,6 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { ProfileMark, profileWord } from "@/components/site/profile-mark";
 import { SpeakerCard } from "@/components/site/speaker-card";
-import { ButtonLink } from "@/components/ui/button";
 import { sessionWhen } from "@/lib/schedule";
 import { ARROW_MOTION } from "@/lib/motion";
 import { loadLineup, resolveSlug } from "@/lib/speakers";
@@ -338,20 +337,6 @@ export default async function SpeakerPage({
             </div>
           </div>
         )}
-
-        <div className="mt-20 border-t border-white/10 pt-14 text-center lg:mt-28 lg:pt-16">
-          <h2 className="font-display text-2xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-3xl">
-            Think you belong up there?
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-pretty text-white/60">
-            Pitch a session — five circuits, one current.
-          </p>
-          <div className="mt-7 flex justify-center">
-            <ButtonLink href="/plug-in" size="lg">
-              Plug in
-            </ButtonLink>
-          </div>
-        </div>
       </div>
     </main>
   );

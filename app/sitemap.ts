@@ -10,7 +10,6 @@ const STATIC_ROUTES = [
   "/speakers",
   "/schedule",
   "/register",
-  "/plug-in",
   "/get-involved",
   "/15-years",
 ];

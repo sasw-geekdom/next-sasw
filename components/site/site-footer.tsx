@@ -84,11 +84,6 @@ export function SiteFooter() {
                     Ask a question
                   </Link>
                 </li>
-                <li>
-                  <Link href="/plug-in" className="hover:text-magenta">
-                    Speak
-                  </Link>
-                </li>
               </ul>
             </div>
             <div>

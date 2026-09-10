@@ -113,7 +113,13 @@ export function SpeakersHero({ hasLineup }: { hasLineup: boolean }) {
               label: "Get on the list.",
               note: "Free registration.",
             }
-          : { href: "/plug-in", label: "Plug in." }
+          : // No lineup and no call to make — /plug-in is gone with the
+            // 2026 slots. Registration is the only thing to offer here.
+            {
+              href: "/register",
+              label: "Get on the list.",
+              note: "Free registration.",
+            }
       }
       bolt={{ color: SPEAKERS_REST, sweep: SPEAKERS_SWEEP, base: BASE }}
     />

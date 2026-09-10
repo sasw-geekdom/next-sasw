@@ -17,7 +17,7 @@ export default async function SpeakersPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Speaker pitches"
-        description="Session pitches from Plug In. Move them through the queue."
+        description="Session pitches from the 2026 call, now closed. Move them through the queue."
       />
       <SpeakersTable rows={rows} />
     </div>
