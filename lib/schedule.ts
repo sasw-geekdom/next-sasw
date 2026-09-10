@@ -698,12 +698,20 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // seating them here.
     //
     // "Save a seat." is Mission Pitch's label too, and shared on purpose: the
-    // labels on this field describe the mechanic, not the organiser. A free
-    // RSVP saves a seat, an invitation-only room requests one, Trinity's
-    // Eventbrite gets a ticket. Naming the organiser instead — which this said
-    // at first — was both the longest label of the five and ambiguous in the
-    // one place ambiguity costs something: on a pitch competition, "register"
-    // reads as entering your startup, and this form is for the audience.
+    // labels on this field describe what the reader does, not who is asking.
+    // An RSVP that holds a seat in a week venue saves one; an invitation-only
+    // room requests one; Trinity gets a ticket because the Stumberg final is
+    // on their campus three miles north and a badge does not open that door.
+    //
+    // That last one is a boundary, not a platform. It said "Trinity's
+    // Eventbrite gets a ticket" here at first, which read as a rule about the
+    // vendor and is not one — Trinity ticket theirs free, and the Creative
+    // Futures Brunch is on Eventbrite too and says "Save a seat."
+    //
+    // Naming the organiser instead — which this said before that — was both
+    // the longest label of the five and ambiguous in the one place ambiguity
+    // costs something: on a pitch competition, "register" reads as entering
+    // your startup, and this form is for the audience.
     register: {
       label: "Save a seat.",
       href: "https://www.latintechpitch.com/event-details/latintech-pitch-2026/form",
@@ -898,7 +906,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // previous copy didn't: the floor, the DJ, both conversations by name,
     // and the fact that it costs nothing extra. The rest is on the page.
     blurb:
-      "Espresso, brunch and DJ Novasoul on the 25th floor, plus two live conversations with the people building here. Ninety seats, included with your registration.",
+      "Espresso, brunch and DJ Novasoul on the 25th floor, plus two live conversations with the people building here. Ninety seats, RSVP with Creative Futures.",
     // Doors 7:30. The organisers' first brief said "programme through 11:00",
     // but their revised running order ends the coffeehouse set at 11:30 — so
     // the event runs to 11:30 here. Leaving 11:00 would have put a hero that
@@ -910,6 +918,27 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       end: "2026-10-01T11:30:00-05:00",
     },
     capacity: 90,
+    // "Save a seat.", not "Get a ticket.", even though this is Eventbrite.
+    //
+    // The labels on this field describe what the reader does, and the vendor
+    // is not that: Trinity's Eventbrite says "Get a ticket." because the
+    // Stumberg final is on their campus three miles north and a Startup + Tech
+    // Week badge genuinely does not open that door. This is the opposite —
+    // a week venue, on the week's own morning, where the only reason to send
+    // people elsewhere is that Creative Futures are counting the room. That is
+    // Mission Pitch's situation exactly, and it takes Mission Pitch's words.
+    //
+    // The page is also built on the word: "The Skylounge seats ninety",
+    // "90 SEATS" above the button. A third noun would be a third thing to
+    // hold in mind on a page about brunch.
+    //
+    // `?aff=oddtdtcreator` stripped — that is the tag Eventbrite staples on
+    // when a creator copies their own link, and it attributes every arrival
+    // from this site to their share button.
+    register: {
+      label: "Save a seat.",
+      href: "https://www.eventbrite.com/e/the-creative-futures-brunchtm-x-san-antonio-startup-tech-week-tickets-2000480500027",
+    },
 
     site: {
       label: "thecreativefutures.com",
@@ -1018,7 +1047,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       // real one, this takes a `register` override pointing at their own
       // capped RSVP — the arrangement Mission Pitch and Latin Tech Pitch use.
       access:
-        "The Skylounge seats ninety, and the good seats go early. Access is included with your Startup + Tech Week registration \u2014 register, then come up and check in with your badge on the 25th floor at 300 Main, Skylounge and rooftop patio.",
+        "The Skylounge seats ninety, and the good seats go early. Creative Futures hold the list on Eventbrite, and that RSVP is what saves your seat \u2014 it does not stand in for your Startup + Tech Week registration, so do both. The 25th floor at 300 Main, Skylounge and rooftop patio.",
     },
     // No logo: the title already carries both brands in full — "The Creative
     // Futures ™ Brunch powered by The Down Market" — so a mark would be the
