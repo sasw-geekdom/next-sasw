@@ -62,6 +62,30 @@ export interface FeaturedSession {
    */
   venueReveal?: string;
   /**
+   * A venue that is not one of the week's six, and is not a secret either.
+   *
+   * `venueReveal` above already mints a room out of a string, but it does it
+   * for a venue nobody may know — no `place`, so no address can leak. A popup
+   * is the opposite case: a real address people have to find, that simply
+   * isn't one of the rooms. The Cyber, AI & Robotics panel sits in UTSA's San
+   * Pedro II building for one evening.
+   *
+   * A seventh entry in `ROOMS` was the other way to do it and is the wrong
+   * one. "Five circuits, six rooms" is published copy — the homepage hero, the
+   * schedule hero, the speakers hero and the footer all say it — and the six
+   * are the week's rooms in a sense a one-night popup is not. This publishes
+   * the address without joining that set: no port, no tier, no ascii, and no
+   * room page of its own.
+   *
+   * `room` is not looked up when this is set, exactly as with `venueReveal`.
+   */
+  venuePopup?: {
+    name: string;
+    /** For the calendar lanes, where the full name truncates. */
+    shortName: string;
+    address: string;
+  };
+  /**
    * Everything on this page fits the screen: the hero carries the message and
    * `ActivationDetail` is not drawn below it.
    *
@@ -96,6 +120,32 @@ export interface FeaturedSession {
    * slot better than square marks — it's a letterbox, not a badge.
    */
   logo?: { src: string; width: number; height: number; alt: string };
+  /**
+   * An organiser's mark beside the hero copy, rather than instead of the title.
+   *
+   * `logo` above replaces the typeset title — the page wears the mark and the
+   * h1 goes visually-hidden. That is right for an activation whose lockup *is*
+   * its name, and wrong for a mark that belongs to whoever runs it: Alamo
+   * Inventors' SIG badge names the group, not the panel, so the title still
+   * has to be set in type.
+   *
+   * Drawn from `lg` up and not below it. The second hero column is where the
+   * talk bill goes on the activations that carry one, and on a phone that
+   * column stacks under the copy — a credit is not worth a screen of its own
+   * before the reader has reached the button.
+   *
+   * Drawn straight onto the hero, with no plate behind it. That was not
+   * obvious: the mark this was built for is a third near-black ink and its
+   * triangle is *outlined* in black, so the outline dissolves into the ground.
+   * What carries the shape instead is the fill — a greyscale gradient, light
+   * at the base and dark at the apex — which reads as the triangle fading into
+   * the page rather than as a broken edge. A white plate was the safe guess
+   * and it looked like a sticker: boxed in, and smaller for the padding.
+   *
+   * So a mark here wants light or mid ink, or its own opaque ground where it
+   * has dark type to carry.
+   */
+  heroMark?: { src: string; width: number; height: number; alt: string };
   /**
    * The mark on its own, without the wordmark beside it.
    *
@@ -668,6 +718,81 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         "Free, and seated through MissionPitch\u2019s own registration rather than the week\u2019s \u2014 their page is the one holding the count.",
     },
   },
+  /**
+   * A popup, and the first activation not in one of the six rooms — see
+   * `venuePopup`. Alamo Inventors hold their Cyber, AI & Robotics SIG panel in
+   * UTSA's San Pedro II for the evening, with the room given by the Harvey
+   * Najim Innovation Center.
+   *
+   * Shares the Wednesday evening with Latin Tech Pitch, which runs 6–9 at TPR
+   * eight blocks away. Both are on the grid and neither is wrong; worth
+   * knowing that the Wednesday now has two things running after six.
+   */
+  {
+    slug: "cyber-ai-robotics-panel",
+    page: "cyber-ai-robotics-panel",
+    heroOnly: true,
+    title: "The Cyber, AI & Robotics Convergence Panel",
+    // The full title is 41 characters and truncates in a calendar lane; the
+    // three technologies are what tells this block apart from anything else
+    // on the Wednesday.
+    shortTitle: "Cyber, AI & Robotics",
+    // Their own framing, condensed. The organisers' description runs to two
+    // paragraphs that say the panel's subject twice; this keeps the second
+    // half, which is the part that says what actually happens in the room.
+    blurb:
+      "Panelists from academia, industry and the patent bar on where cyber, AI and robotics converge \u2014 and the intellectual property that follows.",
+    venuePopup: {
+      name: "UTSA San Pedro II",
+      shortName: "San Pedro II",
+      address: "622 Dolorosa St",
+    },
+    venueDetail: "1st Floor",
+    // Alamo Inventors' own SIG badge, beside the copy rather than in place of
+    // the title — the mark names the group, not the panel.
+    //
+    // The mark whole, on the second cut Alamo Inventors supplied. The first
+    // set "Cyber, AI & Robotics SIG" as black type on nothing, which on this
+    // ground was the one part that could not survive — it had to be cropped
+    // off. This one puts that line on an opaque white band instead, so the
+    // full badge reads on black and the name stays visible rather than living
+    // only in the alt text.
+    heroMark: {
+      src: "/activations/alamo-inventors-carsig.png",
+      width: 497,
+      height: 478,
+      alt: "Alamo Inventors — Cyber, AI & Robotics SIG",
+    },
+    // `room` is required by the type and never looked up while `venuePopup` is
+    // set. Named as the nearest of the six so the value is not a lie if the
+    // popup is ever removed.
+    room: "central-library",
+    // Cyber, AI and robotics converging is the subject; the patents are what
+    // the room does about it. Founder is the other candidate, since the
+    // inventors and entrepreneurs are who it is for.
+    circuit: "AI & Applied Innovation",
+    when: {
+      start: "2026-09-30T18:30:00-05:00",
+      end: "2026-09-30T20:00:00-05:00",
+    },
+    // Alamo Inventors take the count on Eventbrite. "Save a seat." for the
+    // same reason Mission Pitch and the Creative Futures Brunch use it: a
+    // badge plausibly gets you through a week venue, and this is not one.
+    register: {
+      label: "Save a seat.",
+      href: "https://www.eventbrite.com/e/2000339650743",
+    },
+    detail: {
+      eyebrow: "The evening",
+      headline: "Three technologies, one patent question.",
+      lede: [
+        "Cyber, AI and robotics are converging faster than the law around them. Panelists from academia, industry and the intellectual property profession take questions from the room on what that convergence means for inventors and entrepreneurs \u2014 and for the patents they file.",
+      ],
+      access:
+        "Seated by Alamo Inventors on Eventbrite rather than by the week\u2019s list. The room is given by the Harvey Najim Innovation Center, on the first floor of UT San Antonio\u2019s San Pedro II building at 622 Dolorosa St.",
+    },
+  },
+
   {
     slug: "latin-tech-pitch",
     page: "latin-tech-pitch",
@@ -3135,6 +3260,24 @@ export function resolveSessions(
         ascii: "",
         // Empty, so "Everything else at …" never offers a room page that
         // does not exist.
+        sessions: [],
+      };
+      return [{ ...s, venue }];
+    }
+    // A popup: the same minted room as above, but with its address, because
+    // this one is a place people have to get to. See `venuePopup`.
+    if (s.venuePopup) {
+      const venue: Room = {
+        slug: "popup",
+        name: s.venuePopup.name,
+        shortName: s.venuePopup.shortName,
+        host: s.site?.label ?? "The organizers",
+        desc: s.blurb,
+        tag: s.circuit,
+        place: { address: s.venuePopup.address },
+        port: "p0",
+        tier: "single",
+        ascii: "",
         sessions: [],
       };
       return [{ ...s, venue }];

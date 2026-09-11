@@ -566,7 +566,7 @@ function ActivationPage({
                 unchanged for every other activation. */}
             <div
               className={cn(
-                heroTalks.length > 0 &&
+                (heroTalks.length > 0 || session.heroMark) &&
                   "grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start lg:gap-14 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]",
               )}
             >
@@ -907,6 +907,22 @@ function ActivationPage({
                   </p>
                 )}
               </div>
+              {/* The organiser's mark, in the column the talk bill would use.
+                  From `lg` up only — see `heroMark` in lib/schedule. */}
+              {session.heroMark && (
+                <div className="hidden lg:flex lg:justify-end">
+                  <div className="w-full max-w-sm">
+                    <Image
+                      src={session.heroMark.src}
+                      alt={session.heroMark.alt}
+                      width={session.heroMark.width}
+                      height={session.heroMark.height}
+                      priority
+                      className="h-auto w-full"
+                    />
+                  </div>
+                </div>
+              )}
               {heroTalks.length > 0 && (
                 <HeroTalk
                   sessions={heroTalks}
