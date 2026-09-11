@@ -421,6 +421,10 @@ async function main() {
       eyebrow: card.eyebrow ?? "",
       headline: card.headline,
       headlineSize: card.headlineSize ?? 88,
+      // The blurb's measure. Defaults to the 760 the-model.html was written
+      // with; a card whose portrait reaches further left needs the copy to
+      // stop sooner, or the text runs into the speaker's face.
+      blurbWidth: card.blurbWidth ?? 760,
       subtitle: card.subtitle ?? "",
       circuit: card.circuit ?? "",
       // A card may carry its own facts. TPR needs it: every other event runs

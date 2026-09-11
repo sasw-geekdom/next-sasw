@@ -488,6 +488,54 @@ export const CARDS = [
   },
 
   {
+    id: "the-model-speaker-maria-consuelo-gonima",
+    // Same shape as jonathan-perry: The Model's own facts, single-speaker
+    // template borrowed off the keynote, because this is a talk inside the
+    // afternoon rather than a fixed point in it.
+    event: "the-model",
+    template: "the-model.html",
+    speaker: "maria-consuelo-gonima",
+    eyebrow: "// The Model",
+    // Her submitted title, split at its comma, with the panel taking the whole
+    // first line — the thesis — and the second line running plain. Marking
+    // "not just the product" instead would put the event's lavender on the
+    // half the talk argues against, which read backwards.
+    //
+    // This is the one card in the set that opens on the panel; every other
+    // sets a plain line first. It was ruled out for that while the template
+    // was still setting headlines in Geist, where the wide grotesque made the
+    // panel a slab across the card. Condensed it is a compact block ending
+    // around x=570, and the objection goes with the width: it reads as a
+    // marked phrase rather than a bar. The same change is why "not just the
+    // product" fits underneath at full size — 773px against the 907 it drew
+    // in Geist.
+    headline:
+      '<span class="hit">Ship the story,</span><br />not just the product',
+    // 72. This was cut to 60 while the template was still setting headlines in
+    // Geist, where "not just the product" and the solid panel behind it ran to
+    // the right padding. Oswald is condensed and draws the same line about a
+    // fifth narrower, so the size comes back up and the panel still ends well
+    // inside the measure.
+    headlineSize: 72,
+    // Her portrait reaches further left than jonathan-perry's, so the copy
+    // stops sooner: 620 leaves ~80px between the last character and her hair,
+    // where the template's default 760 ran the text into her face.
+    blurbWidth: 620,
+    // Her opening line. It states the stake the headline leaves implicit —
+    // the headline says what to ship, this says what happens if you do not.
+    subtitle: "A brilliant product without a story<br />becomes invisible.",
+    // The probe's worst miss in the set. It read her head+neck at 59.9% of
+    // frame, which would make this the tightest crop here by half again — but
+    // her hair runs well below the chin, so the shoulder line it watches for
+    // arrives late and it measured most of her torso as head. Solving jonathan
+    // -perry's 880 against that fiction gave 605 and drew her about half the
+    // size he draws. Solved by eye against his card instead: 1030 matched his
+    // head but brought her crown to within 35px of the headline, where his has
+    // room to breathe, so 960 trades a little size back for that clearance.
+    portrait: { height: 960, left: 439 },
+  },
+
+  {
     id: "the-model-speaker-jonathan-perry",
     // The Model's own facts — Monday, no hour — with the single-speaker
     // template borrowed off the keynote. Justin's card is the only other one
@@ -1192,6 +1240,67 @@ export const CARDS = [
     // wolfy. The probe's 662 is short by the usual margin — his beard reaches
     // the collar, which is the case it cannot read.
     portrait: { height: 890, left: 470 },
+  },
+
+  /**
+   * The first card in the set to credit a sponsor on the talk rather than the
+   * event. Google for Startups paid for this slot; TPR itself is hosted by the
+   * week, which is why `tpr` carries `logos: []` and the strip in tpr.html is
+   * guarded — the other eight cards on this stage draw nothing.
+   *
+   * The mark is the trimmed cut from lib/sponsor-marks, not the CMS file. The
+   * CMS artwork arrives with 12.8px of transparent padding down its left edge
+   * at a 32px render, which inside a flex row is space no `gap` can close. It
+   * is also already pure white and carries no colour at all — measured, 0% of
+   * its opaque pixels are chromatic — so it needs no `white: true` on this
+   * black ground.
+   */
+  {
+    id: "tpr-speaker-vibha-kurpad",
+    event: "tpr",
+    speaker: "vibha-kurpad",
+    // No colon and no dash to split on, and the phrase is one idea, so it runs
+    // whole over three lines rather than being cut into a headline and a
+    // subtitle that would misquote it. "Modern AI Landscape" is the unit and
+    // stays together; the breaks fall either side of it.
+    headline: "The Founder\u2019s Guide<br />to the Modern<br />AI Landscape",
+    // No session record for this talk, so no slot and no track to read — the
+    // circuit below is the subject, matched to the other AI talks on this
+    // stage. Change it if the programme files her under Founder instead.
+    circuit: "AI & Applied Innovation",
+    poweredLabel: "Presented by",
+    logos: [
+      { repo: "public/brand/google-for-startups-wordmark.png", height: 44 },
+    ],
+    // The probe's 837 undersized her by the margin the README warns about:
+    // her hair covers the neck, so the shoulder line it watches for never
+    // arrives where the chin is and it measured a head longer than she draws.
+    // Crystal and Jennifer are the same case and sit at 940. 920 lands her
+    // head level with daniel-ward, which is the card this one sits beside.
+    portrait: { height: 920, left: 439 },
+  },
+
+  {
+    id: "tpr-speaker-luis-martinez",
+    event: "tpr",
+    speaker: "luis-martinez-ph-d",
+    // Splits at the colon, the way patrick-robinson and daniel-ward do: the
+    // hook in front, the question behind. Short enough to run at 106.
+    headline: "The Truth<br />About Startups",
+    headlineSize: 106,
+    subtitle: "What Are You Going to Do About It?",
+    // No session record for this talk, so no slot and no track to read. He is
+    // a Principal at Capital Factory, so Capital is the other candidate — this
+    // is filed on who the talk is for rather than who is giving it.
+    circuit: "Founder",
+    // The second-tightest crop in the set at 44.3% of frame, just behind
+    // patrick-robinson's 46%, so it takes a short image to draw the head at
+    // the size the others do. The probe's 641 is far too short even for that;
+    // 900 was 10% too large, measured against patrick and daniel-ward side by
+    // side. 830 puts his head level with both.
+    portrait: { height: 830, left: 439 },
+    // No sponsor on this one, so no `logos` — the strip and the shallower
+    // bottom padding both stay off. See tpr-speaker-vibha-kurpad.
   },
 
   {

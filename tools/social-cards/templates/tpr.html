@@ -109,6 +109,17 @@
         display: flex;
         flex-direction: column;
       }
+      /* A card with a sponsor does not need the 150px.
+
+         That padding is there because this template has no partner strip, and
+         a card that carries one has the strip doing the job the padding was
+         doing — holding the facts clear of the figure. Keeping both pushed the
+         whole bottom-anchored group up by the strip's own height, which read
+         as the name and role floating. 84px is what give-a-lot and
+         college-night use, and both of those have a strip. */
+      .frame.sponsored {
+        padding-bottom: 84px;
+      }
       /* A scrim in the bottom-left corner, under the frame's own text and over
          the bolt. Running the bolt bright puts its lower arm exactly where the
          name, role and facts sit, and two of those are magenta — the role and
@@ -302,14 +313,39 @@
         flex: none;
       }
 
-      /* No partner strip. TPR's host is the week itself. */
+      /* TPR's host is the week itself, so there is no event-level partner
+         strip here the way there is on Access Granted or The Model — the
+         event config carries `logos: []` and this block never renders for it.
+         What it does render is a sponsor on a single talk: Google for Startups
+         paid for one slot on this stage, and crediting that on that card is
+         not the same claim as crediting a host on all of them. Hence the
+         guard: a card with no `logos` of its own draws nothing. */
+      .powered {
+        margin-top: 34px;
+      }
+      .powered .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.26em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+      .powered .logos {
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        gap: 30px;
+      }
+      .powered .logos img {
+        width: auto;
+      }
     </style>
   </head>
   <body>
     <img class="bolt" src="bolt.svg" alt="" />
     <div class="portrait"><img src="{{face}}" alt="" /></div>
 
-    <div class="frame">
+    <div class="frame<!--if:logos--> sponsored<!--/if:logos-->">
       <div class="top">
         <img src="sastw.png" alt="" />
         <div class="dates">{{week}}</div>
@@ -353,6 +389,13 @@
         <div class="fact"><span class="pip"></span>{{fact2}}</div>
         <!--/if:fact2-->
       </div>
+
+      <!--if:logos-->
+      <div class="powered">
+        <div class="label">// {{poweredLabel}}</div>
+        <div class="logos">{{logos}}</div>
+      </div>
+      <!--/if:logos-->
     </div>
   </body>
 </html>
