@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Drawer } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { Combobox } from "@/components/ui/combobox";
+import { FilterChips } from "@/components/admin/ui/filter-chips";
 import { saveSession, deleteSession } from "@/lib/admin/cms-actions";
 import { formatDateTime } from "@/lib/format";
 import { EVENT_DAYS } from "@/lib/event";
@@ -147,6 +148,8 @@ export function SessionManager({
   const [track, setTrack] = React.useState("");
   const [venue, setVenue] = React.useState("");
   const [activation, setActivation] = React.useState("");
+  /** Which day the rail is showing; "all" is the whole week. */
+  const [railDay, setRailDay] = React.useState<string>("all");
   const [day, setDay] = React.useState("");
   const [startTime, setStartTime] = React.useState("");
   const [endTime, setEndTime] = React.useState("");
@@ -256,6 +259,71 @@ export function SessionManager({
     });
   }
 
+  /**
+   * The week down the rail, the activations inside each day.
+   *
+   * Two axes, because the schedule has two. Roughly fifty sessions are coming:
+   * twenty on the main stage spread across the five days, and the rest inside
+   * nine activations that each sit on one day — The Model owns the Monday,
+   * Access Granted the Wednesday, PySanAntonio the Friday. One flat list of
+   * fifty is ten thousand pixels of scroll, and either axis alone leaves a
+   * pile: by day you still get thirteen undifferentiated rows on the Monday,
+   * by activation the main stage is one bucket of twenty.
+   *
+   * So the day narrows the set and the activation groups what is left, which
+   * is also the order the team works in — a day gets programmed, and an
+   * activation's running order gets filled.
+   */
+  const dayOf = React.useCallback(
+    (row: SessionRow) => toParts(row.startsAt).day,
+    [],
+  );
+
+  const dayCounts = React.useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const r of rows) c[dayOf(r)] = (c[dayOf(r)] ?? 0) + 1;
+    return c;
+  }, [rows, dayOf]);
+
+  const visible = React.useMemo(
+    () => (railDay === "all" ? rows : rows.filter((r) => dayOf(r) === railDay)),
+    [rows, railDay, dayOf],
+  );
+
+  /** Activation slug to its display title, for the group headings. */
+  const activationTitle = React.useMemo(() => {
+    const m = new Map<string, string>();
+    for (const a of activationOptions()) m.set(a.slug, a.title);
+    return m;
+  }, []);
+
+  /**
+   * Standalone first, then activations in the order their first session runs.
+   *
+   * Sorting the groups by time rather than by name keeps the page reading as a
+   * day: the main stage leads because it is the spine of the schedule, and the
+   * activations follow in the order somebody walking the week would meet them.
+   */
+  const groups = React.useMemo(() => {
+    const by = new Map<string, SessionRow[]>();
+    for (const r of visible) {
+      const k = r.activation ?? "";
+      const list = by.get(k) ?? [];
+      list.push(r);
+      by.set(k, list);
+    }
+    return [...by.entries()]
+      .map(([slug, list]) => ({
+        slug,
+        label: slug ? (activationTitle.get(slug) ?? slug) : "Main stage",
+        list,
+        first: Math.min(...list.map((r) => r.startsAt)),
+      }))
+      .sort((a, b) =>
+        a.slug === "" ? -1 : b.slug === "" ? 1 : a.first - b.first,
+      );
+  }, [visible, activationTitle]);
+
   const current = editing === "new" ? null : editing;
   const available = speakers.filter(
     (s) => !participants.some((p) => p.speakerId === s.id),
@@ -269,70 +337,109 @@ export function SessionManager({
             Add speakers first to assign them to sessions.
           </p>
         )}
+        {/* The week down the rail. Counts on the chips so an empty day is
+            visible without opening it — which is the question being asked
+            while a schedule is still being built. */}
+        <FilterChips
+          value={railDay}
+          onChange={setRailDay}
+          options={[
+            { key: "all", label: "All", count: rows.length },
+            ...EVENT_DAYS.map((d) => ({
+              key: d.iso,
+              label: d.label,
+              count: dayCounts[d.iso] ?? 0,
+            })),
+          ]}
+        />
         <Button className="ml-auto" onClick={() => open("new")}>
           Add session
         </Button>
       </div>
 
-      {rows.length === 0 ? (
+      {visible.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-10 text-center text-muted-foreground">
-          No sessions yet. Build the schedule.
+          {rows.length === 0
+            ? "No sessions yet. Build the schedule."
+            : "Nothing on this day yet."}
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
-          {rows.map((row) => (
+        <div className="flex flex-col gap-7">
+          {groups.map((group) => (
             <div
-              key={row.id}
-              className="flex flex-col gap-3 rounded-lg border border-border bg-white p-5"
+              key={group.slug || "standalone"}
+              className="flex flex-col gap-3"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-display text-lg font-bold">
-                      {row.title}
-                    </span>
-                    {row.track && (
-                      <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                        {row.track}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {formatDateTime(row.startsAt)}
-                    {row.endsAt
-                      ? ` – ${formatDateTime(row.endsAt)}`
-                      : ""} · {venueLabel(row.location)}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => open(row)}>
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => onDelete(row)}
-                  >
-                    Delete
-                  </Button>
-                </div>
+              {/* The activation is a heading rather than a field on every card:
+                  a running order is a list under its own name, and repeating
+                  "Datanauts" on nine rows says it nine times. */}
+              <div className="flex items-baseline gap-2">
+                <h3 className="font-display text-sm font-bold uppercase tracking-wide">
+                  {group.label}
+                </h3>
+                <span className="text-xs text-muted-foreground">
+                  {group.list.length}
+                </span>
               </div>
-              <p className="line-clamp-2 text-sm text-muted-foreground">
-                {row.description}
-              </p>
-              {row.participants.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {row.participants.map((p) => (
-                    <Badge
-                      key={p.speakerId}
-                      tone={p.role === "moderator" ? "magenta" : "blue"}
-                    >
-                      {p.name}
-                      {p.role === "moderator" ? " · mod" : ""}
-                    </Badge>
-                  ))}
+              {group.list.map((row) => (
+                <div
+                  key={row.id}
+                  className="flex flex-col gap-3 rounded-lg border border-border bg-white p-5"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-display text-lg font-bold">
+                          {row.title}
+                        </span>
+                        {row.track && (
+                          <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                            {row.track}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {formatDateTime(row.startsAt)}
+                        {row.endsAt
+                          ? ` – ${formatDateTime(row.endsAt)}`
+                          : ""} · {venueLabel(row.location)}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => open(row)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onDelete(row)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="line-clamp-2 text-sm text-muted-foreground">
+                    {row.description}
+                  </p>
+                  {row.participants.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {row.participants.map((p) => (
+                        <Badge
+                          key={p.speakerId}
+                          tone={p.role === "moderator" ? "magenta" : "blue"}
+                        >
+                          {p.name}
+                          {p.role === "moderator" ? " · mod" : ""}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
           ))}
         </div>
