@@ -103,7 +103,23 @@ export default async function TalkPage({
   const talk = hit.talk;
 
   const { row, room } = talk;
-  const speakers = row.participants.filter((p) => p.name);
+  const participants = row.participants.filter((p) => p.name);
+  /**
+   * Who is on, and who is asking.
+   *
+   * A fireside has both, and the column used to draw them the same size: two
+   * squares side by side, which on a 22rem column is two 170px thumbs over
+   * 379px of empty black — the copy beside them runs 602. It also said the
+   * wrong thing. "Building Nopalera on Her Own Terms" is Sandra's company and
+   * Sandra's story; giving the moderator equal footprint made the page look
+   * like a two-hander.
+   *
+   * So the split is by role, not by count, and it comes off the record rather
+   * than being set per talk. It carries to the sessions with three on stage
+   * and somebody chairing, which is what the schedule is heading for.
+   */
+  const speakers = participants.filter((p) => p.role !== "moderator");
+  const moderators = participants.filter((p) => p.role === "moderator");
   // A talk carries a track where an activation carries a circuit; they are the
   // same five names, so the same sponsor answers for both. This is the only
   // surface the Founder circuit appears on — no activation carries it.
@@ -209,7 +225,7 @@ export default async function TalkPage({
         <article
           className={cn(
             "mt-8 grid gap-10 lg:gap-16",
-            speakers.length > 0 && "lg:grid-cols-[minmax(0,22rem)_1fr]",
+            participants.length > 0 && "lg:grid-cols-[minmax(0,22rem)_1fr]",
           )}
         >
           {/* Who is on, at the size the lineup draws them — grayscale for the
@@ -220,22 +236,44 @@ export default async function TalkPage({
               squares, because a fireside with two names stacked at 4:5 would
               run past the copy beside it and put the page back into a
               scroll. */}
-          {speakers.length > 0 && (
+          {participants.length > 0 && (
             <div className="mx-auto w-full max-w-xs self-start lg:mx-0 lg:max-w-none">
-              <div
-                className={cn(
-                  "grid gap-3",
-                  speakers.length > 1 && "grid-cols-2",
-                )}
-              >
-                {speakers.map((p) => (
-                  <SpeakerFace
-                    key={`${p.speakerId}-${p.role}`}
-                    speaker={p}
-                    solo={speakers.length === 1}
-                  />
-                ))}
-              </div>
+              {speakers.length > 0 && (
+                <div
+                  className={cn(
+                    "grid gap-3",
+                    speakers.length > 1 && "grid-cols-2",
+                  )}
+                >
+                  {speakers.map((p) => (
+                    <SpeakerFace
+                      key={`${p.speakerId}-${p.role}`}
+                      speaker={p}
+                      solo={speakers.length === 1}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* The chair, under a rule rather than beside the speaker.
+                  
+                  Small on purpose: a moderator is on the record and worth
+                  linking, and is not what the talk is about. At the portrait
+                  size the speakers get, two faces side by side read as a
+                  two-hander — which is what this column used to say about a
+                  session named after one person's company. */}
+              {moderators.length > 0 && (
+                <div
+                  className={cn(
+                    "flex flex-col gap-4",
+                    speakers.length > 0 && "mt-6 border-t border-white/10 pt-6",
+                  )}
+                >
+                  {moderators.map((p) => (
+                    <ModeratorRow key={`${p.speakerId}-${p.role}`} person={p} />
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -244,7 +282,7 @@ export default async function TalkPage({
               "min-w-0",
               // Alone in the row, the copy needs a measure of its own — see
               // the note on the article.
-              speakers.length === 0 && "lg:max-w-4xl",
+              participants.length === 0 && "lg:max-w-4xl",
             )}
           >
             {/* Circuit and room, in the eyebrow slot. Circuits carry no colour
@@ -418,6 +456,62 @@ function SpeakerFace({
       className="group block focus-visible:outline-none"
     >
       {face}
+    </Link>
+  );
+}
+
+/**
+ * The chair: a thumbnail, a name, and the word moderator.
+ *
+ * Deliberately not a `SpeakerFace` at a smaller size. That component is a
+ * portrait with its name under it, and shrunk to fit here it would have read
+ * as a speaker who mattered less rather than as somebody doing a different
+ * job. Turned on its side — face beside name rather than above it — the row
+ * stops competing with the column above it and starts reading as a credit.
+ *
+ * Still a link wherever the id resolves, and still grayscale, for the same
+ * reasons the portraits are.
+ */
+function ModeratorRow({ person }: { person: ResolvedParticipant }) {
+  const body = (
+    <>
+      <div className="relative size-14 shrink-0 overflow-hidden rounded-md ring-1 ring-white/10">
+        {person.imageUrl ? (
+          <Image
+            src={person.imageUrl}
+            alt=""
+            fill
+            sizes="3.5rem"
+            className="object-cover object-top grayscale"
+          />
+        ) : (
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 grid place-items-center font-display text-xl font-bold uppercase text-white/25"
+          >
+            {person.name.charAt(0)}
+          </span>
+        )}
+      </div>
+      <div className="min-w-0">
+        <p className="truncate font-display text-base font-bold uppercase leading-tight text-white">
+          {person.name}
+        </p>
+        <p className="mt-0.5 font-mono text-[11px] uppercase tracking-widest text-white/50">
+          {person.role}
+        </p>
+      </div>
+    </>
+  );
+
+  if (!person.slug)
+    return <div className="flex items-center gap-3">{body}</div>;
+  return (
+    <Link
+      href={`/speakers/${person.slug}`}
+      className="group flex items-center gap-3 focus-visible:outline-none"
+    >
+      {body}
     </Link>
   );
 }
