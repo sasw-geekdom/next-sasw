@@ -1,0 +1,301 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* The house magenta, not a palette of the group's own.
+         PySanAntonio, The Model and Access Granted each get their own template
+         because each has a brand system in the codebase — a palette, its own
+         devices, its own labels. The community groups have a logo and nothing
+         else: no accent, no wordmark treatment, no second colour. So this is a
+         Startup + Tech Week card that carries the group's mark, and one
+         template serves all six. */
+      :root {
+        --magenta: #ff32a0;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* The house bolt, as a ground rather than a badge.
+         These cards already carry two marks — the week's lockup and the
+         group's — and a third would be clutter competing with the one thing
+         that tells the six apart. But this template also has the weakest
+         signature of the four: no palette, no wordmark treatment, just a
+         bloom. So the bloom takes the bolt's shape instead, which is how the
+         site itself uses it — masked, not placed (see event-particles.tsx).
+         0.17, which measures 2.32:1 against the black. Two references set
+         that: at 0.09 it survives feed compression intact but reads as a
+         smudge, and PySanAntonio's bloom — the nearest equivalent device —
+         sits at 3.53:1. Lower than that on purpose, because this is a large
+         hard-edged shape where the bloom is a diffuse glow, so the same
+         luminance carries further. At 0.26 it starts competing with the
+         speaker's name. */
+      .bolt {
+        position: absolute;
+        /* Above the portrait's scrim, and on the left. Behind it the scrim
+           paints it out entirely; over the figure it would tint a face. The
+           left-middle is the one genuinely empty region on this template —
+           between the talk title and the speaker's name — which is where a
+           ground element belongs. */
+        z-index: 1;
+        left: -190px;
+        top: 330px;
+        width: 820px;
+        height: auto;
+        /* Drawn, not masked. The file is already #ff32a0, so it needs no
+           mask — and a CSS mask would not have worked anyway: Chromium treats
+           an external SVG mask over file:// as cross-origin and drops it
+           silently. The renderer's failed-request line is what caught it. */
+        opacity: 0.17;
+        filter: blur(7px);
+      }
+      /* The half a person fills on a speaker card, given to the group's own
+         badge instead.
+
+         community-group.html puts the hero bolt here when there is no figure,
+         which is right when the card has nothing else to show. This one does:
+         Alamo Inventors' badge is the thing people recognise, it is nearly
+         square where every other group sends a wordmark, and at the top-left
+         mark size those lockups use it drew about a fifth of the width it
+         wants. So it takes the figure's half at the figure's scale, the way
+         tpr.html hands that half to a portrait, and the ground bolt below
+         stays as texture rather than becoming the subject. */
+      .badge {
+        position: absolute;
+        z-index: 2;
+        right: 74px;
+        top: 500px;
+        width: {{markHeight}}px;
+        height: auto;
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        /* Deep bottom padding, unlike the other templates. They end in a
+           partner strip that holds the facts clear of the figure; with no
+           strip the facts fell to the foot of the card, which is exactly where
+           a seated portrait's shoulder is widest — the time ran into a jacket
+           at x=403. This lifts them to where the silhouette has drawn back. */
+        padding: 74px 72px 150px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 58px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* The group's own mark, in the slot PySA gives its wordmark. Sized by
+         height per group, because these lockups run from 3.3:1 (Linux SA) to
+         10:1 (Google Developer Groups) and a single height would draw one of
+         them a third of the width of another. */
+      .mark {
+        margin-top: 52px;
+        height: {{markHeight}}px;
+        width: auto;
+        display: block;
+        align-self: flex-start;
+      }
+
+      h1 {
+        margin-top: 34px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 1;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+
+      <!--if:subtitle-->
+      .subtitle {
+        margin-top: 22px;
+        max-width: 560px;
+        font-size: 27px;
+        line-height: 1.34;
+        color: rgba(255, 255, 255, 0.72);
+        text-wrap: balance;
+      }
+      <!--/if:subtitle-->
+
+      .spacer {
+        flex: 1;
+      }
+      .name {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 62px;
+        line-height: 0.98;
+        text-transform: uppercase;
+        letter-spacing: 0.01em;
+      }
+      .role {
+        margin-top: 16px;
+        font-size: 27px;
+        font-weight: 600;
+        color: var(--magenta);
+      }
+      <!--ifnot:org-->
+      .role {
+        margin-bottom: 4px;
+      }
+      <!--/ifnot:org-->
+      <!--if:org-->
+      .org {
+        margin-top: 10px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.2em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+      <!--/if:org-->
+
+      .facts {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--magenta);
+        flex: none;
+      }
+
+      /* A partner strip only where the group has partners.
+         Most of these are a single host whose mark is already at the top of
+         the card, which is why there is no strip by default and why the frame
+         above carries the deep bottom padding instead. Linux San Antonio is
+         the exception — three orgs put it on, and its page says so — so the
+         strip comes back and the padding it was standing in for goes away. */
+      <!--if:logos-->
+      .frame {
+        padding-bottom: 62px;
+      }
+      .powered {
+        margin-top: 30px;
+      }
+      .powered .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.26em;
+        color: #6f6f6f;
+        text-transform: uppercase;
+      }
+      /* Wraps, and the width is what forces it to.
+         Three marks in one row reach x=822 and the figure starts around 560,
+         so the last two sat on his jacket. Shrinking them to fit one row put
+         learnOPENtech's 10:1 wordmark at 20px tall — legible, and visibly the
+         smallest thing on any of these cards. Two rows keeps them readable
+         and clear of him, which is the same trade Access Granted's six marks
+         make. */
+      .logos {
+        margin-top: 18px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        max-width: 420px;
+        gap: 16px 34px;
+      }
+      .logos img {
+        width: auto;
+      }
+      <!--/if:logos-->
+    </style>
+  </head>
+  <body>
+    <img class="bolt" src="bolt.svg" alt="" />
+    <img class="badge" src="{{mark}}" alt="" />
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <h1>{{headline}}</h1>
+      <!--if:subtitle-->
+      <p class="subtitle">{{subtitle}}</p>
+      <!--/if:subtitle-->
+
+      <div class="spacer"></div>
+
+      <!-- The break and the second line are conditional, the same fix tpr.html
+           carries: Beck goes by one name, and an unconditional <br /> leaves an
+           empty 62px line under it. The block below the spacer is bottom-
+           anchored as a group, so that does not show up as a gap under the
+           name — it lifts the whole group, the name included, off the line the
+           other cards sit on. -->
+      <!--if:first-->
+      <div class="name">
+        {{first}}<!--if:last--><br />{{last}}<!--/if:last-->
+      </div>
+      <div class="role">{{role}}</div>
+      <!--if:org-->
+      <div class="org">{{org}}</div>
+      <!--/if:org-->
+      <!--/if:first-->
+
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+      </div>
+
+      <!--if:logos-->
+      <div class="powered">
+        <div class="label">// {{poweredLabel}}</div>
+        <div class="logos">{{logos}}</div>
+      </div>
+      <!--/if:logos-->
+    </div>
+  </body>
+</html>

@@ -484,7 +484,9 @@ async function main() {
       // The strip's own line. Every other template writes its label into the
       // markup because it serves one event; this one serves two, and Access
       // Granted's names the coalition where The Model's is the house "//".
-      poweredLabel: card.poweredLabel ?? "",
+      // Falls back to the event, the way `logos` does above: the label goes
+      // with the strip, and the strip is usually the event's.
+      poweredLabel: card.poweredLabel ?? event.poweredLabel ?? "",
       transparent: card.video ? "1" : "",
       // Whether the card's art is a block rather than a cutout — an opaque
       // ground the bloom has to be carried over. See `pysanantonio-event`.

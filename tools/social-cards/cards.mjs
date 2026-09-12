@@ -64,6 +64,34 @@ const AT_THE_RAND = (mark, markHeight, day, hours) => ({
   logos: [],
 });
 
+/**
+ * The one community-shaped card that is not at The Rand and has no speaker.
+ *
+ * Alamo Inventors' panel runs in UTSA's San Pedro II for the evening, and the
+ * panelists are not named. `community-group.html` already covers both: its
+ * name block is conditional on `first`, so with no speaker it draws the mark,
+ * the headline and the facts and stops, and with no `face` it swaps the ground
+ * bolt for the hero one. A template of its own would have been a copy of that
+ * with the venue changed.
+ *
+ * The mark is the group's own badge rather than a wordmark, so it takes a
+ * taller box than the lockups beside it — those run 3.3:1 to 10:1 and this is
+ * nearly square.
+ */
+const CYBER_AI_ROBOTICS = {
+  template: "panel.html",
+  // `height` is the badge's *width* on this template — it is nearly square, so
+  // sizing it by height the way a 10:1 wordmark is sized would have drawn it a
+  // fifth of the space it wants.
+  mark: { repo: "public/activations/alamo-inventors-carsig.png", height: 440 },
+  facts: ["Wednesday, September 30", "6:30 \u2013 8 PM  ·  UTSA San Pedro II"],
+  // "Venue by", not the "Powered by" the community cards print. UT San Antonio
+  // is not running this panel — Alamo Inventors are, and the badge above says
+  // so; UTSA gave the room, through the Harvey Najim Innovation Center.
+  poweredLabel: "Venue by",
+  logos: [{ repo: "public/activations/ut-san-antonio.svg", height: 34 }],
+};
+
 export const COMMUNITY = {
   "dotnet-user-group": AT_THE_RAND(
     "dotnet-user-group.svg",
@@ -248,6 +276,8 @@ export const EVENTS = {
    * Thursday. When the slots land they go on each card as `facts`, which
    * overrides this. The talk's circuit is not a fact — it captions the ramp.
    */
+  "cyber-ai-robotics-panel": CYBER_AI_ROBOTICS,
+
   tpr: {
     template: "tpr.html",
     facts: ["Texas Public Radio", "321 W Commerce St"],
@@ -1109,6 +1139,19 @@ export const CARDS = [
 
   // ─── Texas Public Radio ───────────────────────────────────────────────────
   {
+    id: "cyber-ai-robotics-panel",
+    event: "cyber-ai-robotics-panel",
+    // "The" is dropped and the title splits at its own clause. Whole and
+    // unbroken it is 41 characters, which at this size reaches past the
+    // measure; the three technologies are the hook and go first.
+    headline: "Cyber, AI & Robotics<br />Convergence Panel",
+    headlineSize: 76,
+    // The same line the activation page leads on, which is what the panel is
+    // actually about rather than a restatement of its title.
+    subtitle: "Three technologies, one patent question.",
+  },
+
+  {
     id: "tpr-speaker-patrick-robinson",
     event: "tpr",
     speaker: "patrick-robinson",
@@ -1190,10 +1233,21 @@ export const CARDS = [
     id: "tpr-speaker-wolfy",
     event: "tpr",
     speaker: "wolfy",
-    headline: "Cybersecurity for<br />Small Businesses",
-    // The longest of the five: the tag runs "SMALL BUSINESS & SOLOPRENEUR ·
-    // MAIN STAGE", ~705px against the 936px measure, and clears.
-    circuit: "Small Business & Solopreneur",
+    // The talk was retitled and re-tracked after this card was first made: it
+    // ran as "Cybersecurity for Small Businesses" on Small Business &
+    // Solopreneur, and the session record now reads this, on Founder. Updated
+    // in place rather than added alongside — a second card would leave the old
+    // one in the set to be re-exported later, which is the exact failure the
+    // note at the top of this file exists to prevent.
+    //
+    // Split at the colon, as on patrick-robinson. "Tea" is the 2025 app breach
+    // his abstract opens on, so the hook only works whole and lands the line.
+    headline: "Don\u2019t Be the<br />Next Tea",
+    headlineSize: 106,
+    subtitle: "Defense in Depth for Founders",
+    // From the session record, not guessed. The CMS titles it "…For Founders"
+    // with a capital F; the subtitle above sets it in title case.
+    circuit: "Founder",
     // He goes by one name — the first the set has had. See the note on
     // .name in tpr.html for what the renderer's default split did with that.
     //
@@ -1264,10 +1318,11 @@ export const CARDS = [
     // subtitle that would misquote it. "Modern AI Landscape" is the unit and
     // stays together; the breaks fall either side of it.
     headline: "The Founder\u2019s Guide<br />to the Modern<br />AI Landscape",
-    // No session record for this talk, so no slot and no track to read — the
-    // circuit below is the subject, matched to the other AI talks on this
-    // stage. Change it if the programme files her under Founder instead.
-    circuit: "AI & Applied Innovation",
+    // From her session record. This was guessed as AI & Applied Innovation
+    // while the talk had no record to read — the subject looked like the
+    // answer. The programme files it under Tech & Builders, which the card now
+    // follows; a circuit is the programme's to state, not the card's to infer.
+    circuit: "Tech & Builders",
     poweredLabel: "Presented by",
     logos: [
       { repo: "public/brand/google-for-startups-wordmark.png", height: 44 },
@@ -1289,9 +1344,9 @@ export const CARDS = [
     headline: "The Truth<br />About Startups",
     headlineSize: 106,
     subtitle: "What Are You Going to Do About It?",
-    // No session record for this talk, so no slot and no track to read. He is
-    // a Principal at Capital Factory, so Capital is the other candidate — this
-    // is filed on who the talk is for rather than who is giving it.
+    // From his session record, and it agrees with what this was set to while
+    // the talk had none: filed on who the talk is for rather than on the
+    // Capital Factory masthead of the man giving it.
     circuit: "Founder",
     // The second-tightest crop in the set at 44.3% of frame, just behind
     // patrick-robinson's 46%, so it takes a short image to draw the head at
