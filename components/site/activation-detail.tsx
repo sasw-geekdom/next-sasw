@@ -152,13 +152,20 @@ export function ActivationDetail({
                 at the end of the third line, which buries the beat the line is
                 built on. A headline with no sentence break renders as one
                 block and is unaffected. */}
-            <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
-              {sentences(detail.headline).map((line, i) => (
-                <span key={i} className="block text-pretty">
-                  {line}
-                </span>
-              ))}
-            </h2>
+            {/* Guarded because `headline` is optional now, and optional only
+                so a `heroOnly` activation can decline the deck it draws under
+                its title — see lib/schedule. Nothing that reaches this
+                component should be without one, and a section that is would
+                be the headless block the note above describes. */}
+            {detail.headline && (
+              <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
+                {sentences(detail.headline).map((line, i) => (
+                  <span key={i} className="block text-pretty">
+                    {line}
+                  </span>
+                ))}
+              </h2>
+            )}
             {hasAside && narrative}
           </div>
 

@@ -275,13 +275,27 @@ export interface FeaturedSession {
     /**
      * The section's display headline.
      *
-     * Required, not optional: every other section on this site runs
-     * eyebrow → headline → body, and the first version of this one skipped
-     * straight to prose. With no Oswald anchor the block had nothing to hang
-     * on, and the lede ended up carrying the weight at 24px — body type doing
-     * a display font's job, which is the one place on the site that happens.
+     * Every section that renders needs one: this site runs eyebrow → headline
+     * → body everywhere, and the first version of this block skipped straight
+     * to prose. With no Oswald anchor it had nothing to hang on, and the lede
+     * carried the weight at 24px — body type doing a display font's job, which
+     * is the one place on the site that happens. So it was `string`, not
+     * `string | undefined`, and the type did the arguing.
+     *
+     * Optional now, for the one case where the section does not render at all.
+     * On a `heroOnly` activation this never reaches `ActivationDetail`; it is
+     * drawn as a deck under the typeset h1 instead, in the same face, case and
+     * weight as the title a few pixels above it. That is a different job with
+     * a different failure: on Texas Venture Fest the deck ran the full width
+     * of the title and read as a second headline arguing with the first, and
+     * the fix a reader actually wanted was no deck at all — let the event's
+     * name be the only display line on the left.
+     *
+     * So: omit it only on a `heroOnly` activation. Omitting it anywhere else
+     * gets you the headless section this was written to prevent, and the type
+     * can no longer stop you.
      */
-    headline: string;
+    headline?: string;
     /**
      * The standfirst, in the pinned intro column.
      *
@@ -1198,6 +1212,298 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       width: 1500,
       height: 1079,
       alt: "",
+    },
+  },
+  /**
+   * Texas Venture Fest's San Antonio stop, on our main stage.
+   *
+   * Part of a statewide thing rather than a one-off: their own copy has more
+   * than fifteen Texas cities running this simultaneously during Texas Startup
+   * & Tech Week, feeding the Venture Gala at the Capitol. That is the fact
+   * worth carrying — this page is the only place on the site where the week
+   * connects to anything outside Bexar County.
+   */
+  {
+    slug: "texas-venture-fest",
+    page: "texas-venture-fest",
+    // Hero and nothing else. This one has no running order to publish — the
+    // firesides are not named yet and the panels are "planned so far" — so a
+    // section below the fold would have been the same three facts a second
+    // time, set larger. Everything a reader decides on is above the button
+    // instead: what it is, what happens in the room, and whose list seats you.
+    heroOnly: true,
+    // "Texas Venture Fest San Antonio" is the edition's full name, and it is
+    // how their Luma bills it. Dropped here because every event on this site
+    // is in San Antonio, so the suffix distinguishes nothing a reader of this
+    // page needs distinguishing — the copy says it where it matters, which is
+    // the sentence about the other fifteen cities.
+    title: "Texas Venture Fest",
+    site: {
+      label: "texasventurefest.com",
+      href: "https://www.texasventurefest.com",
+    },
+    room: "tpr",
+    // Founder over Capital, which the name argues for. The two Capital
+    // activations on this stage are pitch competitions where money is decided
+    // in the room; this is firesides and three panels on arts and tourism,
+    // events and media, and technology — no one is raising anything. Their
+    // own framing is "the ecosystem of entrepreneur support", and the
+    // co-hosts come from Emerge and Rise and Founder Institute.
+    circuit: "Founder",
+    // Their first sentence, condensed to the half that says what makes this
+    // different from every other panel afternoon: the honesty. Plenty of
+    // events put the momentum on the table; this one has said out loud that
+    // it will also cover where the ecosystem is short.
+    blurb:
+      "Short firesides and three panels on the deals and the buildout that don\u2019t make headlines — and on where the ecosystem still falls short.",
+    when: {
+      start: "2026-10-01T15:00:00-05:00",
+      end: "2026-10-01T18:00:00-05:00",
+    },
+    // Confirmed against their Luma listing, which has it 3–6pm in the Alvarez
+    // Theater and free. Checked because the last activation seated on Luma
+    // disagreed with its brief by an hour — see Mission Pitch.
+    register: {
+      label: "Save a seat.",
+      href: "https://luma.com/texas-venture-fest-san-antonio-2026",
+    },
+    // Their boot-and-spur lockup, beside the copy rather than in place of the
+    // title — the second hero column, from `lg` up.
+    //
+    // `heroMark` and not `logo`, even though this one genuinely is the event's
+    // own name and `logo` is the field for that. Two reasons it goes on the
+    // right instead: `logo` takes the h1 visually-hidden, which would also
+    // take the deck with it (the deck only draws when there is no logo), and
+    // the mark carries "10/1/26" baked into the artwork — a date is a fine
+    // thing to have beside the date line and a strange thing to have as the
+    // page's only heading.
+    //
+    // Taken from the partner wall rather than supplied for this page, and it
+    // survives the move because that wall is `bg-black` too: the wordmark is
+    // pure white, the boot a mid grey and the date a tan, so all three read
+    // straight onto the hero with no plate. On a light ground the name would
+    // vanish — worth knowing before this file is reused anywhere else.
+    //
+    // Copied in rather than read from the CMS blob, on the Mission Pitch
+    // precedent: a mark the layout depends on should not hang off a bucket.
+    // Cropped to its ink first — as uploaded it was 2500x2205 with roughly
+    // 350px of transparent margin on the left and 470px on top, so the box
+    // and the mark were different shapes and CSS was aligning the wrong one.
+    //
+    // `logoFromPartner` would have tracked the admin's uploads, which is the
+    // better property, but it feeds `logo` rather than this and so lands the
+    // mark in the wrong half of the hero.
+    heroMark: {
+      src: "/activations/texas-venture-fest.png",
+      width: 1100,
+      height: 794,
+      // Empty on purpose. The h1 two inches to its left already says "Texas
+      // Venture Fest"; the same words again is a second announcement of the
+      // same thing to anyone listening rather than looking.
+      alt: "",
+    },
+    // `heroOnly` renders exactly three of these — the headline as a deck
+    // under the title, `lede[0]` as the one paragraph, and `access` as the
+    // small line above the button. `coda`, `kicker` and a second lede would
+    // never print, so what used to be in them has been folded into these
+    // three rather than left in the file reading like published copy.
+    //
+    // Two facts did not fit and are gone rather than squeezed: the bill of
+    // co-hosts, MC and five community partners, and the note that local
+    // founders are expected across the panels. Both live on their own page,
+    // which is what `site` is for.
+    detail: {
+      eyebrow: "The afternoon",
+      // No headline, so no deck under the title. Two went in and neither
+      // worked: a full sentence ran the width of the h1 and read as a second
+      // headline arguing with the first, and the stub that replaced it was
+      // still a display line competing for the same glance. The event's name
+      // is the one thing that should be big and white on this page.
+      //
+      // `headline` is optional for this — see the note on the field, and the
+      // guard in `ActivationDetail`.
+      //
+      // Their own copy, cut to what a reader decides on. Gone: the minute
+      // count on the firesides and the subjects of the three panels. Both
+      // are real and both are on their Luma, and neither changes whether
+      // someone comes — "arts and tourism, events and media, technology"
+      // read as a table of contents in the middle of a paragraph that was
+      // trying to make an argument.
+      //
+      // Kept, close to their wording: momentum "on the table", the growth
+      // that doesn't "make headlines", the "honest look" at the work left.
+      // That last clause is the voice of this event — plenty of weeks put
+      // the momentum on the table and stop there.
+      lede: [
+        "San Antonio\u2019s real momentum, on the table: the founders, the deals and the infrastructure growth that don\u2019t always make headlines \u2014 and an honest look at where the ecosystem still has work to do. Short firesides and three panels, broken into blocks rather than one long stretch of programming, with local founders and startups across the bill.",
+      ],
+      // The eight orgs activating this one with them, under their mark in the
+      // second hero column — see the note in the activation page on why this
+      // wall moves right when there is a `heroMark` above it to sit under.
+      //
+      // Laptops and monitors only, because that column does not exist below
+      // `lg`. That also makes every base step below the `sm:` one dead: the
+      // wall is never drawn at a width where it applies. The pairs are kept
+      // anyway — they are the shape every other wall on the site uses, and
+      // they are what this needs again the day it is drawn anywhere else.
+      //
+      // Six came off the partner wall and survive the move because that wall
+      // is `bg-black` too — Geekdom among them, in its own red, drawing the
+      // same file the home page does. Two did not arrive usable and each
+      // needed a different answer, which is the note on each of them: 434
+      // Media is one near-black ink and takes `white`; the Applied Innovation
+      // Council is three colours and could not, so its navy was lifted on its
+      // own.
+      //
+      // The heights are not one number, and the marks are why. They run from
+      // a 3.8:1 script wordmark to a 0.6:1 droplet, so matched on height the
+      // wordmark would be four times the width of the mark beside it, and
+      // matched on width the droplet would tower. These are matched on how
+      // large each one reads: the wordmark shortest because it is dense and
+      // wide, the circular badge tallest because a ring with type set around
+      // it needs the height before any of it is legible.
+      poweredBy: [
+        {
+          name: "Texas Venture Alliance",
+          href: "https://texasventurealliance.org/",
+          logo: "/activations/tvf/texas-venture-alliance.png",
+          // A seal: fine type set around a ring, and the first thing to go
+          // illegible when a wall is levelled by box height.
+          heightClass: "h-12 sm:h-14",
+        },
+        {
+          name: "The Building Texas Show",
+          href: "https://www.buildingtexasshow.com/",
+          logo: "/activations/tvf/building-texas-show.png",
+          // Nearly 4:1 and heavy with it — the widest thing in the row at any
+          // height, so it takes the lowest one and still leads the line.
+          //
+          // The live step is `sm:h-7`, and it is a measurement rather than
+          // taste: at `h-8` it drew 123px and the marks and their gaps came to
+          // 508px against the 512px column, which is a four-pixel margin and
+          // so not a margin. 108px leaves 19px.
+          heightClass: "h-6 sm:h-7",
+        },
+        {
+          name: "Emerge and Rise",
+          href: "https://emergeandrise.org/",
+          logo: "/activations/tvf/emerge-and-rise.png",
+          heightClass: "h-8 sm:h-9",
+        },
+        {
+          name: "Geekdom",
+          href: "https://geekdom.com",
+          // The same file College Night's wall uses, and byte for byte the
+          // image the CMS partner wall draws on the home page — not
+          // `og-geekdom.svg`, which is already white and tempting for that
+          // reason but is the throwback wordmark belonging to the /15-years
+          // surfaces.
+          //
+          // No `white` here, unlike College Night, which knocks it back
+          // because its surface is otherwise magenta and white and the red
+          // would be the only colour on it. This wall is the opposite case:
+          // it already carries the Building Texas Show's coral, a gold seal
+          // and a gold star, so Geekdom's own red is one of several and not
+          // an intrusion. At luminance 96 it reads on black unaided.
+          logo: "/brand/geekdom.png",
+          // 2.8:1, with the crown sitting above the letters — so the wordmark
+          // is smaller than its box and it takes more height than the ratio
+          // alone asks for. Same value College Night arrived at.
+          heightClass: "h-10 sm:h-11",
+          // Fourth rather than first, which is a packing decision and not a
+          // ranking one — a wall is a set, not an order of precedence, and
+          // 434 Media is the only position anyone asked for.
+          //
+          // It is the widest mark here at 124px. Leading with it put the
+          // three widest on the first row, which left the five small ones
+          // fitting four on the second and stranded 434 alone on a third row
+          // at `lg`. Spread through the middle, the rows come out four and
+          // four at `xl` and three, three and two at `lg`, and nothing is
+          // left on its own.
+        },
+        {
+          name: "InVentures",
+          href: "https://inventures.team/",
+          // Their own lockup with the plate taken off it. As published it is
+          // white artwork on a solid green rectangle, which on this ground
+          // would have been the one mark in the row arriving inside a box.
+          //
+          // Knocked out rather than keyed: every pixel of that file is a
+          // blend of white over the same green, so the alpha was rebuilt from
+          // how far each one had travelled from the plate toward the ink.
+          // Selecting the green and deleting it leaves a fringe on every
+          // anti-aliased edge; solving for the blend does not. The rocket's
+          // window and the gaps in the clouds were plate too, so they come
+          // through as holes — which is correct, and is why it reads as line
+          // art on black rather than as a white silhouette.
+          logo: "/activations/tvf/inventures.png",
+          // A stacked lockup: mark over wordmark, with the name in the lower
+          // third. Matched on box height it reads smaller than the marks
+          // beside it, the same correction DEF CON's skyline takes on the
+          // Access Granted wall.
+          heightClass: "h-9 sm:h-11",
+        },
+        {
+          name: "San Antonio Applied Innovation Council",
+          href: "https://sanantonioinnovates.com/",
+          // Their lockup reversed, which is not the same as knocked white.
+          //
+          // The file they publish is already transparent — there was no plate
+          // to remove — and the problem was the ink: a navy wordmark at
+          // luminance 26, which on this ground is very nearly nothing. They
+          // publish no reversed version, so one had to be made.
+          //
+          // `white: true` was the wrong tool. It flattens every opaque pixel,
+          // and this mark is three colours doing three jobs: the compass is
+          // navy arrows interleaved with grey ones, with a gold star at the
+          // centre. Flattened, the two sets of arrows merge into one white
+          // blob and the star goes with them — the design stops being the
+          // design.
+          //
+          // So only the navy was lifted, keyed on how blue each pixel is:
+          // b − r runs 65 on the navy, 9 on the neutral grey and negative on
+          // the gold, which separates them cleanly, and the remap is
+          // continuous so the anti-aliased edges stay soft rather than
+          // stepping. The grey arrows and the star come through untouched.
+          logo: "/activations/tvf/sa-applied-innovation-council.png",
+          // A mark plus three lines of type, so the type is small inside the
+          // box — it takes a step more than its 2.5:1 ratio asks for.
+          heightClass: "h-9 sm:h-10",
+        },
+        {
+          name: "Founders Institute San Antonio",
+          // Their Instagram, which is the link the partner wall carries for
+          // them — not fi.co, which is the global org rather than the chapter
+          // in this room.
+          href: "https://www.instagram.com/founderinstitutesanantonio/",
+          logo: "/activations/tvf/founders-institute.png",
+          // The only portrait mark of the four, and the mark alone rather
+          // than a lockup, so height is the axis it is read on.
+          heightClass: "h-10 sm:h-12",
+        },
+        {
+          name: "434 Media",
+          href: "https://www.434media.com/",
+          logo: "/activations/tvf/434-media.png",
+          // The file as they publish it, drawn white by CSS rather than by a
+          // second copy of the artwork. It is a single near-black ink on
+          // transparency — mean luminance 6 — so on this ground it renders as
+          // nothing at all, and `brightness-0 invert` flips every opaque pixel
+          // to white with the alpha untouched. Lossless here in the way it is
+          // not for a two-tone mark: there is only one colour to lose.
+          white: true,
+          // Two lines of heavy type, so it carries at a lower step than its
+          // 2.2:1 ratio suggests — matched to Emerge and Rise it would be the
+          // loudest thing in the wall.
+          heightClass: "h-7 sm:h-8",
+        },
+      ],
+      // The terms, and the one fact about this event that nothing else on the
+      // site carries: it is a statewide franchise, not a one-off. The two
+      // belong in one line because they say the same thing from two sides —
+      // this is their programme, and we are one stop on it.
+      access:
+        "Free, and seated on Texas Venture Fest\u2019s own Luma rather than the week\u2019s list \u2014 one of more than fifteen running in Texas cities the same week.",
     },
   },
   {

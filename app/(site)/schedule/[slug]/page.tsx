@@ -563,11 +563,26 @@ function ActivationPage({
           >
             {/* Two columns only when there is a talk to put in the second one.
                 Without it the copy keeps its own `max-w-3xl` and the hero is
-                unchanged for every other activation. */}
+                unchanged for every other activation.
+
+                Two sets of column widths, because the two things that can sit
+                in that second column want opposite treatment. `HeroTalk` is a
+                card of type — a time, a title and the people — and 24rem is a
+                measure chosen for reading. A mark is one object, and at 24rem
+                it was small enough on a 13-inch screen to read as a logo
+                parked in the corner rather than as half the composition.
+
+                `items-center` for the same reason. Against `items-start` the
+                mark hangs off the top of a column the copy fills to the
+                bottom, which is what makes it look parked; centred, it sits
+                with the block it belongs to. The talk bill keeps `items-start`
+                — that one is a card with its own top edge to align. */}
             <div
               className={cn(
-                (heroTalks.length > 0 || session.heroMark) &&
-                  "grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start lg:gap-14 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]",
+                heroTalks.length > 0
+                  ? "grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start lg:gap-14 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]"
+                  : session.heroMark &&
+                      "grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-center lg:gap-14 xl:grid-cols-[minmax(0,1fr)_minmax(0,32rem)]",
               )}
             >
               <div className="max-w-3xl">
@@ -763,13 +778,33 @@ function ActivationPage({
                         hosts are part of what the reader is deciding on — who
                         is running this — so they belong on the way to the CTA
                         rather than trailing it. Also keeps the buttons as the
-                        last thing before the fold. */}
-                    {isHeroOnly && session.detail?.poweredBy && (
-                      <PoweredBy
-                        orgs={session.detail.poweredBy}
-                        className="mt-7"
-                      />
-                    )}
+                        last thing before the fold.
+
+                        Unless there is a mark in the second column, in which
+                        case nothing is drawn here at all and the wall lives
+                        under that mark instead — which means it is drawn from
+                        `lg` up only, because that column does not exist below
+                        it.
+
+                        So an activation with a `heroMark` credits its
+                        partners on laptops and monitors and not on phones.
+                        That is a deliberate call rather than a gap: Texas
+                        Venture Fest carries eight of them, which wrap to
+                        three rows on a phone, and three rows of marks is a
+                        screenful of other people's logos between a reader and
+                        the thing they came to do. The names are all on the
+                        organiser's own page, one tap away under `Run by`.
+
+                        College Night has no `heroMark`, so its two marks stay
+                        exactly here at every width. */}
+                    {isHeroOnly &&
+                      session.detail?.poweredBy &&
+                      !session.heroMark && (
+                        <PoweredBy
+                          orgs={session.detail.poweredBy}
+                          className="mt-7"
+                        />
+                      )}
 
                     {/* Full width below sm — see the note on the banded row. */}
                     <div
@@ -911,7 +946,11 @@ function ActivationPage({
                   From `lg` up only — see `heroMark` in lib/schedule. */}
               {session.heroMark && (
                 <div className="hidden lg:flex lg:justify-end">
-                  <div className="w-full max-w-sm">
+                  {/* No `max-w-sm` here any more. It capped the mark at 384px
+                      inside a column that is now 512px at `xl`, so the column
+                      widths above would have had no effect at all. The column
+                      is the cap. */}
+                  <div className="w-full">
                     <Image
                       src={session.heroMark.src}
                       alt={session.heroMark.alt}
@@ -920,6 +959,32 @@ function ActivationPage({
                       priority
                       className="h-auto w-full"
                     />
+                    {/* The partners under the mark, not beside the copy — see
+                        the note above the buttons, which is where this would
+                        otherwise be drawn. Only when there is a mark to sit
+                        under, and inside that column's `hidden lg:flex` — so
+                        this is the wall's only copy, and it is a laptops-and-
+                        monitors surface by construction. */}
+                    {isHeroOnly && session.detail?.poweredBy && (
+                      <PoweredBy
+                        orgs={session.detail.poweredBy}
+                        // No width of its own: the column is the measure. A
+                        // 22rem cap lived here while there were six marks,
+                        // because at the full width they packed four onto the
+                        // first row and left the second trailing with half the
+                        // column empty. The seventh partner made that cap the
+                        // problem rather than the fix — it pushed the split to
+                        // three, three and one, and a mark alone on a third
+                        // row is worse than an uneven second one.
+                        //
+                        // Uncapped, seven wrap four and three at `xl` and
+                        // three and four at `lg`. Both are even enough, and
+                        // neither is a number written down anywhere: they fall
+                        // out of the column. An eighth partner is worth
+                        // re-measuring, not worth a constant.
+                        className="mt-10 border-t border-white/10 pt-8"
+                      />
+                    )}
                   </div>
                 </div>
               )}
