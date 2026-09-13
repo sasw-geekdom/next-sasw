@@ -184,16 +184,39 @@ export async function featuredLineup(): Promise<FeaturedEntry[]> {
     });
   }
 
-  // Announced before it exists: a name, who it is with, and now when and
-  // where. Still no arrow — an arrow promises somewhere to go, and there is no
-  // session behind this yet. The day and room are stated here rather than read
-  // off a record for the same reason; when the session lands, this entry
-  // becomes a `talk` lookup like the first one and the line comes from the CMS.
+  // The session landed, so this is the `talk` lookup the announcement always
+  // said it would become: the day and the room come off the record now, and
+  // the row has an arrow because there is finally somewhere to go.
+  //
+  // What does not come off the record is the title. The other talk row above
+  // is billed by its subject because the subject is a company with a mark;
+  // this one was picked as a person — her name and who she is here with are
+  // the draw, and "The Founder's Guide to the Modern AI Landscape" is the
+  // talk, not the billing. The link carries the reader to it either way.
+  const vibha = talks.find(
+    (x) => x.row.slug === "the-founders-guide-to-the-modern-ai-landscape",
+  );
   out.push({
-    day: "2026-10-01",
+    day: vibha ? dayOf(vibha.row.startsAt) : "2026-10-01",
     entry: {
       key: "vibha-kurpad",
-      meta: "Thu, Oct 1 · Texas Public Radio",
+      // Falls back to the line this row carried while it was an
+      // announcement. A slug that changes should cost the row its link, not
+      // the row — the name and the credit are curated and are not recoverable
+      // from the CMS.
+      meta: vibha
+        ? [
+            new Date(vibha.row.startsAt).toLocaleDateString("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+              timeZone: "America/Chicago",
+            }),
+            vibha.room?.name,
+          ]
+            .filter(Boolean)
+            .join(" · ")
+        : "Thu, Oct 1 · Texas Public Radio",
       title: [{ text: "Vibha Kurpad" }],
       credit: google
         ? [
@@ -206,6 +229,7 @@ export async function featuredLineup(): Promise<FeaturedEntry[]> {
             },
           ]
         : [{ text: "with Google for Startups" }],
+      href: vibha ? `/schedule/talk/${vibha.row.slug}` : undefined,
     },
   });
 
