@@ -1556,30 +1556,30 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // event. "venturelab" on a card in the week grid says which organisation
     // and not which day.
     //
-    // Reconstructed rather than supplied, and that is worth knowing before
-    // anyone reuses this file. VentureLab publishes no IGNITE lockup — not on
-    // venturelab.org, not on /ignite, not on the Eventbrite listing — so this
-    // is traced out of their Eventbrite photograph, where the lockup is
-    // projected on a screen behind the finalists. The purple was removed by
-    // estimating the ground locally with a heavy blur and taking each pixel's
-    // distance from it, which is what survives the lighting seam across the
-    // top of the slide. The keyed value is then thresholded with a narrow
-    // soft band rather than used as alpha directly, which matters more than
-    // it sounds: the first cut let interior brightness become transparency,
-    // and since a projector does not light a screen evenly, the letterforms
-    // and the rocket came out mottled like brushed metal. The lockup is flat
-    // white. Only the edge band carries partial alpha now; everything inside
-    // it is opaque.
+    // Their own artwork, lifted out of the co-branded flyer VentureLab sent
+    // for this day ("VentureLab IGNITE at SASTW 2026"). It is embedded there
+    // as a raster with a real soft mask, so what comes out is the lockup
+    // itself: flat white, true letterforms, correct alpha.
     //
-    // What that cannot fix is the contour. Thresholding photo noise leaves
-    // the edges very slightly organic where the original letterforms are
-    // geometric — invisible at the ~150px the calendar draws, faintly visible
-    // at the 512px the hero does. This is a stand-in, not artwork: ask
-    // VentureLab for the real file and replace it.
+    // This replaces a trace. VentureLab publishes no IGNITE lockup anywhere
+    // public — not venturelab.org, not /ignite, not the Eventbrite listing —
+    // and the plain `venturelab` mark on the partner wall drops the word that
+    // names the event, the same trap Latin Tech Pitch rejected the "LatinTECH"
+    // cut for. So this was first keyed out of a photograph of the lockup
+    // projected on a screen behind the finalists, which looked like a logo
+    // and was not one: a projector does not light a screen evenly, so the
+    // letterforms came out mottled and their contours were noise rather than
+    // geometry. The flyer ended that. Prefer a file the partner sent.
+    //
+    // Upscaled 3x from the 400x138 the PDF carries, which is under the 512
+    // the hero draws it at. Safe to do here and not in general: the mark is a
+    // flat silhouette, so the alpha ramp is purely its edge, and re-crisping
+    // that ramp around its midpoint after a Lanczos resize recovers the edge
+    // without inventing any detail. Replace this if a vector ever arrives.
     logo: {
       src: "/activations/venturelab-ignite.png",
-      width: 1200,
-      height: 399,
+      width: 1198,
+      height: 407,
       alt: "VentureLab IGNITE",
     },
     detail: {
@@ -1593,7 +1593,11 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       programme: [
         {
           time: "9 – 10 AM",
-          title: "Introduction and inspirational speaker",
+          // "Keynote", which is how their own flyer bills it — the Eventbrite
+          // listing calls the same hour an introduction with an inspirational
+          // speaker, and a keynote is the larger claim of the two. Theirs to
+          // make, and the flyer is the later document.
+          title: "Keynote and welcome speaker",
           body: "The day opens by welcoming the IGNITE student founders and asking what becomes possible when young people are handed the tools, the relationships and the confidence to turn an idea into action.",
         },
         {
@@ -1615,7 +1619,11 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         {
           time: "2 – 4 PM",
           title: "IGNITE Final Pitch Event",
-          body: "The finalists take the stage in front of a live audience and a panel: the problem they found, the solution they built, the feedback they took, and why it matters. The end of the day and the point of it.",
+          // The prizes are on the flyer and not on the Eventbrite listing,
+          // and they are a fact a reader deciding whether to come would want:
+          // the 2025 edition put $1,000 and $500 on the screen behind the
+          // finalists in the photograph VentureLab supplied.
+          body: "The finalists take the stage in front of a live audience and a panel, competing for prizes: the problem they found, the solution they built, the feedback they took, and why it matters. The end of the day and the point of it.",
           feature: true,
         },
       ],
