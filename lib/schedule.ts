@@ -896,6 +896,107 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       alt: "",
     },
   },
+  /**
+   * The week's earliest start, and the only thing on the main stage before
+   * the talks begin — Capital Factory's coffee series, brought to Texas
+   * Public Radio with Geekdom's own Open Coffee Club.
+   */
+  {
+    slug: "cup-of-capital",
+    page: "cup-of-capital",
+    heroOnly: true,
+    // Their Luma bills it "Cup of Capital with Geekdom's SATX Open Coffee
+    // Club and San Antonio Startup Week", which names the week as a third
+    // party to itself — true on their site, redundant on ours. This keeps the
+    // two things a reader is choosing between.
+    //
+    // Joined with a plus and not an x. The title sets in uppercase Oswald, so
+    // a lowercase x arrives as a capital X and reads as a letter stranded
+    // inside a word rather than as a mark between two names. The plus is the
+    // week's own conjunction — "SA STARTUP + TECH WEEK" is in the nav a few
+    // pixels above this headline — so it already means "these two together"
+    // everywhere else on the site.
+    title: "Cup of Capital + SATX Open Coffee Club",
+    // 38 characters, and a calendar lane is 100–300px wide. The half that
+    // identifies it is the first one: the coffee club runs monthly all year,
+    // and what makes this one the week's is Capital Factory in the room.
+    shortTitle: "Cup of Capital",
+    site: {
+      label: "capitalfactory.com",
+      href: "https://www.capitalfactory.com",
+    },
+    room: "tpr",
+    // Capital, and not only because of the name. The draw is who is in the
+    // room — their copy says entrepreneurs *and investors* — which is the
+    // same reason the two pitch nights on this stage carry it. Founder is the
+    // other read and it is the audience, not the offer.
+    circuit: "Capital",
+    blurb:
+      "Capital Factory’s coffee morning, with Geekdom’s SATX Open Coffee Club — founders and investors in one room before the week’s first talk.",
+    when: {
+      start: "2026-09-29T08:00:00-05:00",
+      end: "2026-09-29T09:30:00-05:00",
+    },
+    // Capital Factory holds the count on their own Luma, and it is approval-
+    // gated rather than instant — so "Request a seat." rather than the "Save
+    // a seat." the other four use. Same distinction Alamo Angels draws: an
+    // RSVP that hands you a seat saves one, a room someone reviews you for
+    // requests one.
+    register: {
+      label: "Request a seat.",
+      href: "https://luma.com/ihg5q4ei",
+    },
+    detail: {
+      // No headline. It would draw as a deck directly under a 33-character
+      // title in the same face and case, which is a second display line
+      // arguing with a first that already needs two lines of its own — see
+      // the note on `headline`, and Texas Venture Fest, which cut one for the
+      // same reason with a much shorter title than this.
+      eyebrow: "The morning",
+      lede: [
+        "Capital Factory’s most popular public coffee series, co-hosted here with Geekdom’s SATX Open Coffee Club. Ninety minutes on the main stage before the first talk of the day.",
+      ],
+      // The two co-hosts and then the sponsor. Capital Factory leads because
+      // the series is theirs — "Cup of Capital" is their event, brought here
+      // with Geekdom's coffee club, which is the order their own Luma states
+      // it in. Neither Capital
+      // Factory nor Cherry Bekaert is in `partners` or `sponsors`, so both
+      // are their own published white cuts, vendored — capitalfactory.com's
+      // /brand directory and cbh.com's white logo asset. Geekdom is the file
+      // the other two walls use, in its own red: this surface already carries
+      // colour, so there is nothing for a knock-back to protect.
+      poweredBy: [
+        {
+          name: "Capital Factory",
+          href: "https://www.capitalfactory.com",
+          logo: "/activations/capital-factory.svg",
+          // 7.6:1, the widest mark on any wall here, so it takes the lowest
+          // step: at Geekdom's height it would draw 300px and read as the
+          // senior partner of a thing Geekdom co-hosts.
+          heightClass: "h-5 sm:h-6",
+        },
+        {
+          name: "Geekdom",
+          href: "https://geekdom.com",
+          logo: "/brand/geekdom.png",
+          heightClass: "h-10 sm:h-11",
+        },
+        {
+          name: "Cherry Bekaert",
+          href: "https://www.cbh.com/",
+          // The white cut they publish, so nothing has to be knocked back —
+          // pure #ffffff on transparent, which is what this ground wants.
+          logo: "/activations/cherry-bekaert.svg",
+          // 4:1, between the other two, but it carries "Your Guide Forward"
+          // in its lower third — so the wordmark itself is smaller than the
+          // box and it takes a step more than the ratio alone asks for.
+          heightClass: "h-7 sm:h-8",
+        },
+      ],
+      access:
+        "Free, and seated on Capital Factory’s own Luma rather than the week’s list — and approved rather than instant, so request the seat before the morning rather than on it.",
+    },
+  },
   {
     slug: "alamo-angels-venture-brunch",
     page: "alamo-angels-venture-brunch",
