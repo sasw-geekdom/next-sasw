@@ -1506,6 +1506,124 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         "Free, and seated on Texas Venture Fest\u2019s own Luma rather than the week\u2019s list \u2014 one of more than fifteen running in Texas cities the same week.",
     },
   },
+  /**
+   * VentureLab's day, and the only one on the week's grid whose founders are
+   * still in school.
+   *
+   * Launch SA rather than the library's own rooms, which is the same address:
+   * Launch SA is on the first floor of 600 Soledad St, inside Central Library,
+   * and this room already carries the library's name and Launch SA's host line
+   * for that reason. See lib/locations.ts.
+   */
+  {
+    slug: "venturelab-ignite",
+    page: "venturelab-ignite",
+    site: { label: "venturelab.org", href: "https://venturelab.org/" },
+    // Their Eventbrite bills it "VentureLab IGNITE: San Antonio's Next
+    // Generation of Founders". The clause after the colon is a description
+    // rather than a name, and at 58 characters it would not survive a lane or
+    // a chip; it is the headline below instead, in the words they wrote.
+    title: "VentureLab IGNITE",
+    room: "central-library",
+    venueDetail: "Launch SA, 1st Floor",
+    // Founder, and the youngest room on the grid rather than a sixth circuit.
+    // Small Business & Solopreneur is what this address usually runs and is
+    // the wrong read: these are students with ideas, not owners with books.
+    circuit: "Founder",
+    // Their own one-line summary, kept nearly whole — it is four verbs in the
+    // order the day runs them, which is a better description of seven hours
+    // than any sentence about young people could be.
+    blurb:
+      "Young founders learn, build, showcase and pitch — VentureLab’s day for the ones who are still in school.",
+    when: {
+      start: "2026-10-01T09:00:00-05:00",
+      end: "2026-10-01T16:00:00-05:00",
+    },
+    // Their Eventbrite, which is where the count is held. Confirmed free
+    // there, and confirmed 9–4 at Launch SA, 600 Soledad St.
+    register: {
+      label: "Save a seat.",
+      href: "https://www.eventbrite.com/e/2000262048633",
+    },
+    // The IGNITE lockup, so the week grid and the agenda draw this activation
+    // as a mark rather than as type. `logo` is the field both read — the
+    // calendar through `brandFor`, the bento through `logoSrc` — and
+    // `logoFromPartner` is not, since the bento moved to the venue pages.
+    //
+    // Not the VentureLab mark on the partner wall, which would have been the
+    // easy answer and is the wrong one for the same reason Latin Tech Pitch
+    // rejected the plain "LatinTECH" cut: it drops the word that names the
+    // event. "venturelab" on a card in the week grid says which organisation
+    // and not which day.
+    //
+    // Reconstructed rather than supplied, and that is worth knowing before
+    // anyone reuses this file. VentureLab publishes no IGNITE lockup — not on
+    // venturelab.org, not on /ignite, not on the Eventbrite listing — so this
+    // is traced out of their Eventbrite photograph, where the lockup is
+    // projected on a screen behind the finalists. The purple was removed by
+    // estimating the ground locally with a heavy blur and taking each pixel's
+    // distance from it, which is what survives the lighting seam across the
+    // top of the slide. The keyed value is then thresholded with a narrow
+    // soft band rather than used as alpha directly, which matters more than
+    // it sounds: the first cut let interior brightness become transparency,
+    // and since a projector does not light a screen evenly, the letterforms
+    // and the rocket came out mottled like brushed metal. The lockup is flat
+    // white. Only the edge band carries partial alpha now; everything inside
+    // it is opaque.
+    //
+    // What that cannot fix is the contour. Thresholding photo noise leaves
+    // the edges very slightly organic where the original letterforms are
+    // geometric — invisible at the ~150px the calendar draws, faintly visible
+    // at the 512px the hero does. This is a stand-in, not artwork: ask
+    // VentureLab for the real file and replace it.
+    logo: {
+      src: "/activations/venturelab-ignite.png",
+      width: 1200,
+      height: 399,
+      alt: "VentureLab IGNITE",
+    },
+    detail: {
+      eyebrow: "The day",
+      // Theirs, verbatim, and the best line on the listing.
+      headline: "San Antonio’s next great founder may still be in school.",
+      lede: [
+        "VentureLab gives the day to young people with ideas worth hearing. It is free and it is open to everyone from nine in the morning — you do not have to be an IGNITE finalist, a student, an educator or a mentor to walk in.",
+        "More than a pitch event, in their own framing: a chance to see the work behind the pitch — the research, the prototyping, the feedback taken, and the nerve it takes to stand up.",
+      ],
+      programme: [
+        {
+          time: "9 – 10 AM",
+          title: "Introduction and inspirational speaker",
+          body: "The day opens by welcoming the IGNITE student founders and asking what becomes possible when young people are handed the tools, the relationships and the confidence to turn an idea into action.",
+        },
+        {
+          time: "10 – 11 AM",
+          title: "Mentor round table",
+          body: "Students sit with entrepreneurs, professionals and community leaders. The brief for the mentors is not to hand over answers: it is to question assumptions, press on how an idea is explained, offer another angle, and help each student name their next experiment.",
+        },
+        {
+          time: "11 AM – 12 PM",
+          title: "Entrepreneurship mini workshops",
+          body: "Short, practical sessions — customer discovery, creative problem-solving, value propositions, prototyping, storytelling and pitching — built so that what students hear in the room is something they can use in it.",
+        },
+        {
+          time: "1 – 2 PM",
+          title: "Student tabling and showcase",
+          body: "The young founders at their own tables with their concepts, prototypes and business ideas, taking questions. Come with real ones, and with feedback worth having. If you cannot give the day seven hours, this is where to arrive.",
+          feature: true,
+        },
+        {
+          time: "2 – 4 PM",
+          title: "IGNITE Final Pitch Event",
+          body: "The finalists take the stage in front of a live audience and a panel: the problem they found, the solution they built, the feedback they took, and why it matters. The end of the day and the point of it.",
+          feature: true,
+        },
+      ],
+      coda: "Entrepreneur, educator, student, parent, mentor, investor or none of those — the invitation is the same, and so is the price. Come for one session or stay for all of it; the showcase at one o’clock and the final at two are the natural arrival points for anyone who cannot make the morning.",
+      access:
+        "Free, and seated on VentureLab’s own Eventbrite rather than the week’s list — theirs is the page holding the count, and they ask you to register in advance because some rooms have one.",
+    },
+  },
   {
     slug: "startup-bash",
     page: "startup-bash",
