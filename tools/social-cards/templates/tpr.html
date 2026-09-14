@@ -86,7 +86,7 @@
         filter: grayscale(1) contrast(1.06);
         position: absolute;
         left: {{portraitLeft}}px;
-        bottom: 0;
+        bottom: {{portraitBottom}}px;
         height: {{portraitHeight}}px;
         width: auto;
       }
@@ -293,6 +293,12 @@
 
       .facts {
         margin-top: 30px;
+      }
+      /* With no name and role above them the facts are the first thing in the
+         bottom group, and a 30px top margin is measured against type that is
+         not there. */
+      .facts.lead {
+        margin-top: 0;
         display: flex;
         flex-direction: column;
         gap: 11px;
@@ -364,12 +370,22 @@
 
       <div class="spacer"></div>
 
-      <!-- The break and the second line are conditional: Wolfy goes by one
-           name, and the unconditional <br /> left an empty 61px line under it.
-           The block below the spacer is bottom-anchored as a group, so that
-           did not show up as a gap under his name — it lifted the whole group,
-           his name included, off the baseline every other card sits on. The
-           other four templates still carry the unconditional version. -->
+      <!-- The whole block is conditional, because this stage takes event
+           cards as well as speaker ones. A card with no speaker puts the
+           event's artwork in the figure slot (`art` in render.mjs) and has
+           nothing for a name, a role or an org — and `.role` is the one of
+           the three with no guard of its own, so it drew an empty magenta
+           line with 16px of margin above it and the facts sat lower than they
+           do on every other card on this stage.
+
+           The break and the second line are conditional for their own reason:
+           Wolfy goes by one name, and the unconditional <br /> left an empty
+           61px line under it. The block below the spacer is bottom-anchored as
+           a group, so that did not show up as a gap under his name — it lifted
+           the whole group, his name included, off the baseline every other
+           card sits on. The other four templates still carry the
+           unconditional version. -->
+      <!--if:first-->
       <div class="name">
         {{first}}<!--if:last--><br />{{last}}<!--/if:last-->
       </div>
@@ -377,8 +393,9 @@
       <!--if:org-->
       <div class="org">{{org}}</div>
       <!--/if:org-->
+      <!--/if:first-->
 
-      <div class="facts">
+      <div class="facts<!--ifnot:first--> lead<!--/ifnot:first-->">
         <!-- Venue and street, the way the other templates give venue and
              floor. Times at TPR are not set yet; when they are they belong
              here as the card's own facts (see `card.facts` in render.mjs),

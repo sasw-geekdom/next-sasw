@@ -566,6 +566,11 @@ async function main() {
       org: card.org ?? a?.org ?? "",
       portraitHeight: card.portrait?.height,
       portraitLeft: card.portrait?.left,
+      // Lifts the figure off the bottom edge. 0 for every portrait — a person
+      // is cropped at the frame and bleeding off it is the point — and set
+      // only by an `art` card, where the figure is a logo. A lockup sitting
+      // flush on the card's edge reads as artwork that did not fit.
+      portraitBottom: card.portrait?.bottom ?? 0,
 
       ...(b
         ? {

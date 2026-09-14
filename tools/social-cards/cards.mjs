@@ -1151,6 +1151,62 @@ export const CARDS = [
     subtitle: "Three technologies, one patent question.",
   },
 
+  /**
+   * The one card on this stage with no speaker on it.
+   *
+   * Texas Venture Fest is an event at Texas Public Radio rather than a talk
+   * given there, and none of its people — two co-hosts and an MC — are in the
+   * CMS, so there is no headshot to resolve and no name for the block above
+   * the facts. What goes in the figure slot instead is the event's own
+   * lockup, through `art`, the same way Access Granted uses its padlock and
+   * The Model its key art.
+   *
+   * It stays on this template rather than moving to `panel.html`, which is
+   * where the Cyber, AI & Robotics panel went for the same reason. The
+   * difference is the room: that panel is in a popup venue and this is on the
+   * main stage, and the five-charge ramp is the thing that says so. A card
+   * for this stage without it would be a card that could be anywhere.
+   *
+   * Greyscaled like every portrait here, and it costs one colour: the tan
+   * "10/1/26" baked into their artwork. That is the template's own argument
+   * rather than an oversight — the bolt runs at 0.62 on this card precisely
+   * because it is the only colour on it, and a second one in the figure half
+   * is the thing greyscale exists to prevent. The boot is grey and the
+   * wordmark white already, so the date is all that changes.
+   */
+  {
+    id: "texas-venture-fest",
+    event: "tpr",
+    art: "public/activations/texas-venture-fest.png",
+    // Their lockup carries "TEXAS VENTURE FEST" in the figure half, so the
+    // headline saying it again would be the card's two largest things
+    // agreeing with each other. It takes the promise instead — their own
+    // framing, the half that is not in the name.
+    headline: "The Deals<br />That Don\u2019t Make<br />Headlines",
+    headlineSize: 92,
+    subtitle:
+      "And an honest look at where the ecosystem still has work to do.",
+    // Founder, as on the activation — this is firesides and panels about the
+    // people building here, not a room where capital is deployed.
+    circuit: "Founder",
+    // Overrides the event's venue-and-street pair. That default exists
+    // because the speakers on this stage sit across different days and the
+    // day cannot come from the event; this card is one event with one slot,
+    // so it states it, and the room rides along on the second line.
+    facts: ["Thursday, October 1", "3 \u2013 6 PM  \u00b7  Texas Public Radio"],
+    // Landscape where every other figure here is a person: 1.39:1 against a
+    // portrait's 0.7, so the height that draws a head draws a lockup 776px
+    // wide and 216px of it falls off the card. Height here is chosen from the
+    // width instead — 375 draws 519, which clears the right edge by 41px.
+    //
+    // `bottom` exists for this card. Every portrait on this stage sits at 0
+    // and bleeds off the frame, which is what a crop of a person should do; a
+    // lockup flush on the edge reads as artwork that did not fit. 210 also
+    // keeps it clear of the facts, which run to x=500 along the bottom, and
+    // off the bolt, whose mass ends around x=490.
+    portrait: { height: 375, left: 520, bottom: 210 },
+  },
+
   {
     id: "tpr-speaker-patrick-robinson",
     event: "tpr",
