@@ -321,7 +321,15 @@ export default async function TalkPage({
                       href={`/schedule/${room.slug}`}
                       className="underline-offset-4 transition-colors duration-300 hover:text-white focus-visible:text-white focus-visible:outline-none"
                     >
-                      {room.name}
+                      {/* With the floor, where the room has one. An
+                          activation states this through `venueDetail`; a CMS
+                          talk has no equivalent field, so these pages were
+                          the one place on the site that named The Rand as a
+                          destination without saying which of its eleven
+                          storeys to go to. See `place.floor`. */}
+                      {room.place?.floor
+                        ? `${room.name}, ${room.place.floor}`
+                        : room.name}
                     </Link>
                   </dd>
                 </div>

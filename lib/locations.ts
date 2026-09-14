@@ -21,6 +21,20 @@ import type { TrackName } from "@/lib/tracks";
 export interface RoomPlace {
   address?: string;
   /**
+   * The floor the week is on, where the street address is not enough to find
+   * the room.
+   *
+   * Set only where a reader arriving at the address would otherwise be stood
+   * in a lobby. The Rand is eleven storeys and the week is on one of them;
+   * every activation there already says so through `venueDetail`, but a CMS
+   * talk has no such field and was printing "The Rand" alone — which is the
+   * gap the organisers reported.
+   *
+   * A default, not an override. An activation's own `venueDetail` still wins
+   * where it is set, because it can be more specific than a floor number.
+   */
+  floor?: string;
+  /**
    * Only where it's been confirmed. Every one of these is almost certainly
    * 78205 — they are all within a few downtown blocks — but "almost certainly"
    * is not a fact to publish in structured data, so this is set for the one
@@ -148,6 +162,7 @@ export const ROOMS: Room[] = [
     name: "The Rand",
     place: {
       address: "110 E Houston St",
+      floor: "3rd Floor",
       coords: { lat: 29.426244, lon: -98.4935 },
     },
     host: "Geekdom · DEVSA Community",
@@ -168,7 +183,12 @@ export const ROOMS: Room[] = [
     // engineer will recognise. It is also the busiest room of the week —
     // four sessions on Tuesday, four on Thursday — which is the single most
     // useful thing this card can say about it.
-    desc: "The community floor, and the busiest room of the week. .NET and Google Developer Groups, AITX and Datanauts, AWS and Linux San Antonio run back to back — the groups DEVSA hosts all year, in one place for five days.",
+    // Opens on the floor number now, at the organisers' request: people were
+    // arriving at 110 E Houston and finding a lobby. It said "The community
+    // floor", which named the right idea and the wrong fact — and the
+    // community half is not lost, because the sentence after it names six of
+    // the groups, which was always the part doing that work.
+    desc: "Geekdom's third floor, and the busiest room of the week. .NET and Google Developer Groups, AITX and Datanauts, AWS and Linux San Antonio run back to back — the groups DEVSA hosts all year, in one place for five days.",
     tag: "Tech & Builders",
     port: "p2",
     tier: "day",

@@ -1368,8 +1368,26 @@ export default async function VenueSchedulePage({
                 </span>
               </div>
               <p className="mt-4 text-pretty text-white/60">{room.desc}</p>
+              {/* The street, and the floor where the room has one.
+
+                  This said "Sept 28 – Oct 2 · San Antonio" for every venue,
+                  which is two facts a reader of a San Antonio schedule
+                  already has. A venue's own page is the last surface before
+                  someone sets off, and it was the one place on the site that
+                  named a room without saying how to reach it — the organisers
+                  reported people arriving at 110 E Houston and finding a
+                  lobby.
+
+                  Falls back to the city where there is no address to print.
+                  Trinity is the case: it is a campus rather than a door, and
+                  the activation there carries its own directions. */}
               <p className="mt-auto pt-6 font-mono text-[11px] uppercase tracking-widest text-white/55">
-                Sept 28 – Oct 2 · San Antonio
+                Sept 28 – Oct 2 ·{" "}
+                {room.place?.address
+                  ? [room.place.address, room.place.floor]
+                      .filter(Boolean)
+                      .join(", ")
+                  : "San Antonio"}
               </p>
             </div>
           </div>
