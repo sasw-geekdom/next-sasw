@@ -4,6 +4,7 @@ import { liveSchedule } from "@/lib/live-schedule";
 import { TRACK_NAMES } from "@/lib/tracks";
 import { WeekCalendarGrid } from "@/components/site/week-calendar-grid";
 import type { Option } from "@/components/site/calendar/controls";
+import { CalendarFallbackList } from "@/components/site/calendar/fallback-list";
 
 // The week on an hour axis — five columns, Monday to Friday.
 //
@@ -99,6 +100,18 @@ export async function WeekCalendar() {
             fallback is the grid's own height so the page doesn't jump when it
             lands; there is nothing useful to show in the meantime, since what
             to show is exactly what the query string decides. */}
+        {/* Before the grid — see the note on the day view's copy of this.
+            Outside the Suspense boundary as well as above it: this depends on
+            nothing the query string decides, so it belongs in the first byte
+            rather than behind a boundary that exists only because
+            `useSearchParams` cannot prerender. */}
+        <CalendarFallbackList
+          items={items}
+          spans={spans}
+          byDay
+          heading="The week, day by day"
+        />
+
         <Suspense fallback={<div className="mt-10 h-[42rem]" />}>
           <WeekCalendarGrid
             days={days}
@@ -109,6 +122,7 @@ export async function WeekCalendar() {
             venues={venues}
           />
         </Suspense>
+
       </div>
     </section>
   );

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { BackLink } from "@/components/site/back-link";
 import { DayCalendarGrid } from "@/components/site/day-calendar-grid";
+import { CalendarFallbackList } from "@/components/site/calendar/fallback-list";
 import type { Option } from "@/components/site/calendar/controls";
 import { EVENT_DAYS } from "@/lib/event";
 import {
@@ -182,6 +183,18 @@ export default async function ScheduleDayPage({
           </div>
         </div>
 
+        {/* Before the grid, not after it. Only a reader with JavaScript off
+            ever sees this, and for them the Suspense fallback below is 42rem
+            of reserved space for a grid that is never going to arrive — so
+            putting the list second buried the day's actual contents under an
+            empty screen. It costs nothing to anyone else: the boundary is
+            invisible either way. */}
+        <CalendarFallbackList
+          items={items}
+          spans={spans}
+          heading={`${day.weekday}, ${day.label}`}
+        />
+
         <Suspense fallback={<div className="mt-10 h-[42rem]" />}>
           <DayCalendarGrid
             activeDay={iso}
@@ -192,6 +205,7 @@ export default async function ScheduleDayPage({
             circuits={circuits}
           />
         </Suspense>
+
       </div>
     </main>
   );
