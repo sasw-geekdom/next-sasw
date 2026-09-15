@@ -6,7 +6,16 @@ import { BackLink } from "@/components/site/back-link";
 import { DayCalendarGrid } from "@/components/site/day-calendar-grid";
 import type { Option } from "@/components/site/calendar/controls";
 import { EVENT_DAYS } from "@/lib/event";
-import { dayCalendar } from "@/lib/schedule";
+import {
+  allSessions,
+  ASSUMED_MINUTES,
+  dayCalendar,
+  eventIso,
+  resolveSessions,
+} from "@/lib/schedule";
+import { listTalks } from "@/lib/talks";
+import { localDayKey } from "@/lib/event";
+import { dayGraph, jsonLd } from "@/lib/structured-data";
 import { liveSchedule } from "@/lib/live-schedule";
 import { TRACK_NAMES } from "@/lib/tracks";
 
@@ -66,6 +75,36 @@ export default async function ScheduleDayPage({
   if (!data) notFound();
 
   const { day, venues, items, spans, axis, index } = data;
+
+  /**
+   * This day's events, as structured data.
+   *
+   * These five pages published none, which matters more here than it would on
+   * a prose page: the calendar below is a client component, so the day's
+   * contents reach a crawler only through the RSC payload. /schedule has the
+   * same client-rendered grid and did not have the same problem, because
+   * `scheduleGraph` describes the whole week in JSON-LD beside it. This is
+   * that, narrowed to one day.
+   *
+   * Filtered on the day's own ISO rather than on `items`, because `items` is
+   * the calendar's shape — it carries lane geometry, not the fields an Event
+   * node needs — and both sources already know which day they fall on.
+   */
+  const dayOf = (iso: string) => iso.slice(0, 10);
+  const daySessions = resolveSessions(allSessions()).filter(
+    (s) => s.when && dayOf(s.when.start) === iso,
+  );
+  const dayTalks = (await listTalks())
+    .filter((t) => localDayKey(t.row.startsAt) === iso)
+    .map((t) => ({
+      slug: t.row.slug,
+      title: t.row.title,
+      description: t.row.description,
+      startIso: eventIso(t.row.startsAt),
+      endIso: eventIso(t.row.endsAt ?? t.row.startsAt + ASSUMED_MINUTES * 60_000),
+      room: t.room,
+      people: t.row.participants.map((p) => ({ name: p.name, slug: p.slug })),
+    }));
   // Only the circuits this day actually runs. A chip with nothing behind it is
   // a control whose only outcome is an empty grid.
   const present = new Set([
@@ -79,6 +118,14 @@ export default async function ScheduleDayPage({
 
   return (
     <main className="bg-black">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLd(
+            dayGraph(iso, day.weekday, daySessions, dayTalks),
+          ),
+        }}
+      />
       {/* Wider than the site's max-w-7xl from 2xl. Every other section holds a
             reading measure, and should — but a calendar is a data grid, not
             prose, and on a 2560px display the 1280px one stranded the whole

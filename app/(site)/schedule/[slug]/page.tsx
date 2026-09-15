@@ -45,7 +45,7 @@ import { liveCalendarItems } from "@/lib/live-schedule";
 import { EVENT_DAYS } from "@/lib/event";
 import { PYSA } from "@/lib/pysa";
 import { BackLink } from "@/components/site/back-link";
-import { activationEvent, jsonLd } from "@/lib/structured-data";
+import { activationEvent, jsonLd, venuePlace } from "@/lib/structured-data";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
 import { PoweredBy } from "@/components/site/powered-by";
 import { PoweredByLine } from "@/components/site/powered-by-line";
@@ -1301,6 +1301,24 @@ export default async function VenueSchedulePage({
 
   return (
     <main>
+      {/* The venue as a Place. `place()` has always built this node for an
+          event's `location`; these six pages are where the venue is the
+          subject rather than a field, and they published nothing. The address
+          and the coordinates were in lib/locations the whole time and simply
+          never reached a crawler from here. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLd(
+            venuePlace({
+              name: room.name,
+              slug: room.slug,
+              desc: room.desc,
+              place: room.place,
+            }),
+          ),
+        }}
+      />
       {/* The venue's own masthead — the same portrait-and-panel grammar as
           room-flow's rows, so arriving here reads as stepping into the row you
           clicked rather than landing somewhere unrelated. */}

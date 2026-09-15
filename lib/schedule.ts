@@ -4070,8 +4070,11 @@ function activations(): Map<string, FeaturedSession> {
 export function venueRedirect(slug: string): string | null {
   const room = ROOMS.find((r) => r.slug === slug);
   if (!room || room.sessions.length > 1) return null;
-  const only = allSessions().find((s) => s.room === slug);
-  return only?.page ? `/schedule/${only.page}` : null;
+  // Held here, not merely pointing here — see `heldIn`.
+  const here = heldIn(slug);
+  return here.length === 1 && here[0].page
+    ? `/schedule/${here[0].page}`
+    : null;
 }
 
 /**
@@ -4122,8 +4125,30 @@ export const RETIRED_PAGES: Record<string, string> = {
   txlf: "linux-satx",
 };
 
+/**
+ * Activations genuinely held in one of the six rooms.
+ *
+ * `room` is a required field, so an activation held somewhere else still
+ * carries one — the note on `venuePopup` calls it "the nearest of the six" and
+ * says it is never looked up. Three places looked it up anyway, and it went
+ * unnoticed while every popup's fallback happened to point at a busy room.
+ *
+ * Alamo Angels' brunch exposed it: moved to the Merchant Ice Building, its
+ * fallback became `300-main`, which hosts exactly one real activation — so
+ * `/schedule/300-main` began redirecting to a brunch held three-quarters of a
+ * mile away, and 300 Main's own page would have listed it.
+ *
+ * Enforcing the invariant here rather than repeating the filter at each call
+ * site, so the next reader of `room` gets it right by default.
+ */
+function heldIn(slug: string): FeaturedSession[] {
+  return allSessions().filter((s) => !s.venuePopup && s.room === slug);
+}
+
 export function scheduleSlugs(): string[] {
-  const withSessions = new Set(allSessions().map((s) => s.room));
+  const withSessions = new Set(
+    allSessions().filter((s) => !s.venuePopup).map((s) => s.room),
+  );
   return [
     ...ROOMS.filter((r) => withSessions.has(r.slug)).map((r) => r.slug),
     ...activations().keys(),
@@ -4149,9 +4174,7 @@ export function resolveSchedule(slug: string): Schedule | null {
     // Anything without a confirmed slot sorts last rather than to the front,
     // which is where an empty string would have put it, and holds its relative
     // order behind the dated ones.
-    const sessions = resolveSessions(
-      allSessions().filter((s) => s.room === room.slug),
-    ).sort((a, b) => {
+    const sessions = resolveSessions(heldIn(room.slug)).sort((a, b) => {
       if (!a.when) return b.when ? 1 : 0;
       if (!b.when) return -1;
       return a.when.start.localeCompare(b.when.start);

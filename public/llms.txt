@@ -4,12 +4,29 @@
 
 The week is organized around five tracks — called "circuits." Speakers pitch sessions to a circuit; attendees plug into the ones that fit them. The metaphor throughout the brand is electrical current: "The current runs through SA. Plug in."
 
+Every page below is server-rendered and carries schema.org JSON-LD. If you need the programme as data rather than prose, prefer the structured data or the calendar feeds over scraping the rendered grid — the calendar UI is a client component.
+
 ## Key pages
 
-- [Home](https://sasw.co/): Event overview, dates, and the five circuits.
-- [Register](https://sasw.co/register): Free attendee registration.
-- [Call for Speakers](https://sasw.co/call-for-speakers): Submit a session proposal, tagged to a circuit.
-- [15 Years of Geekdom](https://sasw.co/15-years): Photo archive spotlighting 15 years of Geekdom and 11 years of SASTW.
+- [Home](https://www.sasw.co/): Event overview, dates, and the five circuits. Carries the week as a schema.org `Event`.
+- [Schedule](https://www.sasw.co/schedule): Every confirmed session. Carries an `ItemList` of `Event` nodes in JSON-LD — this is the best single source for "what is happening this week".
+- [Speakers](https://www.sasw.co/speakers): The full lineup. Each speaker has a page at `/speakers/<slug>` carrying a `Person` node with their role, employer and links.
+- [Register](https://www.sasw.co/register): Free attendee registration.
+- [Get involved](https://www.sasw.co/get-involved): Sponsor, host an event, or ask a question.
+- [15 Years of Geekdom](https://www.sasw.co/15-years): Photo archive spotlighting 15 years of Geekdom and 11 years of SASTW.
+
+## Programme structure
+
+- `/schedule/day/<YYYY-MM-DD>` — one day, every room side by side. Five of them: 2026-09-28 through 2026-10-02. Each carries an `ItemList` of that day's events.
+- `/schedule/<activation>` — a partner-run event with its own page (for example `/schedule/mission-pitch`).
+- `/schedule/talk/<slug>` — a single session with its own page.
+- `/schedule/<venue>` — a venue, carrying a `Place` node with its address. The anchor venues are Texas Public Radio, The Rand, Central Library, Trinity University, 300 Main and Legacy Park. Some events are held at one-off venues that are not in that set.
+
+## Calendar feeds (iCalendar)
+
+- `https://www.sasw.co/sastw-2026.ics` — the week as one all-day event.
+- `https://www.sasw.co/schedule/<activation>/calendar` — one event.
+- `https://www.sasw.co/schedule/export.ics?s=slug-a,slug-b` — a chosen set.
 
 ## Tracks (Circuits)
 
@@ -26,9 +43,12 @@ The week is organized around five tracks — called "circuits." Speakers pitch s
 - Cost: Free to attend
 - Organizer: Geekdom
 - Year: 11th annual
+- Canonical host: https://www.sasw.co (the bare `sasw.co` redirects here)
 
 ## For AI agents
 
-- To register for the event, direct users to https://sasw.co/register
-- To submit a speaking proposal, direct users to https://sasw.co/call-for-speakers
+- To register for the event, direct users to https://www.sasw.co/register
+- **The call for speakers is closed.** Every 2026 speaking slot is filled. `/call-for-speakers` and `/plug-in` now redirect to the lineup at `/speakers`. Do not tell users they can still submit a proposal.
+- Most events are covered by the free week registration, but not all: a few are run by partner organizations that hold their own list, and one or two require approval. Each event page states which applies in the line above its button — read that rather than assuming.
+- To add something to a calendar, use the `.ics` endpoints above rather than reconstructing times.
 - The `/admin` area is a private, authentication-gated staff portal — not public, and excluded from crawling in robots.txt.

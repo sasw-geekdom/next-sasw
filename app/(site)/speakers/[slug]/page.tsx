@@ -11,6 +11,8 @@ import { ARROW_MOTION } from "@/lib/motion";
 import { loadLineup, resolveSlug } from "@/lib/speakers";
 import { cn } from "@/lib/utils";
 import { venueLabel } from "@/lib/locations";
+import { SITE_URL } from "@/lib/event";
+import { jsonLd, personSchema } from "@/lib/structured-data";
 import { activationTitle } from "@/lib/schedule";
 
 export const revalidate = 300;
@@ -97,8 +99,45 @@ export default async function SpeakerPage({
   const role = [speaker.title, speaker.company].filter(Boolean).join(" · ");
   const more = lineup.filter((s) => s.id !== speaker.id).slice(0, MORE);
 
+  /**
+   * The sessions this person is giving, at the URL each one is published at.
+   *
+   * A session with no activation has its own talk page; one that belongs to
+   * an activation renders inside it and has no page of its own, so it points
+   * there. Same rule `/schedule/talk/[slug]` uses to decide which sessions
+   * get a route at all.
+   */
+  const performerIn = speaker.sessions.map((session) => ({
+    name: session.title,
+    url: session.activation
+      ? `${SITE_URL}/schedule/${session.activation}`
+      : `${SITE_URL}/schedule/talk/${session.slug}`,
+  }));
+
   return (
     <main className="bg-black">
+      {/* Person markup. These pages had none, which the sitemap's own note
+          calls out as the wrong way round — they are "the reason slugs
+          exist: they're what gets shared". `sameAs` is the part that earns
+          its keep: it is how a crawler ties this page to the same human on
+          LinkedIn rather than guessing from a name two people share. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLd(
+            personSchema({
+              name: speaker.name,
+              slug: speaker.slug,
+              role: speaker.title,
+              company: speaker.company,
+              bio: speaker.bio,
+              image: speaker.imageUrl,
+              links: [speaker.linkedin],
+              performerIn,
+            }),
+          ),
+        }}
+      />
       <div className="mx-auto w-full max-w-7xl px-6 py-14 lg:py-20">
         {/* The label lifts a step in brightness; the arrow is the only thing
             that takes colour. Charge lands on the moving part, not the whole

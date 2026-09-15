@@ -3,6 +3,7 @@ import { SpeakerWall } from "@/components/site/speaker-wall";
 import { SpeakersHero } from "@/components/site/speakers-hero";
 import { loadLineup, SPEAKERS_ANNOUNCED } from "@/lib/speakers";
 import { VENUE_OPTIONS } from "@/lib/locations";
+import { jsonLd, speakerListGraph } from "@/lib/structured-data";
 
 // Speakers and sessions both come from the CMS; admin saves bust this path
 // directly, so the window is the ceiling rather than the usual wait.
@@ -45,6 +46,22 @@ export default async function SpeakersPage() {
 
   return (
     <main>
+      {/* The list this page is. /schedule describes its own contents and this
+          one did not describe its own — names and URLs only, because the
+          detail belongs on each speaker's page and repeating it here would be
+          forty-six biographies in one payload.
+
+          Gated on `hasLineup` for the same reason the wall is: before the
+          announcement there is no list to describe, and publishing one would
+          leak the names the gate exists to hold back. */}
+      {hasLineup && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: jsonLd(speakerListGraph(lineup)),
+          }}
+        />
+      )}
       {/* Light hero into a black wall — the same rhythm the homepage and
           /sessions run, so all three pages open the same way. */}
       <SpeakersHero hasLineup={hasLineup} />

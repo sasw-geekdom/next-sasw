@@ -336,6 +336,170 @@ export function scheduleGraph(
 }
 
 /**
+ * One day of the week, for /schedule/day/[iso].
+ *
+ * These five pages published nothing at all, which mattered more than it
+ * sounds: the calendar they draw is a client component, so the day's contents
+ * reach a crawler only through the RSC payload. A reader with JavaScript sees
+ * the grid and an agent with JavaScript can be made to; a plain fetch of
+ * "what is on Thursday" got a page with a heading and no answer.
+ *
+ * /schedule had the same client-rendered grid and did not have the same
+ * problem, because `scheduleGraph` describes the whole week in JSON-LD beside
+ * it. This is that, narrowed to a day.
+ *
+ * The same `@graph` shape, and for the same reason: the week node travels with
+ * the list so the `superEvent` reference on every event resolves on this page
+ * rather than depending on a crawler having read the homepage first.
+ */
+export function dayGraph(
+  iso: string,
+  weekday: string,
+  sessions: ResolvedSession[],
+  talks: TalkEventInput[] = [],
+) {
+  const events = [...sessions.map(activationEvent), ...talks.map(talkEvent)]
+    .filter((e): e is NonNullable<typeof e> => e !== null)
+    .sort((a, b) => Date.parse(a.startDate) - Date.parse(b.startDate));
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      nested(weekEvent()),
+      {
+        "@type": "ItemList",
+        name: `San Antonio Startup + Tech Week 2026 — ${weekday}, ${iso}`,
+        itemListOrder: "https://schema.org/ItemListOrderAscending",
+        numberOfItems: events.length,
+        itemListElement: events.map((item, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          item: nested(item),
+        })),
+      },
+    ],
+  };
+}
+
+/**
+ * A speaker, for /speakers/[slug].
+ *
+ * Forty-six pages carried no structured data at all — no `Person`, nothing —
+ * which is the wrong way round for the pages the sitemap itself calls "the
+ * reason slugs exist: they're what gets shared".
+ *
+ * `sameAs` is the part worth having. It is how a search engine or an agent
+ * ties this page to the same human on LinkedIn or their own site, rather than
+ * guessing from a name that several people share. Only the links a speaker
+ * actually gave us go in; nothing is inferred.
+ *
+ * `performerIn` names the sessions they are giving. By `url` and `name`, not
+ * by `@id`: `talkEvent` publishes no `@id`, so an `@id` reference here would
+ * dangle rather than resolve. A session that belongs to an activation points
+ * at the activation, because that is the page it renders on.
+ */
+export function personSchema(p: {
+  name: string;
+  slug: string;
+  role?: string | null;
+  company?: string | null;
+  bio?: string | null;
+  image?: string | null;
+  links?: (string | null | undefined)[];
+  /** Sessions this person is giving, as they are published elsewhere. */
+  performerIn?: { name: string; url: string }[];
+}) {
+  const sameAs = (p.links ?? []).filter(
+    (u): u is string => typeof u === "string" && /^https?:\/\//.test(u),
+  );
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": `${SITE_URL}/speakers/${p.slug}#person`,
+    name: p.name,
+    url: `${SITE_URL}/speakers/${p.slug}`,
+    ...(p.role ? { jobTitle: p.role } : {}),
+    ...(p.company
+      ? { worksFor: { "@type": "Organization", name: p.company } }
+      : {}),
+    ...(p.bio ? { description: p.bio } : {}),
+    ...(p.image ? { image: p.image } : {}),
+    ...(sameAs.length ? { sameAs } : {}),
+    ...(p.performerIn?.length
+      ? {
+          performerIn: p.performerIn.map((e) => ({
+            "@type": "Event",
+            name: e.name,
+            url: e.url,
+          })),
+        }
+      : {}),
+  };
+}
+
+/**
+ * A venue, for the room pages under /schedule.
+ *
+ * `place()` builds this node for an event's `location`; this publishes it as
+ * the subject of its own page, which the six room pages were not doing. The
+ * address and the coordinates were already in lib/locations and simply never
+ * reached a crawler from here.
+ *
+ * `containedInPlace` rather than a bare address line: these are all downtown
+ * San Antonio, and saying so as an entity is what lets a result cluster them.
+ */
+export function venuePlace(room: {
+  name: string;
+  slug: string;
+  desc?: string;
+  place?: Room["place"];
+}) {
+  return {
+    "@context": "https://schema.org",
+    ...place(room),
+    "@id": `${SITE_URL}/schedule/${room.slug}#place`,
+    url: `${SITE_URL}/schedule/${room.slug}`,
+    ...(room.desc ? { description: room.desc } : {}),
+    containedInPlace: {
+      "@type": "Place",
+      name: "Downtown San Antonio",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "San Antonio",
+        addressRegion: "TX",
+        addressCountry: "US",
+      },
+    },
+  };
+}
+
+/**
+ * The speaker index, for /speakers.
+ *
+ * /schedule describes its own list and this page did not describe its own.
+ * Names and URLs only — the detail belongs on each speaker's page, and
+ * repeating it here would be forty-six biographies in one payload.
+ */
+export function speakerListGraph(people: { name: string; slug: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Speakers — San Antonio Startup + Tech Week 2026",
+    numberOfItems: people.length,
+    itemListElement: people.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Person",
+        "@id": `${SITE_URL}/speakers/${p.slug}#person`,
+        name: p.name,
+        url: `${SITE_URL}/speakers/${p.slug}`,
+      },
+    })),
+  };
+}
+
+/**
  * Serialise for a `<script type="application/ld+json">`.
  *
  * `<` is escaped because a literal `</script>` anywhere in the data would end
