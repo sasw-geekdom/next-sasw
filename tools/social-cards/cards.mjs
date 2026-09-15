@@ -872,6 +872,40 @@ export const CARDS = [
     portrait: { height: 760, left: 520 },
   },
 
+  /**
+   * The quiz night, in PySanAntonio's own blue and gold.
+   *
+   * No Jeopardy! logo on it, deliberately. That mark belongs to Jeopardy
+   * Productions / Sony Pictures — jeopardy.com brands itself "America's
+   * Favorite Quiz Show®" — and putting it on a card for an unaffiliated event
+   * that is giving prizes away is the exact use a trademark exists to stop:
+   * it reads as a licence nobody granted.
+   *
+   * Nothing is lost by leaving it off, because the format is not the mark.
+   * The headline is the format — a category and a dollar value is the game in
+   * six words — and this template already paints in #4a90d9 and #edca00,
+   * which is a quiz board's palette and happens to be PySanAntonio's own. The
+   * card reads as the thing without borrowing anyone's logo, and it reads as
+   * PySanAntonio rather than as a knock-off of a game show.
+   */
+  {
+    id: "pysanantonio-jeopardy",
+    event: "pysanantonio",
+    art: "public/pysa/mascot-block.webp",
+    // See `pysanantonio-event` — the same block, matted the same way.
+    artBlock: true,
+    // The category-and-value line is the whole format, and it is funnier than
+    // naming the game. "Python for 400" is a clue nobody has to explain.
+    headline: "We\u2019ll take<br />Python for 400.",
+    headlineSize: 96,
+    subtitle:
+      "A quiz night for the Python crowd \u2014 no prep, no teams to join in advance, and a pair of PyTexas tickets on the board.",
+    // No hour: the session has a day and a room and not yet a slot inside the
+    // afternoon. Stating one would be inventing it. Add `facts` here when the
+    // running order lands, the way every other card on this stage does.
+    portrait: { height: 760, left: 520 },
+  },
+
   {
     id: "pysanantonio-motion",
     event: "pysanantonio",
