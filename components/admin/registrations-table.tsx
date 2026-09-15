@@ -109,7 +109,7 @@ function Facet({
         value={value}
         onChange={onChange}
         size="sm"
-        className="w-auto min-w-[10rem] max-w-[18rem]"
+        className="w-auto min-w-40 max-w-[18rem]"
         options={options.map((o) => ({
           value: o.value,
           label: `${o.label ?? o.value} · ${o.count}`,
