@@ -1,5 +1,5 @@
 import { boltOgImage, OG_SIZE } from "@/lib/og";
-import { listTalks, resolveTalk } from "@/lib/talks";
+import { allTalks, resolveTalk } from "@/lib/talks";
 
 // Per-talk share card. The point of giving a talk its own URL is that the
 // speaker posts it, so the preview carries the talk's name and theirs — not
@@ -11,7 +11,7 @@ export const contentType = "image/png";
 // Prerender alongside the pages, so a crawler unfurling a shared link doesn't
 // pay a cold Firestore read to build the card.
 export async function generateStaticParams() {
-  return (await listTalks()).map((t) => ({ slug: t.row.slug }));
+  return (await allTalks()).map((t) => ({ slug: t.row.slug }));
 }
 
 // A talk title runs long where a speaker's name does not — "Building Nopalera

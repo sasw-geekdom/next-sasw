@@ -214,7 +214,8 @@ export function activationEvent(session: ResolvedSession) {
  *
  * `superEvent` points at the week, exactly as an activation does, so a talk
  * reads as part of it rather than as an unrelated event that happens to fall
- * in the same five days.
+ * in the same five days — or, for a session inside an activation, at that
+ * activation, which points at the week in turn. See `partOf`.
  *
  * No `image` override: the OG route builds a card per talk and the metadata
  * already points at it, but that URL carries a content hash Next owns. Naming
@@ -230,6 +231,21 @@ export interface TalkEventInput {
   endIso: string;
   room: { name: string; place?: Room["place"] } | null;
   people: { name: string; slug: string }[];
+  /**
+   * The activation this runs inside, where it runs inside one.
+   *
+   * Sessions with an activation used to have no page at all, so every talk
+   * here was a child of the week and nothing else. Now that they do, saying so
+   * is what keeps the two pages from reading as rivals: the six PySanAntonio
+   * abstracts each have a URL *and* the afternoon that gathers them has one,
+   * and a crawler with no link between them sees seven events at the same
+   * level describing the same five hours.
+   *
+   * No `@id`: an activation publishes none (see `activationEvent`), so the
+   * chain is written out as a nested node keyed by `url`, with the week above
+   * it — session inside activation inside week, which is the truth.
+   */
+  partOf?: { name: string; url: string } | null;
 }
 
 export function talkEvent(talk: TalkEventInput) {
@@ -256,7 +272,14 @@ export function talkEvent(talk: TalkEventInput) {
     ...(talk.room ? { location: place(talk.room) } : {}),
     ...(performers.length > 0 ? { performer: performers } : {}),
     organizer: ORGANIZER,
-    superEvent: { "@id": WEEK_ID },
+    superEvent: talk.partOf
+      ? {
+          "@type": "Event",
+          name: talk.partOf.name,
+          url: talk.partOf.url,
+          superEvent: { "@id": WEEK_ID },
+        }
+      : { "@id": WEEK_ID },
     offers: FREE_OFFER,
     url,
     image: [`${SITE_URL}/brand/bolt-current-og.png`],

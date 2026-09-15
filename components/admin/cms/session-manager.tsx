@@ -481,10 +481,9 @@ export function SessionManager({
               title={title}
               slug={slug}
               setSlug={setSlug}
-              // Only a session that stands on its own has a page of its own.
-              // One inside an activation is shown on that activation's page,
-              // so its slug is stored and unused — say so rather than print a
-              // URL that goes nowhere.
+              // Every session has a page now; this only changes what the
+              // field says underneath it, because one inside an activation is
+              // reachable from two places and the drawer should say which.
               standalone={activation === ""}
               currentSlug={current?.slug ?? null}
               issue={issues.slug?.[0]}
@@ -710,8 +709,9 @@ function SlugField({
   // can't know what's taken without a round trip, and a "-2" surprise on save
   // is rare enough to explain there rather than predict here.
   const preview = slugify(slug.trim() || title, "session");
-  const moving =
-    standalone && currentSlug && slug.trim() && preview !== currentSlug;
+  // No longer gated on `standalone`: an activation's sessions have live URLs
+  // too, so an edit here moves a real page either way.
+  const moving = currentSlug && slug.trim() && preview !== currentSlug;
 
   return (
     <div>
@@ -729,17 +729,18 @@ function SlugField({
           className="font-mono"
         />
       </div>
-      {standalone ? (
-        <p className="mt-1.5 font-mono text-[11px] text-muted-foreground">
-          {preview
-            ? `sasw.co/schedule/talk/${preview}`
-            : "sasw.co/schedule/talk/\u2026"}
-        </p>
-      ) : (
-        <p className="mt-1.5 text-[11px] text-muted-foreground">
-          This session runs inside an activation, so it shows on that
-          activation&rsquo;s page rather than one of its own. Saved either way,
-          for if it is ever detached.
+      <p className="mt-1.5 font-mono text-[11px] text-muted-foreground">
+        {preview
+          ? `sasw.co/schedule/talk/${preview}`
+          : "sasw.co/schedule/talk/\u2026"}
+      </p>
+      {/* This used to read "shows on that activation's page rather than one of
+          its own". That stopped being true when the running orders started
+          truncating long abstracts — every session has a page now, and the
+          activation links to it. */}
+      {!standalone && (
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Also listed on its activation&rsquo;s page, which links here.
         </p>
       )}
       {issue && <FieldError>{issue}</FieldError>}

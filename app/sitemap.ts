@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { loadLineup } from "@/lib/speakers";
 import { scheduleSlugs, venueRedirect } from "@/lib/schedule";
-import { listTalks } from "@/lib/talks";
+import { allTalks } from "@/lib/talks";
 import { EVENT_DAYS, SITE_URL } from "@/lib/event";
 
 const BASE = SITE_URL;
@@ -40,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // builds its routes from, so this cannot list one that 404s or miss one that
   // exists — which it did: eleven talk pages, each with its own OG card and
   // its own Event markup, were absent from here entirely.
-  const talks = await listTalks().catch(() => []);
+  const talks = await allTalks().catch(() => []);
 
   return [
     ...STATIC_ROUTES.map((path) => ({

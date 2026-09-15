@@ -102,16 +102,15 @@ export default async function SpeakerPage({
   /**
    * The sessions this person is giving, at the URL each one is published at.
    *
-   * A session with no activation has its own talk page; one that belongs to
-   * an activation renders inside it and has no page of its own, so it points
-   * there. Same rule `/schedule/talk/[slug]` uses to decide which sessions
-   * get a route at all.
+   * Every session has its own talk page now, activation or not — so the name
+   * and the URL describe the same thing. They used not to: a session inside an
+   * activation had no page, so this pointed at the activation instead and
+   * published a `performerIn` whose name was a talk and whose url was an
+   * afternoon. See `listTalks` for why that changed.
    */
   const performerIn = speaker.sessions.map((session) => ({
     name: session.title,
-    url: session.activation
-      ? `${SITE_URL}/schedule/${session.activation}`
-      : `${SITE_URL}/schedule/talk/${session.slug}`,
+    url: `${SITE_URL}/schedule/talk/${session.slug}`,
   }));
 
   return (
@@ -292,29 +291,24 @@ export default async function SpeakerPage({
                         className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-xs bg-magenta/70"
                       />
                       <div className="min-w-0">
-                        {/* A talk that stands on its own has a page now, and
-                            this list was the last place still printing its
-                            title as dead text. One inside an activation keeps
-                            its title plain and takes the "Part of" link below
-                            — that page is its home, and linking the title
-                            there would name the activation as the talk. */}
-                        {s.activation === null ? (
-                          <Link
-                            href={`/schedule/talk/${s.slug}`}
-                            className="group font-display text-lg font-bold uppercase leading-tight text-white transition-colors duration-200 hover:text-magenta focus-visible:text-magenta focus-visible:outline-none"
-                          >
-                            {s.title}
-                            <ArrowUpRight
-                              className={cn(ARROW_OUT, "ml-1 inline-block")}
-                              strokeWidth={2}
-                              aria-hidden="true"
-                            />
-                          </Link>
-                        ) : (
-                          <p className="font-display text-lg font-bold uppercase leading-tight text-white">
-                            {s.title}
-                          </p>
-                        )}
+                        {/* The title goes to the talk, and the "Part of" line
+                            below goes to the activation. A session inside one
+                            used to render its title as dead text, because the
+                            activation page was the only home it had and
+                            linking the title there would have named the
+                            afternoon as the talk. Both now exist, so both are
+                            linked, each to itself. */}
+                        <Link
+                          href={`/schedule/talk/${s.slug}`}
+                          className="group font-display text-lg font-bold uppercase leading-tight text-white transition-colors duration-200 hover:text-magenta focus-visible:text-magenta focus-visible:outline-none"
+                        >
+                          {s.title}
+                          <ArrowUpRight
+                            className={cn(ARROW_OUT, "ml-1 inline-block")}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
+                        </Link>
                         <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-white/55">
                           {/* Same fix as the talk page: the event's zone,
                               and both ends of the slot. See `sessionWhen`. */}

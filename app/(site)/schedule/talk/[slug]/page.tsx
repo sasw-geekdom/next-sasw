@@ -4,11 +4,18 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
 import { BackLink } from "@/components/site/back-link";
+import { SITE_URL } from "@/lib/event";
 import { ARROW_MOTION } from "@/lib/motion";
-import { ASSUMED_MINUTES, dayKey, eventIso, sessionWhen } from "@/lib/schedule";
+import {
+  ASSUMED_MINUTES,
+  activationTitle,
+  dayKey,
+  eventIso,
+  sessionWhen,
+} from "@/lib/schedule";
 import { jsonLd, talkEvent } from "@/lib/structured-data";
 import type { ResolvedParticipant } from "@/lib/admin/cms-types";
-import { listTalks, resolveTalk, type Talk } from "@/lib/talks";
+import { allTalks, resolveTalk, type Talk } from "@/lib/talks";
 import { listSponsors } from "@/lib/admin/cms-queries";
 import { circuitSponsor } from "@/lib/circuit-sponsors";
 import { CircuitSponsorLine } from "@/components/site/circuit-sponsor-line";
@@ -31,7 +38,7 @@ const ARROW_OUT = cn(
 );
 
 export async function generateStaticParams() {
-  return (await listTalks()).map((t) => ({ slug: t.row.slug }));
+  return (await allTalks()).map((t) => ({ slug: t.row.slug }));
 }
 
 /** "Ana Reyes", "Ana Reyes and Dee Okafor", "Ana Reyes, Dee Okafor and …". */
@@ -128,6 +135,25 @@ export default async function TalkPage({
     await listSponsors().catch(() => []),
   );
   const day = dayKey(new Date(row.startsAt).toISOString());
+  /**
+   * The activation this sits inside, where it sits inside one.
+   *
+   * These pages were standalone-only until the running orders started
+   * truncating their abstracts. A session that now has two homes has to say
+   * which one is the parent, in three places: the eyebrow, so a reader landing
+   * from a search knows what afternoon they are being invited to; the back
+   * link, so a shared URL goes up rather than out to the whole week; and the
+   * markup, so a crawler reads a programme rather than six rival events.
+   *
+   * `activationTitle` returns null for a slug no activation claims, which is
+   * what a stale CMS value looks like — so this degrades to the standalone
+   * layout rather than rendering a link to a 404.
+   */
+  const parentTitle = activationTitle(row.activation);
+  const parent =
+    row.activation && parentTitle
+      ? { slug: row.activation, title: parentTitle }
+      : null;
 
   // The same markup an activation page carries, which this had no equivalent
   // of — so a talk with a named speaker, a room and a confirmed half hour was
@@ -149,6 +175,9 @@ export default async function TalkPage({
     endIso: eventIso(endsAt),
     room,
     people: speakers.map((p) => ({ name: p.name, slug: p.slug })),
+    partOf: parent
+      ? { name: parent.title, url: `${SITE_URL}/schedule/${parent.slug}` }
+      : null,
   });
 
   return (
@@ -189,7 +218,10 @@ export default async function TalkPage({
           // for someone arriving on a shared link with no week behind them:
           // /schedule opens ~990px above its own grid, and this is a talk, so
           // the grid is what they came for.
-          href="/schedule#the-week"
+          //
+          // Unless the talk has a parent, in which case the running order it
+          // came out of is one step up rather than five days out.
+          href={parent ? `/schedule/${parent.slug}` : "/schedule#the-week"}
           className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 transition-colors duration-300 hover:text-white/70 focus-visible:text-white/70 focus-visible:outline-none"
         >
           <ArrowLeft
@@ -289,8 +321,9 @@ export default async function TalkPage({
                 of their own, so this is the magenta the eyebrow already owns
                 rather than anything track-specific. */}
             <p className="font-mono text-xs uppercase tracking-widest text-magenta">
-              {[row.track, room?.name].filter(Boolean).join(" \u00b7 ") ||
-                "On the schedule"}
+              {[parent?.title, row.track, room?.name]
+                .filter(Boolean)
+                .join(" \u00b7 ") || "On the schedule"}
             </p>
 
             {/* A step down from the speakers' 6xl. A name is two words and a
@@ -371,6 +404,24 @@ export default async function TalkPage({
             )}
 
             <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+              {/* First, and the only filled button in the row, because for a
+                  session inside an activation it is the better destination
+                  than either of the two beside it: the rest of the day is a
+                  grid, the room is a venue, and the thing this talk is
+                  actually part of is an afternoon with a running order. */}
+              {parent && (
+                <Link
+                  href={`/schedule/${parent.slug}`}
+                  className="group inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-white/70 transition-colors duration-300 hover:border-white/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
+                >
+                  All of {parent.title}
+                  <ArrowUpRight
+                    className={ARROW_OUT}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                </Link>
+              )}
               <Link
                 href={`/schedule/day/${day}`}
                 className="group inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-white/70 transition-colors duration-300 hover:border-white/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"

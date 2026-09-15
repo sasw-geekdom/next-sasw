@@ -53,16 +53,16 @@ export interface ResolvedParticipant extends SessionParticipant {
 export interface SessionRow {
   id: string;
   /**
-   * The public URL segment, for a session that stands on its own.
+   * The public URL segment. Every session has one and every session uses it.
    *
    * Stored once an admin has saved the session; derived from the title at read
    * time before that, which is how the speakers collection backfilled its own.
    * A derived slug is provisional — the next save promotes it to stored, and
    * that is what makes it safe to link to.
    *
-   * Sessions inside an activation carry one too and simply don't use it: the
-   * activation page is their home, and giving them a second URL would split
-   * content that page deliberately gathers.
+   * Sessions inside an activation used to carry one and not use it, on the
+   * reasoning that the activation page was their home. They have their own
+   * page now; the activation links to it and it links back. See `listTalks`.
    */
   slug: string;
   /**
@@ -98,7 +98,7 @@ export interface SessionRow {
 
 export interface LineupSession {
   id: string;
-  /** The talk's own URL segment, for a session with no activation. */
+  /** The talk's own URL segment. Every session has a page. */
   slug: string;
   title: string;
   startsAt: number;
