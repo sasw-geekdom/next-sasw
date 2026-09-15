@@ -207,6 +207,96 @@ function heroTitleParts(session: ResolvedSession): [string] | [string, string] {
 }
 
 /**
+ * Why a Python afternoon is here at all, pinned beside its running order.
+ *
+ * Python and PyTexas lead; DEVSA gets the last block, under its own name for
+ * the programme — "Building Together", and the line off that page. A passing
+ * clause at the end of a paragraph was the wrong shape for it: the reader has
+ * already met the DEVSA mark in the hero wall above, so what the column owes
+ * them is not another mention but somewhere to go, which is why the block ends
+ * in a link rather than a sentence.
+ *
+ * Every claim is theirs, from pytexas.org. "2026 marked the 20th year of the
+ * largest gathering of Python developers within the great state of Texas" is
+ * verbatim off their 2026 page; the 2027 dates, the Austin Central Library and
+ * "y'all means all" are off the 2027 one. The CFP date is the fact worth the
+ * column, and it is printed as a date rather than as "Thursday of this week":
+ * this page is read months before the week, during it and long after, and only
+ * one of those readers knows which week that is. "Open from Thursday, October
+ * 1" is true in all three tenses.
+ *
+ * Jordana Naftali is deliberately not billed here as the PyLadies organiser.
+ * Her own bio, which her speaker page prints, says she "supports PyLadies
+ * Austin even if not as actively as she'd like" — so a page calling her its
+ * organiser would contradict the page one click away. Her line about community
+ * is quoted instead, which is hers and needs no title. Upgrade this if she
+ * confirms the role.
+ */
+function PysaAside() {
+  return (
+    <>
+      <p className="font-mono text-xs uppercase tracking-widest text-magenta">
+        Why Python, why here
+      </p>
+      <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
+        Community first,
+        <br />
+        language second.
+      </h2>
+      <div className="mt-6 space-y-4 text-pretty text-white/60">
+        <p>
+          That is Jordana Naftali&rsquo;s line, and it is the afternoon&rsquo;s
+          too. Nothing here asks what you do for a living or how long
+          you&rsquo;ve been writing Python &mdash; sensors and air quality,
+          agents and their bad habits, and a quiz at the end that anybody can
+          shout at.
+        </p>
+        <p>
+          PyTexas is the through-line. The conference is its own event, run by
+          the PyTexas Foundation, and 2026 marked its twentieth year and the
+          largest gathering of Python developers in the state. The president of
+          the Foundation opens this afternoon. PyTexas 2027 runs 16 &ndash; 18
+          April at the Austin Central Library, with the call for proposals open
+          from Thursday, October 1 &mdash; so if something here gives you an
+          idea, you can act on it before the week is out.
+        </p>
+        <p>
+          &ldquo;Y&rsquo;all means all&rdquo; is how PyTexas puts it. That is
+          why the last hour is a quiz with a ticket to Austin on the board
+          rather than another talk.
+        </p>
+      </div>
+      <div className="mt-8 border-t border-white/10 pt-6">
+        <p className="font-mono text-xs uppercase tracking-widest text-white/40">
+          Building Together
+        </p>
+        <p className="mt-3 text-pretty text-white/60">
+          Where partners and communities come together to build. DEVSA keeps
+          this room going the other fifty-one weeks of the year &mdash; Alamo
+          Python, the meetups, the people you&rsquo;ll be sitting next to.
+        </p>
+        <a
+          href="https://www.devsa.community/buildingtogether"
+          target="_blank"
+          rel="noreferrer"
+          className="group mt-4 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-widest text-white transition-colors duration-200 hover:text-magenta"
+        >
+          Find your people
+          <ArrowUpRight
+            className={cn(
+              ARROW_MOTION,
+              "h-3.5 w-3.5 duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5",
+            )}
+            strokeWidth={2.5}
+            aria-hidden="true"
+          />
+        </a>
+      </div>
+    </>
+  );
+}
+
+/**
  * An activation's own page.
  *
  * Four activations get a band as their masthead — PySanAntonio, Access
@@ -1025,7 +1115,16 @@ function ActivationPage({
         // whole. A pair rides in the hero as a bill with no abstracts, so the
         // order below still runs and is where they live. See `HeroTalk`.
         heroTalks.length === 1 ? null : (
-          <ActivationSessions sessions={sessions} speakers={speakers} />
+          <ActivationSessions
+            sessions={sessions}
+            speakers={speakers}
+            /* Only PySanAntonio. Six sessions run by two nonprofits, and the
+               rows cap at a reading measure — so the right half of this
+               section was empty black for the length of the afternoon. The
+               pinned column fills it with the thing a reader arriving from
+               /schedule does not have: who is putting this on. */
+            aside={isPysa ? <PysaAside /> : undefined}
+          />
         )
       ) : isHeroOnly ? null : (
         <ActivationDetail detail={session.detail} speakers={speakers} />

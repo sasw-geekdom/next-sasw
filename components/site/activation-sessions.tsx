@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Clock } from "lucide-react";
+import { ArrowUpRight, Clock } from "lucide-react";
 import { ProfileMark, profileLabel } from "@/components/site/profile-mark";
 import type { CardSpeaker } from "@/components/site/speaker-card";
 import type { SessionRow } from "@/lib/admin/cms-types";
@@ -20,6 +20,22 @@ import { cn } from "@/lib/utils";
 // — which is not a talk with a speaker and does not want a talk's fields.
 // These sit alongside it.
 
+/**
+ * Where an abstract stops being a line in a running order.
+ *
+ * Six of PySanAntonio's run to 3,000 characters together and one alone to
+ * 1,352 — printed in full they made a list that could not be scanned for what
+ * a reader came for, which is what is on and who is giving it. Printed behind
+ * a disclosure they made the pinned column beside them jump on every click,
+ * which is worse: the thing that moved was not the thing that was clicked.
+ *
+ * So the long ones are clamped in place and finish on their own page. The
+ * number is set just above the longest abstract that already fits the clamp —
+ * Python Jeopardy, at 280 — so the rows that read fine whole are left whole,
+ * and only the ones that were the problem grow a second link.
+ */
+const DESC_CLAMP = 300;
+
 const TIME = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/Chicago",
   hour: "numeric",
@@ -29,8 +45,24 @@ const TIME = new Intl.DateTimeFormat("en-US", {
 export function ActivationSessions({
   sessions,
   speakers = [],
+  aside,
 }: {
   sessions: SessionRow[];
+  /**
+   * Context to pin beside the running order, from `lg` up.
+   *
+   * Opt-in, and only PySanAntonio passes one. The default layout puts the
+   * heading across the top and the list under it, which is right for an
+   * activation whose section is the list — most of these are an hour with one
+   * or two talks. PySanAntonio is a six-session afternoon run by two
+   * nonprofits, and it had a second problem: the rows cap at a reading measure,
+   * so on a wide screen the right half of that section was empty black for
+   * 2,000px of scroll.
+   *
+   * The same pinned-column grammar `ActivationDetail` uses, down to `top-24`
+   * clearing the header.
+   */
+  aside?: React.ReactNode;
   /**
    * Everyone in the CMS, for the join below.
    *
@@ -100,23 +132,12 @@ export function ActivationSessions({
     );
   }
 
-  return (
-    <section className="border-t border-white/10 bg-black">
-      <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
-        <div className="max-w-2xl">
-          <p className="font-mono text-xs uppercase tracking-widest text-magenta">
-            The running order
-          </p>
-          <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
-            What&rsquo;s on, in order.
-          </h2>
-        </div>
-
-        <ol className="mt-10 flex flex-col lg:mt-12">
+  const list = (
+    <ol className={cn("flex flex-col", aside ? "mt-8 lg:mt-0" : "mt-10 lg:mt-12")}>
           {sessions.map((s) => (
             <li
               key={s.id}
-              className="grid gap-x-8 gap-y-3 border-t border-white/10 py-6 lg:grid-cols-[10rem_1fr]"
+              className="grid min-w-0 gap-x-8 gap-y-3 border-t border-white/10 py-6 lg:grid-cols-[10rem_1fr]"
             >
               {/* self-start from lg: the grid cell stretches to the row, and a
                   centred time floats to the middle of a long description
@@ -127,15 +148,61 @@ export function ActivationSessions({
                 {s.endsAt ? ` – ${TIME.format(new Date(s.endsAt))}` : ""}
               </p>
 
-              <div>
-                <h3 className="text-pretty text-lg font-medium text-white">
-                  {s.title}
+              {/* `min-w-0`: a grid item's min-width defaults to `auto`, which
+                  refuses to shrink below its content's min-content width — so
+                  one long unbroken run in a title or an abstract pushed the
+                  whole row wider than its track and the page scrolled
+                  sideways on a phone. The same note `column-board` carries
+                  about `min-height`. */}
+              <div className="min-w-0">
+                {/* The title is a link, and that is what pays for the clamp
+                    below it. Every CMS session has a page now — /schedule/talk
+                    used to be standalone-only, on the reasoning that an
+                    activation page was already a session's home, which held
+                    right up until that page stopped printing the whole
+                    abstract. See `listTalks`. */}
+                <h3 className="text-pretty text-lg font-medium">
+                  <Link
+                    href={`/schedule/talk/${s.slug}`}
+                    className="group/talk rounded-sm text-white transition-colors duration-200 hover:text-magenta focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-magenta"
+                  >
+                    {s.title}
+                    {/* Inline rather than a flex sibling, so on a title that
+                        wraps it follows the last word instead of pinning to
+                        the top-right of a two-line block. */}
+                    <ArrowUpRight
+                      className="ml-1.5 inline h-4 w-4 -translate-y-px opacity-45 transition-opacity duration-200 group-hover/talk:opacity-100"
+                      aria-hidden="true"
+                    />
+                  </Link>
                 </h3>
 
                 {s.description && (
-                  <p className="mt-2 max-w-2xl text-pretty text-white/60">
-                    {s.description}
-                  </p>
+                  <>
+                    <p
+                      className={cn(
+                        "mt-2 max-w-2xl text-pretty text-white/60",
+                        s.description.length > DESC_CLAMP && "line-clamp-4",
+                      )}
+                    >
+                      {s.description}
+                    </p>
+                    {/* Only under a clamped one. A reader whose paragraph
+                        ended on a full stop needs no invitation to go and
+                        read it again. */}
+                    {s.description.length > DESC_CLAMP && (
+                      <Link
+                        href={`/schedule/talk/${s.slug}`}
+                        className="group/more mt-2 inline-flex items-center gap-1.5 rounded-sm font-mono text-[11px] uppercase tracking-widest text-white/45 transition-colors duration-200 hover:text-magenta focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-magenta"
+                      >
+                        Read the full talk
+                        <ArrowUpRight
+                          className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover/more:-translate-y-0.5 group-hover/more:translate-x-0.5"
+                          aria-hidden="true"
+                        />
+                      </Link>
+                    )}
+                  </>
                 )}
 
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -150,7 +217,41 @@ export function ActivationSessions({
               </div>
             </li>
           ))}
-        </ol>
+    </ol>
+  );
+
+  if (aside) {
+    return (
+      <section className="border-t border-white/10 bg-black">
+        <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
+          {/* `items-start` is what makes the pin work: a grid item stretches to
+              the row by default, so its box is already the full height and
+              `top` has nothing to pin against — the same note `ActivationDetail`
+              carries over its own sticky column.
+
+              The list takes the wider half. It holds abstracts and faces; the
+              aside holds three paragraphs and stops. */}
+          <div className="grid gap-x-14 gap-y-10 lg:grid-cols-[22rem_1fr] lg:items-start xl:grid-cols-[26rem_1fr]">
+            <div className="min-w-0 lg:sticky lg:top-24">{aside}</div>
+            <div className="min-w-0">{list}</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="border-t border-white/10 bg-black">
+      <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-24">
+        <div className="max-w-2xl">
+          <p className="font-mono text-xs uppercase tracking-widest text-magenta">
+            The running order
+          </p>
+          <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
+            What&rsquo;s on, in order.
+          </h2>
+        </div>
+        {list}
       </div>
     </section>
   );
@@ -348,7 +449,15 @@ function People({
         return (
           <li
             key={p.speakerId}
-            className="group/who relative flex items-center gap-3"
+            // `min-w-0` here as well as on the name block inside it. The
+            // inner one lets the role line shrink *within* this row; without
+            // this one the row itself cannot shrink inside the wrapping list,
+            // so its min-content — avatar, name, a role like "Sr Solutions
+            // Architect · Temporal Technologies", and the LinkedIn mark —
+            // became the page's width and a phone scrolled sideways. The
+            // `truncate` on the role never engaged because nothing ever
+            // constrained it.
+            className="group/who relative flex min-w-0 items-center gap-3"
           >
             {SPEAKERS_ANNOUNCED && (
               <span className="relative size-11 shrink-0 overflow-hidden rounded-full ring-1 ring-white/15">
