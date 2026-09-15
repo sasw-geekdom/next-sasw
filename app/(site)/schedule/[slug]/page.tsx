@@ -270,10 +270,14 @@ function PysaAside() {
         <p className="font-mono text-xs uppercase tracking-widest text-white/40">
           Building Together
         </p>
+        {/* Their words, not ours. "Keeps this room going the other fifty-one
+            weeks of the year" was a nice line and the wrong voice — DEVSA
+            describes itself as a bridge across an ecosystem, not as a host
+            with a key. See devsa.community. */}
         <p className="mt-3 text-pretty text-white/60">
-          Where partners and communities come together to build. DEVSA keeps
-          this room going the other fifty-one weeks of the year &mdash; Alamo
-          Python, the meetups, the people you&rsquo;ll be sitting next to.
+          Where partners and communities come together to build. DEVSA is the
+          bridge across San Antonio&rsquo;s tech ecosystem, connecting 20+
+          grassroots groups into one.
         </p>
         <a
           href="https://www.devsa.community/buildingtogether"
