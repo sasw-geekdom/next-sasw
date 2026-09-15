@@ -92,14 +92,25 @@ const DAY_OPTIONS = EVENT_DAYS.map((d) => ({
 }));
 
 /**
- * Every quarter hour from 7am to 10pm.
+ * Every five minutes from 7am to 10pm.
  *
  * The week's real span is the 7:30 brunch to the 8pm bash, so this covers it
- * with room either side. Quarter hours because nothing on this schedule starts
- * at 2:07, and a list of 61 is one the Combobox gives a search box to.
+ * with room either side.
+ *
+ * Five rather than the quarter hours this used to run: the quarter-hour grid
+ * was a guess about how organisers schedule, and it was wrong often enough to
+ * be reported — a ten-minute turnaround between talks, a panel that runs to
+ * 3:50, a coffee slot that is genuinely twenty minutes. Anything off the grid
+ * had to be typed into the CMS some other way or rounded, and rounding a time
+ * to make a picker happy is the picker deciding the programme.
+ *
+ * 181 options rather than 61. That is well past the point the Combobox starts
+ * showing its search box (> 7), which is what makes the longer list workable:
+ * typing "3:50" is faster than scrolling to it either way. A stored time that
+ * lands off even this grid is still kept — see `timeOptions`.
  */
-const TIME_OPTIONS = Array.from({ length: 61 }, (_, i) => {
-  const mins = 7 * 60 + i * 15;
+const TIME_OPTIONS = Array.from({ length: 181 }, (_, i) => {
+  const mins = 7 * 60 + i * 5;
   const h24 = Math.floor(mins / 60);
   const m = mins % 60;
   const value = `${String(h24).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
@@ -113,7 +124,7 @@ const TIME_OPTIONS = Array.from({ length: 61 }, (_, i) => {
 /**
  * The grid, plus whatever a row already holds.
  *
- * A stored time off the quarter-hour — or outside 7am–10pm — would otherwise
+ * A stored time off the five-minute grid — or outside 7am–10pm — would otherwise
  * match no option, the picker would show its placeholder, and saving an
  * untouched row would silently move the session. The venue picker deliberately
  * blanks on an unmatched legacy value because a human should re-choose it;
