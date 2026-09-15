@@ -29,12 +29,6 @@ export async function WeekCalendar() {
     .sort((a, b) => trackOrder(a) - trackOrder(b))
     .map((c) => ({ value: c, label: c }));
   const venues: Option[] = dedupe(present.map((s) => s.venueSlug))
-    // Not the RSVP room. It is the one entry in this list that is not a
-    // place: `resolveSessions` mints it from `venueReveal` for an activation
-    // whose address is disclosed on RSVP, so filtering by it would mean "show
-    // me the things whose location I am not being told" — a control with one
-    // member and no outcome worth the click. See the note by `slug: "rsvp"`.
-    .filter((slug) => slug !== "rsvp")
     .map((slug) => ({
       value: slug,
       label: present.find((s) => s.venueSlug === slug)!.venueName,

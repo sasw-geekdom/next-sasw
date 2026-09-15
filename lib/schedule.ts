@@ -47,28 +47,13 @@ export interface FeaturedSession {
   /** The circuit or strand this runs under. Matches the room's session kind. */
   circuit: TrackName | "Social";
   /**
-   * Shown in place of a room, for an activation whose location is disclosed
-   * only to people who RSVP.
+   * A venue that is not one of the week's six.
    *
-   * Alamo Angels hold their brunch somewhere the invitation names and this
-   * site does not; Luma reveals it on RSVP. That is a real constraint and not
-   * a missing field, so it is stated rather than guessed at — the venue is
-   * absent from this repo entirely, which is the only way it cannot leak from
-   * a bundle, an .ics file or a JSON-LD blob.
-   *
-   * `room` is not looked up when this is set. `resolveSessions` builds a room
-   * out of this string instead, so every surface that prints a venue prints
-   * this without knowing anything special is going on.
-   */
-  venueReveal?: string;
-  /**
-   * A venue that is not one of the week's six, and is not a secret either.
-   *
-   * `venueReveal` above already mints a room out of a string, but it does it
-   * for a venue nobody may know — no `place`, so no address can leak. A popup
-   * is the opposite case: a real address people have to find, that simply
-   * isn't one of the rooms. The Cyber, AI & Robotics panel sits in UTSA's San
-   * Pedro II building for one evening.
+   * The Cyber, AI & Robotics panel sits in UTSA's San Pedro II building for
+   * one evening; the speed networking is at Centre Club; Alamo Angels' brunch
+   * is at the Merchant Ice Building. Give it an `address` and the minted room
+   * carries a `place`; leave it off and it carries none, which is how a venue
+   * gets named without its street being published.
    *
    * A seventh entry in `ROOMS` was the other way to do it and is the wrong
    * one. "Five circuits, six rooms" is published copy — the homepage hero, the
@@ -77,13 +62,23 @@ export interface FeaturedSession {
    * the address without joining that set: no port, no tier, no ascii, and no
    * room page of its own.
    *
-   * `room` is not looked up when this is set, exactly as with `venueReveal`.
+   * `room` is not looked up when this is set.
    */
   venuePopup?: {
     name: string;
     /** For the calendar lanes, where the full name truncates. */
     shortName: string;
-    address: string;
+    /**
+     * Optional, because a venue can be named without its street being ours
+     * to publish.
+     *
+     * Alamo Angels are the case: the brunch was `venueReveal` while they were
+     * not naming the place at all, and they now name the building without
+     * having given us an address. Left unset, the minted room carries no
+     * `place`, so nothing reaches the .ics or the JSON-LD — the same property
+     * `venueReveal` was built for, with the name filled in.
+     */
+    address?: string;
   };
   /**
    * Everything on this page fits the screen: the hero carries the message and
@@ -1013,12 +1008,22 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // works without it, which is also how the page's own lockup sets it:
     // the mark over a rule over the event.
     ogTitle: "Alamo Angels 5th Annual Venture Brunch",
-    // Not one of the week's rooms, and deliberately not named here: Alamo
-    // Angels are holding this somewhere they are not sharing publicly, and
-    // Luma reveals it to whoever RSVPs. `room` is never looked up when
-    // `venueReveal` is set — see `resolveSessions`.
-    room: "rsvp",
-    venueReveal: "Location shared on RSVP",
+    // Not one of the week's rooms. This was `venueReveal` while Alamo Angels
+    // were not naming the place at all — the calendar lane read "On RSVP" and
+    // Luma disclosed the rest to whoever registered. They name the building
+    // now, so it is a popup like the other two, with one difference: they
+    // have given us the name and not the street, so `address` is left unset
+    // and nothing reaches the .ics or the JSON-LD. Their own page still has
+    // the directions.
+    //
+    // `room` is never looked up when `venuePopup` is set — see
+    // `resolveSessions`. 300 Main is the nearest of the six.
+    room: "300-main",
+    venuePopup: {
+      name: "Merchant Ice Building",
+      // 21 characters, against a calendar lane 100–300px wide.
+      shortName: "Merchant Ice",
+    },
     circuit: "Capital",
     // On the rail rather than the axis — see `rail`.
     rail: true,
@@ -1731,6 +1736,103 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       coda: "Entrepreneur, educator, student, parent, mentor, investor or none of those — the invitation is the same, and so is the price. Come for one session or stay for all of it; the showcase at one o’clock and the final at two are the natural arrival points for anyone who cannot make the morning.",
       access:
         "Free, and seated on VentureLab’s own Eventbrite rather than the week’s list — theirs is the page holding the count, and they ask you to register in advance because some rooms have one.",
+    },
+  },
+  /**
+   * The second popup of the week, and the only room on the grid a week badge
+   * does not open — see `access`. Centre Club is a private club on the ninth
+   * floor of 112 E Pecan St, a block north of The Rand.
+   */
+  {
+    slug: "founders-investors-speed-networking",
+    page: "founders-investors-speed-networking",
+    heroOnly: true,
+    title: "Founders & Investors Speed Networking",
+    // 36 characters, which a calendar lane cannot hold. "Speed Networking" is
+    // the half that says what happens; the other half says who is in the
+    // room, and the circuit chip beside it is already saying Capital.
+    shortTitle: "Speed Networking",
+    // Not one of the six rooms — see `venuePopup`, built for the Cyber, AI &
+    // Robotics panel and the same shape here.
+    venuePopup: {
+      name: "Centre Club",
+      shortName: "Centre Club",
+      address: "112 E Pecan St",
+    },
+    // Required by the type and never looked up while `venuePopup` is set.
+    // The Rand is the nearest of the six — 110 E Houston St, one block south
+    // — so the value is not a lie if the popup is ever removed.
+    room: "the-rand",
+    circuit: "Capital",
+    blurb:
+      "Rapid-fire introductions between founders and a curated room of investors — by request, not by badge.",
+    when: {
+      start: "2026-10-01T12:00:00-05:00",
+      end: "2026-10-01T14:00:00-05:00",
+    },
+    // Approval-gated, like Cup of Capital and Alamo Angels: the hosts read
+    // every request before a place exists. "Request a seat." is the label
+    // this site gives that, against the "Save a seat." an instant RSVP gets.
+    register: {
+      label: "Request a seat.",
+      href: "https://luma.com/zrfv55lc",
+    },
+    detail: {
+      eyebrow: "The afternoon",
+      lede: [
+        "Rapid-fire conversations between founders and a curated room of investors and business leaders — there because they are ready to back the right thing.",
+      ],
+      // The five co-hosts, all of them already in this repo: Tech Bloc and
+      // Alamo Angels off the partner wall, Founders Institute and InVentures
+      // vendored for Texas Venture Fest and shared from there, Geekdom the
+      // file three other walls use.
+      //
+      // Five ratios from 3.5:1 to 0.6:1, so five different heights — matched
+      // on box height the wordmarks would draw three times the area of the
+      // droplet beside them.
+      poweredBy: [
+        {
+          name: "Tech Bloc",
+          href: "https://techbloc.co/",
+          logo: "/activations/tech-bloc.svg",
+          // Their tenth-anniversary lockup, which is what the partner wall
+          // carries. A 1.5:1 solid — red faces with white type set inside a
+          // drawn box — so the wordmark is a fraction of the mark and this
+          // takes the tallest step on the wall before it is legible at all.
+          heightClass: "h-12 sm:h-14",
+        },
+        {
+          name: "Alamo Angels",
+          href: "https://alamoangels.com/",
+          // The network's own mark, not `alamo-angels-venture-brunch.webp`,
+          // which has the event name set under it for their own page.
+          logo: "/activations/alamo-angels.webp",
+          heightClass: "h-7 sm:h-8",
+        },
+        {
+          name: "Founders Institute San Antonio",
+          href: "https://www.instagram.com/founderinstitutesanantonio/",
+          logo: "/activations/tvf/founders-institute.png",
+          heightClass: "h-10 sm:h-12",
+        },
+        {
+          name: "InVentures",
+          href: "https://inventures.team/",
+          logo: "/activations/tvf/inventures.png",
+          heightClass: "h-9 sm:h-11",
+        },
+        {
+          name: "Geekdom",
+          href: "https://geekdom.com",
+          logo: "/brand/geekdom.png",
+          heightClass: "h-10 sm:h-11",
+        },
+      ],
+      // The one activation on the grid where the week's own registration buys
+      // nothing. Worth stating plainly rather than leaving a reader to infer
+      // it from a button that says something different to the other twenty.
+      access:
+        "Free, and the one room this week a Startup + Tech Week badge does not open — the hosts keep their own list and read every request.",
     },
   },
   {
@@ -3562,12 +3664,7 @@ export function weekCalendar(
     // Ordered by start, then by the canonical room order, so lane assignment
     // downstream is stable: without the tiebreak two activations starting at
     // the same minute could swap columns between renders.
-    .sort(
-      (a, b) =>
-        a.startMin - b.startMin ||
-        ROOMS.findIndex((r) => r.slug === a.venueSlug) -
-          ROOMS.findIndex((r) => r.slug === b.venueSlug),
-    );
+    .sort((a, b) => a.startMin - b.startMin || roomOrder(a) - roomOrder(b));
 
   const dayIndex = new Map(EVENT_DAYS.map((d, i) => [d.iso, i]));
   const spans: CalendarSpan[] = resolved
@@ -3630,6 +3727,16 @@ export interface DayVenue {
   short: string;
   tier: RoomTier;
   count: number;
+  /**
+   * Where the lane's heading links, or null for a venue with no page.
+   *
+   * The six anchor rooms all resolve under /schedule. A venue minted from a
+   * `venuePopup` does not — it exists only for the calendar — and the heading
+   * was building `/schedule/<slug>` for it regardless, which with
+   * `dynamicParams: false` is a 404. Centre Club, UTSA San Pedro II and the
+   * Merchant Ice Building all had one the moment they gained a lane.
+   */
+  href: string | null;
 }
 
 export interface DayCalendar {
@@ -3664,6 +3771,30 @@ export interface DayCalendar {
  * to make a point about its emptiness. So Thursday's brunch rides the rail
  * here as it does in the week, and both views open at 1 PM.
  */
+/**
+ * Position in the canonical room order, with anything unknown sorted last.
+ *
+ * `findIndex` returns -1 for a venue that is not one of the six, which sorted
+ * popups ahead of every anchor room rather than after them.
+ */
+function roomOrder(i: { venueSlug: string }): number {
+  const at = ROOMS.findIndex((r) => r.slug === i.venueSlug);
+  return at === -1 ? Number.MAX_SAFE_INTEGER : at;
+}
+
+/**
+ * A URL-safe key for a venue that has no room record.
+ *
+ * Only ever used as an identity — to group calendar lanes and to build the
+ * room filter's options — never as an address. See `venuePopup`.
+ */
+function slugifyVenue(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export function dayCalendar(
   iso: string,
   extra: CalendarItem[] = [],
@@ -3681,22 +3812,64 @@ export function dayCalendar(
     (s) => index >= s.fromIndex && index <= s.toIndex,
   );
 
-  const venues: DayVenue[] = ROOMS.flatMap((room) => {
-    const onDay = [
-      ...items.filter((i) => i.venueSlug === room.slug),
-      ...spans.filter((s) => s.venueSlug === room.slug),
-    ];
-    if (onDay.length === 0) return [];
-    return [
-      {
-        slug: room.slug,
-        name: room.name,
-        short: room.shortName ?? room.name,
-        tier: room.tier,
-        count: onDay.length,
-      },
-    ];
-  });
+  /**
+   * A lane for every venue with something on, the six anchor rooms first.
+   *
+   * This used to iterate ROOMS and keep the ones with items, which quietly
+   * dropped anything held somewhere that is not one of the six — an
+   * activation with a `venuePopup` had no lane, so it drew nowhere and the
+   * day simply did not show it. Three were missing by the
+   * time anyone noticed: the Cyber, AI & Robotics panel, Alamo Angels'
+   * brunch and the speed networking at Centre Club. All three were on the
+   * week and agenda views, which group by what is present rather than by the
+   * room list, which is why it went unseen.
+   *
+   * ROOMS still leads, so the anchor venues keep their canonical order and
+   * the one-offs follow. Counting is done in one pass over items and spans
+   * rather than a filter per room, which also stops this being quadratic as
+   * the week fills up.
+   */
+  const order = new Map(ROOMS.map((r, i) => [r.slug, i]));
+  const counts = new Map<string, DayVenue>();
+  const note = (
+    slug: string,
+    name: string,
+    short: string,
+    tier: RoomTier,
+  ) => {
+    const seen = counts.get(slug);
+    if (seen) seen.count += 1;
+    else
+      counts.set(slug, {
+        slug,
+        name,
+        short,
+        tier,
+        count: 1,
+        href: order.has(slug) ? `/schedule/${slug}` : null,
+      });
+  };
+  for (const i of items) {
+    note(i.venueSlug, i.venueName, i.venueShort, i.venueTier);
+  }
+  // Spans deliberately do not open a lane.
+  //
+  // They ride on the all-day rail above the columns, not inside one, and the
+  // grid counts only what a column draws — so a venue whose entire presence
+  // on a day was a span got a column headed "0 sessions" standing over
+  // "Nothing here". Central Library on the Friday was the case: the Give-a-LOT
+  // drive runs all week and nothing else is there that day.
+  //
+  // Nothing is lost by dropping it. The rail entry carries its own venue
+  // label, so the drive still says where it is; what goes is an empty column
+  // claiming a room is in use when it is not.
+
+  const venues: DayVenue[] = [...counts.values()].sort(
+    (a, b) =>
+      (order.get(a.slug) ?? Number.MAX_SAFE_INTEGER) -
+        (order.get(b.slug) ?? Number.MAX_SAFE_INTEGER) ||
+      a.name.localeCompare(b.name),
+  );
 
   // Tight to this day's own extent. `Math.min` of an empty list is Infinity,
   // which would lay the grid out with a negative height, so an empty day
@@ -3772,42 +3945,44 @@ export function resolveSessions(
   sessions: FeaturedSession[],
 ): ResolvedSession[] {
   return sessions.flatMap((s) => {
-    // An activation whose location is disclosed on RSVP has no room in the
-    // week's set, and must not borrow one — pointing it at a real venue would
+    // An activation somewhere that is not one of the week's rooms has no room
+    // in the set and must not borrow one — pointing it at a real venue would
     // print an address that is wrong on the grid, in the hero, in the .ics and
-    // in the Event markup. It gets a room made out of `venueReveal` instead,
-    // with no `place`, so `eventLocation` and `place()` have nothing to give
-    // away. See `venueReveal`.
-    if (s.venueReveal) {
-      const venue: Room = {
-        slug: "rsvp",
-        name: s.venueReveal,
-        shortName: "On RSVP",
-        host: s.site?.label ?? "The organizers",
-        desc: s.blurb,
-        tag: s.circuit,
-        port: "p0",
-        tier: "single",
-        // Required on a Room and never drawn for this one, which only ever
-        // reaches the surfaces that print a venue's name.
-        ascii: "",
-        // Empty, so "Everything else at …" never offers a room page that
-        // does not exist.
-        sessions: [],
-      };
-      return [{ ...s, venue }];
-    }
-    // A popup: the same minted room as above, but with its address, because
-    // this one is a place people have to get to. See `venuePopup`.
+    // in the Event markup. It gets a room minted out of `venuePopup` instead.
+    //
+    // There were two of these branches. The other, `venueReveal`, minted a
+    // room from a bare string for an activation whose address was disclosed
+    // only on RSVP, and carried no `place` so nothing could leak. Alamo Angels
+    // were its only user, and when they named their building it turned out
+    // this branch already did that job: leave `address` off and the room is
+    // minted without a `place` exactly as the other one did. One mechanism
+    // rather than two, and the one that survives is the one that can also
+    // name a venue.
     if (s.venuePopup) {
       const venue: Room = {
-        slug: "popup",
+        // Keyed on the venue's own name rather than the literal "popup" this
+        // carried, because the slug is a venue identity downstream: the
+        // calendar groups lanes by it and the week's room filter builds an
+        // option per distinct value. With one popup that was invisible; with
+        // two it is a bug waiting for a date clash — UTSA San Pedro II and
+        // Centre Club were both "popup", so two popups on one day would have
+        // fused into a single lane wearing whichever name sorted first.
+        //
+        // Off the name and not the activation slug, so two activations at the
+        // same popup venue correctly share one lane.
+        //
+        // Safe to invent: nothing links here. `sessions: []` below is what
+        // suppresses "Everything else at …", which is the only place a venue
+        // slug becomes a URL.
+        slug: slugifyVenue(s.venuePopup.name),
         name: s.venuePopup.name,
         shortName: s.venuePopup.shortName,
         host: s.site?.label ?? "The organizers",
         desc: s.blurb,
         tag: s.circuit,
-        place: { address: s.venuePopup.address },
+        ...(s.venuePopup.address
+          ? { place: { address: s.venuePopup.address } }
+          : {}),
         port: "p0",
         tier: "single",
         ascii: "",

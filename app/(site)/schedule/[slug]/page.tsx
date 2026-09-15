@@ -146,14 +146,14 @@ export async function generateMetadata({
           title: schedule.session.title,
           description: (() => {
             const w = schedule.session.when;
-            // An activation whose location is disclosed on RSVP has no venue
-            // to name here — "at Location shared on RSVP" reads as a bug, and
-            // a description is not the place to advertise what is withheld.
-            const at = schedule.session.venueReveal
-              ? ""
-              : ` at ${schedule.session.venue.name}`;
+            // Always named. This used to go blank for an activation whose
+            // address was disclosed only on RSVP, because "at Location shared
+            // on RSVP" read as a bug and a description is no place to
+            // advertise what is withheld. Every venue on the week is named
+            // now, popups included, so the guard went with the field.
+            const at = ` at ${schedule.session.venue.name}`;
             if (!w) {
-              return `${schedule.session.blurb}${at ? ` At ${schedule.session.venue.name}` : ""} during San Antonio Startup + Tech Week, Sept 28 – Oct 2, 2026.`;
+              return `${schedule.session.blurb} At ${schedule.session.venue.name} during San Antonio Startup + Tech Week, Sept 28 – Oct 2, 2026.`;
             }
             const { date, time } = whenLabels(w);
             return `${schedule.session.blurb} ${date}, ${time}${at} — part of San Antonio Startup + Tech Week.`;

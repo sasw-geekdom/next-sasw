@@ -85,7 +85,14 @@ export function DayCalendarGrid({
             key: v.slug,
             label: v.short,
             sublabel: count === 1 ? "1 session" : `${count} sessions`,
-            href: `/schedule/${v.slug}`,
+            // Null for a popup or an RSVP venue, which has no page to reach
+            // — see `DayVenue.href`. Built here unconditionally before those
+            // venues had lanes at all, which turned each of them into a 404
+            // the moment they did.
+            // `?? undefined` because the column API treats an absent href as
+            // "render the heading as plain text", which is exactly what a
+            // venue with no page wants.
+            href: v.href ?? undefined,
           };
         }),
     [venues, venue, shownItems],
