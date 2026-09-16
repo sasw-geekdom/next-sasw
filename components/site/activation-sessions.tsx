@@ -109,9 +109,26 @@ export function ActivationSessions({
             </p>
             {/* The talk's own title carries the section. In the list it is an
                 h3 under "What's on, in order"; alone, that heading would be
-                a label for a single thing sitting right beneath it. */}
+                a label for a single thing sitting right beneath it.
+                
+                Linked, like every title in the list branch. This was the last
+                session title on the site still rendered as dead text: the
+                rule used to be that a session inside an activation had no page
+                of its own, and when that changed the list learned about it and
+                this branch did not. The one activation currently running a
+                single session is The Model, so its talk was the only one you
+                could read and not open. */}
             <h2 className="mt-4 text-pretty font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
-              {solo.title}
+              <Link
+                href={`/schedule/talk/${solo.slug}`}
+                className="group/solo rounded-sm transition-colors duration-200 hover:text-magenta focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-magenta"
+              >
+                {solo.title}
+                <ArrowUpRight
+                  className="ml-2 inline h-6 w-6 -translate-y-0.5 opacity-45 transition-opacity duration-200 group-hover/solo:opacity-100 sm:h-7 sm:w-7"
+                  aria-hidden="true"
+                />
+              </Link>
             </h2>
             {solo.description && (
               <p className="mt-5 text-pretty text-lg leading-relaxed text-white/70">

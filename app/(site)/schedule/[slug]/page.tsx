@@ -44,6 +44,7 @@ import {
 import { liveCalendarItems } from "@/lib/live-schedule";
 import { EVENT_DAYS } from "@/lib/event";
 import { PYSA } from "@/lib/pysa";
+import { MODEL_LAVENDER } from "@/lib/the-model";
 import { BackLink } from "@/components/site/back-link";
 import { activationEvent, jsonLd, venuePlace } from "@/lib/structured-data";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
@@ -232,6 +233,63 @@ function heroTitleParts(session: ResolvedSession): [string] | [string, string] {
  * is quoted instead, which is hers and needs no title. Upgrade this if she
  * confirms the role.
  */
+/**
+ * Why a creative-economy afternoon is here, pinned beside its running order.
+ *
+ * The Model's half of what `PysaAside` does for PySanAntonio, and written off
+ * the same source of truth its band is: lib/the-model. Two things are carried
+ * over from the long note on THE_MODEL's hook, because both are easy to
+ * undo by accident.
+ *
+ * It does not sell anything. Three earlier passes at that hook borrowed
+ * sentence shapes from elevenlabs.io/creative and runway.com and each one came
+ * back a capability promise — "turn ideas into finished image, film and
+ * voice". An event cannot turn a reader's ideas into anything. Borrow those
+ * sites for vocabulary, never for sentence shape.
+ *
+ * And the order of the three nouns is load-bearing: creatives, founders,
+ * developers run in the same order as The Creative Futures, Tech Bloc and
+ * DEVSA in the wall above. Nothing labels that mapping and nothing needs to —
+ * reorder MODEL_ORGANIZERS and this quietly stops working.
+ */
+function ModelAside() {
+  return (
+    <>
+      <p
+        className="font-mono text-xs uppercase tracking-widest"
+        style={{ color: MODEL_LAVENDER }}
+      >
+        Why this room
+      </p>
+      <h2 className="mt-3 font-display text-3xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-4xl">
+        Three rooms,
+        <br />
+        one afternoon.
+      </h2>
+      <div className="mt-6 space-y-4 text-pretty text-white/60">
+        <p>
+          Creatives, founders and developers do not usually share a floor. The
+          Creative Futures, Tech Bloc and DEVSA put them on one for five hours
+          &mdash; a community-driven activation that brings San Antonio&rsquo;s
+          creative economy directly into the same room as the people building
+          the tools it runs on.
+        </p>
+        <p>
+          It opens on what is coming, and then it gets specific: local makers
+          on the work itself &mdash; virtual reality, audio, Claude, and the
+          image and video models &mdash; and on the recipes they actually ship
+          with rather than the ones that demo well.
+        </p>
+        <p>
+          Nobody is selling you a tool this afternoon. Every session here is
+          somebody showing how they made something, in a city that has been
+          making things a long time.
+        </p>
+      </div>
+    </>
+  );
+}
+
 function PysaAside() {
   return (
     <>
@@ -1127,7 +1185,22 @@ function ActivationPage({
                section was empty black for the length of the afternoon. The
                pinned column fills it with the thing a reader arriving from
                /schedule does not have: who is putting this on. */
-            aside={isPysa ? <PysaAside /> : undefined}
+            /* PySanAntonio and The Model. Both are long afternoons whose
+               rows cap at a reading measure, so the right half of this
+               section was empty black for the length of the event; the
+               pinned column fills it with the thing a reader arriving from
+               /schedule does not have, which is who is putting this on and
+               why it is one room rather than three.
+
+               Only reaches the page at two sessions or more. Below that
+               `ActivationSessions` takes its solo branch, where the talk's
+               own title is the heading and a column of context beside it
+               would outweigh the thing it is context for — which is where
+               The Model sits today, with one session in the CMS against an
+               afternoon its own blurb describes as five. */
+            aside={
+              isPysa ? <PysaAside /> : isModel ? <ModelAside /> : undefined
+            }
           />
         )
       ) : isHeroOnly ? null : (
