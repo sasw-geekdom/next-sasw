@@ -30,6 +30,12 @@ export const revalidate = 300;
 // own page, which is the whole failure this route exists to fix. Prerendered
 // where they are known, rendered on demand and cached where they are not.
 
+// Where a description stops fitting the capped column — the speaker page's
+// LONG_BIO, for the same box at the same size. Only past it does the fade
+// appear; a shorter one never overflows, and a hint at a scroll that is not
+// there is a lie.
+const LONG_DESCRIPTION = 800;
+
 const ARROW = cn(ARROW_MOTION, "h-3.5 w-3.5");
 const ARROW_OUT = cn(
   ARROW,
@@ -193,25 +199,10 @@ export default async function TalkPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(event) }}
       />
-      {/* It was one screen: `lg:h-[calc(100vh-4rem)]`, with the description
-          capped inside it, scrolling in its own box under a mask fade once it
-          passed ~520 characters.
-          
-          The reasoning was that a description is whatever an organiser typed,
-          so the copy column should absorb the slack rather than the page. But
-          absorbing it meant clipping it — the BDO Alliance launch runs to
-          ~580 characters and arrived with its last two sentences behind a
-          fade, in a box a reader has to notice is scrollable before they can
-          finish reading the one thing the page exists to show.
-          
-          The repo has already settled this argument elsewhere, in the
-          agenda's own note: "nested scroll areas trap the wheel, double the
-          scrollbars, and break the browser's own find-on-page." A page that
-          scrolls is not a design failure; a paragraph that cannot be read
-          without discovering a hidden scroller is. So the page scrolls, and
-          the links below the copy go under the fold on a long one — which is
-          the right thing to lose, since they are onward navigation and the
-          description is the content. */}
+      {/* Not one screen. This page was once `lg:h-[calc(100vh-4rem)]` with
+          everything inside it, which clipped descriptions to fit a viewport.
+          Now the page scrolls and only the description is capped, at the size
+          the speaker bio uses — see the note on it below. */}
       <div className="mx-auto w-full max-w-7xl px-6 py-10 lg:py-12">
         <BackLink
           // Only the fallback — BackLink prefers router.back(). The anchor is
@@ -370,18 +361,37 @@ export default async function TalkPage({
             </dl>
 
             {/* Capped and scrolled inside itself on `lg`, exactly as the
-                speakers' bio is, and for the same reason: a description is
-                whatever an organiser typed, and a long one pushed the links
-                below it off the screen. Below `lg` the page is one column
-                that scrolls as a whole, where a nested scroll box is
-                something to fight past rather than a convenience. */}
-            {/* No scroller, no mask, no focus stop to give a scroller a
-                keyboard route — all three existed to serve the viewport cap
-                that is gone. It is a paragraph. */}
+                speakers' bio is — same cap, same fade, same threshold, so the
+                two slug pages keep the same balance side by side.
+
+                This page went through a version without it, on the argument
+                that a nested scroller hides the end of the one thing the page
+                exists to show. What that version cost was the balance: a
+                1,300-character abstract ran the copy column hundreds of pixels
+                below the portrait and pushed the links under it off screen,
+                which is the exact imbalance the speaker page already solved.
+                The mitigations that argument asked for are the ones the bio
+                carries — the fade only where there is more to read, and a
+                focus stop so a keyboard can scroll it.
+
+                `lg:` only. On a phone the page is one column that scrolls as a
+                whole, and a box inside it is something to fight past. */}
             {row.description && (
-              <p className="mt-7 max-w-2xl whitespace-pre-line text-pretty text-lg leading-relaxed text-white/70">
-                {row.description}
-              </p>
+              <div
+                tabIndex={0}
+                role="region"
+                aria-label={`About ${row.title}`}
+                className={cn(
+                  "mt-7 max-w-2xl lg:max-h-[min(24rem,50vh)] lg:overflow-y-auto lg:pr-4",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta",
+                  row.description.length > LONG_DESCRIPTION &&
+                    "lg:pb-10 lg:[mask-image:linear-gradient(to_bottom,black_calc(100%-2.5rem),transparent)]",
+                )}
+              >
+                <p className="whitespace-pre-line text-pretty text-lg leading-relaxed text-white/70">
+                  {row.description}
+                </p>
+              </div>
             )}
 
             {/* At the foot, with the other credits, rather than under the
