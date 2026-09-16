@@ -30,10 +30,9 @@ import type { ToolMarkName } from "@/lib/tool-marks";
 // There is no output node. Showing one would put a single finished artefact at
 // the end of a diagram whose whole point is the breadth at the front.
 //
-// There is no output node. Showing one would put a single finished artefact at
-// the end of a diagram whose whole point is the breadth at the front. It also
-// leaves public/the-model/key-art-loop.mp4 and key-art-poster.jpg unused —
-// they are the video the previous build ended on, kept in case it returns.
+// The previous build ended on a key-art video — a synth with the SASTW mark on
+// its screen. That concept was dropped, and its three files (key-art.png, the
+// loop and its poster) were removed rather than kept in case it returned.
 //
 // Positions are percentages of the canvas, hand-placed. Anchors are not: they
 // are measured off the rendered cards, because a card is as wide as its text.
