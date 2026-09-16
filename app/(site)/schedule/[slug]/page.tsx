@@ -248,7 +248,7 @@ function heroTitleParts(session: ResolvedSession): [string] | [string, string] {
  * sites for vocabulary, never for sentence shape.
  *
  * And the order of the three nouns is load-bearing: creatives, founders,
- * developers run in the same order as The Creative Futures, Tech Bloc and
+ * builders run in the same order as The Creative Futures, Tech Bloc and
  * DEVSA in the wall above. Nothing labels that mapping and nothing needs to —
  * reorder MODEL_ORGANIZERS and this quietly stops working.
  */
@@ -268,7 +268,7 @@ function ModelAside() {
       </h2>
       <div className="mt-6 space-y-4 text-pretty text-white/60">
         <p>
-          Creatives, founders and developers do not usually share a floor. The
+          Creatives, founders and builders do not usually share a floor. The
           Creative Futures, Tech Bloc and DEVSA put them on one for five hours
           &mdash; a community-driven activation that brings San Antonio&rsquo;s
           creative economy directly into the same room as the people building

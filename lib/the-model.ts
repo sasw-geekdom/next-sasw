@@ -120,9 +120,18 @@ export const THE_MODEL = {
    *
    * The setup's three nouns run in the same order as the three logos in the
    * `// powered by` row directly beneath them — creatives/Creative Futures,
-   * founders/Tech Bloc, developers/DEVSA. Nothing labels that mapping and
+   * founders/Tech Bloc, builders/DEVSA. Nothing labels that mapping and
    * nothing needs to; the order is the entire mechanism. It is also load-bearing
    * now: reorder MODEL_ORGANIZERS and this line quietly stops working.
+   *
+   * "builders", not "developers", in the third slot — at the organisers'
+   * direction, because that slot is DEVSA's and builders is DEVSA's own word
+   * for the people it represents. It was "developers" until then. Note this is
+   * the opposite of the turn's rule below and does not contradict it: there,
+   * "builders" was rejected because the turn's noun has to stand for all three
+   * groups and DEVSA's word hands the afternoon to one of them. Here the noun
+   * is one of the three on purpose, so DEVSA's word is exactly right.
+   * 50 characters, inside the 52 ceiling noted at the end of this block.
    *
    * The turn has no subject on purpose. Every version that named a doer —
    * "how the work gets made" (nobody in it, so the work made itself), then
@@ -154,7 +163,7 @@ export const THE_MODEL = {
    * avoid in the first place.
    */
   tagline: {
-    setup: "Creatives, founders and developers in the same room.",
+    setup: "Creatives, founders and builders in the same room.",
     turn: "An afternoon of showing each other what comes next.",
   },
 
