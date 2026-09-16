@@ -83,6 +83,26 @@
         display: inline-block;
       }
 
+      <!--if:subtitle-->
+      /* A hook under the headline, only where a card gives one — the
+         single-speaker template's blurb, same rule, same size, same cyan.
+         
+         Optional so the card this template was drawn for keeps its layout:
+         Hernandez and Gallegos run a four-line headline with nothing under
+         it. A pair card that trims its title to two lines has the height for
+         a line of description instead, and the description is where a talk
+         says what actually happens in it. */
+      .blurb {
+        margin-top: 26px;
+        max-width: 840px;
+        border-left: 3px solid var(--cyan);
+        padding-left: 26px;
+        font-size: 29px;
+        line-height: 1.45;
+        color: rgba(255, 255, 255, 0.86);
+      }
+      <!--/if:subtitle-->
+
       .pair {
         margin-top: 40px;
         display: grid;
@@ -108,18 +128,13 @@
 
       /* Two values per portrait, and both have to be solved rather than
          reused: `height` matches the head sizes, `top` aligns the crowns.
-         Their crops start at different depths — she begins 76px into a 1350px
-         frame, he begins 130px — so equal offsets sit one of them lower and
-         read as them being different heights.
+         Two crops rarely start at the same depth, so equal offsets sit one
+         person lower and read as them being different heights.
 
-         Solved against Daniel as the reference: both heads render ~284px with
-         the crown 14px below the frame. */
+         The numbers live on the card, per slot, not here — this template
+         serves more than one pair, and which person is `a` is the card's
+         call. See hernandez-gallegos and rose-chavez in cards.mjs. */
       .who.a .shot img {
-        /* 740, not the 651 the measurement gave. The heuristic reads
-           head-plus-neck, and her hair hides the shoulder line that ends it,
-           so her head measured larger than it draws and the derived height
-           came out ~15% short. Sized by eye; the offset is then solved to put
-           her crown back on his. */
         height: {{heightA}}px;
         top: {{topA}}px;
       }
@@ -221,6 +236,9 @@
       <div class="eyebrow">// Speakers · The Model</div>
 
       <h1>{{headline}}</h1>
+      <!--if:subtitle-->
+      <p class="blurb">{{subtitle}}</p>
+      <!--/if:subtitle-->
 
       <div class="pair">
         <div class="who a">

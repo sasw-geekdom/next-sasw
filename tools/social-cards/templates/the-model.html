@@ -176,6 +176,34 @@
       }
       <!--/if:org-->
 
+      <!--if:moderatorName-->
+      /* The chair, as a line under the hook rather than anything beside the
+         speaker. Indented to the hook's text rather than its rule, so it
+         reads as part of the description of the talk — who is running it —
+         and not as a second entry in the name block below.
+         
+         No face. A thumbnail beside the credit was tried and read as a second
+         speaker at a smaller size. */
+      .mod {
+        margin-top: 18px;
+        padding-left: 29px;
+        font-size: 22px;
+        color: rgba(255, 255, 255, 0.72);
+      }
+      .mod .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 15px;
+        letter-spacing: 0.2em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+        margin-right: 12px;
+      }
+      .mod .who {
+        font-weight: 600;
+        color: var(--lav);
+      }
+      <!--/if:moderatorName-->
+
       .facts {
         margin-top: 30px;
         display: flex;
@@ -236,6 +264,9 @@
       <!--if:subtitle-->
       <p class="blurb">{{subtitle}}</p>
       <!--/if:subtitle-->
+      <!--if:moderatorName-->
+      <p class="mod"><span class="label">Moderated by</span><span class="who">{{moderatorName}}</span></p>
+      <!--/if:moderatorName-->
 
       <div class="spacer"></div>
 

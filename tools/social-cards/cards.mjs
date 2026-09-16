@@ -309,7 +309,10 @@ export const EVENTS = {
     template: "the-model.html",
     // The keynote is the one card in the set that carries a time — it is a
     // fixed slot inside the afternoon rather than the afternoon itself.
-    facts: ["Monday, September 28  ·  1:30 PM", "Geekdom, 3rd Floor"],
+    // 1:10, not the 1:30 this said when the slot was first set — the CMS
+    // moved it and the talk page, the grid and the .ics all followed. A card
+    // is the one surface that does not read the CMS for its time.
+    facts: ["Monday, September 28  ·  1:10 PM", "Geekdom, 3rd Floor"],
     logos: [
       // 40, where the CMS ring took 84. Different file, different shape: the
       // lockup is 3.2:1, so 40 draws it 127 across — beside Tech Bloc rather
@@ -422,6 +425,49 @@ export const EVENTS = {
   },
 };
 
+/**
+ * The Model's poster, shared by the still and the motion card so the two
+ * cannot drift — every word, fact and logo is written once. The motion card
+ * differs only in its art: a captured sequence of the node graph walking
+ * itself on, rather than the still of where it ends.
+ */
+const MODEL_POSTER = {
+  event: "the-model",
+  template: "activation-poster.html",
+  accent: "#c0b4fc",
+  // A still of the live component, not a picture of one — `ModelFlow` on
+  // the activation's own page, captured at 2x. The same relationship
+  // `bolt-current-og.png` has to the WebGL hero, and the reason this poster
+  // could not be rebuilt until now: its art was never a file. What is in
+  // `public/the-model/` is `code-select.png`, a different graphic.
+  art: "public/the-model/node-graph.png",
+  artWidth: 880,
+  eyebrow: "// The Rand · AI & Applied Innovation",
+  // The lockup is this poster's only mark — Access Granted gives the row's
+  // left half to DEVSA, and this one gives its right half to the dates.
+  lockupHeight: 40,
+  // Figure and ground, not two colours of ink: "MODEL" is knocked out of a
+  // lavender panel, which is this event's own device and the reason the
+  // template carries `.panel` as well as `.hit`.
+  headline: 'The <span class="panel">Model</span>',
+  headlineSize: 130,
+  // One sentence a line, broken by hand. Left to wrap at this size it
+  // split "An / afternoon", which reads as a setup and a stray word rather
+  // than as the two halves of the hook in lib/the-model.ts.
+  subtitle:
+    "Creatives, founders and builders in the same room.<br />An afternoon of showing each other what comes next.",
+  facts: [
+    "Monday, September 28, 2026  ·  1:00 – 6:00 PM",
+    "Geekdom, 3rd Floor",
+  ],
+  poweredLabel: "// Powered by",
+  logos: [
+    { repo: "public/activations/the-creative-futures.webp", height: 40 },
+    { partner: "Tech Bloc", height: 60 },
+    { repo: "public/access-granted/orgs/devsa.png", height: 56 },
+  ],
+};
+
 export const CARDS = [
   // ─── PySanAntonio ─────────────────────────────────────────────────────────
   {
@@ -508,12 +554,19 @@ export const CARDS = [
     event: "the-model",
     // One card, not two: they are co-founders of the same company giving one
     // talk, and the pairing is the story. Either can post it.
-    speakers: ["serena-hernandez", "daniel-gallegos"],
+    // Daniel first, at the organisers' request — the order the pair is
+    // credited in, left to right.
+    speakers: ["daniel-gallegos", "serena-hernandez"],
     headline:
       'What happens when<br /><span class="hit">creative storytelling</span><br />collides with<br />startup strategy?',
+    // Swapped with the speakers, so each crop keeps its own solved numbers.
+    // Solved against Daniel: both heads ~284px, crowns 14px under the frame.
+    // Serena's 740 is by eye, not the probe's 651 — her hair hides the
+    // shoulder line the probe watches for, so it read her head as longer
+    // than it draws and came out ~15% short.
     portraits: [
-      { height: 740, top: -28 },
       { height: 622, top: -46 },
+      { height: 740, top: -28 },
     ],
   },
 
@@ -563,6 +616,98 @@ export const CARDS = [
     // head but brought her crown to within 35px of the headline, where his has
     // room to breathe, so 960 trades a little size back for that clearance.
     portrait: { height: 960, left: 439 },
+  },
+
+  {
+    id: "the-model-speakers-rose-chavez",
+    event: "the-model",
+    // One card for a two-speaker talk, as hernandez-gallegos is: the talk is
+    // theirs jointly and either can post it.
+    speakers: ["aj-rose", "diego-chavez"],
+    // The title to its colon and its subject, and the description's own
+    // example underneath it.
+    //
+    // It ran the whole submitted title first, which fit in four lines and
+    // said where the talk applies — "for High-Traffic Physical Spaces" — but
+    // not what anyone will see in it. The description has that: a live
+    // convention booth turning attendees into printed vinyl-toy figures in
+    // under ninety seconds, with no cloud in the loop. That is the hook, and
+    // it lands on the card's own title — "Beyond the Cloud" — without
+    // restating it. The panel stays on "Offline AI Pipelines", the subject.
+    headline:
+      'Beyond the Cloud: Building<br /><span class="hit">Offline AI Pipelines</span>',
+    // The description's own example, as a sentence rather than a spec line.
+    //
+    // It has three candidates and this is the only concrete one. The opening —
+    // "Cloud APIs promise simplicity, but live event floors demand zero
+    // latency" — is the talk's argument, but it is abstract under a headline
+    // that is already abstract, and would say "Beyond the Cloud" twice. The
+    // close, Las Vegas and Denver trade shows, is credibility rather than a
+    // reason to stop scrolling. The booth is the thing a reader can picture.
+    //
+    // A first pass ran "Attendee photos to printed vinyl-toy figures in under
+    // 90 seconds — 100% local, zero internet": a fragment, and it dropped
+    // "big-head", which is the word that makes the image. "No internet" goes
+    // too — the headline has already said offline.
+    //
+    // Broken by hand at two lines; left to wrap, a hook this long orphans its
+    // last word and pushes the names below where the sibling card sets them.
+    subtitle:
+      "A convention photo booth that turns attendees into<br />big-head vinyl toys, printed in under 90 seconds.",
+    // Solved against the fade, not the probe.
+    //
+    // The template darkens the bottom 42% of each 408px frame — load-bearing,
+    // since without it the crop ends each figure on a hard line — so a chin
+    // has to land above 237px or the face goes dim. The probe's pair drew
+    // their heads small; scaled up by a fifth "to match" the sibling card,
+    // they drew ~295px crown to chin against Daniel's ~205, a head and a half
+    // bigger, with AJ's beard and Diego's jaw inside the fade.
+    //
+    // So both are solved from measured crown and chin, as fractions of each
+    // frame: head ~215px (level with hernandez-gallegos), chin at ~225px (just
+    // above the fade), crown ~10px under the edge.
+    portraits: [
+      { height: 646, top: -76 },
+      { height: 592, top: -43 },
+    ],
+  },
+
+  {
+    id: "the-model-speaker-cynthia-gentry",
+    // Same shape as leon-hitchens and jonathan-perry: The Model's facts, the
+    // single-speaker template, a talk inside the afternoon.
+    event: "the-model",
+    template: "the-model.html",
+    speaker: "cynthia-gentry",
+    eyebrow: "// The Model \u00b7 AI & Applied Innovation",
+    /**
+     * The submitted title, whole, with the panel on "Directing".
+     *
+     * Not on "Prompt", which is the obvious noun and the wrong one: the talk
+     * argues the prompt is the least interesting part of the work, and the
+     * lavender on it would mark the half she is arguing against — the same
+     * trap maria-consuelo-gonima's note describes for "not just the product".
+     * Directing is what the talk is about.
+     *
+     * Two lines, at 72. It ran three at 76, and the third line pushed the
+     * hook below it down into her hair: her crop is tight, 50px from crown to
+     * frame, so she reaches higher on the card than anyone else in the set
+     * and the copy above her has less room to spend.
+     */
+    headline:
+      'Beyond the Prompt:<br /><span class="hit">Directing</span> in the Age of AI',
+    headlineSize: 72,
+    // Her description's opening line, verbatim. It is the hook the talk wrote
+    // for itself, and it pays off the headline without restating it.
+    subtitle:
+      "The prompt might be the least interesting part of making a film with AI.",
+    // Sized against leon-hitchens and jonathan-perry rather than the probe's
+    // 740, which drew her head a sixth smaller than theirs. 820, a shade under
+    // their ~331px head, because her crown sits so near the top of her own
+    // frame: at 862 her hair rose into the end of the hook, and the 40px
+    // taken off comes out of where her crown lands rather than out of her
+    // face.
+    portrait: { height: 820, left: 439 },
   },
 
   {
@@ -648,6 +793,10 @@ export const CARDS = [
     // His record carries no company; the card lists where he has worked, which
     // is the credential that matters for this talk.
     org: "Meta · MoonPay · Acorns · Paxos",
+    // The CMS has Maria Consuelo Gonima chairing it. Credited under the hook,
+    // by name only: this is his keynote, and she has a card of her own for her
+    // own talk.
+    moderator: "maria-consuelo-gonima",
     portrait: { height: 880, left: 500 },
   },
 
@@ -953,32 +1102,6 @@ export const CARDS = [
     subtitle: "Every other room this week is people talking about technology.",
     facts: ["Wednesday, September 30  ·  1 – 6 PM", "Geekdom, 3rd Floor"],
     portrait: { height: 980, left: 470 },
-  },
-
-  {
-    id: "the-model-event",
-    event: "the-model",
-    art: "public/the-model/key-art.png",
-    // Explicit, because The Model's *event* default is `the-model-pair.html`
-    // — the two-speaker layout — and its single-speaker cards each name
-    // `the-model.html` themselves. Without this the event card renders through
-    // the pair template, which hardcodes its own eyebrow, positions portraits
-    // by `top` rather than `left`, and drops the blurb.
-    template: "the-model.html",
-    // "// The Model", like every card on this template — the eyebrow is where
-    // it names itself, since the template draws no wordmark of its own.
-    eyebrow: "// The Model",
-    headline: "What comes<br />next.",
-    // 76, the size its speaker cards use. 118 is Access Granted's, and this
-    // template's measure is narrower.
-    headlineSize: 76,
-    subtitle: "Creatives, founders and developers in the same room.",
-    facts: ["Monday, September 28  ·  1 – 6 PM", "Geekdom, 3rd Floor"],
-    // Not a person's numbers. The key art is a wide illustration with deep
-    // transparent margin, and the template's scrim runs solid black to 20% of
-    // the width and clears at 52% — so at a portrait's `left: 500` the art was
-    // half painted out and half off the right edge. Placed clear of both.
-    portrait: { height: 690, left: 452 },
   },
 
   {
@@ -1887,36 +2010,76 @@ export const CARDS = [
 
   {
     id: "the-model-poster",
-    event: "the-model",
-    template: "activation-poster.html",
-    accent: "#c0b4fc",
-    // A still of the live component, not a picture of one — `ModelFlow` on
-    // the activation's own page, captured at 2x. The same relationship
-    // `bolt-current-og.png` has to the WebGL hero, and the reason this poster
-    // could not be rebuilt until now: its art was never a file. What is in
-    // `public/the-model/` is `code-select.png`, a different graphic.
-    art: "public/the-model/node-graph.png",
-    artWidth: 880,
-    eyebrow: "// The Rand · AI & Applied Innovation",
-    // The lockup is this poster's only mark — Access Granted gives the row's
-    // left half to DEVSA, and this one gives its right half to the dates.
-    lockupHeight: 40,
-    // Figure and ground, not two colours of ink: "MODEL" is knocked out of a
-    // lavender panel, which is this event's own device and the reason the
-    // template carries `.panel` as well as `.hit`.
-    headline: 'The <span class="panel">Model</span>',
-    headlineSize: 130,
-    subtitle:
-      "Creatives, founders and developers in the same room. An afternoon of showing each other what comes next.",
-    facts: [
-      "Monday, September 28, 2026  ·  1:00 – 6:00 PM",
-      "Geekdom, 3rd Floor",
-    ],
-    poweredLabel: "// Powered by",
-    logos: [
-      { repo: "public/activations/the-creative-futures.webp", height: 40 },
-      { partner: "Tech Bloc", height: 60 },
-      { repo: "public/access-granted/orgs/devsa.png", height: 56 },
+    ...MODEL_POSTER,
+  },
+
+  /**
+   * The lead, for social: the poster with its node graph animating on, as it
+   * does at the top of the activation page.
+   *
+   * The still stays the art of record — it is the picture every frame of this
+   * ends on. What this adds is the thing the page does and a picture cannot:
+   * the pointer walking the top row, the wires drawing, the nodes lighting in
+   * the order the work actually runs.
+   *
+   * Frames come from capture-model-flow.mjs, which films the live component
+   * rather than re-drawing it, so a change to the graph on the site is a
+   * re-capture here rather than a second implementation to keep in step.
+   * 60 frames of the site's 1.5s intro play over 2.5s — the reasoning is in
+   * that script — with a second of the empty graph first and five of the
+   * finished one after.
+   */
+  {
+    id: "the-model-motion",
+    ...MODEL_POSTER,
+    art: "tools/social-cards/.cache/model-flow/frame-059.png",
+    artFrames: {
+      dir: "tools/social-cards/.cache/model-flow",
+      fps: 24,
+      holdStart: 1,
+      holdEnd: 5,
+    },
+  },
+
+  /**
+   * The second slide: the programme, under the line the first slide's hook
+   * ends on.
+   *
+   * "What comes next." was the headline of an earlier Model card and too
+   * good to lose with it, and it only works here. On the lead poster it would
+   * sit sixty pixels above the hook's own "what comes next"; over the lineup
+   * it points at something — the next five hours — and the keynote opening
+   * them is titled "…and what to build next". The lead says what The Model
+   * is; this says what happens in it.
+   *
+   * No hook: it would repeat the headline. No art: the rows take its slot.
+   *
+   * Titles are cut to what is legible at this size, each from its own talk
+   * page; the full ones are a tap away. Alamo City AI has no speaker and a
+   * title that is its own name, so its second line is the description's own
+   * phrase, "building over broadcasting". Daniel before Serena, as the
+   * organisers asked on their card.
+   */
+  {
+    id: "the-model-lineup",
+    ...MODEL_POSTER,
+    art: null,
+    // Names the event, where the lead's eyebrow names the room: the lead has
+    // "THE MODEL" as its headline, and this slide — shared on its own, as a
+    // second slide often is — would otherwise not say what it is the lineup of.
+    eyebrow: "// The Model \u00b7 AI & Applied Innovation",
+    headline: "What comes next.",
+    headlineSize: 104,
+    subtitle: "",
+    rows: [
+      { at: "1:10", who: "The Next Era of the Creator Economy", what: "Keynote \u00b7 Justin Johnson" },
+      { at: "2:20", who: "Beyond the Cloud", what: "AJ Rose & Diego Chavez" },
+      { at: "2:45", who: "Let the Machines Win", what: "Jonathan Perry" },
+      { at: "3:10", who: "Ship the Story, Not Just the Product", what: "Maria Consuelo Gonima" },
+      { at: "3:35", who: "Beyond the Prompt", what: "Cynthia Gentry" },
+      { at: "4:00", who: "Putting Grok Bot and Agents to Work", what: "Leon Hitchens" },
+      { at: "4:25", who: "Alamo City AI", what: "Building over broadcasting" },
+      { at: "5:30", who: "Storytelling Meets Startup Strategy", what: "Daniel Gallegos & Serena Hernandez" },
     ],
   },
 

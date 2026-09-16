@@ -21,7 +21,7 @@
  *   pnpm add -D playwright && pnpm exec playwright install chromium
  */
 
-import { readFile, writeFile, mkdir, copyFile, rm } from "node:fs/promises";
+import { readFile, readdir, writeFile, mkdir, copyFile, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, dirname, extname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -330,6 +330,24 @@ async function main() {
     }
 
     /**
+     * The chair, where a talk has one — resolved by slug like a speaker, but
+     * kept out of `people`. Everything downstream of `people` treats its
+     * members as the subject of the card: the pair template gives each a
+     * portrait, the single template names the first. A moderator is neither.
+     *
+     * Name only. The first pass staged her headshot as a thumbnail beside the
+     * credit, and it read as a second speaker at a smaller size; a line of
+     * text under the hook says what she is doing on the talk without putting
+     * a face in competition with the one it is about.
+     */
+    let moderator = null;
+    if (card.moderator) {
+      moderator = bySlug.get(card.moderator);
+      if (!moderator)
+        throw new Error(`${card.id}: no speaker "${card.moderator}" in the CMS`);
+    }
+
+    /**
      * The marks in a field: every activation and every partner behind them.
      *
      * `repo` for one vendored here, `url` for one that is not — Alamo Python
@@ -592,6 +610,7 @@ async function main() {
       // A card may override what the CMS says — see mason-egger.
       role: card.role ?? a?.role ?? "",
       org: card.org ?? a?.org ?? "",
+      moderatorName: moderator?.name ?? "",
       portraitHeight: card.portrait?.height,
       portraitLeft: card.portrait?.left,
       // Lifts the figure off the bottom edge. 0 for every portrait — a person
@@ -688,6 +707,51 @@ async function main() {
         // clip behind it *is* the picture, and a transparent PNG there
         // composites over nothing and comes out as a black frame.
         await page.screenshot({ path: f, omitBackground: !!card.video });
+        stills.push({ file: f, hold });
+      }
+    }
+
+    /**
+     * A card whose art is a sequence rather than a picture.
+     *
+     * The motion poster's art is a captured animation — The Model's node graph
+     * walking itself on, from capture-model-flow.mjs — and the poster around
+     * it does not move. So the card is shot once per frame with only the
+     * art's `src` swapped, which keeps everything that is not the animation
+     * pixel-identical from the first frame to the last, and costs one
+     * screenshot a frame rather than any compositing geometry: the frames drop
+     * into the same `<img>` a still poster uses, at the same size, sized by
+     * the same CSS.
+     *
+     * The first and last frames hold. A walk that starts the instant a video
+     * does is over before a feed has stopped scrolling, and one that ends the
+     * instant it arrives never shows the finished graph, which is the poster.
+     */
+    if (card.artFrames) {
+      const a = card.artFrames;
+      const dir = join(REPO, a.dir);
+      const frames = existsSync(dir)
+        ? (await readdir(dir)).filter((n) => n.endsWith(".png")).sort()
+        : [];
+      if (frames.length < 2)
+        throw new Error(
+          `${card.id}: no frames in ${a.dir} — run tools/social-cards/capture-model-flow.mjs`,
+        );
+      const step = 1 / (a.fps ?? 24);
+      for (const [i, name] of frames.entries()) {
+        await page.evaluate(
+          (src) =>
+            new Promise((done) => {
+              const img = document.querySelector(".art img");
+              img.onload = () => requestAnimationFrame(() => done());
+              img.src = src;
+            }),
+          "file://" + join(dir, name),
+        );
+        const f = out.replace(/\.png$/, `-${String(i).padStart(3, "0")}.png`);
+        await page.screenshot({ path: f, omitBackground: !!card.video });
+        const hold =
+          i === 0 ? (a.holdStart ?? 1) : i === frames.length - 1 ? (a.holdEnd ?? 4) : step;
         stills.push({ file: f, hold });
       }
     }
