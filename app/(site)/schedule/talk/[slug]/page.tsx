@@ -255,10 +255,21 @@ export default async function TalkPage({
               same reason it is grayscale there: headshots shot under wildly
               different light stop announcing the difference.
 
-              One speaker gets the portrait. Two or more share the column as
-              squares, because a fireside with two names stacked at 4:5 would
-              run past the copy beside it and put the page back into a
-              scroll. */}
+              One speaker gets the portrait. Three or more share the column as
+              squares, because a panel stacked at any portrait ratio would run
+              past the copy beside it.
+
+              Two stack, from `lg`. Side by side they were 170px squares in a
+              352px column — 223px of faces beside 675px of copy, which is
+              450px of black under two thumbnails on every duo's page. Stacked
+              at 4:3 each face takes the column's full width and the pair
+              lands within a few pixels of the copy's height. The copy has a
+              ceiling now (the description caps at the speaker bio's height),
+              which is what makes that number stable enough to size against.
+              4:3 rather than square because a square pair runs 840px, past
+              the copy; the crop is `object-top`, so what 4:3 gives up is chest,
+              not face. On a phone they stay side by side — there the column
+              is one of two stacked blocks, not half a row. */}
           {participants.length > 0 && (
             <div className="mx-auto w-full max-w-xs self-start lg:mx-0 lg:max-w-none">
               {speakers.length > 0 && (
@@ -266,13 +277,21 @@ export default async function TalkPage({
                   className={cn(
                     "grid gap-3",
                     speakers.length > 1 && "grid-cols-2",
+                    speakers.length === 2 && "lg:grid-cols-1 lg:gap-5",
                   )}
                 >
-                  {speakers.map((p) => (
+                  {speakers.map((p, i) => (
                     <SpeakerFace
                       key={`${p.speakerId}-${p.role}`}
                       speaker={p}
-                      solo={speakers.length === 1}
+                      layout={
+                        speakers.length === 1
+                          ? "solo"
+                          : speakers.length === 2
+                            ? "pair"
+                            : "group"
+                      }
+                      priority={i === 0}
                     />
                   ))}
                 </div>
@@ -471,11 +490,14 @@ export default async function TalkPage({
  */
 function SpeakerFace({
   speaker,
-  solo,
+  layout,
+  priority,
 }: {
   speaker: ResolvedParticipant;
-  solo: boolean;
+  layout: "solo" | "pair" | "group";
+  priority: boolean;
 }) {
+  const solo = layout === "solo";
   const face = (
     <>
       <div
@@ -487,6 +509,26 @@ function SpeakerFace({
           // viewport as well, so a 13" screen shrinks the portrait rather
           // than pushing the name and role out of the box under it.
           solo && "lg:aspect-auto lg:h-[min(27.5rem,calc(100vh-19rem))]",
+          // The pair's half of the same cap, and taller than the copy wants.
+          //
+          // It was 16.5rem — the column at 4:3 — which matched the copy's
+          // height to the pixel and cut both people off at the chest. The
+          // headshots are 4:5, so 4:3 threw away 176px of each photo, all of
+          // it off the bottom, and a portrait that ends at the sternum reads
+          // as a crop rather than as a person. 20rem gives back 56px of body,
+          // and the pair now runs ~80px past the copy beside it — a mismatch
+          // nobody sees, against a crop everybody does.
+          //
+          // No viewport cap, unlike the solo portrait above. One was here —
+          // half the viewport less a name block — and on a real MacBook Air it
+          // was the whole problem: the browser's chrome leaves ~800px of
+          // window, so the cap took each face down to 236-271px, shorter than
+          // the 4:3 crop this replaced. The solo cap exists so one portrait
+          // and its name fit a screen; a pair runs ~760px and does not fit a
+          // laptop screen at any honest size, so the page scrolls, and the
+          // crop stays the same on every display instead of getting worse on
+          // the smallest one.
+          layout === "pair" && "lg:aspect-auto lg:h-80",
         )}
       >
         {speaker.imageUrl ? (
@@ -494,9 +536,18 @@ function SpeakerFace({
             src={speaker.imageUrl}
             alt=""
             fill
-            priority={solo}
+            priority={priority}
             sizes="(min-width: 1024px) 22rem, (min-width: 640px) 20rem, 80vw"
-            className="object-cover object-top grayscale"
+            className={cn(
+              "object-cover grayscale",
+              // `object-top` everywhere a face is the whole card. In a pair
+              // it spends the entire crop on the body: these headshots carry
+              // 35-55px of air above the crown, and taking a fifth of the
+              // excess from the top instead moves that much of the cut from
+              // the torso into empty background, with the head still clear
+              // of the edge.
+              layout === "pair" ? "object-[50%_18%]" : "object-top",
+            )}
           />
         ) : (
           <span
