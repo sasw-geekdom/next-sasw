@@ -712,6 +712,85 @@ export const CARDS = [
     portrait: { height: 881, left: 439 },
   },
 
+  /**
+   * The YouTube Short. 1080x1920, and a bill rather than a running order.
+   *
+   * PySanAntonio's Short reveals seven talks a line at a time over its own
+   * footage. Datanauts has two talks and no footage — so this shows the group,
+   * then each talk with the face giving it, then the ask. Six states, each
+   * replacing the last, encoded straight from its own stills.
+   *
+   * The template it uses is written for all six community groups, not for
+   * this one: same reason `community-group.html` serves them all. Only the
+   * card changes.
+   */
+  {
+    id: "datanauts-short",
+    event: "datanauts",
+    template: "community-group-short.html",
+    size: { width: 1080, height: 1920 },
+    // 1, as the other moving cards use: a video is transcoded by every
+    // platform it touches and the extra sample rate buys nothing.
+    scale: 1,
+    // 92, against the still card's 62. The mark is the only thing on here
+    // that says which of the six groups this is, and it has to carry that at
+    // feed size through every one of the six states.
+    markHeight: 92,
+    speakers: ["ednalyn-dd-de-dios", "fouzan-aslam"],
+    /**
+     * Matched at the crown, not at the file.
+     *
+     * Her crop is head-and-shoulders and his is looser — her head is 46% of
+     * her own frame against his 21% — so no single height draws the two faces
+     * the same size, which is the conclusion the 4:5 cards reached and the
+     * ratio between their heights (900 : 881) is carried over here. What is
+     * matched instead is where the crown lands, at y=1000 for both: that is
+     * the number a viewer compares across two beats of the same video, and a
+     * face that jumps 25px between cuts is the one thing this format makes
+     * impossible to miss.
+     *
+     * 1000 is also what the copy above is sized against — the block holds 560
+     * and ends by 878, clear of the hair.
+     *
+     * 1350 is the headshots' own height, so they draw one source pixel to one
+     * frame pixel. Anything larger is an upscale of a CMS photo and anything
+     * smaller throws away resolution these already have; at 1150 the faces
+     * were a sixth smaller for no reason but an earlier guess.
+     */
+    portraits: [
+      { height: 1350, top: 887 },
+      { height: 1322, top: 915 },
+    ],
+    kicker: "Two talks, one hour",
+    subtitle:
+      "San Antonio\u2019s data and AI community, on the Tech & Builders circuit.",
+    talks: [
+      {
+        title: "Move Fast,<br />Break Data",
+        subtitle: "A Situationship With the Truth",
+      },
+      {
+        title: "Scaling<br />Executive Vision",
+        subtitle:
+          "Automated C-Suite Insights with the Data Intelligence Hub Deck Generator",
+      },
+    ],
+    ctaLine: "Free with your badge.",
+    ctaUrl: "sasw.co/schedule/datanauts",
+    /**
+     * Six states at one bar each, with two on the ask.
+     *
+     * 3.000s is a bar at 80 BPM, which is the grid the PySanAntonio Short
+     * settled on — kept here so the two read as a series and so a track at
+     * that tempo drops straight in. There is no music on this one yet; the
+     * timing is the only thing that has to be decided before there is.
+     *
+     * 21 seconds for two talks, against 30 for seven. A bill has less to say
+     * and holding it longer would not make it say more.
+     */
+    reveal: [3, 3, 3, 3, 3, 6],
+  },
+
   {
     id: "datanauts-meetup",
     event: "datanauts",
@@ -950,6 +1029,120 @@ export const CARDS = [
       y: 588,
       loops: 1,
       seconds: 14.2,
+    },
+  },
+
+  /**
+   * The YouTube Short. 1080x1920, and the one card in here that is a list.
+   *
+   * Everything else PySanAntonio posts is a poster — a hook, a face, a fact
+   * row. A Short is watched, not read at a glance, and what it has that a
+   * poster does not is twenty seconds of someone's attention. The right thing
+   * to spend that on is the running order, arriving a line at a time, which
+   * is also the one thing a still cannot do.
+   *
+   * Titles are cut to what survives at arm's length on a phone. "From Sensor
+   * to Signal: Building an Indoor Air Quality Platform With Python" is 74
+   * characters and wraps to three lines at this size; the half before the
+   * colon is the half that reads, and the full title is one tap away.
+   *
+   * Times drop their meridiem. Every session here is in the afternoon and the
+   * fact line above already says 1 - 6 PM, so seven repetitions of "PM" buy
+   * nothing and cost the width the speakers' names want.
+   */
+  {
+    id: "pysanantonio-short",
+    event: "pysanantonio",
+    template: "pysanantonio-short.html",
+    size: { width: 1080, height: 1920 },
+    // 1, for the reason `pysanantonio-motion` gives: a video is transcoded by
+    // every platform it touches and the extra sample rate buys nothing.
+    scale: 1,
+    facts: ["Friday, October 2  \u00b7  1 \u2013 6 PM", "Geekdom, 3rd Floor"],
+    kicker: "The running order",
+    rows: [
+      { at: "1:10", who: "Mason Egger", what: "Opening keynote \u00b7 PyTexas Foundation" },
+      { at: "1:45", who: "Samad Ahmed", what: "From Sensor to Signal" },
+      { at: "2:40", who: "Jordana Naftali", what: "JOMO in the age of AI slop" },
+      { at: "3:15", who: "Edwin Jung", what: "Experiments in Agentic Coding" },
+      { at: "4:00", who: "Yossi Eliaz", what: "Your agent\u2019s requirements.txt is a lie" },
+      { at: "4:10", who: "Shayan Ali", what: "AI Steering Wheel" },
+      {
+        at: "4:30",
+        who: "Python Jeopardy",
+        what: "Two tickets to PyTexas 2027 on the board",
+        prize: true,
+      },
+    ],
+    ctaLine: "Free with your badge.",
+    ctaUrl: "sasw.co/schedule/pysanantonio",
+    /**
+     * Nine states: the header, then one per row, then the call to action.
+     *
+     * One bar each, and the bar is the track's. "Sabor a la Antigua" is 80
+     * BPM in 4/4 — 3.000s to the bar, which is as clean as this ever gets —
+     * so every speaker's name arrives on a downbeat and the call to action
+     * takes the last two bars. Ten bars, thirty seconds, no drift.
+     *
+     * Cut silent this ran 1.9s a row, which is the floor for reading a name
+     * and a title at this size. A bar is longer than it needs to be for
+     * reading and exactly right for hearing, and with music under it the
+     * extra second does not read as a pause.
+     *
+     * If the track changes, this changes with it: hold = 4 x 60 / BPM, and
+     * `video.loops` has to cover the new total — `-t` trims the footage, so
+     * the only failure mode is too little of it.
+     */
+    reveal: [3, 3, 3, 3, 3, 3, 3, 3, 6],
+    /**
+     * The figure, bottom-anchored and centred-ish.
+     *
+     * Solved the same way `pysanantonio-motion`'s numbers were — against the
+     * card — but with one constraint that composition did not have: the clip
+     * is landscape and its subject sits right of its centre (x 420-992 of
+     * 1114), so centring *him* pushes the footage left and exposes the right
+     * edge of a 1080 frame. Covering the width and holding him near the
+     * middle needs the clip at ~1315 wide, which is what sets `height` at
+     * 850 rather than anything about how big he should be.
+     *
+     * `y` puts his feet past the bottom edge rather than resting on it: he is
+     * cropped at the hip in the source, so a figure that stops inside the
+     * frame reads as a cutout that ran out rather than as someone standing
+     * in it.
+     */
+    video: {
+      src: "public/pysa/pysa2-loop.mp4",
+      height: 850,
+      x: -234,
+      y: 1108,
+      // 4, for five plays and 35.6s, against a 30s cut. Was 3 when this ran
+      // 21.4s; a loop count short of the reveal total ends the card early.
+      loops: 4,
+    },
+    /**
+     * From YouTube's Audio Library, and deliberately not in this repo.
+     *
+     * Those tracks are licensed to the uploader for use in their videos, not
+     * for redistribution — and a public repo is redistribution. So the file
+     * stays where it was downloaded and this points at it; a render without
+     * it warns and comes out silent rather than failing.
+     *
+     * `start` is a downbeat, not a round number. The track opens on a 30s
+     * build that peaks at -20 dBFS, and a Short whose first second is the
+     * quietest thing in it has thrown away the only second that matters.
+     * 31.830 is the first downbeat of the full section, where the level
+     * steps up to -8.5 and stays.
+     *
+     * No fade in worth the name: the cut lands on a downbeat, and fading up
+     * over it would soften the one frame that should hit. 0.12s is a
+     * de-click, not an effect. The tail fades over two beats so the track
+     * resolves under the call to action instead of being cut off mid-bar.
+     */
+    audio: {
+      src: "~/Downloads/Sabor a la Antigua - Cumbia Deli.mp3",
+      start: 31.83,
+      fadeIn: 0.12,
+      fadeOut: 1.5,
     },
   },
 

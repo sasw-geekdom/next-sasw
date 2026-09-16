@@ -1,0 +1,379 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* 9:16, for a community group's bill.
+       *
+       * The counterpart to `pysanantonio-short.html`, and the differences are
+       * the two events' differences rather than taste. PySanAntonio has seven
+       * talks and seven seconds of its own footage, so its Short is a running
+       * order revealed over a moving figure. A community group has two talks
+       * and two headshots, so this one is a bill: the group, then each talk
+       * with the face giving it, then the ask.
+       *
+       * No footage anywhere in the repo for these six, which is why the card
+       * *is* the picture here — opaque, encoded straight from its own states
+       * rather than composited over anything. See `card.video || stills` in
+       * render.mjs.
+       */
+      body {
+        width: 1080px;
+        height: 1920px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* The house bolt as a ground, at the charge and blur the 4:5 card uses
+         — see the long note in community-group.html. Moved and grown for the
+         axis: there the empty region is the left-middle beside a figure, here
+         it is the band between the copy and the head below it. */
+      .bolt {
+        position: absolute;
+        z-index: 1;
+        left: -240px;
+        top: 700px;
+        width: 1080px;
+        height: auto;
+        opacity: 0.17;
+        filter: blur(7px);
+      }
+
+      /* Both portraits are staged; the reveal decides which is up.
+
+         Bottom-anchored and centred, where the 4:5 card runs them down the
+         right beside its copy. A headshot is head-and-shoulders, so the crown
+         sits within a few percent of the top of its own frame — which is what
+         makes `top` here load-bearing rather than cosmetic. Too high and the
+         face collides with the talk title; too low and the card is a strip of
+         copy over an empty middle. */
+      .portrait {
+        position: absolute;
+        z-index: 2;
+        left: 50%;
+        transform: translateX(-50%);
+        width: auto;
+        visibility: hidden;
+      }
+      /* Sized and placed one at a time, not as a pair.
+         
+         The two crops are not the same picture: Ednalyn's crown sits 8.4%
+         into her frame and Fouzan's 6.4%, so a single `top` for both puts one
+         face 25px lower than the other and the card jumps between beats. The
+         numbers to match across two portraits are where the crowns land, not
+         where the files start — the same thing the 4:5 cards settled on. */
+      #faceA {
+        top: {{topA}}px;
+        height: {{heightA}}px;
+      }
+      #faceB {
+        top: {{topB}}px;
+        height: {{heightB}}px;
+      }
+
+      /* The homepage's bolt, taking the space a face takes on every other
+         state.
+         
+         Straight out of community-group.html's `ifnot:face` branch, and the
+         note there is the whole argument: the opening beat has no speaker in
+         it, which leaves the region a person fills empty, and the answer is
+         the bolt at its own charge as a subject — not the ground silhouette
+         turned up, which is a texture being asked to do a mark's job.
+         
+         Centred rather than set to one side, because this composition stacks
+         where the 4:5 card splits left and right. */
+      .bolt-hero {
+        position: absolute;
+        z-index: 2;
+        left: 50%;
+        transform: translateX(-50%);
+        /* Directly under the blurb rather than centred in the lower half.
+           The copy block reserves 560px so the other five states do not jump,
+           and on this one that reserve is empty — left at 1080 the bolt sat
+           below a 540px hole with nothing in it. */
+        top: 780px;
+        width: 620px;
+        opacity: 0.95;
+        visibility: hidden;
+      }
+
+      /* Lays the copy down over the top of the picture and settles the foot
+         of it into black for the call to action. Same two-gradient job the
+         PySanAntonio Short does, with the stops moved to this composition's
+         own horizon. */
+      .scrim {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        background:
+          linear-gradient(
+            to bottom,
+            #000 0%,
+            #000 44%,
+            rgba(0, 0, 0, 0.5) 52%,
+            rgba(0, 0, 0, 0) 60%
+          ),
+          linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.72) 10%, rgba(0, 0, 0, 0) 22%);
+      }
+
+      .frame {
+        position: relative;
+        z-index: 4;
+        height: 100%;
+        padding: 64px 72px 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      /* 80, as on the PySanAntonio Short and for the same reason: this is
+         watched at arm's length and often at half size, where the set's
+         still-card 58 stops naming the week legibly. */
+      .top img {
+        height: 80px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* The group's own mark, under the week's and never hidden. It is the
+         one thing on the card that says which of the six this is, so it holds
+         through every state. */
+      .mark {
+        margin-top: 40px;
+        height: {{markHeight}}px;
+        width: auto;
+        align-self: flex-start;
+      }
+
+      .block {
+        margin-top: 42px;
+        /* Holds its height across the states so the copy above a face does
+           not jump when a name arrives under a title — the same reason the
+           PySanAntonio rows are `visibility` rather than `display`. */
+        min-height: 560px;
+      }
+
+      .kicker {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 22px;
+        letter-spacing: 0.24em;
+        color: #ff32a0;
+        text-transform: uppercase;
+      }
+      .facts {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 23px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: #ff32a0;
+        flex: none;
+      }
+      .blurb {
+        margin-top: 34px;
+        max-width: 800px;
+        font-size: 28px;
+        line-height: 1.34;
+        color: rgba(255, 255, 255, 0.66);
+        text-wrap: balance;
+      }
+
+      .talk {
+        display: none;
+      }
+      .talk h2 {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 82px;
+        line-height: 0.97;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+      .talk .sub {
+        margin-top: 20px;
+        max-width: 820px;
+        font-size: 28px;
+        line-height: 1.3;
+        color: rgba(255, 255, 255, 0.68);
+      }
+      /* The speaker, arriving a beat after the talk they are giving.
+
+         Two states per face rather than one: a single beat holding a title, a
+         subtitle, a name and a role is four things landing at once, and the
+         eye takes the largest and moves on. Split, the title lands on its own
+         downbeat and the person lands on the next. */
+      .talk .who {
+        margin-top: 38px;
+        visibility: hidden;
+      }
+      .talk .who .name {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 56px;
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.01em;
+      }
+      .talk .who .role {
+        margin-top: 14px;
+        font-size: 27px;
+        font-weight: 600;
+        color: #ff32a0;
+      }
+
+      .cta {
+        position: absolute;
+        left: 72px;
+        right: 72px;
+        bottom: 66px;
+        z-index: 5;
+        opacity: 0;
+      }
+      .cta .line {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 44px;
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.01em;
+      }
+      .cta .url {
+        margin-top: 14px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 24px;
+        letter-spacing: 0.06em;
+        color: #ff32a0;
+      }
+    </style>
+  </head>
+  <body>
+    <img class="bolt" src="bolt.svg" alt="" />
+    <img class="portrait" id="faceA" src="{{faceA}}" alt="" />
+    <img class="portrait" id="faceB" src="{{faceB}}" alt="" />
+    <img class="bolt-hero" id="boltHero" src="bolt-current.png" alt="" />
+    <div class="scrim"></div>
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <img class="mark" src="{{mark}}" alt="" />
+
+      <div class="block">
+        <div class="event" id="event">
+          <div class="kicker">{{kicker}}</div>
+          <div class="facts">
+            <div class="fact"><span class="pip"></span>{{fact1}}</div>
+            <div class="fact"><span class="pip"></span>{{fact2}}</div>
+          </div>
+          <p class="blurb">{{subtitle}}</p>
+        </div>
+
+        <div class="talk" id="talkA">
+          <h2>{{talkA}}</h2>
+          <p class="sub">{{talkSubA}}</p>
+          <div class="who">
+            <div class="name">{{firstA}}<br />{{lastA}}</div>
+            <div class="role">{{roleA}}</div>
+          </div>
+        </div>
+
+        <div class="talk" id="talkB">
+          <h2>{{talkB}}</h2>
+          <p class="sub">{{talkSubB}}</p>
+          <div class="who">
+            <div class="name">{{firstB}}<br />{{lastB}}</div>
+            <div class="role">{{roleB}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <div class="line">{{ctaLine}}</div>
+      <div class="url">{{ctaUrl}}</div>
+    </div>
+
+    <script>
+      /**
+       * Six states, and unlike the running order they replace rather than
+       * accumulate — a bill is two talks shown in turn, not a list being
+       * filled in.
+       *
+       *   0  the group: what it is, when, where
+       *   1  talk one
+       *   2  talk one, with the speaker
+       *   3  talk two
+       *   4  talk two, with the speaker
+       *   5  the ask
+       *
+       * The last state keeps the second face up. It is the strongest picture
+       * on the card and dropping to black under the call to action would
+       * spend the closing beat on nothing.
+       */
+      window.reveal = function (step) {
+        const show = (el, on, prop) => {
+          if (el) el.style[prop] = on ? (prop === "display" ? "block" : "visible") : (prop === "display" ? "none" : "hidden");
+        };
+        const onA = step === 1 || step === 2;
+        const onB = step >= 3;
+        show(document.getElementById("event"), step === 0, "display");
+        show(document.getElementById("talkA"), onA, "display");
+        show(document.getElementById("talkB"), onB && step < 5, "display");
+        show(document.getElementById("faceA"), onA, "visibility");
+        show(document.getElementById("faceB"), onB, "visibility");
+        show(document.getElementById("boltHero"), step === 0, "visibility");
+        const whoA = document.querySelector("#talkA .who");
+        const whoB = document.querySelector("#talkB .who");
+        if (whoA) whoA.style.visibility = step === 2 ? "visible" : "hidden";
+        if (whoB) whoB.style.visibility = step === 4 ? "visible" : "hidden";
+        document.querySelector(".cta").style.opacity = step >= 5 ? "1" : "0";
+      };
+      window.reveal(0);
+    </script>
+  </body>
+</html>

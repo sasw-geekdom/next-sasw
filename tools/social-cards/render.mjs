@@ -502,6 +502,34 @@ async function main() {
       // reader the paragraph under it is answering the one above it.
       turnLabel: card.turnLabel ?? "",
       turnBody: card.turnBody ?? "",
+      /**
+       * A running order, one row per session, built here for the same reason
+       * `logos` and `marks` are: the engine substitutes and branches but does
+       * not loop.
+       *
+       * `at` / `who` / `what` rather than time / speaker / title, because the
+       * last row is a quiz with no speaker — `who` is "Python Jeopardy" there
+       * and the template golds it rather than special-casing a missing name.
+       */
+      rows: (card.rows ?? [])
+        .map(
+          (r) =>
+            `<div class="row${r.prize ? " prize" : ""}">` +
+            `<div class="at">${r.at}</div>` +
+            `<div><div class="who">${r.who}</div>` +
+            (r.what ? `<div class="what">${r.what}</div>` : "") +
+            `</div></div>`,
+        )
+        .join("\n        "),
+      kicker: card.kicker ?? "",
+      // A bill's two talks. Named rather than folded into `headline`, because
+      // this card carries both at once and the existing token is singular.
+      talkA: card.talks?.[0]?.title ?? "",
+      talkSubA: card.talks?.[0]?.subtitle ?? "",
+      talkB: card.talks?.[1]?.title ?? "",
+      talkSubB: card.talks?.[1]?.subtitle ?? "",
+      ctaLine: card.ctaLine ?? "",
+      ctaUrl: card.ctaUrl ?? "",
       cols: card.cols ?? 4,
       cellH: card.cellH ?? 66,
       marksA: cells
@@ -635,6 +663,36 @@ async function main() {
     await page.screenshot({ path: out, omitBackground: !!card.video });
 
     /**
+     * A card that reveals itself, for a Short.
+     *
+     * The still cards are one screenshot. This is a list that arrives a line
+     * at a time, and the cheap way to film that is to shoot the states rather
+     * than the frames: nine screenshots held for a couple of seconds each,
+     * not 24 a second for twenty seconds. A 24fps capture of this would be
+     * 513 screenshots to draw nine distinct pictures.
+     *
+     * What a step *means* is the template's business — it exposes
+     * `window.reveal(n)` and this only counts. That seam is deliberate: the
+     * next template to want motion can wipe, count down or move a figure
+     * without the renderer learning what any of those are.
+     *
+     * The stills are written beside the mp4 and cleaned up after it, because
+     * the only thing anyone wants out of this card is the video.
+     */
+    const stills = [];
+    if (card.reveal) {
+      for (const [i, hold] of card.reveal.entries()) {
+        await page.evaluate((n) => window.reveal(n), i);
+        const f = out.replace(/\.png$/, `-${String(i).padStart(2, "0")}.png`);
+        // Transparent only where footage will show through. A card with no
+        // clip behind it *is* the picture, and a transparent PNG there
+        // composites over nothing and comes out as a black frame.
+        await page.screenshot({ path: f, omitBackground: !!card.video });
+        stills.push({ file: f, hold });
+      }
+    }
+
+    /**
      * A motion card: the same design, composited over its event's own footage.
      *
      * PySanAntonio is the one activation with a video asset, and a still cut
@@ -678,35 +736,141 @@ async function main() {
      * #040404 to #0b0b0b left to right, and the scrim covers the copy side
      * of it.
      */
-    if (card.video) {
-      const v = card.video;
+    /**
+     * Anything that comes out as an mp4: footage with a card over it, a
+     * sequence of cards, or both.
+     *
+     * The two are not variants of one idea. PySanAntonio has seven seconds of
+     * its own mascot and the card is an overlay on it; a community group has
+     * two headshots and a bolt, and the card *is* the picture. So a card with
+     * `reveal` and no `video` skips the compositing entirely and encodes its
+     * own stills — which is also why those stills are shot opaque.
+     */
+    if (card.video || stills.length) {
+      const v = card.video ?? {};
       const mp4 = out.replace(/\.png$/, ".mp4");
       const W = size.width * scale;
       const H = size.height * scale;
+      /**
+       * One overlay or a timed sequence of them.
+       *
+       * The concat demuxer turns the stills into a video stream with alpha
+       * intact, each held for the seconds the card gave it. Its one quirk is
+       * that the final entry's `duration` is ignored, so the last file is
+       * listed twice — the second listing is what the duration attaches to.
+       */
+      // Index 0 is the footage when there is footage, and the sequence when
+      // there is not — every later input shifts with it.
+      let overlayIn = ["-i", out];
+      let total = v.seconds ?? 14;
+      if (stills.length) {
+        const list = out.replace(/\.png$/, ".txt");
+        await writeFile(
+          list,
+          stills
+            .map((s2) => `file '${s2.file}'\nduration ${s2.hold}`)
+            .join("\n") + `\nfile '${stills[stills.length - 1].file}'\n`,
+        );
+        overlayIn = ["-f", "concat", "-safe", "0", "-i", list];
+        total = stills.reduce((a, s2) => a + s2.hold, 0);
+        stills.push({ file: list });
+      }
+      /**
+       * The soundtrack, measured rather than guessed at.
+       *
+       * A card names a file, a start and two fade lengths; the level is not
+       * its business. ffmpeg runs `loudnorm` over the exact slice that will
+       * be used, and the second pass applies that measurement linearly — a
+       * constant gain, not the dynamic mode, which pumps a track with a
+       * quiet bar in it. Swapping the track needs no numbers changed here.
+       *
+       * -14 LUFS is what YouTube normalises to, so a louder master only gets
+       * turned back down at playback; -1.5 dBTP leaves room for the clipping
+       * a lossy transcode adds on the way there. This particular track
+       * arrived at -10.2 LUFS and +0.73 dBTP, which is over full scale.
+       */
+      const audio = [];
+      if (card.audio) {
+        const a = card.audio;
+        const src = /^[~/]/.test(a.src)
+          ? a.src.replace(/^~/, process.env.HOME)
+          : join(REPO, a.src);
+        if (!existsSync(src)) {
+          console.warn(`${card.id}  !! no audio at ${src} — rendering silent`);
+        } else {
+          const slice = ["-ss", String(a.start ?? 0), "-t", String(total), "-i", src];
+          const ai = card.video ? 2 : 1;
+          const { stderr } = await run(
+            "ffmpeg",
+            [...slice, "-af", "loudnorm=print_format=json", "-f", "null", "-"],
+            { maxBuffer: 1 << 24 },
+          );
+          // ffmpeg keeps writing after the JSON block, so it has to be cut
+          // at its own closing brace rather than at the end of the stream.
+          const at = stderr.lastIndexOf("{");
+          const m = JSON.parse(stderr.slice(at, stderr.indexOf("}", at) + 1));
+          const fin = a.fadeIn ?? 0.2;
+          const fout = a.fadeOut ?? 1.5;
+          audio.push({
+            in: slice,
+            filter:
+              `[${ai}:a]loudnorm=I=-14:TP=-1.5:LRA=11:linear=true` +
+              `:measured_I=${m.input_i}:measured_TP=${m.input_tp}` +
+              `:measured_LRA=${m.input_lra}:measured_thresh=${m.input_thresh}` +
+              `,aresample=48000` +
+              `,afade=t=in:st=0:d=${fin}` +
+              `,afade=t=out:st=${(total - fout).toFixed(3)}:d=${fout}[a]`,
+          });
+        }
+      }
+
       await run("ffmpeg", [
         "-y",
         "-v",
         "error",
-        "-stream_loop",
-        String(v.loops ?? 1),
-        "-i",
-        join(REPO, v.src),
-        "-i",
-        out,
+        ...(card.video
+          ? ["-stream_loop", String(v.loops ?? 1), "-i", join(REPO, v.src)]
+          : []),
+        ...overlayIn,
+        ...(audio[0]?.in ?? []),
         "-filter_complex",
-        `[0:v]scale=-2:${v.height * scale},split[clip][edge];` +
-          `[edge]crop=iw:4:0:0,scale=iw:${v.y * scale}[fill];` +
-          `[fill][clip]vstack[fig];` +
-          `color=c=${v.canvas ?? "black"}:s=${W}x${H}[bg];` +
-          `[bg][fig]overlay=${v.x * scale}:0[b];` +
-          `[b][1:v]overlay=0:0,format=yuv420p[o]`,
+        (card.video
+          ? `[0:v]scale=-2:${v.height * scale},split[clip][edge];` +
+            `[edge]crop=iw:4:0:0,scale=iw:${v.y * scale}[fill];` +
+            `[fill][clip]vstack[fig];` +
+            `color=c=${v.canvas ?? "black"}:s=${W}x${H}[bg];` +
+            `[bg][fig]overlay=${v.x * scale}:0[b];`
+          : ``) +
+          /**
+           * A sequence needs normalising; a single still must not be.
+           *
+           * The concat demuxer hands over frames on its own clock, so the
+           * sequence is resampled to the output rate before it is laid down.
+           * Running the same filter on a one-frame PNG turns it into a
+           * one-frame *video* — and the composite then lasts one frame, which
+           * is what `pysanantonio-motion` became the first time this was
+           * written as one branch for both.
+           *
+           * Neither case wants `shortest`: overlay repeats its last frame at
+           * EOF, which is exactly the hold a still card and a final reveal
+           * state both want, and `-t` is what decides the length.
+           */
+          (!card.video
+            ? `[0:v]fps=24`
+            : stills.length
+              ? `[1:v]fps=24,format=rgba[ov];[b][ov]overlay=0:0`
+              : `[b][1:v]overlay=0:0`) +
+          `,format=yuv420p[o]` +
+          (audio[0] ? `;${audio[0].filter}` : ``),
         "-map",
         "[o]",
+        ...(audio[0]
+          ? ["-map", "[a]", "-c:a", "aac", "-b:a", "192k"]
+          : ["-an"]),
         "-t",
-        String(v.seconds ?? 14),
+        String(total),
         "-r",
         "24",
-        "-an",
         "-c:v",
         "libx264",
         "-preset",
@@ -717,6 +881,9 @@ async function main() {
         "+faststart",
         mp4,
       ]);
+      // The stills were scaffolding for the mp4 and nothing else reads them.
+      for (const s2 of stills) await rm(s2.file, { force: true });
+      if (stills.length) await rm(out, { force: true });
       console.log(`${card.id}  -> ${mp4.split("/").pop()}`);
     }
     console.log(

@@ -1,0 +1,289 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* PySanAntonio's own palette, from lib/pysa.ts — the same two this
+         event's other cards carry. */
+      :root {
+        --blue: #4a90d9;
+        --gold: #edca00;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* 9:16, and a template of its own rather than `pysanantonio.html` at a
+         different height.
+
+         The 4:5 card is a *poster*: a headline, a face, and a fact row, laid
+         out left-of-figure. A Short is a *list* — the running order is the
+         whole reason to post one — and the list wants the full measure, not
+         the third of it a side-by-side composition leaves. Stretching the
+         poster to 1920 would have given the same poster with 570px of extra
+         black in it.
+
+         Every value below that names a colour, a face or a size is the
+         poster's, so the two read as one set. What differs is the axis. */
+      body {
+        width: 1080px;
+        height: 1920px;
+        /* Transparent by default, unlike its 4:5 sibling: this template only
+           exists to be composited over the mascot loop, so there is no still
+           to paint a ground for. `omitBackground` does the rest. */
+        background: transparent;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Holds the copy side down over moving footage, and it runs top-to-
+         bottom here where the poster's runs left-to-right — same job, rotated
+         with the composition.
+
+         Opaque to 52%, gone by 68%. The mascot's head lands at 1145px (60%),
+         so the fade has to be complete above it or the figure arrives through
+         a veil; and it has to start well below the last row of the list or
+         the type sits on footage. Those two constraints are what set the
+         stops, not taste.
+
+         The second gradient is the foot of the card: the URL sits over the
+         mascot's guitar, and without something under it the mono disappears
+         into the instrument. */
+      .scrim {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+          linear-gradient(
+            to bottom,
+            #000 0%,
+            #000 52%,
+            rgba(0, 0, 0, 0.55) 61%,
+            rgba(0, 0, 0, 0) 68%
+          ),
+          linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.72) 9%, rgba(0, 0, 0, 0) 20%);
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 64px 72px 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      /* 80, where every still in this set gives the house lockup 58.
+         
+         The stills are looked at; a Short is watched, at arm's length, often
+         at half this size in a feed. 58px of lockup is 29 on a phone held
+         normally and the week it names stops being legible — which is the
+         one thing on the card that has to survive, because the event is
+         inside it. Nothing else here grows: the wordmark is already the
+         subject and matching it would just be two marks arguing. */
+      .top img {
+        height: 80px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      .wordmark {
+        /* 34, down from the poster's 42: the bigger lockup above has to come
+           out of something, and the gap under it is the one place on this
+           card with slack. The list below is pinned by the figure's head. */
+        margin-top: 34px;
+        height: 124px;
+        width: auto;
+        display: block;
+        /* A flex column stretches its children — see the poster's note. */
+        align-self: flex-start;
+      }
+
+      .facts {
+        margin-top: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 22px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--blue);
+        flex: none;
+      }
+
+      /* Says what the empty column is about to hold.
+         
+         The first beat is the header alone, and without this it was the
+         wordmark, two facts, and 700px of nothing — elegant, and it told a
+         viewer who has not seen the rest that they were looking at a finished
+         card with a hole in it. A label costs 48px and turns the hole into a
+         space something is going to arrive in. */
+      .kicker {
+        margin-top: 26px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 22px;
+        letter-spacing: 0.24em;
+        color: var(--blue);
+        text-transform: uppercase;
+      }
+
+      /* The list. Seven rows in 706px of column, which is what sets every
+         size below it — the figure's head is the ceiling and it does not
+         move. The gap paid for the kicker above: 31px to 27px across seven
+         gaps is 28 of the 48 it cost. */
+      .rows {
+        margin-top: 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 27px;
+      }
+      .row {
+        display: flex;
+        align-items: baseline;
+        gap: 22px;
+        /* `visibility`, not `display`. The rows reveal one at a time and the
+           block has to hold its full height from the first frame: laid out as
+           they appear, every row still to come would shift the ones already
+           read, and the eye tracks movement rather than the new line. */
+        visibility: hidden;
+      }
+      .row .at {
+        flex: none;
+        width: 112px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 23px;
+        letter-spacing: 0.04em;
+        color: var(--blue);
+      }
+      .row .who {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 37px;
+        line-height: 1;
+        letter-spacing: 0.01em;
+        text-transform: uppercase;
+      }
+      .row .what {
+        margin-top: 6px;
+        font-size: 25px;
+        line-height: 1.16;
+        color: rgba(255, 255, 255, 0.62);
+      }
+      /* The last row is the quiz, and it has no speaker — the title takes the
+         display face and the gold, because it is the prize slot. */
+      .row.prize .who {
+        color: var(--gold);
+      }
+
+      .cta {
+        position: absolute;
+        left: 72px;
+        right: 72px;
+        bottom: 66px;
+        z-index: 3;
+        opacity: 0;
+      }
+      .cta .line {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 44px;
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.01em;
+      }
+      .cta .url {
+        margin-top: 14px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 24px;
+        letter-spacing: 0.06em;
+        color: var(--blue);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scrim"></div>
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <img class="wordmark" src="pysa.svg" alt="" />
+
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+      </div>
+
+      <div class="kicker">{{kicker}}</div>
+      <div class="rows">{{rows}}</div>
+    </div>
+
+    <div class="cta">
+      <div class="line">{{ctaLine}}</div>
+      <div class="url">{{ctaUrl}}</div>
+    </div>
+
+    <script>
+      /**
+       * What one step of the reveal means, decided here rather than in the
+       * renderer.
+       *
+       * render.mjs counts steps and holds each for however long the card
+       * says; it does not know what a step looks like. That seam is what
+       * lets a different template animate differently — a countdown, a wipe,
+       * a figure that moves — without the renderer learning about any of it.
+       *
+       * Step 0 is the header alone. Steps 1..n add one row each. The step
+       * after the last row brings up the call to action, which is why it is
+       * `> rows.length` rather than a separate flag.
+       */
+      window.reveal = function (step) {
+        const rows = document.querySelectorAll(".row");
+        rows.forEach((el, i) => {
+          el.style.visibility = i < step ? "visible" : "hidden";
+        });
+        document.querySelector(".cta").style.opacity =
+          step > rows.length ? "1" : "0";
+      };
+      window.reveal(0);
+    </script>
+  </body>
+</html>
