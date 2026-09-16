@@ -566,6 +566,55 @@ export const CARDS = [
   },
 
   {
+    id: "the-model-speaker-leon-hitchens",
+    // Same shape as jonathan-perry and maria-consuelo-gonima: The Model's own
+    // facts, single-speaker template, a talk inside the afternoon rather than
+    // a fixed point in it.
+    event: "the-model",
+    template: "the-model.html",
+    speaker: "leon-hitchens",
+    // The circuit joins the eyebrow because this template has no slot of its
+    // own for one — and it is the only place on the card where a second fact
+    // about where the talk sits does not compete with the talk itself.
+    eyebrow: "// The Model \u00b7 AI & Applied Innovation",
+    /**
+     * His line, not ours.
+     *
+     * The submitted title is "Putting Grok Bot and Agents to Work in a Real
+     * Business", which is what the talk is called and not what it argues.
+     * Set as the headline it is a long compound with no claim in it, and the
+     * lavender panel — the event's signature, and the reason these headlines
+     * are written to have one — would have had to land on "Grok Bot", a
+     * product name.
+     *
+     * His own bio says the work is "figuring out where AI actually earns its
+     * keep inside an agency". That is the thesis, in his words, and it puts
+     * the panel on the claim the way jonathan-perry's puts it on the machines.
+     * The submitted title runs underneath, whole.
+     */
+    headline: 'Where AI actually<br /><span class="hit">earns its keep</span>',
+    headlineSize: 76,
+    // Title case, and left alone. This is the talk's name as the CMS holds it,
+    // and a name keeps its case — the sibling cards set sentence case because
+    // their subtitles are descriptions rather than titles.
+    // Broken by hand rather than by measure. Left to wrap it reads "...in a
+    // Real / Business." at every width that fits the card — the title's two
+    // halves are 35 and 19 characters, so the only measures that break them
+    // cleanly are ones that leave the first line visibly short. The tag takes
+    // HTML, so the break is stated.
+    subtitle: "Putting Grok Bot and Agents to Work<br />in a Real Business.",
+    // 880, matching jonathan-perry, rather than the probe's 756.
+    //
+    // The probe says so itself: the crown is exact and the height is a guess
+    // that hair confuses. At 756 his head drew 284px against Jonathan's ~330
+    // on the card beside it, and two speakers at the same event with heads a
+    // sixth apart read as two different templates. His head is 37.6% of his
+    // own frame, so 880 draws it at 331 — level with the card this one will
+    // be posted next to, which is the comparison that matters.
+    portrait: { height: 880, left: 439 },
+  },
+
+  {
     id: "the-model-speaker-jonathan-perry",
     // The Model's own facts — Monday, no hour — with the single-speaker
     // template borrowed off the keynote. Justin's card is the only other one
