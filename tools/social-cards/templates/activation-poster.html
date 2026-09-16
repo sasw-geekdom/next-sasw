@@ -151,6 +151,30 @@
         padding: 4px 18px 8px;
       }
 
+      <!--if:headlineMono-->
+      /* The event page's face for its own name, where a card asks for it.
+
+         The Model's masthead sets "THE MODEL" in Geist Mono, medium, tight —
+         model-band.tsx says why: its artwork is set in a plain monospace, and a
+         display face beside it is a second voice. The poster set the same two
+         words in Oswald Bold, the speaker cards' face, so the one card meant
+         to look like the page looked like a speaker card instead. This is the
+         page's type, carried over: weight 500, -0.025em tracking, 1.05
+         leading, white at 85%, the panel's word in The Model's ink rather than
+         pure black, and the panel's padding at the page's 0.1em. */
+      h1 {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-weight: 500;
+        line-height: 1.05;
+        letter-spacing: -0.025em;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      h1 .panel {
+        color: #09090b;
+        padding: 0.02em 0.1em 0.06em;
+      }
+      <!--/if:headlineMono-->
+
       <!--if:subtitle-->
       /* A rule, not a filled panel — carried over from access-granted.html,
          where the note is explicit that a solid block of the accent shouts at
@@ -168,6 +192,19 @@
         color: #fff;
       }
       <!--/if:subtitle-->
+
+      <!--if:headlineMono-->
+      /* The hook as the page sets it, too: regular weight, white at 80%, and
+         the rule in The Model's cyan — the page's `border-(--model-cyan)` —
+         rather than the headline's lavender. Semibold white on a lavender rule
+         was the poster template's own voice, and next to the page's type it
+         read as a louder second headline. */
+      .quote {
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.8);
+        border-left-color: #00b4fc;
+      }
+      <!--/if:headlineMono-->
 
       /* The art takes what is left, and is centred in it. `min-height: 0` so a
          tall image shrinks to the space rather than pushing the strip off the

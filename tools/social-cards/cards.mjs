@@ -450,7 +450,12 @@ const MODEL_POSTER = {
   // lavender panel, which is this event's own device and the reason the
   // template carries `.panel` as well as `.hit`.
   headline: 'The <span class="panel">Model</span>',
-  headlineSize: 130,
+  // 110, down from 130. The poster is a set with the speaker cards, which
+  // run their talk titles at 66–76 beside a portrait, and at 130 the panel
+  // alone — a solid lavender slab — outweighed anything else in the carousel
+  // and made the swipe to a speaker card a drop rather than a step. 110
+  // still reads as the event's name, and sits by the lineup slide's 104.
+  headlineSize: 110,
   // One sentence a line, broken by hand. Left to wrap at this size it
   // split "An / afternoon", which reads as a setup and a stray word rather
   // than as the two halves of the hook in lib/the-model.ts.
@@ -2011,6 +2016,9 @@ export const CARDS = [
   {
     id: "the-model-poster",
     ...MODEL_POSTER,
+    // The page's face for its name — Geist Mono, not the speaker cards'
+    // Oswald. See `headlineMono` in activation-poster.html.
+    headlineFont: "mono",
   },
 
   /**
@@ -2032,6 +2040,7 @@ export const CARDS = [
   {
     id: "the-model-motion",
     ...MODEL_POSTER,
+    headlineFont: "mono",
     art: "tools/social-cards/.cache/model-flow/frame-059.png",
     artFrames: {
       dir: "tools/social-cards/.cache/model-flow",

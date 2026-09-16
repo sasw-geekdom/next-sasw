@@ -540,6 +540,9 @@ async function main() {
         )
         .join("\n        "),
       kicker: card.kicker ?? "",
+      // The event page's own headline face, where a poster should read as
+      // the page rather than as the speaker set — see activation-poster.
+      headlineMono: card.headlineFont === "mono" ? "1" : "",
       // A bill's two talks. Named rather than folded into `headline`, because
       // this card carries both at once and the existing token is singular.
       talkA: card.talks?.[0]?.title ?? "",
