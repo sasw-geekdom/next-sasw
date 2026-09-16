@@ -232,8 +232,26 @@ export function ActivationSessions({
               The list takes the wider half. It holds abstracts and faces; the
               aside holds three paragraphs and stops. */}
           <div className="grid gap-x-14 gap-y-10 lg:grid-cols-[22rem_1fr] lg:items-start xl:grid-cols-[26rem_1fr]">
-            <div className="min-w-0 lg:sticky lg:top-24">{aside}</div>
+            {/* The list is first in the source, and the aside takes the left
+                column back at `lg`.
+
+                One column deep, "pinned beside the running order" is just
+                "before the running order" — and on a phone that put 800px of
+                why-Python-matters between a hero and the thing the page is
+                for. The first session started 2,194px down an iPhone, which
+                is 2.6 screens of scrolling to reach a schedule.
+
+                Ordering rather than two copies of the block, and the source
+                order is the phone's rather than the desktop's: a screen
+                reader gets the running order first either way, which is the
+                right answer for a page somebody opened to find out what is
+                on. The context still reads as context — it just stops
+                gatekeeping the list on the one screen size that cannot put
+                them side by side. */}
             <div className="min-w-0">{list}</div>
+            <div className="min-w-0 lg:sticky lg:top-24 lg:order-first">
+              {aside}
+            </div>
           </div>
         </div>
       </section>
