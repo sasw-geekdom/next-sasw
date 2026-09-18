@@ -523,6 +523,36 @@ export function speakerListGraph(people: { name: string; slug: string }[]) {
 }
 
 /**
+ * The one-pager's questions, for /faq.
+ *
+ * FAQPage rather than a pile of Questions, which is what Google's own
+ * guidance asks for and what lets the answers appear under the result. Built
+ * from lib/faq.ts so the marked-up answer is the answer on the page — the
+ * failure mode this avoids is the two drifting, which is worse than no markup
+ * because it is an assertion to a search engine that the page says something
+ * it does not.
+ *
+ * Answers go in as text. `acceptedAnswer.text` accepts a limited set of HTML
+ * and none of it is needed here; the page's own links sit beside the answer
+ * rather than inside it.
+ */
+export function faqGraph(sections: { items: { q: string; a: string[] }[] }[]) {
+  const items = sections.flatMap((s) => s.items);
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "@id": `${SITE_URL}/faq#faq`,
+    url: `${SITE_URL}/faq`,
+    name: "Attending — San Antonio Startup + Tech Week 2026",
+    mainEntity: items.map((i) => ({
+      "@type": "Question",
+      name: i.q,
+      acceptedAnswer: { "@type": "Answer", text: i.a.join(" ") },
+    })),
+  };
+}
+
+/**
  * Serialise for a `<script type="application/ld+json">`.
  *
  * `<` is escaped because a literal `</script>` anywhere in the data would end

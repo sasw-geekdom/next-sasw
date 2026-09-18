@@ -12,6 +12,7 @@ const STATIC_ROUTES = [
   "/schedule",
   "/register",
   "/get-involved",
+  "/faq",
   "/15-years",
 ];
 

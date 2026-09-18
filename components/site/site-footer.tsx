@@ -62,6 +62,13 @@ export function SiteFooter() {
                     Speakers
                   </Link>
                 </li>
+                {/* Last in the column because it is the one people go looking
+                    for rather than browse to — badges, parking and rooms. */}
+                <li>
+                  <Link href="/faq" className="hover:text-magenta">
+                    Attending
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
