@@ -278,6 +278,59 @@ export const EVENTS = {
    */
   "cyber-ai-robotics-panel": CYBER_AI_ROBOTICS,
 
+  /**
+   * The founder format the week borrows rather than programmes: Launch SA's
+   * 1 Million Cups chapter, running its ordinary Wednesday morning inside the
+   * week. So the card credits two parties and not one — see `.credits` in the
+   * template, and `hosts` in render.mjs.
+   */
+  "1-million-cups": {
+    template: "one-million-cups.html",
+    // The chapter's own lockup, from the repo, at the size the title slot
+    // takes. Height-led like every mark here; at 96 the stacked file draws
+    // 192px wide, which sets it against the headline below rather than over
+    // it.
+    mark: { repo: "public/activations/1-million-cups.png", height: 96 },
+    facts: [
+      "Wednesday, September 30",
+      "9:00 \u2013 11:00 AM",
+      "Launch SA, Central Library",
+    ],
+    // No label: the mark is set into the hook, in the sentence that says
+    // what Launch SA does here, so a second line naming the relationship
+    // would be saying it twice.
+    hostLabel: "",
+    // In colour, like the Give-a-LOT strip carries it. The navy is quiet on
+    // black but it is their mark; the white treatment this tool can apply
+    // would fill the glyph's teal square solid and take the arrow inside it
+    // with it.
+    hosts: [{ partner: "Launch SA", height: 30 }],
+    poweredLabel: "Powered by",
+    // No mark: PNC Bank is in neither wall, which is exactly why the page
+    // prints the name — see `poweredNames` in render.mjs and the note on
+    // components/site/powered-by-line.tsx. Swap to `logos` if their artwork
+    // is ever added to the CMS.
+    logos: [],
+    poweredNames: ["PNC Bank"],
+  },
+
+  /**
+   * The week's own party, and the one event here with nothing programmed
+   * inside it — no speakers, no running order, no partner brand. What it has
+   * instead is a room and two hours, so the card leads on the field of bolts
+   * the schedule grid already runs through this row and nowhere else.
+   */
+  "startup-bash": {
+    template: "startup-bash.html",
+    facts: [
+      "Thursday, October 1",
+      "6:00 \u2013 8:00 PM",
+      "Get on the list \u00b7 sasw.co",
+    ],
+    poweredLabel: "Sponsored by",
+    logos: [{ partner: "Active Capital", height: 46 }],
+  },
+
   tpr: {
     template: "tpr.html",
     facts: ["Texas Public Radio", "321 W Commerce St"],
@@ -1238,11 +1291,23 @@ export const CARDS = [
     facts: ["Friday, October 2  \u00b7  1 \u2013 6 PM", "Geekdom, 3rd Floor"],
     kicker: "The running order",
     rows: [
-      { at: "1:10", who: "Mason Egger", what: "Opening keynote \u00b7 PyTexas Foundation" },
+      {
+        at: "1:10",
+        who: "Mason Egger",
+        what: "Opening keynote \u00b7 PyTexas Foundation",
+      },
       { at: "1:45", who: "Samad Ahmed", what: "From Sensor to Signal" },
-      { at: "2:40", who: "Jordana Naftali", what: "JOMO in the age of AI slop" },
+      {
+        at: "2:40",
+        who: "Jordana Naftali",
+        what: "JOMO in the age of AI slop",
+      },
       { at: "3:15", who: "Edwin Jung", what: "Experiments in Agentic Coding" },
-      { at: "4:00", who: "Yossi Eliaz", what: "Your agent\u2019s requirements.txt is a lie" },
+      {
+        at: "4:00",
+        who: "Yossi Eliaz",
+        what: "Your agent\u2019s requirements.txt is a lie",
+      },
       { at: "4:10", who: "Shayan Ali", what: "AI Steering Wheel" },
       {
         at: "4:30",
@@ -1588,8 +1653,7 @@ export const CARDS = [
     // framing, the half that is not in the name.
     headline: "The Deals<br />That Don\u2019t Make<br />Headlines",
     headlineSize: 92,
-    subtitle:
-      "And an honest look at where the ecosystem still has work to do.",
+    subtitle: "And an honest look at where the ecosystem still has work to do.",
     // Founder, as on the activation — this is firesides and panels about the
     // people building here, not a room where capital is deployed.
     circuit: "Founder",
@@ -1798,6 +1862,156 @@ export const CARDS = [
     // match that one instead; his crown sits 165px into the frame, the
     // deepest here, which is why the number has to be this much larger.
     portrait: { height: 980, left: 439 },
+  },
+
+  {
+    id: "tpr-speaker-janie-martinez-gonzalez",
+    event: "tpr",
+    speaker: "janie-martinez-gonzalez",
+    /**
+     * Split at the colon, like patrick-robinson and oscar-perez. Whole, the
+     * title is 50 characters and wraps to three lines under the ramp; and the
+     * half before the colon is the better half anyway — "The Readiness Gap"
+     * is the idea, "AI, Quantum, and What Comes Next" only says which
+     * technologies it is about.
+     *
+     * The talk's own sharper line is "Are we innovating faster than we are
+     * preparing?", and it was the other candidate for the headline. It lost
+     * because it is a question a reader answers in their head and scrolls
+     * past; the gap is a thing they want named. The question belongs in the
+     * caption, where a reply is the point.
+     */
+    headline: "The Readiness Gap",
+    headlineSize: 96,
+    subtitle: "AI, Quantum, and What Comes Next",
+    // The talk's own circuit on the site, and the one she keynotes for.
+    circuit: "AI & Applied Innovation",
+    /**
+     * 1030, against the probe's 959, and this one is capped rather than
+     * matched.
+     *
+     * Hers is the loosest crop on this stage — her head is 29.6% of its frame
+     * where Oscar's is 33% and Patrick's 46% — so it takes the tallest figure
+     * here to draw a face the size of theirs, and long hair puts the
+     * suggestion further the wrong way: it delays the shoulder line the probe
+     * watches for, so the head measures longer than it draws and the height
+     * comes back short.
+     *
+     * Her face still lands about a tenth smaller than Oscar's, and it stays
+     * there, because the headline is the ceiling. The figure is anchored at
+     * the bottom, so every pixel of height lifts the crown; at 1100 her hair
+     * reaches the P of GAP and the last letter of the headline sits in it.
+     * A tenth of a face is a smaller cost than a headline with hair through
+     * it, and the hair mass reads as head anyway.
+     */
+    portrait: { height: 1030, left: 439 },
+    /**
+     * No sponsor strip, though Webhead sponsors the circuit she is speaking
+     * on — because Webhead is hers. A "sponsored by" line under her own name
+     * reads as her buying the slot rather than as a company backing a room,
+     * which is the opposite of what the sponsorship is. The circuit credit
+     * lives on the talk page, where the whole circuit is in view.
+     */
+  },
+
+  {
+    id: "1-million-cups",
+    event: "1-million-cups",
+    kicker: "Small Business \u0026 Solopreneur",
+    /**
+     * The blurb's second half, which is the format itself — three verbs in
+     * the order a founder meets them. The first half says what it is and
+     * where it runs, and that is the line under it.
+     */
+    headline: "Present.<br />Take questions.<br />Leave with answers.",
+    headlineSize: 92,
+    // Split where their mark goes — see `quoteTail` in render.mjs for why
+    // the sentence is in two pieces. Nothing follows the mark now: "run by"
+    // ends on it, so the credit is the last thing read rather than a word
+    // trailing after the logo.
+    quote: "The weekly founder format, run by",
+    quoteTail: "",
+    // Central Library's own illustration, the URL lib/locations.ts builds
+    // through ASSET() for this room — written out because this file is plain
+    // JS and that helper is TS.
+    art: "https://firebasestorage.googleapis.com/v0/b/sasw2026-783a5.firebasestorage.app/o/sasw-assets%2Fsastw-launchsa.jpg?alt=media",
+  },
+
+  {
+    id: "startup-bash",
+    event: "startup-bash",
+    // The page's own eyebrow, in its own order. The venue is not repeated in
+    // the facts below it — the three lines there are the two a reader acts on
+    // and the one that tells them how.
+    kicker: "Social \u00b7 Legacy Park",
+    // Two words, two lines, as large as the card will carry. Nothing else is
+    // competing for the upper half.
+    headline: "Startup<br />Bash",
+    headlineSize: 176,
+    // The blurb, split where it already has a full stop. The first sentence
+    // is four words and is the whole pitch, so it is set at headline weight
+    // rather than buried in body copy; the second carries the terms.
+    deck: "Where the week unwinds.",
+    quote: "Open-air, the whole ecosystem in one place, no badge scanning.",
+    poweredLabel: "Sponsored by",
+  },
+
+  {
+    /**
+     * The same card with the room under it — Legacy Park's own illustration,
+     * which lib/schedule.ts already gives this activation as its hero.
+     */
+    id: "startup-bash-park",
+    event: "startup-bash",
+    kicker: "Social \u00b7 Legacy Park",
+    headline: "Startup<br />Bash",
+    headlineSize: 176,
+    deck: "Where the week unwinds.",
+    quote: "Open-air, the whole ecosystem in one place, no badge scanning.",
+    poweredLabel: "Sponsored by",
+    // The URL lib/schedule.ts builds through ASSET() for this activation's
+    // hero, written out because this file is plain JS and that helper is TS.
+    art: "https://firebasestorage.googleapis.com/v0/b/sasw2026-783a5.firebasestorage.app/o/sasw-assets%2Fsastw-legacypark.jpg?alt=media",
+  },
+
+  {
+    id: "tpr-speaker-bill-gonzalez",
+    event: "tpr",
+    speaker: "bill-gonzalez",
+    /**
+     * The title whole, which is not what the rest of this stage does — the
+     * others split at the colon because their second halves are subjects
+     * rather than hooks. This one is the hook: the joke is "a bit", and it
+     * only lands with "quantum computing" beside it to be the other meaning.
+     * Cutting to "A Bit of Quantum Truth" to buy a shorter line would have
+     * spent the pun on 15 characters.
+     *
+     * It breaks after QUANTUM, which sets the two lines within about 80px of
+     * each other — the tidiest block on this stage.
+     */
+    headline: "A Bit of Quantum<br />Computing Truth",
+    headlineSize: 96,
+    // His own three, in his own order. The talk's promise is the hype being
+    // named alongside the technology, by someone building the thing.
+    subtitle: "The Technology, the Hype, and the Algorithms",
+    circuit: "AI & Applied Innovation",
+    /**
+     * 780, against the probe's 561 — the largest correction this tool has
+     * needed, and the clearest case of what it warns about.
+     *
+     * His is the tightest crop on this stage: head and neck measure 50.7% of
+     * the frame, where Patrick's read 46% and Oscar's 33%. A tight crop means
+     * a short figure draws a big head, so the suggestion comes back small —
+     * and at 561 the card had him floating low in the right half with the
+     * middle of it empty, because the figure is anchored to the bottom edge
+     * and there was not enough of him to reach up into the card.
+     *
+     * Sized against Patrick's, the other AI & Applied Innovation card he
+     * posts beside: their heads now draw within 4% of each other. It leaves
+     * his org line 60px of clearance before his shoulder, which is why
+     * "Webhead, Quantum Realm Computing" can stay whole.
+     */
+    portrait: { height: 780, left: 439 },
   },
 
   {
@@ -2270,14 +2484,30 @@ export const CARDS = [
     subtitle: "Creatives, founders and builders in the same room.",
     kicker: "Monday, Sept 28 \u00b7 1 \u2013 6 PM \u00b7 Geekdom, 3rd Floor",
     rows: [
-      { at: "1:10", who: "The Next Era of the Creator Economy", what: "Keynote \u00b7 Justin Johnson" },
+      {
+        at: "1:10",
+        who: "The Next Era of the Creator Economy",
+        what: "Keynote \u00b7 Justin Johnson",
+      },
       { at: "2:20", who: "Beyond the Cloud", what: "AJ Rose & Diego Chavez" },
       { at: "2:45", who: "Let the Machines Win", what: "Jonathan Perry" },
-      { at: "3:10", who: "Ship the Story, Not Just the Product", what: "Maria Consuelo Gonima" },
+      {
+        at: "3:10",
+        who: "Ship the Story, Not Just the Product",
+        what: "Maria Consuelo Gonima",
+      },
       { at: "3:35", who: "Beyond the Prompt", what: "Cynthia Gentry" },
-      { at: "4:00", who: "Putting Grok Bot and Agents to Work", what: "Leon Hitchens" },
+      {
+        at: "4:00",
+        who: "Putting Grok Bot and Agents to Work",
+        what: "Leon Hitchens",
+      },
       { at: "4:25", who: "Alamo City AI", what: "Building over broadcasting" },
-      { at: "5:30", who: "Storytelling Meets Startup Strategy", what: "Daniel Gallegos & Serena Hernandez" },
+      {
+        at: "5:30",
+        who: "Storytelling Meets Startup Strategy",
+        what: "Daniel Gallegos & Serena Hernandez",
+      },
     ],
     ctaLine: "Free with your badge.",
     ctaUrl: "sasw.co/schedule/the-model",
@@ -2315,14 +2545,30 @@ export const CARDS = [
     headlineSize: 104,
     subtitle: "",
     rows: [
-      { at: "1:10", who: "The Next Era of the Creator Economy", what: "Keynote \u00b7 Justin Johnson" },
+      {
+        at: "1:10",
+        who: "The Next Era of the Creator Economy",
+        what: "Keynote \u00b7 Justin Johnson",
+      },
       { at: "2:20", who: "Beyond the Cloud", what: "AJ Rose & Diego Chavez" },
       { at: "2:45", who: "Let the Machines Win", what: "Jonathan Perry" },
-      { at: "3:10", who: "Ship the Story, Not Just the Product", what: "Maria Consuelo Gonima" },
+      {
+        at: "3:10",
+        who: "Ship the Story, Not Just the Product",
+        what: "Maria Consuelo Gonima",
+      },
       { at: "3:35", who: "Beyond the Prompt", what: "Cynthia Gentry" },
-      { at: "4:00", who: "Putting Grok Bot and Agents to Work", what: "Leon Hitchens" },
+      {
+        at: "4:00",
+        who: "Putting Grok Bot and Agents to Work",
+        what: "Leon Hitchens",
+      },
       { at: "4:25", who: "Alamo City AI", what: "Building over broadcasting" },
-      { at: "5:30", who: "Storytelling Meets Startup Strategy", what: "Daniel Gallegos & Serena Hernandez" },
+      {
+        at: "5:30",
+        who: "Storytelling Meets Startup Strategy",
+        what: "Daniel Gallegos & Serena Hernandez",
+      },
     ],
   },
 

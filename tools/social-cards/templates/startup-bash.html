@@ -1,0 +1,1366 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* One frame of the schedule grid's own animation.
+         The Startup Bash row is the only one on the grid with bolts rising
+         through it continuously — see BoltDrift in
+         components/site/calendar/event-particles.tsx, and the note above it
+         about why that row and the AI afternoon are the two exceptions to a
+         still grid. This card is that row's field, from further back: same
+         shape, same magenta, same ±19deg of spin, at the sizes a 1350px
+         canvas holds instead of a 60px one.
+         Nobody is on it, like College Night, so the bolts take the half a
+         portrait holds everywhere else. */
+      :root {
+        --magenta: #ff32a0;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      <!--if:face-->
+      /* Legacy Park's own SA lockup.
+         The room's illustration, which lib/schedule.ts already hands this
+         activation as its hero, cropped to the one thing in it that is ours:
+         the bracket-and-bolt mark standing over the park in halftone, at
+         x 250-560, y 60-380 of the source.
+         It is a second SA mark on a card that already wears the house lockup
+         top left, which is usually the argument against — but not at these
+         two sizes and in these two registers. The lockup up there is 58px of
+         flat white, the width lockup every card in the set opens with; this
+         is 440px of magenta dot-matrix bleeding off two edges, the city's
+         own sign for the place. One reads as the mark of the week, the other
+         as the picture of where the party is, and nothing about the second
+         asks to be read as a logo.
+         Cropped in the box rather than in the file so the asset stays the one
+         the site fetches: an oversized image in an overflow-hidden band,
+         placed by its own offsets. */
+      .park {
+        position: absolute;
+        z-index: 0;
+        left: 500px;
+        right: -20px;
+        bottom: 40px;
+        height: 540px;
+        overflow: hidden;
+        opacity: 1;
+        filter: brightness(1.35) contrast(1.04);
+        /* Only the edges that meet the card's black, and only just — a fade
+           deep enough to be safe took the top of the bracket with it. The
+           bottom and right are left alone because the crop bleeds past both. */
+        -webkit-mask-image: linear-gradient(
+            to top,
+            #000 76%,
+            rgba(0, 0, 0, 0) 100%
+          ),
+          linear-gradient(to left, #000 74%, rgba(0, 0, 0, 0) 100%);
+        -webkit-mask-composite: source-in;
+        mask-image: linear-gradient(to top, #000 76%, rgba(0, 0, 0, 0) 100%),
+          linear-gradient(to left, #000 74%, rgba(0, 0, 0, 0) 100%);
+        mask-composite: intersect;
+      }
+      /* 1113 wide against the source's 784 draws the mark 440px across and
+         the halftone dots with it, which is what keeps this reading as the
+         illustration rather than as a logo file. The two offsets put the
+         mark's own top left corner at 80,40 inside the band. */
+      .park img {
+        position: absolute;
+        left: -275px;
+        top: -45px;
+        width: 1113px;
+        height: auto;
+      }
+      <!--/if:face-->
+
+      /* The field, on the right.
+         Positions are generated once and pasted in — fixed like the row's
+         eight, and for the same reason those are: a card has to reproduce
+         byte for byte. None of them starts left of x=430: the left of this
+         card is the copy column and the big bolt's corner, and a field that
+         crosses into it stops being weather on one side of the card and
+         becomes speckle over the whole of it. Four boxes are held clear
+         inside that right-hand band as well — the headline, the deck, the
+         hook and the lockup inside the illustration — because a bolt landing
+         on a word or on the middle of a mark reads as a mistake rather than
+         as one of seventy.
+         A quarter of them are aimed at the bottom band on purpose, and the
+         generator then walks a 165px grid over the whole band and drops one
+         into any cell the random pass left empty. Weighted by height alone
+         the field thinned out below y=1200 and left corners of black in the
+         lower right, which read as the field having stopped rather than as it
+         running off the card. Randomness gives the arrangement; the grid pass
+         is what guarantees there is no hole big enough to look like one. Depth is carried by three things at once, size,
+         opacity and a sub-pixel blur on the far ones. Size alone read as
+         bolts of different sizes rather than as one size at different
+         distances.
+         The row masks a single shape and colours it from `currentColor`,
+         which is right there and impossible here: this page is loaded over
+         file://, Chromium gives every file:// document its own opaque origin,
+         and an SVG used as a CSS mask must be same-origin — so every
+         mask-image request is blocked and the field renders empty. Tags
+         instead, the way college-night.html stages the same file, which
+         costs nothing: sastw-bolt.svg is already flat #ff32a0. */
+      .field {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+      }
+      .field img {
+        position: absolute;
+        display: block;
+      }
+
+      /* Black back under the copy, so no line ever sits on a bolt.
+         Two gradients rather than one: the column holds the left third for the
+         title and the hook, and the floor holds the bottom band for the when,
+         the where and the sponsor. The field is densest low and right, which
+         is exactly where both of those need to be clear. */
+      /* The bolt the field is made of, once, at size.
+         The mini bolts are one frame of the schedule row's animation and they
+         read as weather — dozens of small marks, none of them the subject. A
+         card can carry that and still want a subject, so this is the same
+         shape at poster scale, in the corner the card's own details sit in.
+         Placed off the shape, not off the box. The bolt is inset in its own
+         square — x 0.127-0.705, y 0.053-0.778 of it, measured by rendering
+         sastw-bolt.svg on its own — so every guess at these numbers before
+         this one either cut an arm mid-stroke or left the shape floating in
+         the middle of the card. At 724 the drawn bolt is 419 wide and 525
+         tall and these two offsets put it at x 0-419, y 820-1345: the lower
+         left, whole, touching the bottom edge without crossing it.
+         That is the corner the facts and the sponsor sit in, and they sit on
+         top of it on purpose — this is a ground for that block, not a
+         neighbour to it.
+         Below the hook, because the bolt may sit behind a picture and never
+         behind a line of type. Quiet on purpose — 0.4 against TPR's 0.62 —
+         because unlike that card this one already has magenta in it. At full
+         charge the 78 small bolts stopped reading as a field and started
+         reading as debris around a big shape. */
+      .bolt {
+        position: absolute;
+        /* Above the scrim, where the small bolts are below it. That one
+           difference is what lets the same gradient hold the left of the card
+           quiet and still leave this shape at full strength — the alternative
+           was removing the gradient, which brought the whole field back over
+           the copy column. Painted after it in the markup as well, since both
+           sit at z-index 1. */
+        z-index: 1;
+        left: -92px;
+        top: 782px;
+        width: 724px;
+        height: auto;
+        opacity: 0.4;
+        filter: blur(5px);
+      }
+
+      /* The scrim that shapes the field.
+         It is doing more than protecting copy. The field is generated across
+         the whole card, and this is what makes it a right-hand field: the
+         left-to-right gradient takes the bolts over the copy column down to
+         nothing, so what reads is the two-thirds it leaves alone. Take it
+         away and every bolt appears, and the card stops having a quiet side.
+         The floor does the same for the bottom edge, under the facts and the
+         sponsor. */
+      .scrim {
+        position: absolute;
+        z-index: 1;
+        inset: 0;
+        background:
+          linear-gradient(
+            to right,
+            #000 0%,
+            rgba(0, 0, 0, 0.9) 22%,
+            rgba(0, 0, 0, 0.48) 44%,
+            rgba(0, 0, 0, 0) 64%
+          ),
+          linear-gradient(
+            to top,
+            #000 0%,
+            rgba(0, 0, 0, 0.8) 11%,
+            rgba(0, 0, 0, 0) 26%
+          );
+      }
+
+      /* The bottom-left corner, under the frame's own text and over both
+         bolts — tpr.html's fix, at half its strength. There the scrim clears
+         the corner so the copy sits on black; here the block of facts and the
+         sponsor is meant to sit on the bolt, so this only takes the top off
+         the brightest part of it. Enough that the magenta pips beside the
+         facts stay pips rather than dissolving into the shape behind them,
+         and no more. z-index:-1 puts it inside .frame's stacking context,
+         above the bolt without being above the type. */
+      .frame::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: px;
+        height: 560px;
+        z-index: -1;
+        background: radial-gradient(
+          125% 95% at 0% 100%,
+          rgba(0, 0, 0, 0.62) 0%,
+          rgba(0, 0, 0, 0.4) 45%,
+          rgba(0, 0, 0, 0) 78%
+        );
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 74px 72px 84px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 58px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* The circuit and the room, as the page's eyebrow gives them. */
+      .eyebrow {
+        margin-top: 72px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.24em;
+        color: var(--magenta);
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin-top: 20px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 0.86;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+
+      /* The blurb's first sentence, at the size of a headline's second line.
+         It is four words and it is the whole pitch — a card that sets it as
+         body copy under the title buries the one line somebody reads. */
+      .deck {
+        margin-top: 30px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 52px;
+        line-height: 1;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+        color: var(--magenta);
+      }
+
+      /* The rest of the blurb, in the house's quoted-line treatment. */
+      .quote {
+        margin-top: 34px;
+        max-width: 520px;
+        border-left: 3px solid var(--magenta);
+        padding-left: 26px;
+        font-size: 26px;
+        line-height: 1.42;
+        color: rgba(255, 255, 255, 0.88);
+        text-wrap: balance;
+      }
+
+      .spacer {
+        flex: 1;
+      }
+
+      .facts {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--magenta);
+        flex: none;
+      }
+
+      .powered {
+        margin-top: 40px;
+      }
+      .powered .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.26em;
+        color: #6f6f6f;
+        text-transform: uppercase;
+      }
+      .logos {
+        margin-top: 18px;
+        display: flex;
+        align-items: center;
+        gap: 34px;
+      }
+      .logos img {
+        width: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <!--if:face-->
+    <div class="park"><img src="{{face}}" alt="" /></div>
+    <!--/if:face-->
+    <div class="field">
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 630px;
+          top: 912px;
+          width: 17px;
+          height: 17px;
+          opacity: 0.249;
+          transform: rotate(-15.1deg);
+          filter: blur(1.4px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 734px;
+          top: 954px;
+          width: 22px;
+          height: 22px;
+          opacity: 0.279;
+          transform: rotate(1.8deg);
+          filter: blur(1.1px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 902px;
+          top: 1125px;
+          width: 63px;
+          height: 63px;
+          opacity: 0.578;
+          transform: rotate(-9.9deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 156px;
+          top: 1178px;
+          width: 52px;
+          height: 52px;
+          opacity: 0.472;
+          transform: rotate(12deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 814px;
+          top: 576px;
+          width: 58px;
+          height: 58px;
+          opacity: 0.502;
+          transform: rotate(18.2deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 939px;
+          top: 1320px;
+          width: 84px;
+          height: 84px;
+          opacity: 0.737;
+          transform: rotate(-16.1deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 688px;
+          top: 680px;
+          width: 29px;
+          height: 29px;
+          opacity: 0.298;
+          transform: rotate(14.3deg);
+          filter: blur(0.8px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 709px;
+          top: 241px;
+          width: 60px;
+          height: 60px;
+          opacity: 0.572;
+          transform: rotate(-5.2deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 516px;
+          top: 981px;
+          width: 35px;
+          height: 35px;
+          opacity: 0.35;
+          transform: rotate(-14.6deg);
+          filter: blur(0.5px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 885px;
+          top: 994px;
+          width: 42px;
+          height: 42px;
+          opacity: 0.402;
+          transform: rotate(15.8deg);
+          filter: blur(0.2px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 539px;
+          top: 1264px;
+          width: 24px;
+          height: 24px;
+          opacity: 0.259;
+          transform: rotate(0.7deg);
+          filter: blur(1px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 309px;
+          top: 457px;
+          width: 14px;
+          height: 14px;
+          opacity: 0.128;
+          transform: rotate(7.8deg);
+          filter: blur(1.5px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 144px;
+          top: 1014px;
+          width: 79px;
+          height: 79px;
+          opacity: 0.694;
+          transform: rotate(-0.7deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 1017px;
+          top: 1018px;
+          width: 23px;
+          height: 23px;
+          opacity: 0.243;
+          transform: rotate(-1.2deg);
+          filter: blur(1.1px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 1113px;
+          top: 944px;
+          width: 84px;
+          height: 84px;
+          opacity: 0.743;
+          transform: rotate(6.5deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 934px;
+          top: 903px;
+          width: 27px;
+          height: 27px;
+          opacity: 0.283;
+          transform: rotate(14.6deg);
+          filter: blur(0.9px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 395px;
+          top: 652px;
+          width: 36px;
+          height: 36px;
+          opacity: 0.301;
+          transform: rotate(5.9deg);
+          filter: blur(0.5px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 582px;
+          top: 923px;
+          width: 50px;
+          height: 50px;
+          opacity: 0.465;
+          transform: rotate(16deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 964px;
+          top: 708px;
+          width: 81px;
+          height: 81px;
+          opacity: 0.766;
+          transform: rotate(-15.3deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 1092px;
+          top: 1295px;
+          width: 38px;
+          height: 38px;
+          opacity: 0.41;
+          transform: rotate(-0.8deg);
+          filter: blur(0.4px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 361px;
+          top: 899px;
+          width: 15px;
+          height: 15px;
+          opacity: 0.142;
+          transform: rotate(9.4deg);
+          filter: blur(1.5px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 572px;
+          top: 205px;
+          width: 35px;
+          height: 35px;
+          opacity: 0.284;
+          transform: rotate(3.1deg);
+          filter: blur(0.6px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 754px;
+          top: 1126px;
+          width: 24px;
+          height: 24px;
+          opacity: 0.311;
+          transform: rotate(6.4deg);
+          filter: blur(1.1px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 218px;
+          top: 705px;
+          width: 54px;
+          height: 54px;
+          opacity: 0.504;
+          transform: rotate(10.2deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 618px;
+          top: 1099px;
+          width: 86px;
+          height: 86px;
+          opacity: 0.71;
+          transform: rotate(-10.5deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 1086px;
+          top: 1225px;
+          width: 49px;
+          height: 49px;
+          opacity: 0.46;
+          transform: rotate(-15.8deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 1064px;
+          top: 1151px;
+          width: 57px;
+          height: 57px;
+          opacity: 0.569;
+          transform: rotate(-7.4deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: -6px;
+          top: 419px;
+          width: 21px;
+          height: 21px;
+          opacity: 0.281;
+          transform: rotate(-17deg);
+          filter: blur(1.2px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 464px;
+          top: 1140px;
+          width: 30px;
+          height: 30px;
+          opacity: 0.25;
+          transform: rotate(0.4deg);
+          filter: blur(0.8px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 406px;
+          top: 719px;
+          width: 29px;
+          height: 29px;
+          opacity: 0.251;
+          transform: rotate(17.1deg);
+          filter: blur(0.8px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 939px;
+          top: 496px;
+          width: 48px;
+          height: 48px;
+          opacity: 0.45;
+          transform: rotate(-2.5deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 731px;
+          top: 1063px;
+          width: 29px;
+          height: 29px;
+          opacity: 0.249;
+          transform: rotate(-3.8deg);
+          filter: blur(0.8px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 1051px;
+          top: 296px;
+          width: 21px;
+          height: 21px;
+          opacity: 0.239;
+          transform: rotate(12.9deg);
+          filter: blur(1.2px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 1009px;
+          top: 457px;
+          width: 61px;
+          height: 61px;
+          opacity: 0.555;
+          transform: rotate(10.8deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 1084px;
+          top: 506px;
+          width: 43px;
+          height: 43px;
+          opacity: 0.452;
+          transform: rotate(-4.2deg);
+          filter: blur(0.2px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 533px;
+          top: 368px;
+          width: 36px;
+          height: 36px;
+          opacity: 0.329;
+          transform: rotate(-5.9deg);
+          filter: blur(0.5px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 592px;
+          top: 719px;
+          width: 35px;
+          height: 35px;
+          opacity: 0.344;
+          transform: rotate(-14.4deg);
+          filter: blur(0.5px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 318px;
+          top: 1285px;
+          width: 75px;
+          height: 75px;
+          opacity: 0.709;
+          transform: rotate(5.5deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 917px;
+          top: 1205px;
+          width: 34px;
+          height: 34px;
+          opacity: 0.362;
+          transform: rotate(17.5deg);
+          filter: blur(0.6px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 221px;
+          top: 959px;
+          width: 30px;
+          height: 30px;
+          opacity: 0.318;
+          transform: rotate(1.5deg);
+          filter: blur(0.8px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 851px;
+          top: 954px;
+          width: 17px;
+          height: 17px;
+          opacity: 0.211;
+          transform: rotate(-10.9deg);
+          filter: blur(1.4px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 363px;
+          top: 954px;
+          width: 26px;
+          height: 26px;
+          opacity: 0.231;
+          transform: rotate(-9deg);
+          filter: blur(0.9px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 634px;
+          top: 661px;
+          width: 53px;
+          height: 53px;
+          opacity: 0.531;
+          transform: rotate(-7.9deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 354px;
+          top: 336px;
+          width: 28px;
+          height: 28px;
+          opacity: 0.279;
+          transform: rotate(15.1deg);
+          filter: blur(0.9px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 12px;
+          top: 447px;
+          width: 16px;
+          height: 16px;
+          opacity: 0.221;
+          transform: rotate(2.9deg);
+          filter: blur(1.4px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 789px;
+          top: 1008px;
+          width: 51px;
+          height: 51px;
+          opacity: 0.524;
+          transform: rotate(-7deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 587px;
+          top: 1304px;
+          width: 22px;
+          height: 22px;
+          opacity: 0.287;
+          transform: rotate(7.1deg);
+          filter: blur(1.2px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 816px;
+          top: 1262px;
+          width: 76px;
+          height: 76px;
+          opacity: 0.662;
+          transform: rotate(17deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 870px;
+          top: 838px;
+          width: 31px;
+          height: 31px;
+          opacity: 0.255;
+          transform: rotate(7.4deg);
+          filter: blur(0.7px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 902px;
+          top: 711px;
+          width: 17px;
+          height: 17px;
+          opacity: 0.255;
+          transform: rotate(1.6deg);
+          filter: blur(1.4px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 692px;
+          top: 1100px;
+          width: 30px;
+          height: 30px;
+          opacity: 0.258;
+          transform: rotate(4.5deg);
+          filter: blur(0.8px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 178px;
+          top: 750px;
+          width: 17px;
+          height: 17px;
+          opacity: 0.223;
+          transform: rotate(5.9deg);
+          filter: blur(1.4px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 710px;
+          top: 752px;
+          width: 14px;
+          height: 14px;
+          opacity: 0.169;
+          transform: rotate(-9.9deg);
+          filter: blur(1.5px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 514px;
+          top: 634px;
+          width: 58px;
+          height: 58px;
+          opacity: 0.488;
+          transform: rotate(-18.1deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: -12px;
+          top: 1304px;
+          width: 56px;
+          height: 56px;
+          opacity: 0.507;
+          transform: rotate(17.9deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 319px;
+          top: 1188px;
+          width: 86px;
+          height: 86px;
+          opacity: 0.736;
+          transform: rotate(-11.4deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 771px;
+          top: 947px;
+          width: 31px;
+          height: 31px;
+          opacity: 0.31;
+          transform: rotate(11deg);
+          filter: blur(0.7px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 262px;
+          top: 1019px;
+          width: 49px;
+          height: 49px;
+          opacity: 0.413;
+          transform: rotate(15deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 486px;
+          top: 1108px;
+          width: 16px;
+          height: 16px;
+          opacity: 0.152;
+          transform: rotate(9.1deg);
+          filter: blur(1.4px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 3px;
+          top: 586px;
+          width: 92px;
+          height: 92px;
+          opacity: 0.841;
+          transform: rotate(3.1deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 1083px;
+          top: 779px;
+          width: 48px;
+          height: 48px;
+          opacity: 0.504;
+          transform: rotate(0.6deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 867px;
+          top: 728px;
+          width: 16px;
+          height: 16px;
+          opacity: 0.167;
+          transform: rotate(-17.4deg);
+          filter: blur(1.4px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 671px;
+          top: 754px;
+          width: 26px;
+          height: 26px;
+          opacity: 0.335;
+          transform: rotate(-11.8deg);
+          filter: blur(0.9px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: -17px;
+          top: 1000px;
+          width: 64px;
+          height: 64px;
+          opacity: 0.578;
+          transform: rotate(-2.9deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 669px;
+          top: 511px;
+          width: 20px;
+          height: 20px;
+          opacity: 0.274;
+          transform: rotate(0.6deg);
+          filter: blur(1.2px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 777px;
+          top: 145px;
+          width: 79px;
+          height: 79px;
+          opacity: 0.679;
+          transform: rotate(-5deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 217px;
+          top: 1003px;
+          width: 22px;
+          height: 22px;
+          opacity: 0.198;
+          transform: rotate(18.4deg);
+          filter: blur(1.2px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 1005px;
+          top: 1104px;
+          width: 40px;
+          height: 40px;
+          opacity: 0.375;
+          transform: rotate(4.4deg);
+          filter: blur(0.3px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 458px;
+          top: 1251px;
+          width: 55px;
+          height: 55px;
+          opacity: 0.458;
+          transform: rotate(0.7deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 311px;
+          top: 718px;
+          width: 65px;
+          height: 65px;
+          opacity: 0.586;
+          transform: rotate(-6.4deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 824px;
+          top: 744px;
+          width: 22px;
+          height: 22px;
+          opacity: 0.279;
+          transform: rotate(-3.4deg);
+          filter: blur(1.1px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 496px;
+          top: 497px;
+          width: 70px;
+          height: 70px;
+          opacity: 0.655;
+          transform: rotate(6deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 974px;
+          top: 846px;
+          width: 28px;
+          height: 28px;
+          opacity: 0.25;
+          transform: rotate(4.8deg);
+          filter: blur(0.9px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 394px;
+          top: 860px;
+          width: 17px;
+          height: 17px;
+          opacity: 0.195;
+          transform: rotate(-18.2deg);
+          filter: blur(1.4px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 1081px;
+          top: 1054px;
+          width: 75px;
+          height: 75px;
+          opacity: 0.669;
+          transform: rotate(-11deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 442px;
+          top: 1034px;
+          width: 24px;
+          height: 24px;
+          opacity: 0.248;
+          transform: rotate(10.6deg);
+          filter: blur(1.1px);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 364px;
+          top: 219px;
+          width: 75px;
+          height: 75px;
+          opacity: 0.633;
+          transform: rotate(-1.6deg);
+        "
+      />
+      <img
+        src="bolt.svg"
+        alt=""
+        style="
+          left: 764px;
+          top: 369px;
+          width: 25px;
+          height: 25px;
+          opacity: 0.293;
+          transform: rotate(1.5deg);
+          filter: blur(1px);
+        "
+      />
+    </div>
+    <div class="scrim"></div>
+    <img class="bolt" src="bolt.svg" alt="" />
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <div class="eyebrow">{{kicker}}</div>
+      <h1>{{headline}}</h1>
+      <p class="deck">{{deck}}</p>
+      <p class="quote">{{quote}}</p>
+
+      <div class="spacer"></div>
+
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+        <div class="fact"><span class="pip"></span>{{fact3}}</div>
+      </div>
+
+      <div class="powered">
+        <div class="label">// {{poweredLabel}}</div>
+        <div class="logos">{{logos}}</div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -21,7 +21,14 @@
  *   pnpm add -D playwright && pnpm exec playwright install chromium
  */
 
-import { readFile, readdir, writeFile, mkdir, copyFile, rm } from "node:fs/promises";
+import {
+  readFile,
+  readdir,
+  writeFile,
+  mkdir,
+  copyFile,
+  rm,
+} from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, dirname, extname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -288,37 +295,53 @@ async function main() {
     const event = EVENTS[card.event];
     if (!event) throw new Error(`${card.id}: unknown event ${card.event}`);
 
-    // Logos, resolved from wherever each one lives.
-    //
-    // `card.logos` overrides the event's, for the same reason `card.template`
-    // and `card.facts` do: the poster carries the coalition without DEVSA,
-    // because DEVSA is in its co-brand row rather than its strip.
-    const logos = [];
-    for (const [i, l] of (card.logos ?? event.logos).entries()) {
-      let src;
-      if (l.repo) src = join(REPO, l.repo);
-      else if (l.url) src = await fetchCached(l.url);
-      else if (l.partner) {
-        const url = byPartner.get(l.partner.toLowerCase());
-        if (!url) throw new Error(`${card.id}: no partner "${l.partner}"`);
-        src = await fetchCached(url);
+    /**
+     * Logos, resolved from wherever each one lives.
+     *
+     * `card.logos` overrides the event's, for the same reason `card.template`
+     * and `card.facts` do: the poster carries the coalition without DEVSA,
+     * because DEVSA is in its co-brand row rather than its strip.
+     *
+     * `prefix` exists because a card can carry two strips. 1 Million Cups is
+     * run by Launch SA and powered by PNC Bank, and those are not the same
+     * claim — one strip holding both under either label says the bank runs
+     * the morning or that Launch SA bought it. Two groups, each with its own
+     * line. The staged filenames have to differ or the second group overwrites
+     * the first in the working directory.
+     */
+    const build = async (list, prefix) => {
+      const logos = [];
+      for (const [i, l] of list.entries()) {
+        let src;
+        if (l.repo) src = join(REPO, l.repo);
+        else if (l.url) src = await fetchCached(l.url);
+        else if (l.partner) {
+          const url = byPartner.get(l.partner.toLowerCase());
+          if (!url) throw new Error(`${card.id}: no partner "${l.partner}"`);
+          src = await fetchCached(url);
+        }
+        const as = `${prefix}-${i}${extname(src) || ".png"}`;
+        await stage(work, src, as);
+        // `white` knocks a mark back to a white silhouette — see OrganizerLogo,
+        // which does the same thing with the same two filters so a mark drawn
+        // white on the site is drawn white here too.
+        const tone = l.white ? ";filter:brightness(0) invert(1)" : "";
+        // `shift` is the strip's version of the one `marks` carries, and it is
+        // needed here for the same reason: a mark with a caption under its
+        // graphic — CyberJedis, Alamo City Locksport — has its file centre
+        // below its visual mass, so a row that centres the files does not
+        // centre what a reader sees.
+        const nudge = l.shift ? `;transform:translateY(${l.shift}px)` : "";
+        logos.push(
+          `<img src="${as}" style="height:${l.height}px${tone}${nudge}" alt="" />`,
+        );
       }
-      const as = `logo-${i}${extname(src) || ".png"}`;
-      await stage(work, src, as);
-      // `white` knocks a mark back to a white silhouette — see OrganizerLogo,
-      // which does the same thing with the same two filters so a mark drawn
-      // white on the site is drawn white here too.
-      const tone = l.white ? ";filter:brightness(0) invert(1)" : "";
-      // `shift` is the strip's version of the one `marks` carries, and it is
-      // needed here for the same reason: a mark with a caption under its
-      // graphic — CyberJedis, Alamo City Locksport — has its file centre
-      // below its visual mass, so a row that centres the files does not
-      // centre what a reader sees.
-      const nudge = l.shift ? `;transform:translateY(${l.shift}px)` : "";
-      logos.push(
-        `<img src="${as}" style="height:${l.height}px${tone}${nudge}" alt="" />`,
-      );
-    }
+      return logos;
+    };
+    const logos = await build(card.logos ?? event.logos, "logo");
+    // The second strip, where a card has one. Absent on every other card, and
+    // `hosts: []` is how a card turns the event's off.
+    const hosts = await build(card.hosts ?? event.hosts ?? [], "host");
 
     // The group's own mark, where the event has one.
     let mark = "";
@@ -357,7 +380,9 @@ async function main() {
     if (card.moderator) {
       moderator = bySlug.get(card.moderator);
       if (!moderator)
-        throw new Error(`${card.id}: no speaker "${card.moderator}" in the CMS`);
+        throw new Error(
+          `${card.id}: no speaker "${card.moderator}" in the CMS`,
+        );
     }
 
     /**
@@ -427,7 +452,15 @@ async function main() {
      * place, sized by the same two numbers.
      */
     if (card.art && people.length === 0) {
-      const src = join(REPO, card.art);
+      // A URL as well as a repo path, because not every piece of event art is
+      // in the repo: the venue illustrations live in the same Firebase bucket
+      // the room photographs do and are hotlinked from lib/locations.ts, so
+      // that a redrawn one reaches the site without a deploy. Fetched and
+      // cached here the way PySanAntonio's logos are, and for the same
+      // reason — a card should draw what the page draws.
+      const src = card.art.startsWith("http")
+        ? await fetchCached(card.art)
+        : join(REPO, card.art);
       const as = `face-art${extname(src) || ".png"}`;
       await stage(work, src, as);
       people.push({ file: as, name: "", title: "", company: "" });
@@ -588,6 +621,22 @@ async function main() {
         )
         .join("\n        "),
       logos: logos.join("\n          "),
+      hosts: hosts.join("\n          "),
+      /**
+       * A credit with no mark to draw, set as a name.
+       *
+       * Neither PNC Bank nor Active Capital is in `partners` or `sponsors`,
+       * which is why components/site/powered-by-line.tsx prints their names
+       * instead of marks — and why it sets them in the body face: a bank's
+       * name in Oswald uppercase reads as a wordmark we invented for them.
+       * The same rule, on the card. Delete this from a card the day the mark
+       * lands in the CMS and give it `logos` instead.
+       */
+      poweredNames: (card.poweredNames ?? event.poweredNames ?? [])
+        .map((n) => `<span>${n}</span>`)
+        .join("\n            "),
+      // The second strip's own line, the way `poweredLabel` is the first's.
+      hostLabel: card.hostLabel ?? event.hostLabel ?? "",
       mark,
       // A card may resize the mark. The wide card has to: the portrait card
       // sets these against a wordmark slot, and beside the SASTW lockup the
@@ -609,6 +658,16 @@ async function main() {
       greyscale: card.greyscale ? "1" : "",
       // A pull quote, where a card leads on a line rather than on a person.
       quote: card.quote ?? "",
+      /**
+       * The rest of that line, where a mark is set into the middle of it.
+       *
+       * 1 Million Cups' hook names Launch SA, who have a logo, and a sentence
+       * cannot carry one through `quote` alone: `fill` substitutes in a single
+       * pass, so a `{{hosts}}` written inside a card's own value is never
+       * looked at again. The template holds the sentence's shape instead and
+       * the card hands it the two halves.
+       */
+      quoteTail: card.quoteTail ?? "",
       // The line under the title, where the page runs one — College Night's
       // `detail.headline`, which is the deck on its hero.
       deck: card.deck ?? "",
@@ -630,7 +689,7 @@ async function main() {
        */
       // Exactly two, not "at least two": a panel has a `b` as well, and with
       // five speakers the pair layout drew its own name column underneath
-       // the crowd's.
+      // the crowd's.
       faceB: people.length === 2 ? (b?.file ?? "") : "",
       /**
        * Three or more speakers, as one row of cutouts.
@@ -832,7 +891,11 @@ async function main() {
         const f = out.replace(/\.png$/, `-${String(i).padStart(3, "0")}.png`);
         await page.screenshot({ path: f, omitBackground: !!card.video });
         const hold =
-          i === 0 ? (a.holdStart ?? 1) : i === frames.length - 1 ? (a.holdEnd ?? 4) : step;
+          i === 0
+            ? (a.holdStart ?? 1)
+            : i === frames.length - 1
+              ? (a.holdEnd ?? 4)
+              : step;
         stills.push({ file: f, hold });
       }
     }
@@ -943,7 +1006,14 @@ async function main() {
         if (!existsSync(src)) {
           console.warn(`${card.id}  !! no audio at ${src} — rendering silent`);
         } else {
-          const slice = ["-ss", String(a.start ?? 0), "-t", String(total), "-i", src];
+          const slice = [
+            "-ss",
+            String(a.start ?? 0),
+            "-t",
+            String(total),
+            "-i",
+            src,
+          ];
           const ai = card.video ? 2 : 1;
           const { stderr } = await run(
             "ffmpeg",

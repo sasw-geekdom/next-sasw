@@ -1,0 +1,349 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* The house room, not the house's own — so the bolt leads, the way it
+         does on the TPR cards.
+         This started as the page's photograph of a 1 Million Cups morning at
+         Launch SA HQ, and a photograph is the wrong ground here: lit for a
+         bright room, it read as the subject with the time and the place
+         beside it as a caption. The bolt is the subject the set already has.
+         Launch SA keeps its credit and gets a better one — the mark is set
+         into the hook, in the sentence that names them, rather than filed in
+         a strip at the foot of the card. */
+      :root {
+        --magenta: #ff32a0;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Bleeding off the left and the bottom, the way tpr.html places it.
+         A cropped bolt reads as texture rather than as a shape somebody drew,
+         which is what it should be here — a ground under the copy column, not
+         the subject. That is also why an earlier pass at putting it on the
+         right failed: whole and alone on a card it has to be whole, and there
+         it was neither.
+         It starts below the hook, because the bolt may sit behind a picture
+         and never behind a line of type. Its lower arm does reach the block
+         that carries the lockup, the facts and the sponsor, and the corner
+         scrim below is what holds those legible — the same fix, for the same
+         reason, as `.frame::before` in tpr.html.
+         900, where TPR runs 1000, because this card has something on its
+         right that card does not: at 1180 the bolt's lower arm crossed the
+         library illustration and the two magentas read as one wash over it.
+         At this size it stays in the copy column and the corner stays the
+         room's.
+         0.3 and 6px, where TPR runs 0.62 and 3px, for the same reason the
+         width came down. Measured across the two halves of the finished card,
+         the bolt at full charge averaged 83 to the illustration's 47 — the
+         louder of the two, sitting under all of the type, so the eye went
+         left for the shape and right for the picture and settled on neither.
+         At 0.3 the halves come to 55 and 47: the bolt is texture behind a
+         column of type, the room is the picture, and the card has one
+         subject again. */
+      .bolt {
+        position: absolute;
+        z-index: 0;
+        left: -300px;
+        top: 620px;
+        width: 900px;
+        height: auto;
+        opacity: 0.3;
+        filter: blur(6px);
+      }
+
+
+      <!--if:face-->
+      /* Central Library, in the corner.
+         The room's own illustration from lib/locations.ts — the library in
+         magenta halftone under a blue sky with Launch SA's mark standing in
+         it — rather than the house bolt. The bolt is the week's mark and it
+         says nothing about this morning; this says the room, the host and the
+         city block it is on, in one picture, in the register the venue pages
+         already use.
+         Placed in the lower right and bleeding off both edges, with the two
+         edges that meet the card's black faded out, so it reads as the corner
+         being lit rather than as a rectangle set down on it. */
+      .art {
+        position: absolute;
+        z-index: 0;
+        left: 452px;
+        top: 672px;
+        right: -34px;
+        bottom: -40px;
+        overflow: hidden;
+        -webkit-mask-image: linear-gradient(
+            to top,
+            #000 72%,
+            rgba(0, 0, 0, 0) 100%
+          ),
+          linear-gradient(to left, #000 70%, rgba(0, 0, 0, 0) 100%);
+        -webkit-mask-composite: source-in;
+        mask-image: linear-gradient(to top, #000 72%, rgba(0, 0, 0, 0) 100%),
+          linear-gradient(to left, #000 70%, rgba(0, 0, 0, 0) 100%);
+        mask-composite: intersect;
+      }
+      .art img {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 700px;
+        height: auto;
+      }
+      <!--/if:face-->
+
+      /* A scrim in the bottom-left corner, under the frame's own text and
+         over the bolt — lifted from tpr.html, where the same collision was
+         found: the bolt's lower arm lands exactly where the facts sit, and
+         the pips beside them are magenta, so they vanish into it. Dimming
+         the corner rather than moving the bolt keeps the big upper mass at
+         full charge, which is the half doing the work. z-index:-1 sits inside
+         .frame's stacking context, so it is above the bolt without being
+         above the type. */
+      .frame::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 660px;
+        height: 620px;
+        z-index: -1;
+        background: radial-gradient(
+          125% 95% at 0% 100%,
+          rgba(0, 0, 0, 0.96) 0%,
+          rgba(0, 0, 0, 0.86) 40%,
+          rgba(0, 0, 0, 0) 74%
+        );
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 74px 72px 84px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 58px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      .eyebrow {
+        margin-top: 66px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.24em;
+        color: var(--magenta);
+        text-transform: uppercase;
+      }
+
+      /* Under the headline, not over it.
+         Above, it cost the card twice: 96px of mark plus its own margin put
+         the first line of the headline 380px down a 1350px card, and the
+         reader met a logo before they met a sentence. Below, the headline
+         opens the card and the mark answers the question it raises — whose
+         format this is.
+         The chapter's own lockup instead of its name in our display face.
+         1 Million Cups is a national format with fifteen years of its own
+         equity, and the stacked white mark carries the Kauffman line that
+         says whose it is — typesetting "1 MILLION CUPS" in Oswald would
+         quietly claim it as a week production. So the mark is the title, and
+         the headline below is what happens in the room. */
+      /* Above the facts, not above the headline and not beside the hook.
+         Over the headline it cost 96px of mark plus its margin and put the
+         first line 380px down the card; beside the hook it made a band that
+         had to be held together by a rule. Here it sits directly over the
+         when and the where, which is the block it belongs to: a reader who
+         has taken the headline meets the lockup and the details as one
+         thing — whose format, and when it runs. */
+      .mark {
+        margin-bottom: 26px;
+      }
+      /* Height-led, like every mark in this tool. At 96 the stacked lockup
+         draws 192px wide, which is the width of the facts block it stands
+         over. */
+      .mark img {
+        height: {{markHeight}}px;
+        width: auto;
+      }
+
+      h1 {
+        margin-top: 30px;
+        /* The full width, because the copy column only narrows below the
+           photograph's top edge — and these three lines end 8px above it. */
+        max-width: 900px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 0.94;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+      }
+
+      .quote {
+        margin-top: 36px;
+        border-left: 3px solid var(--magenta);
+        padding-left: 26px;
+        /* Two lines, with a 223px mark standing in the second. */
+        max-width: 470px;
+        font-size: 26px;
+        line-height: 1.42;
+        color: rgba(255, 255, 255, 0.88);
+        text-wrap: balance;
+      }
+
+      .spacer {
+        flex: 1;
+      }
+
+      .facts {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--magenta);
+        flex: none;
+      }
+
+      /* Two credits, side by side, each under its own line.
+         They are different claims: Launch SA runs the chapter and hosts it,
+         PNC Bank powers this morning of it. One strip holding both under
+         either label would say the bank runs 1 Million Cups or that Launch SA
+         sponsors it, and both are wrong. */
+      /* One credit now, not two: Launch SA's is in the hook, and a mark
+         printed twice on one card reads as two different relationships. */
+      .credits {
+        margin-top: 38px;
+      }
+      .credits .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.26em;
+        color: #6f6f6f;
+        text-transform: uppercase;
+      }
+      .credits .logos {
+        margin-top: 18px;
+        display: flex;
+        align-items: center;
+        gap: 30px;
+      }
+      .credits .logos img {
+        width: auto;
+      }
+      /* A name where there is no mark, in the body face — the rule
+         powered-by-line.tsx sets on the site, for the reason it gives there:
+         a bank's name in this card's display face would read as a wordmark
+         we drew for them. */
+      /* The mark standing in the sentence. Baseline-shifted rather than
+         middle-aligned: the wordmark's own centre is its cap height, so
+         optical alignment with 26px type is a few pixels below the line. */
+      .set-in img {
+        vertical-align: -7px;
+        margin: 0 4px;
+      }
+      .credits .names {
+        margin-top: 16px;
+        font-size: 30px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.88);
+      }
+    </style>
+  </head>
+  <body>
+    <img class="bolt" src="bolt.svg" alt="" />
+    <!--if:face-->
+    <div class="art"><img src="{{face}}" alt="" /></div>
+    <!--/if:face-->
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <div class="eyebrow">{{kicker}}</div>
+      <h1>{{headline}}</h1>
+      <!-- The sentence's shape lives here rather than in the card, because
+           a mark set into the middle of a line cannot travel inside one
+           substituted value — see `quoteTail` in render.mjs. -->
+      <!--if:quote-->
+      <p class="quote">
+        {{quote}} <span class="set-in">{{hosts}}</span> {{quoteTail}}
+      </p>
+      <!--/if:quote-->
+
+      <div class="spacer"></div>
+
+      <div class="mark"><img src="{{mark}}" alt="" /></div>
+
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+        <div class="fact"><span class="pip"></span>{{fact3}}</div>
+      </div>
+
+      <div class="credits">
+        <div>
+          <div class="label">// {{poweredLabel}}</div>
+          <!--if:logos-->
+          <div class="logos">{{logos}}</div>
+          <!--/if:logos-->
+          <!--ifnot:logos-->
+          <div class="names">{{poweredNames}}</div>
+          <!--/ifnot:logos-->
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
