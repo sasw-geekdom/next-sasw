@@ -2031,26 +2031,6 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       height: 1277,
       alt: "AITX Community",
     },
-    // One of their own rooms, from aitxcommunity.com — a speaker with a mic
-    // and a room listening, which is what a one-hour community activation
-    // actually looks like.
-    //
-    // Chosen over their wider hackathon group photo for how it meets the
-    // frame. This hero is masked into black behind the copy, and the group
-    // shot is bright edge to edge, so the mask handed off at a visible seam.
-    // This room is dark and dissolves into it, and its one lit subject is
-    // still legible after the dimming. The cost is honest: it says "a room",
-    // not "seven thousand members", which is what the blurb beside it claims.
-    //
-    // 4:3, so it crops harder into the letterbox than their one true landscape
-    // would; the speaker sits near the right edge and goes further into the
-    // corner as the viewport widens.
-    hero: {
-      src: "/activations/aitx-hero.jpg",
-      width: 1800,
-      height: 1350,
-      alt: "",
-    },
     when: {
       start: "2026-09-29T15:00:00-05:00",
       end: "2026-09-29T16:00:00-05:00",
@@ -2069,6 +2049,78 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
         "Their rooms are in Austin and Houston. This hour is the first of them in San Antonio, on the floor DEVSA keeps for exactly this.",
       ],
       coda: "Texas keeps being described as an AI hub in the aggregate \u2014 the capital that landed, the companies that moved. AITX is the part of that which is a room with people in it, and the difference between a region with startups and a region with an ecosystem is whether those people ever meet.",
+    },
+  },
+  /**
+   * The week's first community hour at The Rand, and the only one whose room
+   * is not for developers.
+   *
+   * Every other group on this floor teaches people who already write code —
+   * .NET, GDG, AITX, Linux. Learn2AI's audience is the one those rooms assume
+   * has already been reached: people who are not engineers and want to use
+   * this stuff at work. That is why it opens the day rather than joining the
+   * run of them, and why the blurb leads on who it is for.
+   *
+   * TODO(content): the hour's session is not named yet. It belongs in the
+   * sessions CMS with `activation: "learn2ai"`, not here — that is what makes
+   * the talk card appear beside this page and the speaker page link back.
+   */
+  {
+    slug: "learn2ai",
+    page: "learn2ai",
+    title: "Learn2AI",
+    room: "the-rand",
+    venueDetail: "3rd Floor",
+    // They teach applied AI to non-engineers, which is this circuit read
+    // literally: the applied end of it rather than the model end.
+    circuit: "AI & Applied Innovation",
+    site: {
+      label: "learn2ai.co",
+      href: "https://www.learn2ai.co/",
+    },
+    /**
+     * Their horizontal lockup with the wordmark cut to white.
+     *
+     * The published file sets LEARN2AI in the same purple gradient as the
+     * flower — around #662d91, which is a 2.3:1 contrast against this site's
+     * black, so the type goes murky and the mark floats. The eight letter
+     * paths are white here and the flower keeps its own gradients, which is
+     * the treatment GDG's published dark cut already uses and the one AITX
+     * had to be traced into.
+     *
+     * TODO(assets): ask Learn2AI for their own light-on-dark lockup, and for
+     * a lighter file while we are there — theirs carries eight embedded
+     * rasters inside luminosity masks for the petals, which is why this is
+     * 291KB against the .NET mark's 15.
+     */
+    logo: {
+      src: "/activations/learn2ai.svg",
+      width: 6832,
+      height: 1572,
+      alt: "Learn2AI",
+    },
+    when: {
+      start: "2026-09-29T12:00:00-05:00",
+      end: "2026-09-29T13:00:00-05:00",
+    },
+    // Theirs, from learn2ai.co: "practical AI skills for real people — born in
+    // San Antonio, open to everyone". What the blurb adds is the shape of it,
+    // because "practical AI skills" is what every AI course claims and the
+    // bootcamps, the sprints and the teen camp are what they actually run.
+    blurb:
+      "Practical AI for people who don\u2019t write code \u2014 prompt bootcamps, automation sprints and a build camp for teens, all of it started in San Antonio.",
+    detail: {
+      eyebrow: "The hour",
+      // Their own line, from the homepage.
+      headline: "Learn AI by doing.",
+      lede: [
+        "Learn2AI runs hands-on training in prompting and automation for people whose job is not engineering \u2014 bootcamps, automation sprints and ready-to-deploy curriculums, built in San Antonio and shared with anyone who needs them.",
+        "Their camp for ten- to sixteen-year-olds is the clearest version of the method: four live build sessions, a family demo night, and every kid leaving with an app they shipped.",
+      ],
+      // "and the hour is free" came off this line: nothing they publish says
+      // so, and the week's own access rules are per activation. Add it back
+      // the day the organisers confirm it.
+      coda: "The group is local and it keeps running \u2014 which makes the useful thing here the next cohort rather than the hour, in a city where the people who need these skills are rarely the people already in the room.",
     },
   },
   {
