@@ -71,6 +71,123 @@
         filter: blur(3px);
       }
 
+      <!--if:faces-->
+      /* A panel: three or more, in one row along the bottom.
+         
+         Same treatment as the pair — bare cutouts, bottom-anchored, bleeding
+         off the edge, no window and no fade — at the size a row of five can
+         hold. They overlap, each behind the one to its left, which is what a
+         group of people standing together looks like and what stops five
+         figures reading as five separate stamps. */
+      .crowd img {
+        position: absolute;
+        bottom: 0;
+        width: auto;
+        /* Under the frame, which sits at 2. A row of five reaches the left
+           edge, so at the pair's z-index the figures covered the venue line
+           and the sponsor strip. Below the text they are still above the
+           bolt, and the frame's own corner scrim holds that copy legible
+           over a body — which is the job it already does for the single
+           portrait. */
+        z-index: 1;
+        filter: grayscale(1);
+      }
+      /* The credits, one line under the hook.
+         
+         Five names cannot take the size one or two get, and they cannot sit
+         beside the row either — the figures need the whole width of the
+         bottom band. Here they clear it, and each person still gets a name
+         and a company. */
+      .crowd-names {
+        margin-top: 22px;
+        max-width: 880px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 22px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 17px;
+        letter-spacing: 0.02em;
+        color: #8b8b8b;
+      }
+      .crowd-names b {
+        font-weight: 500;
+        color: #ededed;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      <!--/if:faces-->
+
+      <!--if:faceB-->
+      /* The two of them in the lower right, overlapping, the nearer one in
+         front — a pair standing together rather than two passport photos in
+         a row. Bottom-anchored and bleeding off the edge, which is what the
+         single portrait does, and the reason a figure on this card reads as
+         cut from it rather than placed on it.
+
+         No window and no fade. The first pass borrowed the-model-pair's
+         windowed crop, which is right on that template and wrong here: its
+         gradient ends a figure inside a box, and a box laid over this card's
+         bolt darkens a rectangle of it — that rectangle was the clash. These
+         headshots are already matted, so black ends them by itself. */
+      .pair img {
+        position: absolute;
+        bottom: 0;
+        width: auto;
+        z-index: 2;
+        filter: grayscale(1);
+      }
+      .pair img.a {
+        height: {{heightA}}px;
+        right: {{topA}}px;
+        z-index: 3;
+      }
+      .pair img.b {
+        height: {{heightB}}px;
+        right: {{topB}}px;
+      }
+      /* Both names in the copy column, where a single speaker's name sits.
+         Keeping them off the figures is what lets the figures overlap. */
+      .duo .one + .one {
+        margin-top: 18px;
+      }
+      .duo .nm {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 42px;
+        line-height: 0.98;
+        text-transform: uppercase;
+      }
+      .duo .rl {
+        margin-top: 6px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.18em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+      <!--/if:faceB-->
+
+      <!--ifnot:face-->
+      /* No figure on this card — it is an event on this stage rather than a
+         speaker, and the right half it would have filled is empty.
+         
+         So the bolt takes it, the way community-group.html hands that space
+         to the hero bolt. Not a second mark, though: this template's bolt is
+         already the subject rather than a ground, so the same one moves and
+         grows instead. Right and down, big enough to hold the half a person
+         held, and still bleeding off two edges — which is the thing that
+         keeps it a mark the card is cut from.
+         
+         An event card with `art` (see texas-venture-fest) puts a lockup in
+         that half and does not want this, but `art` is staged as `face`, so
+         this guard already excludes it. */
+      .bolt {
+        left: 40px;
+        top: 250px;
+        width: 1180px;
+      }
+      <!--/ifnot:face-->
+
       .portrait {
         position: absolute;
         inset: 0;
@@ -349,7 +466,24 @@
   </head>
   <body>
     <img class="bolt" src="bolt.svg" alt="" />
+    <!--ifnot:faces-->
+    <!--ifnot:faceB-->
     <div class="portrait"><img src="{{face}}" alt="" /></div>
+    <!--/ifnot:faceB-->
+    <!--/ifnot:faces-->
+
+    <!--if:faces-->
+    <div class="crowd">
+      {{faces}}
+    </div>
+    <!--/if:faces-->
+
+    <!--if:faceB-->
+    <div class="pair">
+      <img class="b" src="{{faceB}}" alt="" />
+      <img class="a" src="{{faceA}}" alt="" />
+    </div>
+    <!--/if:faceB-->
 
     <div class="frame<!--if:logos--> sponsored<!--/if:logos-->">
       <div class="top">
@@ -368,6 +502,12 @@
       <p class="subtitle">{{subtitle}}</p>
       <!--/if:subtitle-->
 
+      <!--if:faces-->
+      <div class="crowd-names">
+        {{crowd}}
+      </div>
+      <!--/if:faces-->
+
       <div class="spacer"></div>
 
       <!-- The whole block is conditional, because this stage takes event
@@ -385,6 +525,25 @@
            the whole group, his name included, off the baseline every other
            card sits on. The other four templates still carry the
            unconditional version. -->
+      <!-- Stands down for a pair: those names sit under their own faces, and
+           `first` is still set from the first speaker, so without this the
+           card names one of the two twice and the block collides with the
+           facts. -->
+      <!--if:faceB-->
+      <div class="duo">
+        <div class="one">
+          <div class="nm">{{firstA}} {{lastA}}</div>
+          <div class="rl">{{orgA}}</div>
+        </div>
+        <div class="one">
+          <div class="nm">{{firstB}} {{lastB}}</div>
+          <div class="rl">{{orgB}}</div>
+        </div>
+      </div>
+      <!--/if:faceB-->
+
+      <!--ifnot:faces-->
+      <!--ifnot:faceB-->
       <!--if:first-->
       <div class="name">
         {{first}}<!--if:last--><br />{{last}}<!--/if:last-->
@@ -394,6 +553,8 @@
       <div class="org">{{org}}</div>
       <!--/if:org-->
       <!--/if:first-->
+      <!--/ifnot:faceB-->
+      <!--/ifnot:faces-->
 
       <div class="facts<!--ifnot:first--> lead<!--/ifnot:first-->">
         <!-- Venue and street, the way the other templates give venue and

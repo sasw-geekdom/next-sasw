@@ -57,9 +57,10 @@ async function loadSpeakers() {
   if (!getApps().length) initializeApp({ credential: cert(JSON.parse(json)) });
 
   const db = getFirestore();
-  const [speakers, partners] = await Promise.all([
+  const [speakers, partners, sponsors] = await Promise.all([
     db.collection("speakers").get(),
     db.collection("partners").get(),
+    db.collection("sponsors").get(),
   ]);
 
   const bySlug = new Map();
@@ -83,8 +84,20 @@ async function loadSpeakers() {
     });
   }
 
+  /**
+   * Logos by name, from both walls.
+   *
+   * `partner:` on a card resolves against this, and it used to read the
+   * partners collection alone — so a card crediting a sponsor could not find
+   * one. H-E-B, whose contest Quest to Shelf is about, is a sponsor; the
+   * alternative was pinning its blob URL on the card, which this file's own
+   * `fetchCached` note warns against.
+   *
+   * Sponsors go in first so a name on both walls resolves to the partner
+   * record, which is the one the site's own partner wall draws.
+   */
   const byPartner = new Map();
-  for (const d of partners.docs)
+  for (const d of [...sponsors.docs, ...partners.docs])
     byPartner.set((d.get("name") || "").toLowerCase(), d.get("imageUrl") || "");
 
   return { bySlug, byPartner };
@@ -605,6 +618,71 @@ async function main() {
 
       // Everything below is absent on a card with no speaker.
       face: a?.file ?? "",
+      /**
+       * Declared even when there is no second speaker, which the pair block
+       * below does not do.
+       *
+       * `fill` only resolves a guard whose key is in `data` — a key that is
+       * absent leaves `<!--if:key-->…<!--/if:key-->` sitting in the HTML as
+       * markup. tpr.html's pair layout is guarded on this one, so every
+       * single-speaker card on that stage rendered the empty pair block and
+       * its name column, which pushed the whole card down ten pixels.
+       */
+      // Exactly two, not "at least two": a panel has a `b` as well, and with
+      // five speakers the pair layout drew its own name column underneath
+       // the crowd's.
+      faceB: people.length === 2 ? (b?.file ?? "") : "",
+      /**
+       * Three or more speakers, as one row of cutouts.
+       *
+       * The pair tokens above stop at two, which is the shape almost every
+       * card here is: a talk, or a talk with a chair. A panel is a different
+       * object — Quest to Shelf has five — and five sets of `faceA`-style
+       * tokens would be five near-identical branches in every template that
+       * ever takes one. So the figures are built here, the way `logos` and
+       * `marks` are, and the template places the row rather than each person.
+       *
+       * `height` is the figure's height and `top` its distance from the right
+       * edge, the same two numbers the TPR pair layout uses. Drawn in card
+       * order with each one behind the last, so a row reading left to right
+       * overlaps like people standing rather than like a stack of cards.
+       */
+      faces:
+        people.length > 2
+          ? people
+              .map((pp, n) => {
+                const box = card.portraits?.[n] ?? {};
+                return (
+                  `<img src="${pp.file}" alt="" style="height:${box.height ?? 520}px` +
+                  `;right:${box.top ?? n * 180}px" />`
+                );
+              })
+              // Reversed, and no z-index on the tag. Painting order comes from
+              // the DOM — last sibling on top — so the row reads right to
+              // left, each figure behind the one nearer the edge. An inline
+              // z-index is what the first pass used, and it beat the
+              // stylesheet's: the figures climbed over the frame and clipped
+              // the venue line.
+              .reverse()
+              .join("\n      ")
+          : "",
+      /**
+       * Their names, as one line rather than a stacked block.
+       *
+       * Five figures need the whole bottom band, so there is no column beside
+       * them to put five names in — the first pass stacked them there and the
+       * row covered every company line. A credits line under the hook clears
+       * the band and still gives each person their name and where they build.
+       */
+      crowd:
+        people.length > 2
+          ? people
+              .map(
+                (pp) =>
+                  `<span><b>${pp.name}</b>${pp.org ? ` &middot; ${pp.org}` : ""}</span>`,
+              )
+              .join("\n        ")
+          : "",
       // Split after the first word unless the card says otherwise. That is
       // right for two- and three-word names and wrong for four: "Daniel" over
       // "Felipe Morales Yusty" runs the second line into the portrait.
@@ -622,7 +700,7 @@ async function main() {
       // flush on the card's edge reads as artwork that did not fit.
       portraitBottom: card.portrait?.bottom ?? 0,
 
-      ...(b
+      ...(people.length === 2
         ? {
             faceA: a.file,
             firstA: a.name.split(" ")[0],

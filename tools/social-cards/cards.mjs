@@ -1611,6 +1611,195 @@ export const CARDS = [
     portrait: { height: 375, left: 520, bottom: 210 },
   },
 
+  /**
+   * Five founders who got through H-E-B's Quest for Texas Best, so the card
+   * takes the template's panel row rather than its pair layout — same bare
+   * cutouts, bottom-anchored and overlapping, at the size five can hold.
+   *
+   * Sponsored, which is the other thing five speakers bring: the strip at the
+   * foot carries H-E-B, whose contest the whole session is about. That is the
+   * one case where a logo on this stage is not decoration — see the note on
+   * `.powered` in tpr.html.
+   */
+  /**
+   * The ETA panel: five people, the second card on this stage to take the
+   * template's panel row.
+   *
+   * Headline off the description's own opening rather than the session name.
+   * "Buy, Build, Lead" is the format; "most founder stories start with an
+   * idea — this one starts with a business someone else already built" is the
+   * argument, and the half of it that makes somebody stop is the second.
+   */
+  {
+    id: "tpr-buy-build-lead",
+    event: "tpr",
+    speakers: [
+      "matthew-reedy",
+      "patrick-mays",
+      "ron-ondechek-jr",
+      "dan-geddes",
+      "carlos-guevara",
+    ],
+    /**
+     * Solved rather than eyeballed, the same way quest-to-shelf is.
+     *
+     * `height` equalises the heads: these five crops run 31% to 38% head
+     * width, so identical heights would draw five different-sized people.
+     * `top` is distance from the right edge, set from where each face
+     * actually lands in its own frame so the five face centres come out
+     * 195px apart — a cutout is three times wider than the face in it, so
+     * evenly spaced figures put a shoulder across the next one's face.
+     */
+    portraits: [
+      { height: 490, top: -46 },
+      { height: 614, top: 107 },
+      { height: 601, top: 311 },
+      { height: 564, top: 509 },
+      { height: 518, top: 724 },
+    ],
+    /**
+     * An instruction, not an observation.
+     *
+     * It read "Someone Else Already Built It" — true, and it describes the
+     * business rather than telling the reader what the session is for. This
+     * audience is on the Capital circuit: the thing they act on is a route,
+     * and the route here is buying rather than starting. The description's
+     * own opening — "most founder stories start with an idea, this one starts
+     * with a business someone else already built" — is the same argument at
+     * three times the length, which is a page's job rather than a card's.
+     */
+    headline: "Skip the Idea.<br />Buy the Business.",
+    headlineSize: 92,
+    // One fact, two lines. It ran to four, which put nine lines of type
+    // between the headline and the faces — the description's argument in
+    // full, when the card only has to make someone want the argument. The
+    // number is the part that does that.
+    subtitle:
+      "Thousands of profitable San Antonio businesses need new operators this decade.",
+    // Capital, as the site files it: this is about financing and deal flow.
+    circuit: "Capital",
+  },
+
+  {
+    id: "tpr-quest-to-shelf",
+    event: "tpr",
+    speakers: [
+      "renato-raposo",
+      "charlie-edwards",
+      "rocio-leon",
+      "leticia-de-leon",
+      "maria-flores",
+    ],
+    // `height` is each figure's height; `top` is its distance from the right
+    // edge. Heights are solved off the probe so five different crops draw
+    // five heads the same size; the 168px spacing is what lets them overlap
+    // like a group without a face landing on a face.
+    // Heights solved off the probe so five different crops draw five heads
+    // the same size — their head-to-frame ratios run 30% to 38%, so the
+    // numbers have to differ by that much to look equal. `top` is distance
+    // from the right edge; 150px apart is what overlaps them like a group
+    // without a face landing on a face.
+    // `top` is solved from where each face actually lands, not from an even
+    // gap between figures: a cutout is three times wider than the face in it,
+    // so evenly spaced *figures* put one person's shoulder across the next
+    // one's face — Rocio covered 125px of Leticia's. Measured off the alpha
+    // channel and re-spaced to put the five face centres 195px apart, then
+    // the row shifted 48px right as a block: at the spacing that cleared
+    // Leticia, the last face sat 8px off the left edge.
+    portraits: [
+      { height: 560, top: -40 },
+      { height: 536, top: 170 },
+      { height: 624, top: 324 },
+      { height: 512, top: 574 },
+      { height: 606, top: 716 },
+    ],
+    // The promise, not the session name — "Quest to Shelf" says the contest,
+    // this says what the half hour is: five people who actually got there.
+    headline: "Garage to<br />Grocery Aisle",
+    headlineSize: 96,
+    // Non-breaking hyphens in the brand: left alone it wrapped as "H-E-/B\u2019s"
+    // and split the name across two lines.
+    subtitle:
+      "Five Texas founders who came out of H\u2011E\u2011B\u2019s Quest for Texas Best with real distribution \u2014 and what it took to get on the shelf.",
+    circuit: "Founder",
+    poweredLabel: "Sponsored by",
+    // H-E-B first: the session is about their contest. Nopalera is the
+    // Founder circuit's sponsor, which is the circuit this runs on. 44
+    // against H-E-B's 58 because theirs is a round badge and this is a 4.6:1
+    // wordmark — matched by drawn weight rather than by height.
+    logos: [
+      { partner: "H-E-B Supplier Diversity", height: 58 },
+      { partner: "Nopalera", height: 44 },
+    ],
+  },
+
+  {
+    id: "tpr-sa-cpg-pitch-social",
+    event: "tpr",
+    /**
+     * Two hosts, Maria Flores and Chris Cook, so the card takes the
+     * template's pair layout — the figure slot splits into two windows in
+     * the lower right rather than one figure bleeding off the bottom.
+     *
+     * The headline is the description's own promise rather than the session
+     * name. "SA CPG Pitch & Social" says the format; "San Antonio's next
+     * shelf staples" says what is being pitched, which is the part a reader
+     * scrolling past has any reason to care about.
+     */
+    speakers: ["maria-flores", "chris-cook"],
+    // Solved at the crown, as every pair in this set is: their crops start at
+    // different depths — hers 76px into the frame, his 53 — so equal offsets
+    // would sit one of them lower and read as them being different heights.
+    // `height` is the figure's height; this template's pair layout reuses
+    // `top` as the distance from the right edge. Solved so their crowns land
+    // level and the two overlap by about a third.
+    portraits: [
+      { height: 700, top: 250 },
+      { height: 664, top: 20 },
+    ],
+    headline: "San Antonio\u2019s Next<br />Shelf Staples",
+    headlineSize: 92,
+    // The hosts are pictured now, so the copy stops naming them — the card
+    // says it twice otherwise, once in type and once in their faces.
+    subtitle:
+      "Founders pitch their products live. Happy hour follows \u2014 drinks, samples, and the room behind SA\u2019s consumer goods scene.",
+    // Founder. The CMS carries no track on this session, so this is the
+    // card's own call — a pitch night for consumer product founders is that
+    // circuit if it is any of the five. Worth confirming with the organisers.
+    circuit: "Founder",
+    // The same pair quest-to-shelf carries, and in the same order: H-E-B for
+    // the CPG programme these pitches feed, Nopalera as the Founder circuit's
+    // sponsor. Heights matched by drawn weight — a round badge against a
+    // 4.6:1 wordmark.
+    poweredLabel: "Sponsored by",
+    logos: [
+      { partner: "H-E-B Supplier Diversity", height: 58 },
+      { partner: "Nopalera", height: 44 },
+    ],
+  },
+
+  {
+    id: "tpr-speaker-oscar-perez",
+    event: "tpr",
+    speaker: "oscar-perez",
+    // Split at the colon, as patrick-robinson and samad-ahmed are. The first
+    // half is the journey and the second is what he did with it; whole, it is
+    // 74 characters and three lines under the ramp.
+    headline: "From Factory Floor<br />to SaaS",
+    headlineSize: 92,
+    subtitle: "Building Software to Solve Your Own Problem",
+    // Founder, and it is the talk's own circuit on the site. He is a
+    // manufacturer who built the tool his own floor needed — the room this
+    // belongs in is the one about starting things, not the one about models.
+    circuit: "Founder",
+    // 980, against the probe's 852. His crop is the loosest on this stage —
+    // head 33% of its frame where Patrick's is 46% — so the probe's height
+    // drew his face about 15% smaller than the card he posts beside. Sized to
+    // match that one instead; his crown sits 165px into the frame, the
+    // deepest here, which is why the number has to be this much larger.
+    portrait: { height: 980, left: 439 },
+  },
+
   {
     id: "tpr-speaker-patrick-robinson",
     event: "tpr",
@@ -2048,6 +2237,51 @@ export const CARDS = [
       holdStart: 1,
       holdEnd: 5,
     },
+  },
+
+  /**
+   * The YouTube Short: the running order, a line at a time.
+   *
+   * The third of these, and the shape is the event's. PySanAntonio reveals
+   * seven talks over its own footage; Datanauts shows a two-talk bill with
+   * the faces. The Model has eight talks and nine speakers — too many faces
+   * for a bill — so the list is the whole card, with nothing behind it.
+   *
+   * 2.5s a row against PySanAntonio's 3.0. That one was cut to the bar of the
+   * track under it; this has no track yet, so the number is a reading speed
+   * rather than a tempo. Pick a track and it should be re-cut to its bar:
+   * hold = 4 x 60 / BPM.
+   *
+   * 28 seconds, which is the longest of the three and earns it — eight talks
+   * at a length anyone can read is what the card is for.
+   */
+  {
+    id: "the-model-short",
+    event: "the-model",
+    template: "the-model-short.html",
+    size: { width: 1080, height: 1920 },
+    // 1, like the other moving cards: a video is transcoded by every platform
+    // it touches and the extra sample rate buys nothing.
+    scale: 1,
+    headline: 'The <span class="panel">Model</span>',
+    // The hook's first half only. The second — "an afternoon of showing each
+    // other what comes next" — is what the list underneath demonstrates, and
+    // printing both would say it twice on one card.
+    subtitle: "Creatives, founders and builders in the same room.",
+    kicker: "Monday, Sept 28 \u00b7 1 \u2013 6 PM \u00b7 Geekdom, 3rd Floor",
+    rows: [
+      { at: "1:10", who: "The Next Era of the Creator Economy", what: "Keynote \u00b7 Justin Johnson" },
+      { at: "2:20", who: "Beyond the Cloud", what: "AJ Rose & Diego Chavez" },
+      { at: "2:45", who: "Let the Machines Win", what: "Jonathan Perry" },
+      { at: "3:10", who: "Ship the Story, Not Just the Product", what: "Maria Consuelo Gonima" },
+      { at: "3:35", who: "Beyond the Prompt", what: "Cynthia Gentry" },
+      { at: "4:00", who: "Putting Grok Bot and Agents to Work", what: "Leon Hitchens" },
+      { at: "4:25", who: "Alamo City AI", what: "Building over broadcasting" },
+      { at: "5:30", who: "Storytelling Meets Startup Strategy", what: "Daniel Gallegos & Serena Hernandez" },
+    ],
+    ctaLine: "Free with your badge.",
+    ctaUrl: "sasw.co/schedule/the-model",
+    reveal: [2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 5.5],
   },
 
   /**
