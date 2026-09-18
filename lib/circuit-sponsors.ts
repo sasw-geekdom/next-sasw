@@ -16,6 +16,24 @@ import type { TrackName } from "@/lib/tracks";
 export const CIRCUIT_SPONSORS: Partial<Record<TrackName, string>> = {
   Founder: "Nopalera",
   "Tech & Builders": "Google for Startups",
+  "AI & Applied Innovation": "Webhead",
+};
+
+/**
+ * A sponsor's own line about the circuit it backs, where it asked for one.
+ *
+ * Webhead did, and it is the first: the other two take the credit line as it
+ * stands. Optional on purpose — a sponsor gets a mark by being in the map
+ * above, and a sentence only by having something to say. A line here is the
+ * sponsor's words, not ours, so it goes in verbatim.
+ *
+ * It renders under the credit rather than beside it, in the same muted
+ * register: this is a footnote to a circuit, and a sentence set at the size
+ * of the page's own copy would read as the activation's blurb.
+ */
+export const CIRCUIT_SPONSOR_NOTES: Partial<Record<TrackName, string>> = {
+  "AI & Applied Innovation":
+    "Powering the deep tech and emerging technology conversation at SASTW — AI, cyber, quantum, and what's coming next.",
 };
 
 export interface CircuitSponsor {
@@ -23,6 +41,8 @@ export interface CircuitSponsor {
   name: string;
   imageUrl: string;
   link: string;
+  /** The sponsor's own line about the circuit, where it has one. */
+  note?: string;
 }
 
 /**
@@ -54,5 +74,6 @@ export function circuitSponsor(
     // decides whether this sponsor appears and where it points.
     imageUrl: sponsorMark(row.name, row.imageUrl),
     link: row.link,
+    note: CIRCUIT_SPONSOR_NOTES[circuit as TrackName],
   };
 }

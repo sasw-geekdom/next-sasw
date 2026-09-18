@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { CircuitSponsor } from "@/lib/circuit-sponsors";
+import { markHeight } from "@/lib/sponsor-marks";
 import { cn } from "@/lib/utils";
 
 /**
@@ -36,10 +37,14 @@ export function CircuitSponsorLine({
       // at h-8 the ink inside it drew about 16px and the mark rendered 143px
       // wide, where the trimmed file at the same height draws 281px. Matching
       // the size it used to *look* means halving the number.
-      className="h-3.5 w-auto object-contain sm:h-4"
+      //
+      // The height comes from the mark rather than from here, because one
+      // number stopped being right for all of them once a stacked lockup
+      // joined two single-line wordmarks. See `markHeight`.
+      className={cn("w-auto object-contain", markHeight(sponsor.name))}
     />
   );
-  return (
+  const credit = (
     // 10px, and now it is the gap you see.
     //
     // It used to be 16px and landed as 28.8px against Google for Startups and
@@ -51,9 +56,7 @@ export function CircuitSponsorLine({
     // box that is the ink, so one value is now right for both marks and the
     // centring is real centring. Matched to `PoweredByLine`, which can appear on
     // the same page.
-    <div
-      className={cn("flex flex-wrap items-center gap-x-2.5 gap-y-2", className)}
-    >
+    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
       <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
         {sponsor.circuit} circuit, sponsored by
       </p>
@@ -69,6 +72,24 @@ export function CircuitSponsorLine({
       ) : (
         <span className="block opacity-85">{mark}</span>
       )}
+    </div>
+  );
+
+  if (!sponsor.note) return <div className={className}>{credit}</div>;
+
+  return (
+    // The sponsor's own sentence, under the credit it belongs to.
+    //
+    // Set at 13px and white/55 — above the mono label it follows, below the
+    // page's own copy. That gap is the whole point: read down the page this is
+    // a footnote in the sponsor's voice, not another paragraph of ours about
+    // the circuit. Capped at 34rem so it breaks into two or three lines rather
+    // than running the width of a talk page and reading as body text.
+    <div className={cn("space-y-2", className)}>
+      {credit}
+      <p className="max-w-[34rem] text-pretty text-[13px] leading-relaxed text-white/55">
+        {sponsor.note}
+      </p>
     </div>
   );
 }
