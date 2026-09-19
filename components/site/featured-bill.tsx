@@ -44,7 +44,13 @@ function Parts({ parts }: { parts: BillPart[] }) {
             alt={p.alt}
             width={800}
             height={200}
-            className={cn(p.h, "w-auto", p.mr, p.darken && "brightness-0")}
+            className={cn(
+              p.h,
+              "w-auto",
+              p.mr,
+              p.dy,
+              p.darken && "brightness-0",
+            )}
           />
         ),
       )}

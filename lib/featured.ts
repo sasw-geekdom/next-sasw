@@ -38,6 +38,20 @@ export type BillPart =
       /** Cancels transparent margin baked into the file. See `BASH_TRIM`. */
       mr?: string;
       /**
+       * Lifts a mark whose own baseline is not where the box implies.
+       *
+       * `Parts` centres marks against the type, which is right for a wordmark
+       * — its ink fills its box, so its centre is its optical centre — and
+       * wrong for a lockup with something stacked under the word. Webhead's
+       * has Quantum Realm Computing below it, which drags the wordmark to
+       * 80.3% of the file's height; centred, its letters sit 0.34em below the
+       * word beside them, which is exactly as crooked as it sounds.
+       *
+       * A transform rather than a margin, so the correction does not change
+       * the row's height and push the line above it.
+       */
+      dy?: string;
+      /**
        * Both CMS sponsor marks are pure white on transparent — one colour
        * each, checked — and the hero's ground is white. `brightness-0` puts
        * them back to black, which costs no brand colour because there is none
@@ -110,6 +124,22 @@ const BASH_TRIM = "mr-[-0.43em]";
 // Now that the box is the ink, these are the drawn sizes.
 const NOPALERA_H = "h-[0.86em]";
 const CREDIT_H = "h-[1.35em]";
+
+/**
+ * Webhead's is taller than the other credits, because it is a different shape.
+ *
+ * Google's and Nopalera's are single-line wordmarks: matched on height they
+ * draw the width a credit line wants. Webhead's is a dual lockup — their
+ * wordmark, a rule, and Quantum Realm Computing stacked three deep — so at
+ * CREDIT_H its second half is two pixels of type and the row carries a mark
+ * nobody can read. 2.3em is where every word in it does, and it lands about
+ * 175px wide, which is the width the other two credits already run at.
+ *
+ * Same trade, same reasoning as `markHeight` in lib/sponsor-marks: on a mark
+ * that stacks, height and width come apart, and width is what the eye
+ * compares along a row.
+ */
+const WEBHEAD_H = "h-[2.3em]";
 
 /** Resolve the lineup against the schedule, the CMS and the sponsor marks. */
 export async function featuredLineup(): Promise<FeaturedEntry[]> {
@@ -267,6 +297,65 @@ export async function featuredLineup(): Promise<FeaturedEntry[]> {
             : [{ text: sn.shortTitle ?? sn.title }],
         credit: credit ? [{ text: credit }] : undefined,
         href: `/schedule/${sn.page}`,
+      },
+    });
+  }
+
+  /*
+   * The keynote, billed the way Vibha's row is: the person leads, the partner
+   * follows.
+   *
+   * It led with the title for a pass — "The Readiness Gap" is a good line —
+   * and the week's team called it the other way, which is the right call for
+   * a bill whose other rows are a company, a person and a format. Two people
+   * and two partners reads as a pattern; one of each reads as a list.
+   *
+   * "with", not "powered by", and the difference is a claim rather than a
+   * preference. Webhead sponsors the AI & Applied Innovation circuit this talk
+   * runs on rather than the session itself — see lib/circuit-sponsors, and the
+   * line the talk page prints — so "powered by" would bill the hour to a
+   * sponsor that did not buy it. "with" is what the Google for Startups row
+   * says two rows down, and it is true of both.
+   */
+  const janie = talks.find(
+    (x) => x.row.slug === "the-readiness-gap-ai-quantum-and-what-comes-next",
+  );
+  if (janie) {
+    out.push({
+      day: dayOf(janie.row.startsAt),
+      entry: {
+        key: janie.row.slug,
+        meta: [
+          new Date(janie.row.startsAt).toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            timeZone: "America/Chicago",
+          }),
+          janie.room?.name,
+        ]
+          .filter(Boolean)
+          .join(" \u00b7 "),
+        title: [{ text: "Janie Martinez Gonzalez" }],
+        // The vendored lockup rather than the CMS row: Webhead's artwork there
+        // is the colour cut, whose left half is navy, and `darken` turns a
+        // white file black for this ground — it cannot rescue a coloured one.
+        // See lib/sponsor-marks for how this copy was cut.
+        credit: [
+          { text: "with" },
+          {
+            src: "/brand/webhead-quantum-lockup.png",
+            alt: "Webhead · Quantum Realm Computing",
+            h: WEBHEAD_H,
+            // Measured in the browser, not guessed: a zero-size inline-block
+            // probe sits on the text baseline, and the wordmark's baseline
+            // (80.3% down the file, off its alpha channel) landed 4.8px under
+            // it at this size.
+            dy: "-translate-y-[0.34em]",
+            darken: true,
+          },
+        ],
+        href: `/schedule/talk/${janie.row.slug}`,
       },
     });
   }
