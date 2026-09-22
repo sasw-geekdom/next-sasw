@@ -219,7 +219,9 @@ function lineup(d, marks = {}) {
                 // second name was clipped by the block below. The names are
                 // the part of a bill a reader can do without — what is on at
                 // 1:30 is not.
-                (t.who && !d.compact ? `<span class="bw">${t.who}</span>` : "") +
+                (t.who && !d.compact
+                  ? `<span class="bw">${t.who}</span>`
+                  : "") +
                 `</div>`,
             )
             .join("");
@@ -874,6 +876,10 @@ async function main() {
       cobrand: card.cobrand ? "1" : "",
       devsaHeight: card.devsaHeight ?? 0,
       artWidth: card.artWidth ?? 0,
+      // Columns in the organiser strip. Three by default, which is what a
+      // six-mark strip needs when a figure is standing beside it; a card
+      // whose art clears the foot of the card can ask for one row.
+      logoCols: card.logoCols ?? 3,
       // The strip's own line. Every other template writes its label into the
       // markup because it serves one event; this one serves two, and Access
       // Granted's names the coalition where The Model's is the house "//".

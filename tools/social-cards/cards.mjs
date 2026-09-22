@@ -3033,29 +3033,87 @@ export const CARDS = [
   },
 
   /**
-   * Corey Hartman, who is not in the CMS yet.
+   * The lockpicking village, which is not a talk.
    *
-   * Every other speaker card resolves its face and its name from Firestore by
-   * slug, which is the whole reason `--env-file` is mandatory. He has no
-   * record, so this card takes the `art` path the event cards use — a picture
-   * staged from the repo — and states the name itself. When he is added, this
-   * should become an ordinary `speaker: "corey-hartman"` card and the file
-   * below should go with the record.
+   * It runs the whole five hours rather than taking a slot, and nobody gives
+   * it — so it takes the `art` path the event card uses, with Alamo City
+   * Locksport's own mark in the figure's place and no name block under it.
    *
-   * The picture is his own avatar rather than a headshot: a drawn frog in a
-   * lab coat with his name on the badge. Cropped to its ink on the way in
-   * (the supplied file had 141px of empty alpha under the figure, and this
-   * template bottom-anchors, so uncropped it would have floated).
-   *
-   * No role and no company, because there is nowhere to get them from. The
-   * card says his name and what he is presenting, which is what it can say
-   * truthfully.
+   * Their new autumn mark rather than the line-art one in the organiser strip
+   * at the foot of every card on this template: the strip says who is running
+   * the day, and this card is about one of the six in particular, so the two
+   * should not be the same picture at two sizes.
    */
+  {
+    id: "access-granted-locksport-village",
+    event: "access-granted",
+    art: "public/access-granted/orgs/locksport-fall.png",
+    // One row, not this template's usual two of three. The two-row grid is
+    // there because a standing figure reaches down into the strip and leaves
+    // it about 410px; the mark on this card sits high and clears the foot
+    // entirely, so all 936px are free and six marks across draw 682.
+    logoCols: 6,
+    headline: "Lock Picking<br />Village",
+    headlineSize: 118,
+    // Their sentence, and the one that says why a lockpicking table belongs
+    // at a security day rather than at a fair: "Understanding how a lock
+    // fails is how you learn to protect yourself and the people around you."
+    // The welcome is theirs too, and it is the fact most likely to decide
+    // whether somebody brings their kid.
+    subtitle:
+      "Understanding how a lock fails is how you learn to protect yourself. All ages welcome.",
+    // The hours, because "drop in whenever" is the whole point — every other
+    // card on this template names a day and a floor and lets the running
+    // order carry the time. Split across both slots rather than packed onto
+    // the first: whole, the day and the hours draw 568px and run under the
+    // mark's lower-left corner.
+    facts: [
+      "Wednesday, September 30",
+      "1 \u2013 6 PM  \u00b7  Geekdom, 3rd Floor",
+    ],
+    /**
+     * Landscape, where this slot was drawn for a standing figure.
+     *
+     * Their mark is 1.41:1, so height sets a width of 1.41x rather than the
+     * 0.46x a headshot gives: 370 high draws 522 across, and at left 555 that
+     * lands flush on the card's right edge.
+     *
+     * A standing figure works on this template because it is narrow where the
+     * copy is tall; a wide mark is not, so it takes the one band that is
+     * clear of both — below the hook, which reaches x=570, and above the
+     * facts, whose second line reaches x=492. That band is y 660 to 1030, and
+     * 370 is what fits it.
+     *
+     * Lifted off the bottom rather than bled off it. A cutout of a person is
+     * cropped at the frame and bleeding is the point; a mark sitting flush on
+     * the card's edge reads as artwork that did not fit — the same note
+     * `portraitBottom` carries in render.mjs.
+     */
+    /**
+     * Whose village it is, in the slot a speaker card gives the speaker.
+     *
+     * Their autumn mark carries no wordmark — it is an Alamo built out of
+     * leaves with a keyhole in it — so a reader who does not already know the
+     * group cannot name them from the picture, and the line-art version in
+     * the strip below is 40px wide. The one place on this template that says
+     * who a card is about is the name block, and for this card that is a
+     * group rather than a person.
+     */
+    name: ["Alamo City", "Locksport"],
+    role: "Hosting the village",
+    // No article: this slot sets in mono caps, where "A TOOOL AFFILIATE"
+    // reads as a sentence that lost its verb rather than as the label it is.
+    org: "TOOOL affiliate",
+    portrait: { height: 370, left: 555, bottom: 320 },
+  },
+
   {
     id: "access-granted-speaker-corey-hartman",
     event: "access-granted",
-    art: "public/access-granted/corey-hartman.png",
-    name: ["Corey", "Hartman"],
+    // "corey-hartman-ph-d", because that is the slug his CMS record carries —
+    // his name is entered as "Corey Hartman, Ph.D." and the card splits it
+    // the way it splits any other: "Corey" over "Hartman, Ph.D.".
+    speaker: "corey-hartman-ph-d",
     // The title's own colon. "Glyph" is the thing being announced and the
     // rest is what it does — the same split `samad-ahmed` makes, where the
     // headline is the idea and the subtitle is the project.
@@ -3065,9 +3123,23 @@ export const CARDS = [
     // headline that lost its second line.
     headlineSize: 176,
     subtitle: "A binary analysis tool powered by machine learning.",
-    // Wider than a person: his cutout is 1.03:1 where a headshot here runs
-    // about 0.46:1, so the same height would put him 300px off the card.
-    portrait: { height: 700, left: 430 },
+    /**
+     * Wider than a person, because it is not one: his headshot in the CMS is
+     * a drawn frog in a lab coat with his name on the badge. The picture is
+     * 1.03:1 against a headshot's usual 0.46:1, so the set's 918 would put
+     * him 300px off the card.
+     *
+     * `left` is 520 rather than the set's 442 because his name is entered
+     * as "Corey Hartman, Ph.D." and sets two lines deep — "HARTMAN, PH.D."
+     * reaches x=490 where "HARTMAN" stopped at 400, and at 442 the frog's
+     * head sat on the full stop. At 520 the figure ends exactly on the card's
+     * right edge and the copy has 30px of air.
+     *
+     * `bottom` because the file has 141px of empty alpha under the figure and
+     * this template anchors to the frame rather than the ink. At 700 that is
+     * 73px of float; -77 lands the hand flush on the card's edge.
+     */
+    portrait: { height: 700, left: 520, bottom: -77 },
   },
 
   {

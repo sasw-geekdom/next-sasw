@@ -85,7 +85,13 @@
       .portrait img {
         position: absolute;
         left: {{portraitLeft}}px;
-        bottom: 0;
+        /* Per card, defaulting to the 0 every card here has always used.
+           A cutout whose file carries empty alpha under the figure floats
+           when it is bottom-anchored — the frame's edge is not the ink's.
+           Corey Hartman's has 141px of it, so his card pushes the box down
+           by that much, scaled. `portraitBottom` is 0 unless a card sets it,
+           so nothing else moves. */
+        bottom: {{portraitBottom}}px;
         height: {{portraitHeight}}px;
         width: auto;
       }
@@ -227,13 +233,17 @@
       .powered .label span {
         color: var(--green);
       }
-      /* Six organisers in two rows of three, not one row of six. One row can
-         only hold them at 34px before it reaches the figure — the other events
-         get a single row because they have three partners, not six. */
+      /* Six organisers in two rows of three by default, not one row of six.
+         One row can only hold them at 34px before it reaches the figure — the
+         other events get a single row because they have three partners, not
+         six.
+         Per card, because that constraint is the *figure's*, not the strip's.
+         A card whose art sits high leaves the whole 936px measure free down
+         here, and six marks across it draw 682 — see the village card. */
       .logos {
         margin-top: 18px;
         display: grid;
-        grid-template-columns: repeat(3, auto);
+        grid-template-columns: repeat({{logoCols}}, auto);
         justify-items: start;
         align-items: center;
         gap: 6px 26px;
