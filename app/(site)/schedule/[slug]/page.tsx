@@ -17,6 +17,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { eventLocation } from "@/lib/calendar";
 import { ARROW_MOTION } from "@/lib/motion";
 import { AccessContinuous } from "@/components/site/access-continuous";
+import { ACCESS_GREEN, accessBlockFor } from "@/lib/access-granted";
 import { ActivationDetail } from "@/components/site/activation-detail";
 import {
   ActivationSessions,
@@ -1215,6 +1216,14 @@ function ActivationPage({
             aside={
               isPysa ? <PysaAside /> : isModel ? <ModelAside /> : undefined
             }
+            /* Only Access Granted. Its afternoon is four community groups
+               with an hour each rather than one programme — see
+               `ACCESS_BLOCKS`. Every other activation passes nothing and
+               every row draws as it always has. */
+            credit={
+              isAccessGranted ? (s) => accessBlockFor(s.startsAt) : undefined
+            }
+            creditAccent={isAccessGranted ? ACCESS_GREEN : undefined}
           />
         )
       ) : isHeroOnly ? null : (

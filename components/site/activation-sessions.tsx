@@ -46,6 +46,8 @@ export function ActivationSessions({
   sessions,
   speakers = [],
   aside,
+  credit,
+  creditAccent,
 }: {
   sessions: SessionRow[];
   /**
@@ -72,6 +74,21 @@ export function ActivationSessions({
    * mono caps.
    */
   speakers?: CardSpeaker[];
+  /**
+   * Who runs a given session's block, where an activation is run in blocks.
+   *
+   * Only Access Granted passes one: its afternoon is four community groups
+   * with an hour each rather than one programme, and the running order cannot
+   * say so on its own — see `accessBlockFor`. A resolver rather than a map so
+   * the caller decides what a block *is*; this component only knows that a
+   * row may carry a credit.
+   *
+   * Returning undefined draws nothing, which is what every other activation
+   * gets and what a session outside any block gets.
+   */
+  credit?: (session: SessionRow) => { name: string; href?: string } | undefined;
+  /** The credit's colour, where an event has its own. Defaults to the house magenta. */
+  creditAccent?: string;
 }) {
   if (sessions.length === 0) return null;
 
@@ -230,6 +247,46 @@ export function ActivationSessions({
                   {s.track}
                 </span>
               )}
+              {/* Not a second chip. The track is a category and reads as one;
+                  this is a credit, and given the same pill it would look like
+                  the session belonged to two taxonomies. Label plus name, with
+                  only the name in the accent.
+
+                  "Powered by", the same words the strip at the foot uses for
+                  all six at once. Deliberately the same: it is the same
+                  relationship at a finer grain, and a second verb for it
+                  ("block by", "run by") would imply a second kind of thing. */}
+              {(() => {
+                const by = credit?.(s);
+                if (!by) return null;
+                const accent = creditAccent ?? undefined;
+                const name = by.href ? (
+                  <a
+                    href={by.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={cn(
+                      "transition-colors duration-200 hover:text-white",
+                      accent ? undefined : "text-magenta",
+                    )}
+                    style={accent ? { color: accent } : undefined}
+                  >
+                    {by.name}
+                  </a>
+                ) : (
+                  <span
+                    className={accent ? undefined : "text-magenta"}
+                    style={accent ? { color: accent } : undefined}
+                  >
+                    {by.name}
+                  </span>
+                );
+                return (
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-white/40">
+                    Powered by {name}
+                  </span>
+                );
+              })()}
             </div>
 
             <People participants={s.participants} byId={byId} />

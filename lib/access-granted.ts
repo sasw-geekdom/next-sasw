@@ -78,6 +78,73 @@ export const ACCESS_GRANTED = {
   lockHeight: 1400,
 } as const;
 
+/**
+ * Who runs which hour.
+ *
+ * The day is not one programme with five talks in it — it is four community
+ * groups given a block each, which is why the running order has a five-minute
+ * gap inside the DEF CON hour and a forty-minute one before SAHA's. Without
+ * this the six marks in the band are a credit nobody can act on, and the gaps
+ * look like mistakes.
+ *
+ * Windows rather than a map of session slugs, so the page does not need
+ * editing when a session is entered. UTSA CyberJedis have a second talk that
+ * is not in the CMS yet; it lands inside their window and picks up their name
+ * the moment it is saved.
+ *
+ * The cost of windows is that a session moved across a boundary changes hands
+ * silently. That is the right behaviour here — the block *is* the hour — but
+ * it means these bounds are the thing to check if a credit ever looks wrong.
+ *
+ * `org` matches a name in ACCESS_ORGANIZERS, which is where the link comes
+ * from. A name with no match renders as plain text rather than throwing.
+ */
+export interface AccessBlock {
+  org: string;
+  /** Local start of the window, "HH:MM" on a 24-hour clock. */
+  from: string;
+  /** Local end, exclusive. */
+  to: string;
+}
+
+export const ACCESS_BLOCKS: readonly AccessBlock[] = [
+  { org: "BSides San Antonio", from: "13:00", to: "13:45" },
+  { org: "DEF CON Group San Antonio", from: "13:45", to: "14:45" },
+  { org: "UTSA CyberJedis", from: "14:45", to: "15:45" },
+  { org: "San Antonio Hacker Association", from: "15:45", to: "18:00" },
+];
+
+/**
+ * The week runs on America/Chicago, which is UTC-5 in late September.
+ *
+ * Stated here rather than imported from lib/schedule's `EVENT_OFFSET`, which
+ * is the same value: that module imports this one, and taking it back would
+ * be a cycle. Not `new Date().getHours()` either — that reads the *server's*
+ * clock, and this has to give the same answer on a machine in UTC.
+ */
+const EVENT_OFFSET_MINUTES = -5 * 60;
+
+function minuteOfDay(ms: number): number {
+  return Math.floor(ms / 60000 + EVENT_OFFSET_MINUTES) % 1440;
+}
+
+function hhmm(v: string): number {
+  const [h, m] = v.split(":").map(Number);
+  return h * 60 + m;
+}
+
+/** The organiser whose block a session starts in, or undefined. */
+export function accessBlockFor(startsAt: number | null | undefined) {
+  if (!startsAt) return undefined;
+  const at = minuteOfDay(startsAt);
+  const block = ACCESS_BLOCKS.find(
+    (b) => at >= hhmm(b.from) && at < hhmm(b.to),
+  );
+  if (!block) return undefined;
+  const org = ACCESS_ORGANIZERS.find((o) => o.name === block.org);
+  return { name: block.org, href: org?.href };
+}
+
 export interface AccessContinuousItem {
   name: string;
   /**
