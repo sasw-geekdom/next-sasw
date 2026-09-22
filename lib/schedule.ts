@@ -234,6 +234,36 @@ export interface FeaturedSession {
    */
   heroBreakBefore?: string;
   /**
+   * Step the hero h1 down one size at xl.
+   *
+   * The h1 runs to 7xl (72px) in a column that measures 664px, which holds
+   * about eighteen characters of Oswald. A title long enough to need three
+   * lines there is not helped by `heroBreakBefore` — forcing a break just
+   * splits one of the two halves again.
+   *
+   * At 6xl the same column holds twenty-four, which is the difference between
+   * two lines and three for a 41-character title. Set it only where the title
+   * is genuinely too long, not to taste: every other activation page draws its
+   * name at the same size, and that consistency is worth more than one page's
+   * line count.
+   */
+  heroTitleTight?: boolean;
+  /**
+   * Put the street on the hero's pin, in place of the venue's name.
+   *
+   * The eyebrow above the title already names the venue, so by default the pin
+   * line repeats it — "UTSA SAN PEDRO II · AI & APPLIED INNOVATION" three
+   * lines above "UTSA SAN PEDRO II, 1ST FLOOR". For a room inside one of the
+   * week's six that repetition is harmless, because the name is the thing a
+   * reader navigates by. For a popup it is a waste of the one line on the page
+   * that a visitor is looking for: the address is what gets them there, and
+   * unset it appears only in the prose below, where it is buried.
+   *
+   * Reads `venue.place.address`, so the street is stated once in `venuePopup`
+   * and cannot drift. No-op where the venue has no address.
+   */
+  pinAddress?: boolean;
+  /**
    * Long-form content for the activation's own page: the organiser's account
    * of their own morning, in their words.
    *
@@ -730,8 +760,8 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
   /**
    * A popup, and the first activation not in one of the six rooms — see
    * `venuePopup`. Alamo Inventors hold their Cyber, AI & Robotics SIG panel in
-   * UTSA's San Pedro II for the evening, with the room given by the Harvey
-   * Najim Innovation Center.
+   * UTSA's San Pedro II for the evening, with the room sponsored by the
+   * Harvey E. Najim Innovation District.
    *
    * Shares the Wednesday evening with Latin Tech Pitch, which runs 6–9 at TPR
    * eight blocks away. Both are on the grid and neither is wrong; worth
@@ -746,11 +776,27 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // three technologies are what tells this block apart from anything else
     // on the Wednesday.
     shortTitle: "Cyber, AI & Robotics",
+    // Two lines, not three. At the hero's full 7xl "THE CYBER, AI & ROBOTICS"
+    // measures 752px against a 664px column and wraps on its own, so the
+    // break alone would have given three lines with a two-word orphan in the
+    // middle; stepped down it measures 626 and the break lands where the
+    // title's own clause does.
+    heroTitleTight: true,
+    heroBreakBefore: "Convergence",
+    // 622 Dolorosa St on the pin. The eyebrow three lines above already says
+    // UTSA San Pedro II, and for a room nobody has been to before the street
+    // is the fact worth the line — Alamo Inventors asked for the address to
+    // be easier to find than a sentence in the paragraph below.
+    pinAddress: true,
     // Their own framing, condensed. The organisers' description runs to two
     // paragraphs that say the panel's subject twice; this keeps the second
     // half, which is the part that says what actually happens in the room.
+    // Follows the abstract below. The old line named "the patent bar" as a
+    // third panelist group, which Alamo Inventors' new copy does not: the
+    // panel is PlusOne Robotics, a cybersecurity professor and their own SIG,
+    // and the USPTO is the subject rather than a seat on the stage.
     blurb:
-      "Panelists from academia, industry and the patent bar on where cyber, AI and robotics converge \u2014 and the intellectual property that follows.",
+      "Panelists from PlusOne Robotics, academia and the Alamo Inventors SIG on patenting an invention that involves AI.",
     venuePopup: {
       name: "UTSA San Pedro II",
       shortName: "San Pedro II",
@@ -793,12 +839,19 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     },
     detail: {
       eyebrow: "The evening",
-      headline: "Three technologies, one patent question.",
+      // Alamo Inventors' own subtitle, supplied verbatim. On a `heroOnly`
+      // activation this draws as the deck under the typeset title rather than
+      // as a section headline — see the note on `headline` above.
+      headline: "Valuable Insights for AI Innovators!",
+      // Their abstract, verbatim. One paragraph because that is all this
+      // page draws: `heroOnly` renders `lede[0]` and nothing after it.
       lede: [
-        "Cyber, AI and robotics are converging faster than the law around them. Panelists from academia, industry and the intellectual property profession take questions from the room on what that convergence means for inventors and entrepreneurs \u2014 and for the patents they file.",
+        "Patent application strategies are revealed when your intellectual property involves artificial intelligence. Panelists from PlusOne Robotics, a Cybersecurity Professor, and the Alamo Inventors Cyber, AI & Robotics SIG present insights to US Patent & Trademark Office processes. A use-case from Intuitive Innovations LLC.",
       ],
+      // Theirs, verbatim, including the welcome to week attendees that the
+      // previous line left out.
       access:
-        "Seated by Alamo Inventors on Eventbrite rather than by the week\u2019s list. The room is given by the Harvey Najim Innovation Center, on the first floor of UT San Antonio\u2019s San Pedro II building at 622 Dolorosa St.",
+        "Alamo Inventors welcomes all SASW attendees and suggest Eventbrite registration for headcount. The venue is sponsored by the Harvey E. Najim Innovation District, located on the first floor of UT San Antonio\u2019s San Pedro II building at 622 Dolorosa St. Free city street parking after 6 PM.",
     },
   },
 
@@ -3883,12 +3936,7 @@ export function dayCalendar(
    */
   const order = new Map(ROOMS.map((r, i) => [r.slug, i]));
   const counts = new Map<string, DayVenue>();
-  const note = (
-    slug: string,
-    name: string,
-    short: string,
-    tier: RoomTier,
-  ) => {
+  const note = (slug: string, name: string, short: string, tier: RoomTier) => {
     const seen = counts.get(slug);
     if (seen) seen.count += 1;
     else
@@ -4124,9 +4172,7 @@ export function venueRedirect(slug: string): string | null {
   if (!room || room.sessions.length > 1) return null;
   // Held here, not merely pointing here — see `heldIn`.
   const here = heldIn(slug);
-  return here.length === 1 && here[0].page
-    ? `/schedule/${here[0].page}`
-    : null;
+  return here.length === 1 && here[0].page ? `/schedule/${here[0].page}` : null;
 }
 
 /**
@@ -4199,7 +4245,9 @@ function heldIn(slug: string): FeaturedSession[] {
 
 export function scheduleSlugs(): string[] {
   const withSessions = new Set(
-    allSessions().filter((s) => !s.venuePopup).map((s) => s.room),
+    allSessions()
+      .filter((s) => !s.venuePopup)
+      .map((s) => s.room),
   );
   return [
     ...ROOMS.filter((r) => withSessions.has(r.slug)).map((r) => r.slug),

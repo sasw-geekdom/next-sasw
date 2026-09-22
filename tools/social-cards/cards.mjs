@@ -92,7 +92,8 @@ const CYBER_AI_ROBOTICS = {
   facts: ["Wednesday, September 30", "6:30 \u2013 8 PM  ·  UTSA San Pedro II"],
   // "Venue by", not the "Powered by" the community cards print. UT San Antonio
   // is not running this panel — Alamo Inventors are, and the badge above says
-  // so; UTSA gave the room, through the Harvey Najim Innovation Center.
+  // so; UTSA gave the room, sponsored by the Harvey E. Najim Innovation
+  // District.
   poweredLabel: "Venue by",
   logos: [{ repo: "public/activations/ut-san-antonio.svg", height: 34 }],
 };
@@ -1650,8 +1651,11 @@ export const CARDS = [
     // measure; the three technologies are the hook and go first.
     headline: "Cyber, AI & Robotics<br />Convergence Panel",
     headlineSize: 76,
-    // The same line the activation page leads on, which is what the panel is
-    // actually about rather than a restatement of its title.
+    // This was the activation page's deck until Alamo Inventors supplied
+    // their own ("Valuable Insights for AI Innovators!"). Kept because it is
+    // still a true description of the panel and the card has shipped — but
+    // the card and the page no longer say the same thing, which they did by
+    // design. Worth reconciling when the card is next re-rendered.
     subtitle: "Three technologies, one patent question.",
   },
 

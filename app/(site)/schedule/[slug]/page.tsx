@@ -275,10 +275,10 @@ function ModelAside() {
           the tools it runs on.
         </p>
         <p>
-          It opens on what is coming, and then it gets specific: local makers
-          on the work itself &mdash; virtual reality, audio, Claude, and the
-          image and video models &mdash; and on the recipes they actually ship
-          with rather than the ones that demo well.
+          It opens on what is coming, and then it gets specific: local makers on
+          the work itself &mdash; virtual reality, audio, Claude, and the image
+          and video models &mdash; and on the recipes they actually ship with
+          rather than the ones that demo well.
         </p>
         <p>
           Nobody is selling you a tool this afternoon. Every session here is
@@ -796,7 +796,14 @@ function ActivationPage({
                     </div>
                   </>
                 ) : (
-                  <h1 className="mt-4 font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl xl:text-7xl">
+                  <h1
+                    className={cn(
+                      "mt-4 font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-white sm:text-6xl",
+                      // One size down at xl for a title too long to set at
+                      // the full one — see `heroTitleTight`.
+                      session.heroTitleTight ? "xl:text-6xl" : "xl:text-7xl",
+                    )}
+                  >
                     {/* `lg:block` on a span rather than a `<br>`: a break element
                       is unconditional, and below lg this has to fall back to
                       wrapping wherever the narrow column runs out. Going block
@@ -884,8 +891,14 @@ function ActivationPage({
                           aria-hidden="true"
                         />
                         <dt className="sr-only">Location</dt>
+                        {/* The street, where the activation asks for it —
+                            see `pinAddress`. Falls back to the venue's name
+                            whenever there is no address to show, so turning
+                            the flag on can never blank the line. */}
                         <dd>
-                          {session.venue.name}
+                          {(session.pinAddress &&
+                            session.venue.place?.address) ||
+                            session.venue.name}
                           {session.venueDetail
                             ? `, ${session.venueDetail}`
                             : ""}
