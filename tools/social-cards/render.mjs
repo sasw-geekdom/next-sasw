@@ -47,6 +47,290 @@ const SIZE = { width: 1080, height: 1350 };
 
 // ─── CMS ────────────────────────────────────────────────────────────────────
 
+/**
+ * Circuit colours, copied from lib/tracks.ts.
+ *
+ * Copied rather than imported: this is a plain .mjs tool and lib/tracks.ts is
+ * TypeScript with no build step in front of it — the same reason every other
+ * fact about the week is restated in cards.mjs. If a circuit is retuned there,
+ * it is retuned here.
+ *
+ * "Social" is not one of the five. It is what the schedule calls the evening
+ * hours that belong to no track — Startup Bash, Open Circuit — and it is white
+ * here on purpose: a sixth hue would read as a sixth circuit, and the whole
+ * point of those hours is that everyone is meant at them.
+ */
+const CIRCUIT_COLORS = {
+  Founder: "#ff32a0",
+  "Tech & Builders": "#4d7cff",
+  "AI & Applied Innovation": "#19c8c8",
+  "Small Business & Solopreneur": "#b45cff",
+  Capital: "#ff6b57",
+  Social: "#e8e8e8",
+};
+
+/** "13:30" to minutes past midnight. */
+function minutesOf(hhmm) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+}
+
+/**
+ * A range as the week writes it: one meridiem, on the end that needs it.
+ *
+ * "12:05 - 12:25 PM", not "12:05 PM - 12:25 PM", and "11:30 AM - 1 PM" when
+ * the range crosses noon. Same rule `compactRange` follows in lib/schedule.ts.
+ */
+function clockRange(fromMin, toMin) {
+  const one = (m) => {
+    const h = Math.floor(m / 60);
+    const mm = m % 60;
+    const h12 = h % 12 || 12;
+    return mm ? `${h12}:${String(mm).padStart(2, "0")}` : `${h12}`;
+  };
+  const ap = (m) => (Math.floor(m / 60) < 12 ? "AM" : "PM");
+  return ap(fromMin) === ap(toMin)
+    ? `${one(fromMin)} - ${one(toMin)} ${ap(toMin)}`
+    : `${one(fromMin)} ${ap(fromMin)} - ${one(toMin)} ${ap(toMin)}`;
+}
+
+/**
+ * A deterministic PRNG, so a field of bolts is the same field every render.
+ *
+ * startup-bash.html solves this by pasting its 78 positions into the file;
+ * here the field belongs to whichever set asks for one, on a card whose
+ * layout is computed, so it is generated — and seeded, because a card that
+ * reshuffles its own weather on every render cannot be diffed against HEAD,
+ * which is how every regression in this tool has been caught.
+ */
+function mulberry32(seed) {
+  let a = seed;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * The bolt field, inside one block.
+ *
+ * The Startup Bash card's field is the reference and the reasoning carries:
+ * depth comes from size, opacity and a sub-pixel blur at once, because size
+ * alone reads as bolts of different sizes rather than one size at different
+ * distances. Scaled down hard — this is a 168px column, not half a poster, so
+ * it is a texture inside a block rather than weather across a card.
+ *
+ * `left` is a percentage because a lane's width is decided by flex at render
+ * time and this runs before that; `top` is pixels because the block's height
+ * is the one number here that is known.
+ */
+function boltField(height, seed) {
+  const rnd = mulberry32(seed);
+  const n = Math.max(6, Math.round(height / 14));
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const size = 7 + Math.round(rnd() * 15);
+    // Far ones small, dim and softened; near ones larger and sharper. One
+    // scalar drives all three so they cannot disagree.
+    const near = (size - 7) / 15;
+    out.push(
+      `<img src="bolt.svg" alt="" style="left:${(rnd() * 96).toFixed(1)}%;` +
+        `top:${(rnd() * (height - size)).toFixed(1)}px;width:${size}px;height:${size}px;` +
+        `opacity:${(0.22 + near * 0.5).toFixed(2)};` +
+        `filter:blur(${((1 - near) * 0.8).toFixed(2)}px)" />`,
+    );
+  }
+  return `<div class="field">${out.join("")}</div>`;
+}
+
+function lineup(d, marks = {}) {
+  const from = minutesOf(d.axis.from);
+  const to = minutesOf(d.axis.to);
+  const gridHeight = d.gridHeight ?? 920;
+  const headHeight = d.headHeight ?? 54;
+  // Pixels per minute, from the axis rather than a constant, so a quiet day
+  // and a dense one both fill the same grid.
+  const ppm = gridHeight / (to - from);
+  const colour = (c) => CIRCUIT_COLORS[c] ?? "#e8e8e8";
+
+  const hours = [];
+  const rules = [];
+  // Ticks on the hour, the last one included: the foot of the axis is a real
+  // boundary — it is when the last thing ends — and a grid that stops ruling
+  // an hour early reads as cropped.
+  for (let m = Math.ceil(from / 60) * 60; m <= to; m += 60) {
+    const y = (m - from) * ppm;
+    const h = Math.floor(m / 60);
+    // Plus the lane heading, because the label is absolutely positioned and
+    // `.clock`'s padding does not move it: an absolute child resolves `top`
+    // against the padding box, so the whole clock read one heading too high
+    // and every hour pointed at the block above the one it names.
+    hours.push(
+      `<div class="hr" style="top:${(y + headHeight).toFixed(1)}px">${h % 12 || 12} ${h < 12 ? "AM" : "PM"}</div>`,
+    );
+    if (m > from && m < to)
+      rules.push(`<div class="rule" style="top:${y.toFixed(1)}px"></div>`);
+  }
+
+  /**
+   * The height under which a block stops stating its own hour.
+   *
+   * A 20-minute talk is 52px on the tall card and 38 on the feed one, and at
+   * 38 a two-line title and a time do not both fit. The time is what goes:
+   * the block's place against the ruled hours already says when it is, to the
+   * nearest few minutes, and a title clipped in half says nothing at all.
+   */
+  const timeFloor = d.compact ? 46 : 0;
+
+  let seed = 1;
+  const lanes = d.rooms
+    .map((room) => {
+      const sets = (room.sets ?? [])
+        .map((s) => {
+          const a = minutesOf(s.from);
+          const b = minutesOf(s.to);
+          // Clamped, not dropped. The library opens at nine and is still
+          // going at noon; that block belongs on the grid, cut off at the top
+          // with `early` saying so, and its label still says nine.
+          const top = Math.max(0, (a - from) * ppm);
+          const bottom = Math.min(gridHeight, (b - from) * ppm);
+          const h = bottom - top;
+          const early = a < from ? " early" : "";
+          // The group's mark, where a set has one and the block is tall
+          // enough to hold it under the type. Bottom-anchored, so it reads as
+          // the room's sign rather than as part of the title.
+          const logo =
+            s.logo && h > 120
+              ? `<img class="mk" src="${marks[s.logo]}" alt="" />`
+              : "";
+          // Each talk inside an activation's hour: the time it starts, what
+          // it is, and who has it. An hour that is really two talks was the
+          // one thing the first grid could not say, and it is the thing a
+          // reader picking a room most wants.
+          const bill = (s.bill ?? [])
+            .map(
+              (t) =>
+                `<div class="bl"><span class="bt">${t.at}</span>` +
+                `<span class="bn">${t.title}</span>` +
+                // No speaker on the feed card. Datanauts' hour is 98px there
+                // and its two talks with names under them want 101, so the
+                // second name was clipped by the block below. The names are
+                // the part of a bill a reader can do without — what is on at
+                // 1:30 is not.
+                (t.who && !d.compact ? `<span class="bw">${t.who}</span>` : "") +
+                `</div>`,
+            )
+            .join("");
+          return (
+            `<div class="set${early}" style="top:${top.toFixed(1)}px;` +
+            `height:${h.toFixed(1)}px;--c:${colour(s.circuit)}">` +
+            (s.bolts ? boltField(h, seed++) : "") +
+            `<div class="sc">` +
+            `<div class="st">${s.title}</div>` +
+            (h > timeFloor ? `<div class="sw">${clockRange(a, b)}</div>` : "") +
+            (s.who ? `<div class="sp">${s.who}</div>` : "") +
+            (s.hook && h > 90 ? `<div class="sh">${s.hook}</div>` : "") +
+            (bill ? `<div class="bill">${bill}</div>` : "") +
+            `</div>${logo}</div>`
+          );
+        })
+        .join("");
+      return (
+        `<div class="lane"><div class="lane-head">` +
+        `<div class="n">${room.short}</div>` +
+        (room.note ? `<div class="k">${room.note}</div>` : "") +
+        `</div><div class="lane-body">${sets}` +
+        `<div class="rules">${rules.join("")}</div></div></div>`
+      );
+    })
+    .join("");
+
+  /**
+   * The morning, as rows or as one line.
+   *
+   * Three rows cost 130px, which the tall card has and the feed card spends
+   * on the axis instead. Same three facts either way — the compact form drops
+   * only the alignment.
+   */
+  const railRows = d.compact
+    ? `<div class="rail-line">` +
+      (d.rail ?? [])
+        .map(
+          (r) =>
+            `<span class="one" style="--c:${colour(r.circuit)}">` +
+            `<i></i>${r.title}<b>${r.room}</b>` +
+            `<u>${clockRange(minutesOf(r.from), minutesOf(r.to))}</u></span>`,
+        )
+        .join("") +
+      `</div>`
+    : (d.rail ?? [])
+        .map(
+          (r) =>
+            `<div class="rail-row" style="--c:${colour(r.circuit)}">` +
+            `<span class="pip"></span><span class="t">${r.title}</span>` +
+            `<span class="r">${r.room}</span>` +
+            `<span class="w">${clockRange(minutesOf(r.from), minutesOf(r.to))}</span></div>`,
+        )
+        .join("\n        ");
+
+  const weekItems = (d.allWeek ?? [])
+    .map(
+      (w) =>
+        `<div class="it" style="--c:${colour(w.circuit)}">` +
+        `<div class="t">${w.title}</div><div class="w">${w.note}</div></div>`,
+    )
+    .join("");
+
+  // Only the circuits on the grid. A key naming five when the day ran three
+  // is a key to the system, not to the poster in front of you.
+  const shown = [];
+  for (const r of d.rooms)
+    for (const s of r.sets ?? [])
+      if (!shown.includes(s.circuit)) shown.push(s.circuit);
+  for (const r of d.rail ?? [])
+    if (!shown.includes(r.circuit)) shown.push(r.circuit);
+
+  return {
+    gridHeight,
+    headHeight,
+    hours: hours.join("\n          "),
+    lanes,
+    railRows,
+    railLabel: d.railLabel ?? "Before the grid",
+    weekItems,
+    weekLabel: d.weekLabel ?? "All week",
+    legend: shown
+      .map((c) => `<span class="c" style="--c:${colour(c)}"><i></i>${c}</span>`)
+      .join(""),
+    // One knob per size, set here rather than branched in the stylesheet.
+    // The feed card is the tall one at about three quarters, and a dozen
+    // `<!--if:compact-->` blocks would be a second layout to keep in step.
+    ...(d.compact
+      ? {
+          h1Size: 44,
+          eyebrowSize: 13,
+          subSize: 12,
+          setTitle: 13,
+          setTime: 9,
+          billSize: 9,
+          laneName: 16,
+          headPad: 40,
+        }
+      : {
+          h1Size: 58,
+          eyebrowSize: 16,
+          subSize: 15,
+          setTitle: 16,
+          setTime: 11,
+          billSize: 10,
+          laneName: 19,
+          headPad: 58,
+        }),
+  };
+}
+
 async function loadSpeakers() {
   const key = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!key) {
@@ -466,7 +750,27 @@ async function main() {
       people.push({ file: as, name: "", title: "", company: "" });
     }
 
-    const facts = card.facts ?? event.facts;
+    // `?? []`, because an event need not have any. Every event did until the
+    // lineup poster, whose facts are the grid — a day, a room and an hour
+    // stated once under a headline is exactly what it replaces.
+    const facts = card.facts ?? event.facts ?? [];
+
+    /**
+     * A lineup's marks, staged like any other asset the card draws.
+     *
+     * Keyed by repo path so a mark used in two lanes is fetched once, and
+     * named by index rather than by basename because two activations could
+     * ship `logo.svg`. `lineup()` is pure and cannot await, so the files are
+     * resolved here and handed to it.
+     */
+    const lineupMarks = {};
+    for (const room of card.lineup?.rooms ?? [])
+      for (const set of room.sets ?? [])
+        if (set.logo && !lineupMarks[set.logo]) {
+          const as = `lineup-${Object.keys(lineupMarks).length}${extname(set.logo)}`;
+          await stage(work, join(REPO, set.logo), as);
+          lineupMarks[set.logo] = as;
+        }
 
     const [a, b] = people;
     const html = await readFile(
@@ -483,6 +787,11 @@ async function main() {
       // DEVSA instead.
       week: card.week === false ? "" : WEEK,
       eyebrow: card.eyebrow ?? "",
+      // The canvas, for a template that has to do arithmetic against it.
+      // Every other template hardcodes 1080x1350 because every other card is
+      // that; the lineup grid is taller and sizes its own rows.
+      cardWidth: (card.size ?? event.size ?? SIZE).width,
+      cardHeight: (card.size ?? event.size ?? SIZE).height,
       headline: card.headline,
       headlineSize: card.headlineSize ?? 88,
       // The blurb's measure. Defaults to the 760 the-model.html was written
@@ -497,6 +806,26 @@ async function main() {
       fact1: facts[0],
       fact2: facts[1] ?? "",
       fact3: facts[2] ?? "",
+      /**
+       * A day's lineup, in the shape an ACL day flyer draws: rooms across
+       * the top, the clock down the side, every session a block at its true
+       * place on the axis.
+       *
+       * Built here for the reason `states` and `talks` are — the engine
+       * substitutes and branches, it does not loop — but with arithmetic the
+       * others do not need. A block's place is a function of the axis, so
+       * the card gives clock times and this turns them into pixels. Times go
+       * in as 24-hour "H:MM" and come out as the label the week writes
+       * ("12:05 - 12:25 PM"), so a card never states the same hour twice and
+       * the two cannot drift apart.
+       *
+       * The axis is the day's busy window, not the day: Thursday opens at
+       * 7:30 and does nothing much until noon, and drawn to scale that is
+       * four empty hours bought at the price of every afternoon block. What
+       * falls outside goes on the rail above the grid, which is the trade
+       * `dayCalendar` already makes for the same reason.
+       */
+      ...(card.lineup ? lineup(card.lineup, lineupMarks) : {}),
       // Give-a-LOT's transform table, built here so the card draws the same
       // four pairs the band does rather than a copy that can drift — see
       // GIVE_A_LOT_STATES in lib/give-a-lot.ts.

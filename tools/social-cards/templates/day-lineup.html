@@ -1,0 +1,570 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+
+      /* A festival lineup grid, in the week's own colours.
+         The reference is the Austin City Limits day flyer: stages across the
+         top, the clock down the left, every set drawn as a block at its true
+         place on the axis so a reader sees the shape of the day before they
+         read a word of it. What that form is good at is exactly this week's
+         problem — six rooms running at once and no way to hold them in your
+         head — and the site's own day view is already the same object, so
+         this is that view made postable rather than a new idea.
+
+         What is borrowed is the grid. What is not is ACL's orange ground and
+         two-tone blocks: this is black, and a block takes the colour of its
+         circuit, which is the system the site already colours sessions with
+         (CIRCUIT_COLORS in lib/tracks.ts). So the legend at the foot is not
+         decoration — it is the one piece of reading the grid needs. */
+      :root {
+        --magenta: #ff32a0;
+        /* The lane's ground. ACL fills a stage's column with a solid tone so
+           the empty hours still read as "this stage is open"; black would
+           make an idle room disappear. #111 is the same move at this end of
+           the value scale — two steps off the card's ground, enough to hold
+           a column's shape without competing with a block. */
+        --lane: #111111;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: {{cardWidth}}px;
+        height: {{cardHeight}}px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* The house bolt, as ground. Same device and the same charge as the
+         community template, behind the grid rather than beside a figure —
+         the grid is a field of small blocks, and a shape this size read at
+         0.17 under it gives the black some weather without touching a
+         block's legibility. */
+      .bolt {
+        position: absolute;
+        z-index: 0;
+        left: -300px;
+        top: 620px;
+        width: 1180px;
+        height: auto;
+        opacity: 0.13;
+        filter: blur(9px);
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: {{headPad}}px 60px 46px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 52px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 17px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* Centred, where the rest of the card is left-aligned.
+         The one place this borrows ACL's composition as well as its grid:
+         their "WEEKEND ONE / FRIDAY, OCTOBER 02" sits on the axis of the
+         wordmark above it, and a day poster wants its day announced the same
+         way. Everything below returns to the left. */
+      .head {
+        margin-top: 22px;
+        text-align: center;
+      }
+      .eyebrow {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: {{eyebrowSize}}px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--magenta);
+      }
+      h1 {
+        margin-top: 10px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{h1Size}}px;
+        line-height: 1;
+        letter-spacing: -0.005em;
+        text-transform: uppercase;
+      }
+      .sub {
+        margin-top: 9px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: {{subSize}}px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #8b8b8b;
+      }
+
+      /* The morning, on a rail rather than on the axis.
+         Thursday opens at 7:30 with a brunch and runs two short talks before
+         noon, then does not get busy until 12. Drawn to scale that is two
+         inches of empty column bought at the price of every afternoon block,
+         and the site's own day view already refuses that trade — see the
+         note above `dayCalendar`, which rails the morning for the same
+         reason. So the grid starts where the day does and the early hours
+         are listed. */
+      .rail {
+        margin-top: 22px;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+        padding: 10px 0 11px;
+      }
+      .rail-label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: #6f6f6f;
+      }
+      .rail-row {
+        margin-top: 7px;
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+      }
+      .rail-row .pip {
+        width: 7px;
+        height: 7px;
+        flex: none;
+        background: var(--c);
+        transform: translateY(-1px);
+      }
+      .rail-row .t {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 19px;
+        text-transform: uppercase;
+        letter-spacing: 0.01em;
+      }
+      .rail-row .w {
+        margin-left: auto;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 13px;
+        color: #8b8b8b;
+        white-space: nowrap;
+      }
+      .rail-row .r {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 13px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--c);
+        white-space: nowrap;
+      }
+
+      .grid {
+        margin-top: 18px;
+        display: flex;
+        gap: 6px;
+      }
+
+      /* The clock. Labels hang from the hour line rather than centring on it,
+         so a label reads as the boundary a block starts at. */
+      .clock {
+        width: 74px;
+        flex: none;
+        position: relative;
+        /* Clears the lane headings, so hour 0 lines up with the top of the
+           lane bodies and not with the top of the column. */
+        padding-top: {{headHeight}}px;
+      }
+      .hr {
+        position: absolute;
+        right: 12px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        color: #8b8b8b;
+        transform: translateY(-7px);
+        white-space: nowrap;
+      }
+
+      .lanes {
+        flex: 1;
+        display: flex;
+        gap: 6px;
+      }
+      .lane {
+        flex: 1;
+        min-width: 0;
+      }
+      .lane-head {
+        height: {{headHeight}}px;
+        background: var(--magenta);
+        color: #000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0 6px;
+        text-align: center;
+      }
+      .lane-head .n {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{laneName}}px;
+        line-height: 1.02;
+        text-transform: uppercase;
+      }
+      .lane-head .k {
+        margin-top: 3px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.62;
+      }
+      .lane-body {
+        position: relative;
+        height: {{gridHeight}}px;
+        background: var(--lane);
+      }
+
+      /* The hour lines, drawn over the lanes rather than inside one, so they
+         cross the whole grid the way a ruled timetable does. */
+      .rules {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .rule {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.07);
+      }
+
+      /* A set.
+         Tinted rather than filled: at a 20-minute block's height a solid
+         circuit colour with text on it is a coloured chip with something
+         written in it, and five of those stacked is a swatch card. The fill
+         carries the circuit, the left edge states it, and the title stays
+         white and legible — which is the ACL block's actual behaviour too,
+         where the act's name is black on cream and the colour is the ground
+         it sits on. */
+      .set {
+        position: absolute;
+        left: 0;
+        right: 0;
+        overflow: hidden;
+        background: color-mix(in srgb, var(--c) 17%, #111);
+        border-left: 3px solid var(--c);
+        padding: 5px 8px 0 9px;
+      }
+      .set .st {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{setTitle}}px;
+        line-height: 1.0;
+        text-transform: uppercase;
+        letter-spacing: 0.005em;
+      }
+      .set .sw {
+        margin-top: 2px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: {{setTime}}px;
+        letter-spacing: 0.04em;
+        color: rgba(255, 255, 255, 0.62);
+        white-space: nowrap;
+      }
+
+      /* The layers inside a block.
+         `.sc` carries the type above the bolt field, which is the only reason
+         it exists — a field painted behind text that is not in its own
+         stacking context puts bolts over letterforms. */
+      .set .sc {
+        position: relative;
+        z-index: 2;
+      }
+      .field {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        overflow: hidden;
+      }
+      .field img {
+        position: absolute;
+        display: block;
+      }
+
+      /* Who has the hour, and what it is really about.
+         The grid's blocks name a session, which for a talk is a title and for
+         an activation is a group — and neither says the thing a reader
+         actually decides on. A name and one line do. */
+      .set .sp {
+        margin-top: 4px;
+        font-family: "Geist", sans-serif;
+        font-weight: 600;
+        font-size: {{billSize}}px;
+        letter-spacing: 0.02em;
+        color: var(--c);
+      }
+      .set .sh {
+        margin-top: 4px;
+        font-family: "Geist", sans-serif;
+        font-size: {{billSize}}px;
+        line-height: 1.32;
+        color: rgba(255, 255, 255, 0.66);
+      }
+
+      /* The talks inside an activation's hour.
+         Datanauts is two talks and AWS is one, and an hour drawn as a single
+         block cannot say so — which is the one thing a reader choosing
+         between two rooms at 1 PM wants to know. Indented under the group's
+         name the way a bill sits under a headliner. */
+      .set .bill {
+        margin-top: 6px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        padding-top: 5px;
+      }
+      .set .bl {
+        margin-top: 5px;
+      }
+      .set .bl:first-child {
+        margin-top: 0;
+      }
+      .set .bt {
+        display: inline-block;
+        min-width: 30px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: {{billSize}}px;
+        color: var(--c);
+      }
+      .set .bn {
+        font-family: "Geist", sans-serif;
+        font-weight: 600;
+        font-size: {{billSize}}px;
+        line-height: 1.24;
+        color: rgba(255, 255, 255, 0.92);
+      }
+      .set .bw {
+        display: block;
+        padding-left: 30px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: {{billSize}}px;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      /* The group's own mark, at the foot of its block.
+         Only where the block is tall enough that the mark is not competing
+         with the type for the same 40px — Linux San Antonio holds the room
+         for two hours and has nothing else in it. Height-led and capped on
+         width, because these marks run from square to 6:1. */
+      .set .mk {
+        position: absolute;
+        left: 9px;
+        bottom: 10px;
+        z-index: 2;
+        height: 30px;
+        max-width: calc(100% - 20px);
+        object-fit: contain;
+        object-position: left bottom;
+        opacity: 0.92;
+      }
+
+      /* The morning as one line, for the feed card. Same three facts the
+         rail's rows carry, wrapped instead of aligned. */
+      .rail-line {
+        margin-top: 7px;
+        font-size: 0;
+      }
+      .rail-line .one {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 7px;
+        margin: 4px 18px 0 0;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        text-transform: uppercase;
+      }
+      .rail-line .one i {
+        width: 6px;
+        height: 6px;
+        background: var(--c);
+        transform: translateY(-1px);
+      }
+      .rail-line .one b {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-weight: 400;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        color: var(--c);
+      }
+      .rail-line .one u {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        text-decoration: none;
+        font-size: 11px;
+        color: #8b8b8b;
+      }
+
+      /* A block that began before the grid opens. ACL has no equivalent —
+         their stages all start inside the frame — but a library that opened
+         at nine and is still going at noon is not a set that starts at noon,
+         and a block drawn flush to the top says the wrong thing. */
+      .set.early {
+        border-top: 2px dashed color-mix(in srgb, var(--c) 55%, #111);
+      }
+
+      /* The all-week strip, in the place ACL puts Austin Kiddie Limits: a
+         separate band under the grid for the thing that is not on the clock.
+         Give-a-LOT takes donations at the library every day of the week, so
+         it belongs to all five columns and to none of them. */
+      .week-strip {
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .week-strip .lab {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: #6f6f6f;
+        white-space: nowrap;
+      }
+      .week-strip .items {
+        display: flex;
+        gap: 8px;
+        flex: 1;
+      }
+      .week-strip .it {
+        flex: 1;
+        background: color-mix(in srgb, var(--c) 17%, #111);
+        border-left: 3px solid var(--c);
+        padding: 9px 10px 10px;
+      }
+      .week-strip .it .t {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 17px;
+        text-transform: uppercase;
+      }
+      .week-strip .it .w {
+        margin-top: 2px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.62);
+      }
+
+      /* No `margin-top: auto`.
+         An auto margin in a column flex container distributes *negative* free
+         space too, so the first build — where the content ran 46px past the
+         1920 — did not overflow the foot off the bottom, it hauled the whole
+         block upwards and printed the legend above the lockup. The layout is
+         measured to fit; a spring that only acts when it does not is a spring
+         that hides the one thing worth knowing. */
+      .foot {
+        padding-top: 16px;
+      }
+      /* The legend does the job ACL's "= American Sign Language interpreted
+         set" line does: the one key the grid cannot state inside itself. */
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 20px;
+      }
+      .legend .c {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #b4b4b4;
+      }
+      .legend .c i {
+        width: 9px;
+        height: 9px;
+        background: var(--c);
+        display: block;
+      }
+      .note {
+        margin-top: 11px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #6f6f6f;
+      }
+    </style>
+  </head>
+  <body>
+    <img class="bolt" src="bolt.svg" alt="" />
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <div class="head">
+        <div class="eyebrow">{{eyebrow}}</div>
+        <h1>{{headline}}</h1>
+        <div class="sub">{{subtitle}}</div>
+      </div>
+
+      <!--if:railRows-->
+      <div class="rail">
+        <div class="rail-label">{{railLabel}}</div>
+        {{railRows}}
+      </div>
+      <!--/if:railRows-->
+
+      <div class="grid">
+        <div class="clock">{{hours}}</div>
+        <div class="lanes">{{lanes}}</div>
+      </div>
+
+      <!--if:weekItems-->
+      <div class="week-strip">
+        <div class="lab">{{weekLabel}}</div>
+        <div class="items">{{weekItems}}</div>
+      </div>
+      <!--/if:weekItems-->
+
+      <div class="foot">
+        <div class="legend">{{legend}}</div>
+        <div class="note">{{note}}</div>
+      </div>
+    </div>
+  </body>
+</html>

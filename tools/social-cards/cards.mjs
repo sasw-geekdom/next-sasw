@@ -275,6 +275,22 @@ export const EVENTS = {
    * template's sense (the card stages DEVSA's logo directly, the way it does
    * the house lockup) and no logo strip, because the strip *is* the bus.
    */
+  /**
+   * The week itself, for the cards that are about a day rather than a talk.
+   * No mark and no logo strip: the house lockup at the top is the only mark
+   * a schedule poster has any business carrying.
+   */
+  week: {
+    template: "day-lineup.html",
+    // Taller than the 1080x1350 every other card is. A day of this week is
+    // five rooms and sixteen sessions, and at feed height the axis gives a
+    // 20-minute talk 32px — less than two lines of the type it is set in.
+    // 1080x1920 buys 52px, which is the block this grid is drawn around: two
+    // lines of the title plus the hour it runs.
+    size: { width: 1080, height: 1920 },
+    logos: [],
+  },
+
   devsa: {
     template: "devsa-partners.html",
     facts: ["Sept 28 – Oct 2", "Downtown San Antonio"],
@@ -562,8 +578,283 @@ const MODEL_POSTER = {
   ],
 };
 
+/**
+ * Thursday, as a festival lineup.
+ *
+ * Drawn from the day the site draws: `dayCalendar("2026-10-01")` plus the
+ * talks `allTalks()` hangs off each activation, which together are what
+ * /schedule/day/2026-10-01 renders. Restated here rather than read, like
+ * every other fact on every other card — this is a .mjs tool and the schedule
+ * is TypeScript behind a Next build. When a session moves, it moves here too.
+ *
+ * 300 Main is not a column. Its only Thursday booking is the brunch, which
+ * finishes half an hour before the axis opens, so a column for it would be an
+ * empty band captioned with a room that had already closed; the brunch is on
+ * the rail with its room named. The other five rooms all have something
+ * inside the window.
+ *
+ * Titles are shortened, which is the one liberty this format takes with the
+ * schedule. A lineup block is 168px wide and ACL fills it with a name — the
+ * week's equivalent is a talk's subject, not its full registered title, and
+ * "Reinventing Security Operations, Intelligence, and GRC for the AI Era" set
+ * at a size that fits would be unreadable at the size anybody sees this.
+ * Every one still says the thing the talk is about.
+ */
+const THURSDAY = {
+  // Noon to eight. The day runs 7:30 to 8, but three of its four morning
+  // hours hold one brunch between them — see `rail`.
+  axis: { from: "12:00", to: "20:00" },
+  gridHeight: 1250,
+  railLabel: "// Before noon",
+  rail: [
+    {
+      title: "The Creative Futures Brunch",
+      room: "300 Main",
+      from: "7:30",
+      to: "11:30",
+      circuit: "AI & Applied Innovation",
+    },
+    {
+      title: "The Founder\u2019s Guide to AI",
+      room: "TPR",
+      from: "11:00",
+      to: "11:30",
+      circuit: "Tech & Builders",
+    },
+    {
+      title: "Don\u2019t Be the Next Tea",
+      room: "TPR",
+      from: "11:40",
+      to: "12:00",
+      circuit: "Founder",
+    },
+  ],
+  rooms: [
+    {
+      short: "TPR",
+      note: "Texas Public Radio",
+      sets: [
+        {
+          title: "A Year of AI Coaching",
+          from: "12:05",
+          to: "12:25",
+          circuit: "AI & Applied Innovation",
+        },
+        {
+          title: "Securing Things vs. Securing People",
+          from: "12:30",
+          to: "12:50",
+          circuit: "Founder",
+        },
+        {
+          title: "Security Ops for the AI Era",
+          from: "13:00",
+          to: "13:20",
+          circuit: "AI & Applied Innovation",
+        },
+        {
+          title: "The New 80/20 of Coding With AI",
+          from: "13:30",
+          to: "13:50",
+          circuit: "AI & Applied Innovation",
+        },
+        {
+          title: "Texas Venture Fest",
+          from: "15:00",
+          to: "18:00",
+          circuit: "Founder",
+        },
+      ],
+    },
+    {
+      short: "The Rand",
+      note: "3rd Floor",
+      sets: [
+        {
+          title: "Maybe That\u2019s Not the Problem",
+          who: "Rachel Davis",
+          // The hook, because without it this is the one block on the grid
+          // whose title says nothing about what happens in the room. It is an
+          // hour of taking a problem apart with LEGO, and that is the reason
+          // somebody picks it over the four other rooms at noon.
+          hook: "Look sideways. Pull it apart. Rebuild what you know \u2014 with LEGO\u00ae.",
+          from: "12:00",
+          to: "13:00",
+          circuit: "Tech & Builders",
+        },
+        {
+          title: "Datanauts",
+          from: "13:00",
+          to: "14:00",
+          circuit: "Tech & Builders",
+          // An activation's hour is really its talks, and a block that names
+          // only the group cannot say so. Times and titles from the sessions
+          // hung off `activation: "datanauts"` in the CMS.
+          bill: [
+            {
+              at: "1:00",
+              title: "Move Fast, Break Data",
+              who: "Ednalyn \u201cDd\u201d De Dios",
+            },
+            {
+              at: "1:30",
+              title: "Scaling Executive Vision",
+              who: "Fouzan Aslam",
+            },
+          ],
+        },
+        {
+          title: "AWS User Group",
+          from: "14:00",
+          to: "15:00",
+          circuit: "Tech & Builders",
+          bill: [
+            {
+              at: "2:00",
+              title: "The Autonomous Hacker",
+              who: "Daniel Morales Yusty",
+            },
+          ],
+        },
+        {
+          title: "Linux San Antonio",
+          from: "15:00",
+          to: "17:00",
+          circuit: "Tech & Builders",
+          // Two hours and no bill — the group runs the room rather than
+          // programming it — so the block has room for their mark, and it is
+          // the one block on the grid that gains from carrying a logo rather
+          // than another line of type.
+          logo: "public/activations/linux-satx.webp",
+        },
+        {
+          title: "Open Circuit",
+          from: "17:00",
+          to: "18:00",
+          circuit: "Social",
+        },
+      ],
+    },
+    {
+      short: "Central Library",
+      note: "Launch SA",
+      sets: [
+        {
+          title: "VentureLab IGNITE",
+          from: "9:00",
+          to: "16:00",
+          circuit: "Founder",
+        },
+      ],
+    },
+    {
+      short: "Centre Club",
+      note: "9th Floor",
+      sets: [
+        {
+          title: "Speed Networking",
+          from: "12:00",
+          to: "14:00",
+          circuit: "Capital",
+        },
+      ],
+    },
+    {
+      short: "Legacy Park",
+      note: "Outdoors",
+      sets: [
+        {
+          title: "Startup Bash",
+          from: "18:00",
+          to: "20:00",
+          circuit: "Social",
+          // The field the Bash card is built on, inside its own block. The
+          // party is the one thing on this grid that is not a room with
+          // chairs in it, and on a poster of eighteen rectangles that has to
+          // be visible before it is read.
+          bolts: true,
+        },
+      ],
+    },
+  ],
+  weekLabel: "// All week",
+  allWeek: [
+    {
+      title: "Give-a-LOT",
+      note: "Central Library \u00b7 Computer donation drive \u00b7 Sept 28 \u2013 Oct 2",
+      circuit: "Tech & Builders",
+    },
+  ],
+};
+
+/** What both sizes of the Thursday poster say above the grid. */
+const THURSDAY_HEAD = {
+  event: "week",
+  eyebrow: "Day Four",
+  headline: "Thursday, October 1",
+  subtitle: "Six rooms \u00b7 Sixteen sessions \u00b7 Downtown San Antonio",
+  note: "All times subject to change \u00b7 sastw.com/schedule",
+};
+
 export const CARDS = [
+  {
+    ...THURSDAY_HEAD,
+    id: "lineup-thursday",
+    lineup: THURSDAY,
+  },
+
+  /**
+   * The same day at feed height.
+   *
+   * 1080x1350 is where these get posted; the tall one is what you print, put
+   * in a story, or hand somebody at a badge desk. Same eight hours in 350
+   * fewer pixels, so a 20-minute talk gets 38 of them instead of 52, and
+   * `compact` spends the difference where it shows: the morning becomes one
+   * wrapped line instead of three aligned rows, every size drops about a
+   * quarter, and a block under 46px stops printing its own hour — its place
+   * against the ruled hours already says when it is, and a title clipped in
+   * half says nothing at all.
+   *
+   * Not a crop of the tall one, and not a second layout either: one set of
+   * sessions, one stylesheet, a dozen numbers that differ.
+   */
+  {
+    ...THURSDAY_HEAD,
+    id: "lineup-thursday-feed",
+    size: { width: 1080, height: 1350 },
+    // 790, not the tall card's 1250, and solved rather than guessed: the
+    // chrome above and below the grid measures 554px at compact sizes, and
+    // 1350 minus that is what the axis gets. A shorter lane heading (44
+    // against 58) pays for 14 of it.
+    lineup: {
+      ...THURSDAY,
+      gridHeight: 790,
+      headHeight: 44,
+      compact: true,
+    },
+  },
+
   // ─── PySanAntonio ─────────────────────────────────────────────────────────
+  {
+    id: "pysanantonio-speaker-jay-jahns",
+    event: "pysanantonio",
+    speaker: "jay-jahns",
+    /**
+     * The loop's three steps, with the third one replaced.
+     *
+     * Red-Green-Refactor is the phrase every TDD practitioner in that room
+     * has in their head, and the talk's own opening is that AI "can
+     * hallucinate a flawless passing test for a feature that doesn't
+     * actually work". Breaking the cycle on its last word is the abstract's
+     * argument in three words. Set whole it draws 943px against the 936
+     * measure, so it breaks after the comma rather than stepping down a size.
+     */
+    headline: "Red, Green,<br />Hallucinate",
+    // The registered title, hyphens and all — the card leads with a hook, so
+    // the line under it is what the schedule calls the talk.
+    subtitle: "Python, Test-Driven-Development, and AI",
+    portrait: { height: 903, left: 439 },
+  },
   {
     id: "pysanantonio-speaker-edwin-jung",
     event: "pysanantonio",
