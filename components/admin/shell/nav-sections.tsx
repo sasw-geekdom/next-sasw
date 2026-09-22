@@ -4,12 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  PRIMARY_NAV,
-  CONTENT_NAV,
-  activeHref,
-  type NavItem,
-} from "@/lib/admin/nav";
+import { navFor, activeHref, type NavItem } from "@/lib/admin/nav";
 import { Badge } from "@/components/ui/badge";
 import type { AdminUser } from "@/lib/auth/roles";
 
@@ -32,19 +27,22 @@ export function Brand({ collapsed = false }: { collapsed?: boolean }) {
 }
 
 export function NavSections({
+  role,
   collapsed = false,
   onNavigate,
 }: {
+  role: AdminUser["role"];
   collapsed?: boolean;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
   const active = activeHref(pathname);
+  const { primary, content } = navFor(role);
 
   return (
     <nav className="flex flex-1 flex-col overflow-y-auto px-2 py-3">
       <ul className="flex flex-col gap-0.5">
-        {PRIMARY_NAV.map((item) => (
+        {primary.map((item) => (
           <NavLink
             key={item.href}
             item={item}
@@ -55,14 +53,17 @@ export function NavSections({
         ))}
       </ul>
 
-      <div className="mt-5">
+      {/* Guarded on the group, not just its items: a door account has no
+          content pages, and a heading with nothing under it reads as a broken
+          sidebar rather than a short one. */}
+      <div className={cn("mt-5", content.length === 0 && "hidden")}>
         {!collapsed && (
           <div className="px-3 pb-1.5 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
             Content Management
           </div>
         )}
         <ul className="flex flex-col gap-0.5">
-          {CONTENT_NAV.map((item) => (
+          {content.map((item) => (
             <NavLink
               key={item.href}
               item={item}

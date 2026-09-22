@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, DOOR_AND_STAFF } from "@/lib/auth/session";
 import { listRegistrations, listSpeakerNames } from "@/lib/admin/queries";
 import { CheckinPortal } from "@/components/admin/checkin-portal";
 import { PageHeader } from "@/components/admin/page-header";
@@ -13,7 +13,8 @@ export default async function CheckinPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  await requireAdmin();
+  // The one screen a door account reaches — see `Role` in lib/auth/roles.
+  await requireAdmin(DOOR_AND_STAFF);
   const [rows, speakers, { q }] = await Promise.all([
     listRegistrations(),
     listSpeakerNames(),

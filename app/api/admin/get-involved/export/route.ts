@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
+import { isStaff } from "@/lib/auth/roles";
 import { listGetInvolved } from "@/lib/admin/queries";
 import {
   applyGetInvolvedFilters,
@@ -14,6 +15,12 @@ export async function GET(req: NextRequest) {
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+  // A door account is signed in and still has no business here: this file is
+  // the attendee list. The page-level guards do not cover route handlers, so
+  // the check is explicit — see `isStaff` in lib/auth/roles.
+  if (!isStaff(user)) {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
 
   // Export the view, not the table. The link carries whatever the table put in

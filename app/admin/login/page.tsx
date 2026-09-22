@@ -27,7 +27,8 @@ export default function LoginPage() {
           Plug in.
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          Geekdom staff only. Sign in with your workspace account.
+          Geekdom staff and approved desk volunteers. Sign in with the account
+          you were invited on.
         </p>
 
         <div className="mt-8">

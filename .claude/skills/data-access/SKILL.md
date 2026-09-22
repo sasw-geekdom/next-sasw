@@ -30,8 +30,11 @@ stop — you want a server component or a server action instead.
    session cookie.
 3. Every admin route calls `requireAdmin()` and re-verifies server-side.
 
-Access is gated on `ALLOWED_WORKSPACE_DOMAIN` (`@geekdom.com`) plus
-`SUPER_ADMIN_EMAILS`. Two tiers: staff and superadmin. [proxy.ts](proxy.ts)
+Access is gated on `ALLOWED_WORKSPACE_DOMAIN` (`@geekdom.com`), plus
+`SUPER_ADMIN_EMAILS` and `DOOR_EMAILS`. Three tiers: staff, superadmin, and
+`door` — a named allowlist that reaches the check-in screen and nothing else.
+`requireAdmin()` defaults to staff+superadmin, so a page added without thinking
+about roles is closed to the door accounts rather than open to them. [proxy.ts](proxy.ts)
 redirects unauthenticated humans away from `/admin/*` — it is UX, **not** the
 security boundary. The boundary is `requireAdmin()` in the route or action.
 

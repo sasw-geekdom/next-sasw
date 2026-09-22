@@ -33,7 +33,7 @@ export function Sidebar({
         <Brand collapsed={collapsed} />
       </div>
 
-      <NavSections collapsed={collapsed} />
+      <NavSections role={user.role} collapsed={collapsed} />
 
       <div className="border-t border-border p-2">
         <AccountBadge user={user} collapsed={collapsed} />

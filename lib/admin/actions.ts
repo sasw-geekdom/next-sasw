@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/admin";
 import { COLLECTIONS } from "@/lib/firebase/collections";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, DOOR_AND_STAFF } from "@/lib/auth/session";
 import { EVENT_DAY_KEYS } from "@/lib/event";
 import { deleteImage } from "@/lib/admin/blob";
 import {
@@ -183,8 +183,16 @@ export async function promoteToSpeaker(
  * second property is what lets the offline queue retry a check-in it is not
  * sure landed.
  */
+/**
+ * Check somebody in. Reachable by the door role — see lib/auth/roles.
+ *
+ * These three are the whole job of a badge desk: find a name, tick it, undo
+ * the tick when the wrong row is tapped, and add the person who never
+ * registered. Everything else in this file stays on the bare `requireAdmin()`
+ * and is therefore staff-only.
+ */
 export async function checkIn(id: string, day: string): Promise<ActionResult> {
-  const user = await requireAdmin();
+  const user = await requireAdmin(DOOR_AND_STAFF);
   if (!id) return { ok: false, error: "Missing registration." };
   if (!EVENT_DAY_KEYS.has(day)) {
     return { ok: false, error: "That date is not part of the week." };
@@ -350,7 +358,7 @@ export async function registerAtDoor(input: {
    */
   clientId?: string;
 }): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
-  const user = await requireAdmin();
+  const user = await requireAdmin(DOOR_AND_STAFF);
 
   const name = input.name.trim();
   if (!name) return { ok: false, error: "A name is required." };
@@ -427,7 +435,7 @@ export async function undoCheckIn(
   id: string,
   day: string,
 ): Promise<ActionResult> {
-  await requireAdmin();
+  await requireAdmin(DOOR_AND_STAFF);
   if (!id) return { ok: false, error: "Missing registration." };
   if (!EVENT_DAY_KEYS.has(day)) {
     return { ok: false, error: "That date is not part of the week." };

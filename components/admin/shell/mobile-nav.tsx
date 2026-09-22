@@ -71,7 +71,7 @@ export function MobileNav({
               </button>
             </div>
 
-            <NavSections onNavigate={onClose} />
+            <NavSections role={user.role} onNavigate={onClose} />
 
             <div className="border-t border-border p-2">
               <AccountBadge user={user} />

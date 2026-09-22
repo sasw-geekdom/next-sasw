@@ -83,7 +83,11 @@ export function AdminShell({
             <div className="mx-auto w-full max-w-6xl">{children}</div>
           </main>
         </div>
-        <CommandMenu open={cmdOpen} onClose={() => setCmdOpen(false)} />
+        <CommandMenu
+          role={user.role}
+          open={cmdOpen}
+          onClose={() => setCmdOpen(false)}
+        />
       </div>
     </MotionConfig>
   );

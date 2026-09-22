@@ -76,10 +76,11 @@ RESEND_API_KEY=
 RESEND_FROM=San Antonio Startup + Tech Week <hello@send.sasw.co>
 RESEND_REPLY_TO=
 
-# Access control
-ALLOWED_WORKSPACE_DOMAIN=geekdom.com
+# Access control — three roles, resolved in lib/auth/roles.ts
+ALLOWED_WORKSPACE_DOMAIN=geekdom.com          # any account here is staff
 NEXT_PUBLIC_ALLOWED_WORKSPACE_DOMAIN=geekdom.com
-SUPER_ADMIN_EMAILS=jesseovr@gmail.com
+SUPER_ADMIN_EMAILS=jesseovr@gmail.com         # full access, any domain
+DOOR_EMAILS=                                  # check-in screen only, comma-separated
 
 # Vercel Blob (images)
 BLOB_READ_WRITE_TOKEN=

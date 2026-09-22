@@ -62,10 +62,32 @@ export async function getSessionUser(): Promise<AdminUser | null> {
   }
 }
 
-/** Guard for server components / route handlers. Redirects to login if absent. */
-export async function requireAdmin(): Promise<AdminUser> {
+/**
+ * Who a page or action is for, where it is not everybody.
+ *
+ * Check-in is the only surface the `door` role reaches, so it names itself
+ * here and every other caller keeps the bare `requireAdmin()` it already had.
+ * That is the whole point of the default: a page added next year is staff-only
+ * without anybody remembering to make it so, and the failure mode of
+ * forgetting is a locked door rather than an open one.
+ */
+export const DOOR_AND_STAFF: Role[] = ["superadmin", "staff", "door"];
+
+/**
+ * Guard for server components / route handlers. Redirects to login if absent.
+ *
+ * `allow` defaults to the two full-access roles. A `door` account that reaches
+ * anything else is sent to the one screen it has rather than to the login page
+ * — it is signed in correctly, it is just somewhere it cannot be.
+ */
+export async function requireAdmin(
+  allow: Role[] = ["superadmin", "staff"],
+): Promise<AdminUser> {
   const user = await getSessionUser();
   if (!user) redirect("/admin/login");
+  if (!allow.includes(user.role)) {
+    redirect(user.role === "door" ? "/admin/checkin" : "/admin");
+  }
   return user;
 }
 

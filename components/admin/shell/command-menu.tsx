@@ -4,7 +4,8 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Search } from "lucide-react";
-import { ALL_NAV } from "@/lib/admin/nav";
+import { navFor } from "@/lib/admin/nav";
+import type { AdminUser } from "@/lib/auth/roles";
 import { cn } from "@/lib/utils";
 
 interface Command {
@@ -16,9 +17,11 @@ interface Command {
 }
 
 export function CommandMenu({
+  role,
   open,
   onClose,
 }: {
+  role: AdminUser["role"];
   open: boolean;
   onClose: () => void;
 }) {
@@ -38,18 +41,21 @@ export function CommandMenu({
   const commands = React.useMemo<Command[]>(() => {
     const q = query.trim().toLowerCase();
 
-    const nav: Command[] = ALL_NAV.filter((n) =>
-      n.label.toLowerCase().includes(q),
-    ).map((n) => {
-      const Icon = n.icon;
-      return {
-        key: n.href,
-        label: n.label,
-        hint: n.href.startsWith("/admin/content/") ? "Content" : "Go to",
-        icon: <Icon className="h-4 w-4" strokeWidth={1.5} />,
-        run: () => go(n.href),
-      };
-    });
+    // The same list the sidebar draws, for the same reason: a palette that
+    // offers a door account the CMS is offering it a redirect.
+    const { primary, content } = navFor(role);
+    const nav: Command[] = [...primary, ...content]
+      .filter((n) => n.label.toLowerCase().includes(q))
+      .map((n) => {
+        const Icon = n.icon;
+        return {
+          key: n.href,
+          label: n.label,
+          hint: n.href.startsWith("/admin/content/") ? "Content" : "Go to",
+          icon: <Icon className="h-4 w-4" strokeWidth={1.5} />,
+          run: () => go(n.href),
+        };
+      });
 
     const search: Command[] = q
       ? [
@@ -64,7 +70,7 @@ export function CommandMenu({
       : [];
 
     return [...nav, ...search];
-  }, [query, go]);
+  }, [query, go, role]);
 
   React.useEffect(() => setActive(0), [query, open]);
 

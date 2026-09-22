@@ -15,6 +15,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import type { Role } from "@/lib/auth/roles";
+
 export interface NavItem {
   href: string;
   label: string;
@@ -64,4 +66,23 @@ export function breadcrumb(pathname: string): NavItem[] {
   const active = ALL_NAV.find((n) => n.href === activeHref(pathname));
   if (active) trail.push(active);
   return trail;
+}
+
+/**
+ * The nav a role actually has.
+ *
+ * A door account can open one screen, so it is shown one link and no Content
+ * group. This is cosmetic — `requireAdmin` is what enforces it, and a hidden
+ * link typed into the address bar still lands on the check-in page — but a
+ * sidebar full of doors that bounce you is a worse tool than a sidebar with
+ * one door that opens.
+ */
+export function navFor(role: Role): { primary: NavItem[]; content: NavItem[] } {
+  if (role === "door") {
+    return {
+      primary: PRIMARY_NAV.filter((n) => n.href === "/admin/checkin"),
+      content: [],
+    };
+  }
+  return { primary: PRIMARY_NAV, content: CONTENT_NAV };
 }
