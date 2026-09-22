@@ -16,6 +16,7 @@ import {
 import { ButtonLink } from "@/components/ui/button";
 import { eventLocation } from "@/lib/calendar";
 import { ARROW_MOTION } from "@/lib/motion";
+import { AccessContinuous } from "@/components/site/access-continuous";
 import { ActivationDetail } from "@/components/site/activation-detail";
 import {
   ActivationSessions,
@@ -1219,6 +1220,12 @@ function ActivationPage({
       ) : isHeroOnly ? null : (
         <ActivationDetail detail={session.detail} speakers={speakers} />
       )}
+
+      {/* Under the running order, not in the band above it.
+          Three things with no start time — see `ACCESS_CONTINUOUS`. They are
+          the answer to "and if I can't make any of those?", which is a
+          question a reader only has once they have read the order. */}
+      {isAccessGranted && <AccessContinuous />}
 
       {/* Only while the slot is open, and only while nothing real has landed —
           a promise of times is worth printing until there are times and

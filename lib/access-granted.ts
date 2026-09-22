@@ -78,47 +78,62 @@ export const ACCESS_GRANTED = {
   lockHeight: 1400,
 } as const;
 
-export interface AccessTrack {
-  /** Terminal-style label, rendered in mono caps. */
-  label: string;
-  note: string;
-  items: readonly string[];
+export interface AccessContinuousItem {
+  name: string;
+  /**
+   * The organisation running it, by name.
+   *
+   * Matched against `ACCESS_ORGANIZERS` for the link rather than carrying a
+   * href of its own, so the one place this project holds an org's address
+   * stays the one place. An item with no match renders its name as plain
+   * text, which is the right answer for a table nobody has claimed yet.
+   */
+  by?: string;
+  note?: string;
 }
 
 /**
- * Two columns, as the spec lays them out: what runs continuously for five
- * hours, and what runs to a clock.
+ * What runs for the whole five hours, as opposed to what runs to a clock.
  *
- * **Not currently rendered anywhere.** Pulled off the slug page because the
- * second column names sessions an organiser will enter in the CMS, and the
- * page would then list them twice in two formats — once as static copy here,
- * once through ActivationSessions with a time and a speaker attached.
+ * There were two columns here and the second is gone: it named sessions an
+ * organiser enters in the CMS, and the page listed them twice — once as static
+ * copy, once through `ActivationSessions` with a time and a speaker attached.
+ * This column has the opposite problem and is why the const survived being
+ * pulled off the page: a lockpicking village that runs for five hours is not a
+ * talk and does not want a talk's fields. Entered in the CMS it would sort
+ * into the running order between two twenty-minute talks, above four things it
+ * is not parallel to, and mint a talk page with an empty speaker slot.
  *
- * Kept rather than deleted because the first column is still true and still
- * has no better home: a lockpicking village that runs for five hours isn't a
- * talk and doesn't want a talk's fields. If this comes back, it should be that
- * column only.
+ * So it lives here and renders as its own strip under the order.
  */
-export const ACCESS_TRACKS: readonly AccessTrack[] = [
-  {
-    label: "Continuous · 1:00 – 6:00",
-    note: "Walk in whenever. Nothing here needs a seat booked.",
-    items: [
-      "Lockpicking village",
-      "Cyber career & resume corner",
-      "Community org tables",
-    ],
-  },
-  {
-    label: "Workshops & hacker track",
-    note: "Zero-pitch technical sessions on real exploits, OSINT and vulnerabilities.",
-    items: [
-      "Threat-modeling workshop for founders",
-      "Three technical lightning talks",
-      "CFP first-time speaker slot",
-    ],
-  },
-] as const;
+export const ACCESS_CONTINUOUS: {
+  label: string;
+  headline: string;
+  lede: string;
+  items: readonly AccessContinuousItem[];
+} = {
+  label: "Continuous \u00b7 1:00 \u2013 6:00",
+  headline: "Walk in whenever.",
+  // Count-free on purpose: it read "three things run the whole afternoon"
+  // until two of the three turned out never to have been confirmed, and a
+  // sentence that has to be rewritten every time the list changes is a
+  // sentence that will one day disagree with the list under it.
+  lede: "Nothing here runs to a clock or needs a seat booked \u2014 the running order above is the part that does.",
+  items: [
+    {
+      name: "Lockpicking village",
+      by: "Alamo City Locksport",
+      // Theirs, condensed. The TOOOL affiliation is the part that says this
+      // is a chapter of something rather than a table with padlocks on it,
+      // and the welcome is the fact most likely to decide whether somebody
+      // brings their kid.
+      note: "A TOOOL affiliate, picking locks in the open. Understanding how a lock fails is how you learn to protect yourself and the people around you \u2014 all ages welcome, no experience needed.",
+    },
+    // A cyber career & resume corner and community org tables were on the
+    // original two-column spec and were never confirmed, so they are not
+    // here. This list is what an organiser has said is happening.
+  ],
+};
 
 /**
  * The orgs running it, in the order asked for.

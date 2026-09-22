@@ -326,17 +326,15 @@ export function AccessGrantedBand({
           </div>
         </div>
 
-        {/* The two-column programme that used to sit here — the continuous
-            track and the workshops track — is out for now. It named specific
-            sessions ("Threat-modeling workshop for founders") that organisers
-            will enter in the CMS, and the page would then have listed them
-            twice in two different formats. ActivationSessions renders the real
-            thing on the slug page instead.
+        {/* The two-column programme that used to sit here is out, and stayed
+            out. Its workshops column named specific sessions that organisers
+            enter in the CMS, and the page would have listed them twice in two
+            formats; ActivationSessions renders the real thing below.
 
-            ACCESS_TRACKS is still in lib/access-granted.ts. Whatever comes
-            back here should be the shape of the afternoon — the lockpicking
-            village, the resume corner — and not anything that is a talk with
-            a speaker, because that now has somewhere better to live. */}
+            Its other column — the continuous one — came back as
+            ACCESS_CONTINUOUS, under the running order rather than up here in
+            the band. It belongs after the order, not before it: it is the
+            answer to "and what if I can't make any of those?" */}
       </div>
     </section>
   );

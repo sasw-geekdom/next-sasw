@@ -15,10 +15,10 @@ import { cn } from "@/lib/utils";
 // it somewhere to land, and gives an activation a programme that can be edited
 // without a deploy.
 //
-// Deliberately not the same thing as Access Granted's ACCESS_TRACKS. That
+// Deliberately not the same thing as Access Granted's ACCESS_CONTINUOUS. That
 // describes the shape of an afternoon — a lockpicking village, a resume corner
-// — which is not a talk with a speaker and does not want a talk's fields.
-// These sit alongside it.
+// — which is not a talk with a speaker and does not want a talk's fields. It
+// renders as its own strip under this one.
 
 /**
  * Where an abstract stops being a line in a running order.
