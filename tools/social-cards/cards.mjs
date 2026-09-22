@@ -3032,6 +3032,110 @@ export const CARDS = [
     ],
   },
 
+  /**
+   * Corey Hartman, who is not in the CMS yet.
+   *
+   * Every other speaker card resolves its face and its name from Firestore by
+   * slug, which is the whole reason `--env-file` is mandatory. He has no
+   * record, so this card takes the `art` path the event cards use — a picture
+   * staged from the repo — and states the name itself. When he is added, this
+   * should become an ordinary `speaker: "corey-hartman"` card and the file
+   * below should go with the record.
+   *
+   * The picture is his own avatar rather than a headshot: a drawn frog in a
+   * lab coat with his name on the badge. Cropped to its ink on the way in
+   * (the supplied file had 141px of empty alpha under the figure, and this
+   * template bottom-anchors, so uncropped it would have floated).
+   *
+   * No role and no company, because there is nowhere to get them from. The
+   * card says his name and what he is presenting, which is what it can say
+   * truthfully.
+   */
+  {
+    id: "access-granted-speaker-corey-hartman",
+    event: "access-granted",
+    art: "public/access-granted/corey-hartman.png",
+    name: ["Corey", "Hartman"],
+    // The title's own colon. "Glyph" is the thing being announced and the
+    // rest is what it does — the same split `samad-ahmed` makes, where the
+    // headline is the idea and the subtitle is the project.
+    headline: "Glyph",
+    // One word, so it is set to fill rather than to the set's 118: at 176
+    // "GLYPH" draws 429px, which is where a single word stops reading as a
+    // headline that lost its second line.
+    headlineSize: 176,
+    subtitle: "A binary analysis tool powered by machine learning.",
+    // Wider than a person: his cutout is 1.03:1 where a headshot here runs
+    // about 0.46:1, so the same height would put him 300px off the card.
+    portrait: { height: 700, left: 430 },
+  },
+
+  {
+    id: "access-granted-speaker-keeban-villarreal",
+    event: "access-granted",
+    speaker: "keeban-villarreal",
+    // The title, whole. "Q-Day" is the hook and it is already in it, so
+    // there is nothing for a coined headline to add — `dante-moreno` gets one
+    // because "A Look at the Gayfemboy Malware" buries its own.
+    //
+    // 118, this template's size: "HOW TO PREPARE" is 14 characters, which
+    // Oswald draws at 804px of the 936 the frame allows.
+    headline: "How to Prepare<br />for Q-Day",
+    headlineSize: 118,
+    // The abstract, shortened to the measure. Its own sentence runs 121
+    // characters and sets to five lines in the 520px rule; this keeps both
+    // halves — where you are going and why the date matters.
+    subtitle:
+      "A practical roadmap to post-quantum cryptography, before today\u2019s encryption is obsolete.",
+    portrait: { height: 918, left: 442 },
+  },
+
+  {
+    id: "access-granted-keynote-richard-davey",
+    event: "access-granted",
+    speaker: "richard-davey",
+    // The title landed, so it takes the headline and the marker drops to the
+    // subtitle — `pysanantonio-speaker-mason-egger` does the same for the
+    // same reason, and the phrasing is its.
+    headline: "Trust Each Other,<br />Not Technology",
+    headlineSize: 104,
+    subtitle: "The opening keynote",
+    // His CMS record has the title and no company. The bio there names it —
+    // "Currently serving as Director of Security at HackerOne" — and a
+    // keynote card with a role and no organisation under it reads like a
+    // field nobody filled in. Set here rather than in the CMS, so his
+    // speaker page and this card disagree until somebody fixes the record;
+    // same trade `mason-egger` makes, same note in the README.
+    org: "HackerOne",
+    portrait: { height: 918, left: 442 },
+  },
+
+  {
+    id: "access-granted-speaker-jacob-wellnitz",
+    event: "access-granted",
+    speaker: "jacob-wellnitz",
+    /**
+     * The whole title, broken at its own full stop.
+     *
+     * That stop is the talk's shape — an incident that is over and an
+     * investigation that has not started — so the line break lands on it and
+     * the question keeps the second line to itself.
+     *
+     * 108, not this template's 118: "THE HACKERS LEFT." is 17 characters,
+     * which Oswald draws at 911px of the 936 the frame allows. At 118 it runs
+     * to 977 and wraps on its own, which puts "LEFT." on a line of its own
+     * and the question on a third.
+     */
+    headline: "The Hackers Left.<br />Now What?",
+    headlineSize: 108,
+    // The abstract's own opening, which is three short sentences where the
+    // title is two — it sets the scene the title's full stop implies rather
+    // than restating it.
+    subtitle:
+      "The attackers are gone. Systems are down. Everyone wants to know what happened.",
+    portrait: { height: 918, left: 442 },
+  },
+
   {
     id: "access-granted-speaker-dante-moreno",
     event: "access-granted",
