@@ -376,11 +376,14 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
     }
   }
 
-  // A stored slug outlives a retitled session. There is no slug field in the
-  // session drawer yet, so without this an admin fixing a typo in a title
-  // would silently move the page's URL and break every link already shared —
-  // the failure the speakers form avoids by pre-filling its slug field. New
-  // sessions derive from the title; edits keep what they have.
+  // A stored slug outlives a retitled session: without this, an admin fixing a
+  // typo in a title would silently move the page's URL and break every link
+  // already shared. New sessions derive from the title; edits keep what they
+  // have unless the drawer's own Public URL field sends a new one.
+  //
+  // (This note used to say the drawer had no slug field. It has had one for a
+  // while — see `SlugField` in components/admin/cms/session-manager, which
+  // previews the URL as you type and warns that the old one will redirect.)
   const snap = id ? await ref.get() : null;
   const existingSlug = snap?.get("slug");
   const desired =

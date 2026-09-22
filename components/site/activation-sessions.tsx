@@ -150,90 +150,92 @@ export function ActivationSessions({
   }
 
   const list = (
-    <ol className={cn("flex flex-col", aside ? "mt-8 lg:mt-0" : "mt-10 lg:mt-12")}>
-          {sessions.map((s) => (
-            <li
-              key={s.id}
-              className="grid min-w-0 gap-x-8 gap-y-3 border-t border-white/10 py-6 lg:grid-cols-[10rem_1fr]"
-            >
-              {/* self-start from lg: the grid cell stretches to the row, and a
+    <ol
+      className={cn("flex flex-col", aside ? "mt-8 lg:mt-0" : "mt-10 lg:mt-12")}
+    >
+      {sessions.map((s) => (
+        <li
+          key={s.id}
+          className="grid min-w-0 gap-x-8 gap-y-3 border-t border-white/10 py-6 lg:grid-cols-[10rem_1fr]"
+        >
+          {/* self-start from lg: the grid cell stretches to the row, and a
                   centred time floats to the middle of a long description
                   instead of sitting against the title it belongs to. */}
-              <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 lg:self-start lg:pt-1.5">
-                <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                {TIME.format(new Date(s.startsAt))}
-                {s.endsAt ? ` – ${TIME.format(new Date(s.endsAt))}` : ""}
-              </p>
+          <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/55 lg:self-start lg:pt-1.5">
+            <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            {TIME.format(new Date(s.startsAt))}
+            {s.endsAt ? ` – ${TIME.format(new Date(s.endsAt))}` : ""}
+          </p>
 
-              {/* `min-w-0`: a grid item's min-width defaults to `auto`, which
+          {/* `min-w-0`: a grid item's min-width defaults to `auto`, which
                   refuses to shrink below its content's min-content width — so
                   one long unbroken run in a title or an abstract pushed the
                   whole row wider than its track and the page scrolled
                   sideways on a phone. The same note `column-board` carries
                   about `min-height`. */}
-              <div className="min-w-0">
-                {/* The title is a link, and that is what pays for the clamp
+          <div className="min-w-0">
+            {/* The title is a link, and that is what pays for the clamp
                     below it. Every CMS session has a page now — /schedule/talk
                     used to be standalone-only, on the reasoning that an
                     activation page was already a session's home, which held
                     right up until that page stopped printing the whole
                     abstract. See `listTalks`. */}
-                <h3 className="text-pretty text-lg font-medium">
-                  <Link
-                    href={`/schedule/talk/${s.slug}`}
-                    className="group/talk rounded-sm text-white transition-colors duration-200 hover:text-magenta focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-magenta"
-                  >
-                    {s.title}
-                    {/* Inline rather than a flex sibling, so on a title that
+            <h3 className="text-pretty text-lg font-medium">
+              <Link
+                href={`/schedule/talk/${s.slug}`}
+                className="group/talk rounded-sm text-white transition-colors duration-200 hover:text-magenta focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-magenta"
+              >
+                {s.title}
+                {/* Inline rather than a flex sibling, so on a title that
                         wraps it follows the last word instead of pinning to
                         the top-right of a two-line block. */}
+                <ArrowUpRight
+                  className="ml-1.5 inline h-4 w-4 -translate-y-px opacity-45 transition-opacity duration-200 group-hover/talk:opacity-100"
+                  aria-hidden="true"
+                />
+              </Link>
+            </h3>
+
+            {s.description && (
+              <>
+                <p
+                  className={cn(
+                    "mt-2 max-w-2xl text-pretty text-white/60",
+                    s.description.length > DESC_CLAMP && "line-clamp-4",
+                  )}
+                >
+                  {s.description}
+                </p>
+                {/* Only under a clamped one. A reader whose paragraph
+                        ended on a full stop needs no invitation to go and
+                        read it again. */}
+                {s.description.length > DESC_CLAMP && (
+                  <Link
+                    href={`/schedule/talk/${s.slug}`}
+                    className="group/more mt-2 inline-flex items-center gap-1.5 rounded-sm font-mono text-[11px] uppercase tracking-widest text-white/45 transition-colors duration-200 hover:text-magenta focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-magenta"
+                  >
+                    Read the full talk
                     <ArrowUpRight
-                      className="ml-1.5 inline h-4 w-4 -translate-y-px opacity-45 transition-opacity duration-200 group-hover/talk:opacity-100"
+                      className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover/more:-translate-y-0.5 group-hover/more:translate-x-0.5"
                       aria-hidden="true"
                     />
                   </Link>
-                </h3>
-
-                {s.description && (
-                  <>
-                    <p
-                      className={cn(
-                        "mt-2 max-w-2xl text-pretty text-white/60",
-                        s.description.length > DESC_CLAMP && "line-clamp-4",
-                      )}
-                    >
-                      {s.description}
-                    </p>
-                    {/* Only under a clamped one. A reader whose paragraph
-                        ended on a full stop needs no invitation to go and
-                        read it again. */}
-                    {s.description.length > DESC_CLAMP && (
-                      <Link
-                        href={`/schedule/talk/${s.slug}`}
-                        className="group/more mt-2 inline-flex items-center gap-1.5 rounded-sm font-mono text-[11px] uppercase tracking-widest text-white/45 transition-colors duration-200 hover:text-magenta focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-magenta"
-                      >
-                        Read the full talk
-                        <ArrowUpRight
-                          className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover/more:-translate-y-0.5 group-hover/more:translate-x-0.5"
-                          aria-hidden="true"
-                        />
-                      </Link>
-                    )}
-                  </>
                 )}
+              </>
+            )}
 
-                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-                  {s.track && (
-                    <span className="inline-block rounded-full border border-magenta/35 bg-magenta/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-magenta">
-                      {s.track}
-                    </span>
-                  )}
-                </div>
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+              {s.track && (
+                <span className="inline-block rounded-full border border-magenta/35 bg-magenta/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-magenta">
+                  {s.track}
+                </span>
+              )}
+            </div>
 
-                <People participants={s.participants} byId={byId} />
-              </div>
-            </li>
-          ))}
+            <People participants={s.participants} byId={byId} />
+          </div>
+        </li>
+      ))}
     </ol>
   );
 
@@ -365,8 +367,22 @@ export function HeroTalk({
               {/* No abstract. Two of them is the whole card and then some,
                   and this is the one case where the section below still
                   runs — so the ellipsis has somewhere to lead. */}
+              {/* Linked, like every other session title on the site. The
+                  running order learned this when sessions gained pages of
+                  their own and the solo section learned it after that; this
+                  card was the last place a talk could be read and not
+                  opened. */}
               <h2 className="mt-2 text-pretty text-lg font-medium leading-snug text-white">
-                {s.title}
+                <Link
+                  href={`/schedule/talk/${s.slug}`}
+                  className="group/talk rounded-sm transition-colors duration-200 hover:text-magenta focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-magenta"
+                >
+                  {s.title}
+                  <ArrowUpRight
+                    className="ml-1.5 inline h-4 w-4 -translate-y-px opacity-45 transition-opacity duration-200 group-hover/talk:opacity-100"
+                    aria-hidden="true"
+                  />
+                </Link>
               </h2>
               {/* Names, not faces. The solo card gives a speaker a portrait,
                   a role and a link, because it has one talk's worth of room
@@ -423,7 +439,16 @@ export function HeroTalk({
       </div>
 
       <h2 className="mt-4 text-pretty text-xl font-medium leading-snug text-white">
-        {session.title}
+        <Link
+          href={`/schedule/talk/${session.slug}`}
+          className="group/talk rounded-sm transition-colors duration-200 hover:text-magenta focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-magenta"
+        >
+          {session.title}
+          <ArrowUpRight
+            className="ml-1.5 inline h-5 w-5 -translate-y-px opacity-45 transition-opacity duration-200 group-hover/talk:opacity-100"
+            aria-hidden="true"
+          />
+        </Link>
       </h2>
 
       {session.description && (

@@ -327,7 +327,23 @@ export default async function SpeakerPage({
                             className="mt-2 inline-block font-mono text-[11px] uppercase tracking-widest text-magenta transition-colors duration-200 hover:text-white"
                           >
                             Part of {activationTitle(s.activation)}
-                            <span aria-hidden="true"> &rarr;</span>
+                            {/* `ArrowUpRight`, not a typed arrow. The house
+                                mark for "this goes somewhere" is the icon with
+                                the up-and-right hop — the column heads,
+                                room-flow, model-band and the calendar blocks
+                                all carry it, and blocks.tsx has a note saying
+                                it replaced a typed "→" for this exact reason.
+                                This line was the last one still setting the
+                                character. `size-3` against 11px mono, matching
+                                the block that made the same swap. */}
+                            <ArrowUpRight
+                              className={cn(
+                                ARROW_OUT,
+                                "ml-1 inline-block size-3",
+                              )}
+                              strokeWidth={2}
+                              aria-hidden="true"
+                            />
                           </Link>
                         )}
                       </div>
