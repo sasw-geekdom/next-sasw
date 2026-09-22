@@ -880,6 +880,21 @@ async function main() {
       // six-mark strip needs when a figure is standing beside it; a card
       // whose art clears the foot of the card can ask for one row.
       logoCols: card.logoCols ?? 3,
+      // The typeset "Access Granted" wordmark's size. 92 on a speaker card,
+      // where it is a standfirst over the talk's title; larger on a card
+      // where the event's name is the title.
+      wordmarkSize: card.wordmarkSize ?? 92,
+      // The schematic field's reach, as the size-and-position half of a
+      // radial-gradient mask. Default is where it has always sat: gathered
+      // behind the figure on the right.
+      gridMask: card.gridMask ?? "58% 62% at 68% 52%",
+      // The schematic's ink. 0.055 behind a figure; more on a card that is
+      // using the field to fill space rather than to sit behind something.
+      gridInk: card.gridInk ?? 0.055,
+      // The scrim's horizontal ramp, as the stop list of a left-to-right
+      // gradient. Default is what every card here has always drawn: solid
+      // black across the left fifth, clear by just past the middle.
+      scrimLeft: card.scrimLeft ?? "#000 0%, #000 20%, rgba(0, 0, 0, 0) 52%",
       // The strip's own line. Every other template writes its label into the
       // markup because it serves one event; this one serves two, and Access
       // Granted's names the coalition where The Model's is the house "//".

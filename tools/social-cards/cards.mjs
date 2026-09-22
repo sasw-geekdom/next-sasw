@@ -266,6 +266,41 @@ const DEVSA_SPLITS = [
   DEVSA_BUILT.length + DEVSA_INVITED.length,
 ];
 
+/**
+ * Alamo City Locksport, in two cuts.
+ *
+ * The autumn mark is the one they now lead with and is what the strip carries.
+ * It costs something: the line-art cut sets their name under the Alamo, and
+ * this one is the Alamo alone, so Locksport is the only mark of the six that
+ * does not say who it is. 78 rather than the others' 64 because it is 1.41:1
+ * where the rest are near-square or wide wordmarks — enough to hold its own
+ * in the row without becoming the row's subject, which 104 did.
+ */
+const LOCKSPORT_FALL = {
+  repo: "public/access-granted/orgs/locksport-fall.png",
+  height: 78,
+};
+
+/**
+ * The line-art cut, kept for the one card that cannot use the other: the
+ * lockpicking village card's whole picture is the autumn mark, and the same
+ * artwork twice on one card at two sizes reads as a mistake.
+ */
+const LOCKSPORT_LINE = {
+  repo: "public/access-granted/orgs/locksport.png",
+  height: 84,
+};
+
+/** The six organisers, in the order asked for, with Locksport's cut chosen. */
+const ACCESS_ORGS = (locksport) => [
+  { repo: "public/access-granted/orgs/bsides.png", height: 64 },
+  { repo: "public/access-granted/orgs/defcon.png", height: 64 },
+  { repo: "public/access-granted/orgs/saha.png", height: 64 },
+  { repo: "public/access-granted/orgs/cyberjedis.png", height: 64 },
+  locksport,
+  { repo: "public/access-granted/orgs/devsa.png", height: 64 },
+];
+
 export const EVENTS = {
   ...COMMUNITY,
 
@@ -519,14 +554,7 @@ export const EVENTS = {
     // figure, and Locksport is sized by eye above the rest: it is a narrow
     // silhouette over a small caption where the others are dense badges, so
     // an equal height reads visibly lighter.
-    logos: [
-      { repo: "public/access-granted/orgs/bsides.png", height: 64 },
-      { repo: "public/access-granted/orgs/defcon.png", height: 64 },
-      { repo: "public/access-granted/orgs/saha.png", height: 64 },
-      { repo: "public/access-granted/orgs/cyberjedis.png", height: 64 },
-      { repo: "public/access-granted/orgs/locksport.png", height: 84 },
-      { repo: "public/access-granted/orgs/devsa.png", height: 64 },
-    ],
+    logos: ACCESS_ORGS(LOCKSPORT_FALL),
   },
 };
 
@@ -1481,12 +1509,59 @@ export const CARDS = [
     id: "access-granted-event",
     event: "access-granted",
     art: "public/access-granted/padlock.png",
-    // Their own one-liner, split across the two slots it was written for.
-    headline: "Taking it<br />apart.",
-    headlineSize: 118,
-    subtitle: "Every other room this week is people talking about technology.",
-    facts: ["Wednesday, September 30  ·  1 – 6 PM", "Geekdom, 3rd Floor"],
-    portrait: { height: 980, left: 470 },
+    /**
+     * The event's own name as the title, where a speaker card puts the talk's.
+     *
+     * There is no talk here, so the wordmark that stands over one on every
+     * other card on this template has nothing above it and takes the size
+     * instead — 118, the headline’s. No `headline`, which the template now
+     * guards: a card that titled itself "TAKING IT APART." under a 92px
+     * "ACCESS GRANTED" was two display lines arguing about which was the
+     * name of the thing.
+     */
+    wordmarkSize: 118,
+    // One row, like the village card and for the same reason: the lock is
+    // lifted clear of the foot, so the strip has the whole 936px measure
+    // rather than the ~410 a standing figure leaves it.
+    logoCols: 6,
+    // Wider than the default, and the scrim over it weakened to match.
+    // The schematic is what fills the black beside the lock; the scrim is
+    // what was painting it out. See `.portrait::after`.
+    gridMask: "96% 70% at 52% 50%",
+    // 0.1, not the default 0.055. Under this template’s scrim a 0.055
+    // line peaks at 13/255 on the left against 20 where the field is
+    // unscrimmed — a difference a meter reads and an eye does not.
+    gridInk: 0.1,
+    scrimLeft:
+      "rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 26%, rgba(0, 0, 0, 0) 52%",
+    /**
+     * Their one-liner whole, rather than split across the two slots.
+     *
+     * It was a headline and a subtitle — the punch hoisted above its own
+     * setup, which reads backwards once you notice. With the name taking the
+     * title the sentence runs in the order it was written, and the turn
+     * lands where a turn should.
+     */
+    subtitle:
+      "Every other room this week is people talking about technology. This one is people taking it apart.",
+    // Two lines, with the hours leading the second rather than trailing the
+    // first. Whole on one line the day and the hours draw 620px and the last
+    // third sits on the padlock; on three lines the hours are a fact of their
+    // own, which they are not — they belong to the day above them. This is
+    // the split the village card uses, and it stops at 492.
+    facts: ["Wednesday, September 30", "1 – 6 PM  ·  Geekdom, 3rd Floor"],
+    // 800, down from 980. The lock is the card’s picture rather than its
+    // subject — at the old size its shackle reached the hook and its body
+    // crossed under the facts. Moved right as it shrank so it stays anchored
+    // to the card’s edge rather than drifting into the middle.
+    //
+    // Lifted off the bottom too. This slot anchors to the card’s foot
+    // because it was drawn for a standing figure, and a figure is cropped
+    // there on purpose; shrinking a lock inside it just slid the lock down
+    // and opened 140px of black above the shackle. At 235 it centres in the
+    // column the copy leaves it and clears the single-row strip below: the
+    // marks run to x=750 and the lock’s body starts at 512.
+    portrait: { height: 800, left: 512, bottom: 235 },
   },
 
   {
@@ -3048,6 +3123,10 @@ export const CARDS = [
     id: "access-granted-locksport-village",
     event: "access-granted",
     art: "public/access-granted/orgs/locksport-fall.png",
+    // The line-art cut in the strip, not the autumn one the event now uses:
+    // this card's picture is already the autumn mark, and the same artwork
+    // twice on one card at two sizes reads as a mistake.
+    logos: ACCESS_ORGS(LOCKSPORT_LINE),
     // One row, not this template's usual two of three. The two-row grid is
     // there because a standing figure reaches down into the strip and leaves
     // it about 410px; the mark on this card sits high and clears the foot

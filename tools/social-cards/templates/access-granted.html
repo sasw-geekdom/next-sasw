@@ -42,18 +42,36 @@
       .grid {
         position: absolute;
         inset: -10%;
+        /* Per card. 0.055 is what a field sitting behind a figure wants —
+           any more and the schematiccompetes with the cutout. A card using
+           the field to hold empty space needs it to actually read: at 0.055
+           under this template's scrim a lit line peaks at 13/255, which is
+           measurable and invisible. */
         background-image:
-          linear-gradient(var(--grid) 1px, transparent 1px),
-          linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+          linear-gradient(rgba(255, 255, 255, {{gridInk}}) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(255, 255, 255, {{gridInk}}) 1px,
+            transparent 1px
+          );
         background-size: 34px 34px;
+        /* Per card. The default keeps the field where it has always been —
+           gathered behind the figure on the right, because on a speaker card
+           the left half is the name and the facts and a schematic running
+           under them competes with type it is meant to sit behind.
+           A card with no figure on the left has nothing to compete with, and
+           the black there reads as a hole rather than as space. Widening the
+           mask is the right lever rather than the bloom: the bloom is green
+           and this brand's note is that the green stays sparing (see below),
+           where the grid is a line field at 4% white. */
         mask-image: radial-gradient(
-          ellipse 58% 62% at 68% 52%,
+          ellipse {{gridMask}},
           black 0%,
           black 20%,
           transparent 74%
         );
         -webkit-mask-image: radial-gradient(
-          ellipse 58% 62% at 68% 52%,
+          ellipse {{gridMask}},
           black 0%,
           black 20%,
           transparent 74%
@@ -95,12 +113,19 @@
         height: {{portraitHeight}}px;
         width: auto;
       }
+      /* The scrim that holds the figure off the copy.
+         Its left stop is per card, because it is the reason the left of this
+         template is black and not because the field stops there: the schematic
+         reaches most of the card, and this paints over it. That is right when
+         a figure stands in the middle and a name has to read across it, and
+         wrong on a card whose picture is small and parked on the right — there
+         it blacks out the one thing filling the space. */
       .portrait::after {
         content: "";
         position: absolute;
         inset: 0;
         background:
-          linear-gradient(to right, #000 0%, #000 20%, rgba(0, 0, 0, 0) 52%),
+          linear-gradient(to right, {{scrimLeft}}),
           linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 14%);
       }
 
@@ -136,7 +161,11 @@
         margin-top: 50px;
         font-family: "OswaldLocal", Impact, sans-serif;
         font-weight: 700;
-        font-size: 92px;
+        /* Per card, defaulting to the 92 every speaker card here uses. On
+           those the name is a standfirst over the talk's title, which is the
+           bigger line; on the event card there is no talk, so the event's own
+           name is the title and takes the size. */
+        font-size: {{wordmarkSize}}px;
         line-height: 0.9;
         letter-spacing: -0.01em;
         text-transform: uppercase;
@@ -269,7 +298,12 @@
 
       <div class="wordmark"><span class="a">Access</span> Granted</div>
 
+      <!-- Guarded, because a card whose title is the event's own name has
+           nothing to put here — see `wordmarkSize`. Every speaker card sets a
+           headline, so this resolves and changes nothing for them. -->
+      <!--if:headline-->
       <h1>{{headline}}</h1>
+      <!--/if:headline-->
       <!--if:subtitle-->
       <p class="subtitle">{{subtitle}}</p>
       <!--/if:subtitle-->
@@ -287,6 +321,14 @@
       <div class="facts">
         <div class="fact"><span class="pip"></span>{{fact1}}</div>
         <div class="fact"><span class="pip"></span>{{fact2}}</div>
+        <!-- Guarded, like community-group.html's. Two is the shape of every
+             speaker card here — a day and a floor — and the third exists for
+             the event card, where the hours are a fact of their own rather
+             than a tail on the date. `fact3` is always in the data as "" when
+             a card has two, so the guard resolves and leaves nothing. -->
+        <!--if:fact3-->
+        <div class="fact"><span class="pip"></span>{{fact3}}</div>
+        <!--/if:fact3-->
       </div>
 
       <div class="powered">
