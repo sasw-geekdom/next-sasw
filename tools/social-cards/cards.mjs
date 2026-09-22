@@ -1722,24 +1722,28 @@ export const CARDS = [
       { height: 518, top: 724 },
     ],
     /**
-     * An instruction, not an observation.
+     * The session's own name, at the team's request, split at its colon the
+     * way every other card on this stage splits one.
      *
-     * It read "Someone Else Already Built It" — true, and it describes the
-     * business rather than telling the reader what the session is for. This
-     * audience is on the Capital circuit: the thing they act on is a route,
-     * and the route here is buying rather than starting. The description's
-     * own opening — "most founder stories start with an idea, this one starts
-     * with a business someone else already built" — is the same argument at
-     * three times the length, which is a page's job rather than a card's.
+     * What it replaces was a hook rather than a title: "Skip the Idea. Buy
+     * the Business." was written off the description's opening, and it did
+     * the job a card headline does — told a reader what the hour is for in
+     * five words. The title is the format, which is the thing the team needs
+     * on the graphic.
+     *
+     * The cost is the fact. The subtitle carried "thousands of profitable San
+     * Antonio businesses need new operators this decade", which is the line
+     * that made somebody stop, and there is nowhere left for it: this
+     * template has a headline, a subtitle and the five names, and the title
+     * now takes two of the three. It belongs in the caption instead, where it
+     * has room to be a sentence rather than a fragment.
+     *
+     * 106, not 92: one line of sixteen characters draws 826px of the card's
+     * 936, where the two-line version needed the smaller size to fit.
      */
-    headline: "Skip the Idea.<br />Buy the Business.",
-    headlineSize: 92,
-    // One fact, two lines. It ran to four, which put nine lines of type
-    // between the headline and the faces — the description's argument in
-    // full, when the card only has to make someone want the argument. The
-    // number is the part that does that.
-    subtitle:
-      "Thousands of profitable San Antonio businesses need new operators this decade.",
+    headline: "Buy, Build, Lead",
+    headlineSize: 106,
+    subtitle: "An Introduction to Entrepreneurship Through Acquisition",
     // Capital, as the site files it: this is about financing and deal flow.
     circuit: "Capital",
   },
