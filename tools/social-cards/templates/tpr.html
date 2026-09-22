@@ -61,8 +61,13 @@
            is the one thing greyscale doesn't rescue. Bleeding off the left
            and the bottom is what keeps it reading as a mark the card is cut
            from rather than a shape placed on it. */
-        left: -360px;
-        top: 430px;
+        /* Per card, because this template now serves two rooms and the
+           figure does not sit in the same place in both. The TPR cards are
+           all cropped alike and share the default; Rachel's portrait sits
+           further right, and a bolt left where it was put its mass in the
+           gap she vacated rather than behind her. */
+        left: {{boltLeft}}px;
+        top: {{boltTop}}px;
         width: 1000px;
         height: auto;
         opacity: 0.62;
@@ -73,7 +78,7 @@
 
       <!--if:faces-->
       /* A panel: three or more, in one row along the bottom.
-         
+
          Same treatment as the pair — bare cutouts, bottom-anchored, bleeding
          off the edge, no window and no fade — at the size a row of five can
          hold. They overlap, each behind the one to its left, which is what a
@@ -93,7 +98,7 @@
         filter: grayscale(1);
       }
       /* The credits, one line under the hook.
-         
+
          Five names cannot take the size one or two get, and they cannot sit
          beside the row either — the figures need the whole width of the
          bottom band. Here they clear it, and each person still gets a name
@@ -170,14 +175,14 @@
       <!--ifnot:face-->
       /* No figure on this card — it is an event on this stage rather than a
          speaker, and the right half it would have filled is empty.
-         
+
          So the bolt takes it, the way community-group.html hands that space
          to the hero bolt. Not a second mark, though: this template's bolt is
          already the subject rather than a ground, so the same one moves and
          grows instead. Right and down, big enough to hold the half a person
          held, and still bleeding off two edges — which is the thing that
          keeps it a mark the card is cut from.
-         
+
          An event card with `art` (see texas-venture-fest) puts a lockup in
          that half and does not want this, but `art` is staged as `face`, so
          this guard already excludes it. */
@@ -473,9 +478,7 @@
     <!--/ifnot:faces-->
 
     <!--if:faces-->
-    <div class="crowd">
-      {{faces}}
-    </div>
+    <div class="crowd">{{faces}}</div>
     <!--/if:faces-->
 
     <!--if:faceB-->
@@ -495,7 +498,7 @@
         <span class="c1"></span><span class="c2"></span><span class="c3"></span
         ><span class="c4"></span><span class="c5"></span>
       </div>
-      <div class="tag">{{circuit}} · Main Stage</div>
+      <div class="tag">{{circuit}} · {{stage}}</div>
 
       <h1>{{headline}}</h1>
       <!--if:subtitle-->
@@ -503,9 +506,7 @@
       <!--/if:subtitle-->
 
       <!--if:faces-->
-      <div class="crowd-names">
-        {{crowd}}
-      </div>
+      <div class="crowd-names">{{crowd}}</div>
       <!--/if:faces-->
 
       <div class="spacer"></div>

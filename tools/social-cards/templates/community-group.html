@@ -62,8 +62,13 @@
            between the talk title and the speaker's name — which is where a
            ground element belongs. */
         z-index: 1;
-        left: -190px;
-        top: 330px;
+        /* Per card, defaulting to where this template has always put it.
+           The position is right for a single figure, whose head fills the
+           upper right and leaves the bolt reading as ground behind it. A pair
+           sits lower and further right, and the same bolt then stands above
+           them like a third object rather than behind them like a ground. */
+        left: {{boltLeft}}px;
+        top: {{boltTop}}px;
         width: 820px;
         height: auto;
         /* Drawn, not masked. The file is already #ff32a0, so it needs no
@@ -77,7 +82,7 @@
       /* No figure on this card — it is an event card rather than a speaker's,
          and the guard below drops the portrait column entirely. That leaves
          the half a person would have filled, so the bolt takes it.
-         
+
          Not the flat silhouette brightened: raising `sastw-bolt.svg` from
          0.17 to 0.42 draws a large dull magenta shape, which is a texture
          being asked to do a mark's job. This is the same swap the DEVSA card
@@ -106,6 +111,59 @@
         height: {{portraitHeight}}px;
         width: auto;
       }
+      <!--if:faceB-->
+      /* Two on one bill, presented the way tpr.html presents a pair.
+         The talks that bring two people to one of these hours were, until
+         now, two cards — right when they are two talks, wrong when they are
+         one. So this is that template's treatment ported whole rather than
+         reinvented: both cutouts bottom-anchored and measured from the right
+         edge so they overlap like people standing together, and both names
+         stacked in the copy column where a single speaker's name already
+         sits. Not that stage's greyscale, though: a community card is a
+         colour card — see the note at the top of this file — and `greyscale`
+         is still the per-card flag it always was. Keeping the names off the
+         figures is what lets the figures overlap.
+         No window and no fade behind them — these headshots are matted
+         already, and a gradient laid over this card's bolt darkens a
+         rectangle of it. */
+      .portrait img {
+        left: auto;
+      }
+      .portrait img.a {
+        height: {{heightA}}px;
+        right: {{topA}}px;
+        z-index: 3;
+      }
+      .portrait img.b {
+        height: {{heightB}}px;
+        right: {{topB}}px;
+        z-index: 2;
+      }
+      /* The scrim behind a single portrait paints the left of the column
+         black so the name can sit on it. With two figures that reach further
+         left it was ending them in a haze; they are matted, so it goes. */
+      .portrait::after {
+        display: none;
+      }
+      .duo .one + .one {
+        margin-top: 18px;
+      }
+      .duo .nm {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 42px;
+        line-height: 0.98;
+        text-transform: uppercase;
+      }
+      .duo .rl {
+        margin-top: 6px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.18em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+      <!--/if:faceB-->
       <!--if:greyscale-->
       /* Same treatment tpr.html gives every portrait — greyscale plus a touch
          of contrast, which stops a desaturated headshot going flat. */
@@ -289,7 +347,15 @@
     <img class="bolt-hero" src="bolt-current.png" alt="" />
     <!--/ifnot:face-->
     <!--if:face-->
+    <!--ifnot:faceB-->
     <div class="portrait"><img src="{{face}}" alt="" /></div>
+    <!--/ifnot:faceB-->
+    <!--if:faceB-->
+    <div class="portrait">
+      <img class="b" src="{{faceB}}" alt="" />
+      <img class="a" src="{{face}}" alt="" />
+    </div>
+    <!--/if:faceB-->
     <!--/if:face-->
 
     <div class="frame">
@@ -313,7 +379,24 @@
            anchored as a group, so that does not show up as a gap under the
            name — it lifts the whole group, the name included, off the line the
            other cards sit on. -->
-      <!--if:first-->
+      <!--if:faceB-->
+      <div class="duo">
+        <div class="one">
+          <div class="nm">{{firstA}} {{lastA}}</div>
+          <div class="rl">{{roleA}}</div>
+        </div>
+        <div class="one">
+          <div class="nm">{{firstB}} {{lastB}}</div>
+          <div class="rl">{{roleB}}</div>
+        </div>
+      </div>
+      <!--/if:faceB-->
+      <!-- The close above is not decoration. Without it `fill` finds no
+           partner for the opening guard, leaves the comment and the whole
+           empty block sitting in the HTML, and every single-speaker card on
+           this template renders a pair's name block with nobody in it. Same
+           failure `faceB` caused on tpr.html, same note in render.mjs. -->
+      <!--ifnot:faceB--><!--if:first-->
       <div class="name">
         {{first}}<!--if:last--><br />{{last}}<!--/if:last-->
       </div>
@@ -321,11 +404,18 @@
       <!--if:org-->
       <div class="org">{{org}}</div>
       <!--/if:org-->
-      <!--/if:first-->
+      <!--/if:first--><!--/ifnot:faceB-->
 
       <div class="facts">
         <div class="fact"><span class="pip"></span>{{fact1}}</div>
         <div class="fact"><span class="pip"></span>{{fact2}}</div>
+        <!-- Guarded, unlike the two above, because a third fact is the
+             exception here: every other card on this template names a day and
+             a room and stops. `fact3` is always in the data as "" when a card
+             has two, so the guard resolves and leaves nothing behind. -->
+        <!--if:fact3-->
+        <div class="fact"><span class="pip"></span>{{fact3}}</div>
+        <!--/if:fact3-->
       </div>
 
       <!--if:logos-->

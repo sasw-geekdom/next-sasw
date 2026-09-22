@@ -557,6 +557,25 @@ async function main() {
       artBlock: card.artBlock ? "1" : "",
       // Where the footage's top edge lands, so the overlay can feather it.
       videoTop: card.video ? card.video.y : 0,
+      /**
+       * The room, beside the circuit on the ramp's caption.
+       *
+       * It read "Main Stage" in the markup while this template served one
+       * room. It serves two now — TPR's stage and the standalone talks at The
+       * Rand — and a card for a third-floor session that announces itself as
+       * the main stage is telling a reader to walk into the wrong building.
+       */
+      stage: card.stage ?? event.stage ?? "Main Stage",
+      /**
+       * Where a template's ground bolt sits, in px.
+       *
+       * The defaults are tpr.html's, which is the template that asked for
+       * this first. community-group.html has its own numbers and passes them
+       * on the event, because one default cannot be right for two templates
+       * whose bolts were placed independently — see `.bolt` in each.
+       */
+      boltLeft: card.boltLeft ?? event.boltLeft ?? -360,
+      boltTop: card.boltTop ?? event.boltTop ?? 430,
       // The label over a single undifferentiated field of marks. The poster
       // splits into three and labels each; a card whose claim is the count
       // wants one field and one line saying what is in it.
@@ -764,14 +783,19 @@ async function main() {
             faceA: a.file,
             firstA: a.name.split(" ")[0],
             lastA: a.name.split(" ").slice(1).join(" "),
-            roleA: a.role,
+            // `roles` overrides what the CMS says, the way `name` and `role`
+            // already do for a single speaker. Needed the first time a pair
+            // card met a 44-character job title: "AI Solution Architect &
+            // Innovation Strategist" set under a name at this size runs into
+            // the figures beside it.
+            roleA: card.roles?.[0] ?? a.role,
             orgA: a.org,
             heightA: card.portraits[0].height,
             topA: card.portraits[0].top,
             faceB: b.file,
             firstB: b.name.split(" ")[0],
             lastB: b.name.split(" ").slice(1).join(" "),
-            roleB: b.role,
+            roleB: card.roles?.[1] ?? b.role,
             orgB: b.org,
             heightB: card.portraits[1].height,
             topB: card.portraits[1].top,

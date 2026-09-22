@@ -59,6 +59,11 @@ const WEEK = "Sept 28 – Oct 2";
  */
 const AT_THE_RAND = (mark, markHeight, day, hours) => ({
   template: "community-group.html",
+  // community-group.html's own bolt placement, which used to be typed into
+  // that file. Stated here so the token has the value this template has
+  // always used rather than tpr.html's.
+  boltLeft: -190,
+  boltTop: 330,
   mark: { repo: `public/activations/${mark}`, height: markHeight },
   facts: [day, `${hours}  ·  The Rand, 3rd Floor`],
   logos: [],
@@ -99,6 +104,16 @@ export const COMMUNITY = {
     "Tuesday, September 29",
     "1 – 2 PM",
   ),
+  // Learn2AI's noon hour, the week's first at The Rand. Their lockup is the
+  // white cut in public/activations — see lib/sponsor-marks for why the
+  // published colour version cannot sit on this ground.
+  learn2ai: AT_THE_RAND(
+    "learn2ai.svg",
+    54,
+    "Tuesday, September 29",
+    "12 \u2013 1 PM",
+  ),
+
   "google-developer-groups": AT_THE_RAND(
     "google-developer-groups.svg",
     46,
@@ -329,6 +344,26 @@ export const EVENTS = {
     ],
     poweredLabel: "Sponsored by",
     logos: [{ partner: "Active Capital", height: 46 }],
+  },
+
+  /**
+   * The Rand's standalone hours, on the TPR template.
+   *
+   * A talk at The Rand that belongs to a community group rides
+   * community-group.html and leads with that group's mark. This is for the
+   * ones that belong to nobody but the week: no mark to lead with, a speaker
+   * and an hour, which is exactly the shape the stage template already draws.
+   * What it needed was for "Main Stage" to stop being typed into the markup —
+   * see `stage` in render.mjs.
+   */
+  rand: {
+    template: "tpr.html",
+    stage: "The Rand",
+    facts: [
+      "Thursday, October 1",
+      "12 \u2013 1 PM  \u00b7  The Rand, 3rd Floor",
+    ],
+    logos: [],
   },
 
   tpr: {
@@ -1976,6 +2011,132 @@ export const CARDS = [
     // The URL lib/schedule.ts builds through ASSET() for this activation's
     // hero, written out because this file is plain JS and that helper is TS.
     art: "https://firebasestorage.googleapis.com/v0/b/sasw2026-783a5.firebasestorage.app/o/sasw-assets%2Fsastw-legacypark.jpg?alt=media",
+  },
+
+  {
+    /**
+     * Two people, one talk — the first card on the community template to take
+     * a pair rather than two cards.
+     *
+     * The other groups' hours are one speaker each, or two talks that each get
+     * their own card. This is one live build with two people on stage, and a
+     * card per person would have said the same title twice under different
+     * faces. See the pair layout in community-group.html.
+     */
+    id: "learn2ai-build-a-startup-live",
+    event: "learn2ai",
+    speakers: ["mayank-gohil", "mihir-shah"],
+    // One line, with the exclamation the session's own billing carries. 22
+    // characters of Oswald at 80 draws 857px of the card's 936.
+    headline: "Build a Startup, Live!",
+    headlineSize: 80,
+    /**
+     * Their own framing first, then the turn.
+     *
+     * "This will be a live build, not a lecture" is the abstract's opening
+     * and it is the promise — every other AI session on the week is somebody
+     * talking about models. The second half is the part nobody else is
+     * saying: the same job done again with the wifi off, by a model that
+     * costs nothing to run.
+     */
+    subtitle:
+      "A live build, not a lecture. Your idea becomes a brand in 40 minutes \u2014 then does it again offline, for free.",
+    roles: ["AI Solution Architect", "Co-Founder"],
+    /**
+     * The event's two lines split into three, to give the figures room.
+     *
+     * "12 - 1 PM  \u00b7  The Rand, 3rd Floor" is one 520px line, and it — not
+     * the names above it, which stop at 330 — is what decided how far left
+     * the pair could stand. Broken apart the column ends at 382, and the
+     * 138px that buys goes straight into their height.
+     */
+    facts: ["Tuesday, September 29", "12 \u2013 1 PM", "The Rand, 3rd Floor"],
+    // Lower than this template's default, because the pair sits lower than a
+    // single figure — see `.bolt` in community-group.html.
+    boltTop: 470,
+    /**
+     * Two people standing beside each other, at the size the copy allows.
+     *
+     * The pair began the way this template's other pairs do — one figure
+     * large at the edge, the second behind it — and at 680/705 Mihir was a
+     * head above Mayank's shoulder and nothing else. Standing them side by
+     * side is a width problem, not a position one: both cutouts are widest
+     * at the very bottom, where Mayank's reaches all 1080px of his frame and
+     * Mihir's 890, so the two together want about 1.03 x their height in
+     * card width and every pixel of height costs a pixel of room.
+     *
+     * The first side-by-side pass solved that by shrinking them to 515/556,
+     * which fit with nothing cropped and left them small against a card this
+     * empty. Splitting the facts line above moved the copy's edge from 520
+     * to 382, so they stand at 684/700 instead and their crowns reach y=724
+     * and y=692 — a third of the card, the proportion the CPG pair holds.
+     * The cost is 38px of Mihir's outer arm at the right edge, which is the
+     * cheapest thing on the card to give up.
+     *
+     * Solved against each face's place in its own frame rather than by eye:
+     * Mayank's head spans 333-716 of his 1080 and sits 114px below his
+     * crown, Mihir's 362-666 and 81px. Those four numbers put Mayank's head
+     * at 569-763 on the card and Mihir's at 793-950, 30px apart.
+     *
+     * Mihir is only 2% taller here rather than the 8% the smaller pair used.
+     * At this size 8% threw his crown 69px clear of Mayank's, which reads as
+     * a man standing on a step; matching their head sizes outright needs 26%
+     * and is worse. A nearer figure with a slightly larger head is how two
+     * people photographed together actually look.
+     *
+     * `top` is distance from the right edge, so Mihir's is negative.
+     */
+    portraits: [
+      { height: 684, top: 133 },
+      { height: 700, top: -85 },
+    ],
+  },
+
+  {
+    id: "rand-speaker-rachel-davis",
+    event: "rand",
+    speaker: "rachel-davis",
+    /**
+     * Split at the full stop the title already has, which is the same cut the
+     * TPR cards make at a colon. "Maybe That's Not the Problem." is the whole
+     * hook — a sentence that argues with the reader — and everything after it
+     * is the method.
+     */
+    headline: "Maybe That\u2019s Not<br />the Problem.",
+    headlineSize: 92,
+    subtitle:
+      "Look sideways. Pull it apart. Rebuild what you think you know, with LEGO\u00ae.",
+    // Tech & Builders, as the talk page files it.
+    circuit: "Tech & Builders",
+    /**
+     * Bigger than the probe's 742, and further right: she fills the right
+     * third rather than standing in it. A crop at 38.3% head-to-frame draws a
+     * head the size of this stage's others at 742, which is the number the
+     * probe solves for — but this card has no five-name credits line under
+     * the hook and no sponsor strip at its foot, so the space the others
+     * spend on those is hers.
+     */
+    /**
+     * Whole, which is the departure on this stage.
+     *
+     * Every other portrait here bleeds off the right edge, because a crop of
+     * a person running out of frame is what these cards do. Hers does not:
+     * her cutout is 546px wide at this height and her hair carries the shape,
+     * so the edge was taking the side of her head rather than a shoulder.
+     * 420 puts her ink at x 534-1064 — clear of the card's edge by 16px, and
+     * her head band starts at 680, well right of the hook's 545.
+     */
+    portrait: { height: 920, left: 420, bottom: 0 },
+    /**
+     * The bolt stays where tpr.html puts it, and only drops.
+     *
+     * At the template's 430 its tip measured x 280-332 across rows 503-551,
+     * which is where the subtitle's second line sits — the one thing that
+     * file says the bolt may never do. 505 clears the last line of type by
+     * 25px and leaves the left-hand mass exactly where the rest of the stage
+     * has it.
+     */
+    boltTop: 505,
   },
 
   {
