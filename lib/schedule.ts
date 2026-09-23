@@ -1132,8 +1132,16 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       // "prioritizing" keeps its z. The comments in this repo are written in
       // British English and the copy is not — the week is in San Antonio and
       // its readers are American. Counting "organisers" to decide this was
-      // the wrong count: 250-odd of those are in comments, and there are five
-      // British spellings in the whole of the rendered copy.
+      // the wrong count: 250-odd of those are in comments, and none are left
+      // in the rendered copy.
+      //
+      // There were five when that was written and six by the time anyone
+      // looked again — /faq shipped with "organisation", "organisations",
+      // "organisers" and "programmes" in it, because the habit that writes
+      // the comments also writes the copy unless something checks. The check
+      // is a scan of string literals for British forms; run it on copy, not
+      // on the whole file, or the comments drown the signal. Type and field
+      // names are code, not copy: `detail.programme` stays as it is.
       access:
         "Attendance is by invitation. A limited number of seats are released to the Startup + Tech Week community each year, prioritizing founders and active investors.",
     },
@@ -2873,7 +2881,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       eyebrow: "The hour",
       headline: "Still meeting, thirty-one events in.",
       lede: [
-        "The San Antonio .NET User Group is for anyone interested in a wide range of .NET topics around the San Antonio area \u2014 their words, and the back catalogue holds them to it: serverless, cross-platform builds, testing, CI/CD, and a recent run on C# with agentic AI.",
+        "The San Antonio .NET User Group is for anyone interested in a wide range of .NET topics around the San Antonio area \u2014 their words, and the back catalog holds them to it: serverless, cross-platform builds, testing, CI/CD, and a recent run on C# with agentic AI.",
         "Most of the last year ran online. This hour is the group back in a room.",
       ],
       coda: "Platform user groups are the least fashionable and most durable thing in a tech scene. They were meeting before the week was announced and they will be meeting after it \u2014 which is the whole argument for giving the community floor to the groups that already do the work.",

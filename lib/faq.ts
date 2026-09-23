@@ -176,7 +176,7 @@ export const FAQ: FaqSection[] = [
       {
         q: "Does my badge open every room?",
         a: [
-          "Most of them. A handful of activations are seated by the organisation running them rather than by the week: Trinity's Stumberg competition is ticketed on Eventbrite, the Alamo Angels brunch is by invitation, and several rooms hold their own list because the room has a count.",
+          "Most of them. A handful of activations are seated by the organization running them rather than by the week: Trinity's Stumberg competition is ticketed on Eventbrite, the Alamo Angels brunch is by invitation, and several rooms hold their own list because the room has a count.",
           "Every activation page carries its own access line. Check the one you are heading to before you go.",
         ],
         link: { label: "The schedule", href: "/schedule" },
@@ -195,7 +195,7 @@ export const FAQ: FaqSection[] = [
           "$10 flat for the day at the City's garages \u2014 City Tower, St. Mary's and Houston Street \u2014 with no hourly maths to do. St. Mary's drops to $5 after 5 PM on weeknights and all weekend, and goes to $15 on the days something big is on downtown.",
           "Central Library's own garage is the cheapest of the four: the first three hours are free with validation, then $5 flat for the day. Validate at the kiosk on the entry level. It opens 7:30 AM and closes 10:30 PM, and it takes cards only.",
         ],
-        link: { label: "Rates and programmes", href: SAPARK_AFFORDABLE },
+        link: { label: "Rates and programs", href: SAPARK_AFFORDABLE },
       },
       {
         q: "Anything free?",
@@ -235,7 +235,7 @@ export const FAQ: FaqSection[] = [
       {
         q: "What does it cost?",
         a: [
-          "Registration is free. A few rooms run by other organisations have their own conditions, and each says so on its own page.",
+          "Registration is free. A few rooms run by other organizations have their own conditions, and each says so on its own page.",
         ],
         link: { label: "Register", href: "/register" },
       },
@@ -249,7 +249,7 @@ export const FAQ: FaqSection[] = [
       {
         q: "I have an access need, or a question this page doesn't answer.",
         a: [
-          "Ask. The same form reaches the organisers whether you are asking about a room, a ramp or a sponsorship, and a person reads every one.",
+          "Ask. The same form reaches the organizers whether you are asking about a room, a ramp or a sponsorship, and a person reads every one.",
         ],
         link: { label: "Ask a question", href: "/get-involved" },
       },
