@@ -54,7 +54,11 @@ export function AccessContinuous() {
                   </h3>
                   {item.by && (
                     <p className="mt-2 font-mono text-[11px] uppercase tracking-widest text-white/55">
-                      By{" "}
+                      {/* "Powered by", the same words the running order
+                          above uses on every session and the organiser strip
+                          uses for all six at once. One relationship, one
+                          phrase for it. */}
+                      Powered by{" "}
                       {org ? (
                         <a
                           href={org.href}

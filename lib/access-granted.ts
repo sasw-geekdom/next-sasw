@@ -88,7 +88,9 @@ export const ACCESS_GRANTED = {
  * look like mistakes.
  *
  * Windows rather than a map of session slugs, so the page does not need
- * editing when a session is entered. UTSA CyberJedis have a second talk that
+ * editing when a session is entered \u2014 though a *new block* does, which is
+ * what DEVSA's 16:45 entry is: SAHA's window ran to 18:00 and swallowed the
+ * 4:50 talk until it was split. UTSA CyberJedis have a second talk that
  * is not in the CMS yet; it lands inside their window and picks up their name
  * the moment it is saved.
  *
@@ -111,7 +113,8 @@ export const ACCESS_BLOCKS: readonly AccessBlock[] = [
   { org: "BSides San Antonio", from: "13:00", to: "13:45" },
   { org: "DEF CON Group San Antonio", from: "13:45", to: "14:45" },
   { org: "UTSA CyberJedis", from: "14:45", to: "15:45" },
-  { org: "San Antonio Hacker Association", from: "15:45", to: "18:00" },
+  { org: "San Antonio Hacker Association", from: "15:45", to: "16:45" },
+  { org: "DEVSA", from: "16:45", to: "18:00" },
 ];
 
 /**
