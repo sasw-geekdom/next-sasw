@@ -1,0 +1,334 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+
+      /* Access Granted as a Short.
+         The afternoon is five community groups with an hour each, which is a
+         list — and a list revealed a line at a time is what this format is
+         for. The still card says the same thing all at once and has to choose
+         one talk to lead on; here every group gets its own beat.
+
+         Built to sit behind the supplied padlock footage rather than to
+         replace it: the clip opens, this counts the blocks, the outro closes
+         on the week's own mark. */
+      :root {
+        --green: #00ff66;
+        --grid: rgba(255, 255, 255, 0.055);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1920px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* The schematic, as on every Access Granted surface. Wider here than on
+         the feed card because a Short has no figure to gather it behind. */
+      .grid {
+        position: absolute;
+        inset: -10%;
+        background-image:
+          linear-gradient(var(--grid) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+        background-size: 44px 44px;
+        mask-image: radial-gradient(
+          ellipse 78% 58% at 50% 46%,
+          black 0%,
+          black 26%,
+          transparent 76%
+        );
+        -webkit-mask-image: radial-gradient(
+          ellipse 78% 58% at 50% 46%,
+          black 0%,
+          black 26%,
+          transparent 76%
+        );
+      }
+      .bloom {
+        position: absolute;
+        left: 50%;
+        top: 300px;
+        width: 900px;
+        height: 900px;
+        margin-left: -450px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(0, 255, 102, 0.16) 0%,
+          transparent 64%
+        );
+        filter: blur(120px);
+      }
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 96px 72px 110px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 56px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* Sized down from 132 when the list went from five groups to seven
+         rows. The wordmark is still the biggest thing on the card, which is
+         all it has to be — the clip in front of it has already said the name
+         once, in a padlock. */
+      .wordmark {
+        margin-top: 44px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 104px;
+        line-height: 0.9;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+      }
+      .wordmark .a {
+        color: var(--green);
+      }
+      .hook {
+        margin-top: 26px;
+        max-width: 880px;
+        border-left: 3px solid var(--green);
+        padding-left: 24px;
+        font-size: 29px;
+        line-height: 1.34;
+        color: rgba(255, 255, 255, 0.82);
+      }
+
+      .label {
+        margin-top: 48px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.26em;
+        text-transform: uppercase;
+        color: #6f6f6f;
+      }
+      .label span {
+        color: var(--green);
+      }
+
+      /* One row per step: an hour, a name and what they are going to say.
+         Names rather than the community blocks that own each hour — the block
+         is how the day was *built*, and the page credits it, but a name and a
+         title is the thing somebody stops scrolling for. */
+      .rows {
+        margin-top: 28px;
+        display: flex;
+        flex-direction: column;
+      }
+      .row {
+        display: flex;
+        align-items: baseline;
+        gap: 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 30px 0;
+      }
+      .row:first-child {
+        border-top: 0;
+      }
+      .row .at {
+        flex: none;
+        width: 128px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 25px;
+        color: var(--green);
+      }
+      .row .who {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 40px;
+        line-height: 1.02;
+        text-transform: uppercase;
+      }
+      .row .what {
+        margin-top: 7px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        line-height: 1.3;
+        letter-spacing: 0.02em;
+        color: #8b8b8b;
+      }
+
+      /* The village, which is not a seventh talk.
+         It runs the whole five hours, so it gets the list's last row but not
+         the list's clock: the time column says so in words, and a green hairline
+         down the left says this one is a different kind of thing without
+         needing a second heading to explain it. */
+      .row.open {
+        margin-top: 10px;
+        border-top: 1px solid rgba(0, 255, 102, 0.35);
+        background: linear-gradient(
+          90deg,
+          rgba(0, 255, 102, 0.07) 0%,
+          transparent 62%
+        );
+      }
+      .row.open .at {
+        font-size: 19px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .row.open .who {
+        color: var(--green);
+      }
+
+      /* The outro, over everything.
+         A full frame rather than a line at the foot: it is the last thing on
+         screen and the only part a viewer who skipped the list still sees, so
+         it carries the week's mark, the bolt, and the two facts that let
+         somebody act — when, and where to go. */
+      .outro {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        opacity: 0;
+      }
+      .outro-bloom {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 1100px;
+        height: 1100px;
+        margin: -550px 0 0 -550px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(0, 255, 102, 0.1) 0%,
+          transparent 62%
+        );
+        filter: blur(130px);
+      }
+      .outro > *:not(.outro-bloom) {
+        position: relative;
+      }
+      .outro .bolt {
+        width: 420px;
+        height: auto;
+        opacity: 0.95;
+      }
+      .outro .lockup {
+        margin-top: 74px;
+        height: 96px;
+        width: auto;
+      }
+      .outro .name {
+        margin-top: 58px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: 92px;
+        line-height: 0.94;
+        text-transform: uppercase;
+        text-align: center;
+      }
+      .outro .name .a {
+        color: var(--green);
+      }
+      .outro .when {
+        margin-top: 34px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 26px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #8b8b8b;
+        text-align: center;
+      }
+      .outro .url {
+        margin-top: 16px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 26px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--green);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid"></div>
+    <div class="bloom"></div>
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <div class="wordmark"><span class="a">Access</span><br />Granted</div>
+      <p class="hook">{{subtitle}}</p>
+
+      <div class="label"><span>&gt;_</span> {{kicker}}</div>
+      <div class="rows">{{rows}}</div>
+    </div>
+
+    <div class="outro">
+      <div class="outro-bloom"></div>
+      <img class="bolt" src="bolt.svg" alt="" />
+      <img class="lockup" src="sastw.png" alt="" />
+      <div class="name"><span class="a">Access</span> Granted</div>
+      <div class="when">{{ctaLine}}</div>
+      <div class="url">{{ctaUrl}}</div>
+    </div>
+
+    <script>
+      /**
+       * Step 0 is the name and the hook. Steps 1..n bring up one block each.
+       * The step after the last one is the outro, which covers the frame.
+       *
+       * The renderer only counts steps — what a step means is this file's
+       * business. See `reveal` in render.mjs.
+       */
+      window.reveal = function (step) {
+        const rows = document.querySelectorAll(".row");
+        rows.forEach((el, i) => {
+          el.style.visibility = i < step ? "visible" : "hidden";
+        });
+        document.querySelector(".outro").style.opacity =
+          step > rows.length ? "1" : "0";
+      };
+      window.reveal(0);
+    </script>
+  </body>
+</html>

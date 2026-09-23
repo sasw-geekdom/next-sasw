@@ -141,6 +141,42 @@
           linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 14%);
       }
 
+      <!--if:transparent-->
+      /* The motion card's overlay.
+         The PNG is composited over the padlock footage, so the ground has to
+         go: `omitBackground` only reaches transparent where the page is, and
+         every template here paints `body` black.
+
+         The scrim comes back as an element of its own because the still
+         card's lives on `.portrait::after`, and a motion card has no
+         `face` — so that whole block is guarded away. Same two gradients,
+         same per-card left stop, now over footage.
+
+         The grid stays and is *wanted* over the clip: it is a 1px line
+         field, not a wash, so it continues across the footage's edge without
+         a seam and stitches the two together. The bloom is the opposite and
+         goes — see below. */
+      body {
+        background: transparent;
+      }
+      .scrim {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+          linear-gradient(to right, {{scrimLeft}}),
+          linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 14%);
+      }
+      /* No bloom on the motion card, for the reason pysanantonio.html records
+         at length: a translucent radial laid over footage stops where the
+         footage does and turns the card's one graded area into a visible
+         rectangle. The clip's own glow is the bloom here — the lock lights
+         its own field, which is what the static bloom was imitating. */
+      .bloom {
+        display: none;
+      }
+      <!--/if:transparent-->
+
       .frame {
         position: relative;
         z-index: 3;
@@ -296,6 +332,9 @@
     </style>
   </head>
   <body>
+    <!--if:transparent-->
+    <div class="scrim"></div>
+    <!--/if:transparent-->
     <div class="grid"></div>
     <div class="bloom"></div>
     <!--if:face-->

@@ -943,11 +943,17 @@ async function main() {
        * `at` / `who` / `what` rather than time / speaker / title, because the
        * last row is a quiz with no speaker — `who` is "Python Jeopardy" there
        * and the template golds it rather than special-casing a missing name.
+       *
+       * `flag` is a free class name for a row that is not like the others —
+       * Access Granted's lockpicking village runs the whole afternoon and has
+       * no start time, so it sits in the same list but must not read as a
+       * seventh thing you can be late for. What the class *does* is the
+       * template's business, as with `prize`.
        */
       rows: (card.rows ?? [])
         .map(
           (r) =>
-            `<div class="row${r.prize ? " prize" : ""}">` +
+            `<div class="row${r.prize ? " prize" : ""}${r.flag ? ` ${r.flag}` : ""}">` +
             `<div class="at">${r.at}</div>` +
             `<div><div class="who">${r.who}</div>` +
             (r.what ? `<div class="what">${r.what}</div>` : "") +

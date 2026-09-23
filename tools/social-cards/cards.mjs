@@ -1608,6 +1608,92 @@ export const CARDS = [
    * spellings are worth reconciling, but not silently and not here, because
    * the speaker cards already shipped with them.
    */
+  /**
+   * Access Granted as a YouTube Short.
+   *
+   * The afternoon is five community groups with an hour each \u2014 a list, and
+   * a list revealed a beat at a time is what this format does that a still
+   * card cannot. The feed card has to lead on one thing; here every group
+   * gets its own moment.
+   *
+   * Holds: 3s on the name and hook, 2s per block, 4s on the outro. Five
+   * blocks makes 17 seconds of card, which sits under the supplied padlock
+   * clip's 10 and inside the minute a Short gets.
+   */
+  {
+    id: "access-granted-short",
+    event: "access-granted",
+    template: "access-granted-short.html",
+    size: { width: 1080, height: 1920 },
+    // 1, like the other moving cards: a video is transcoded by every platform
+    // it touches and the extra sample rate buys nothing.
+    scale: 1,
+    subtitle:
+      "Every other room this week is people talking about technology. This one is people taking it apart.",
+    kicker: "Six talks, one afternoon",
+    /**
+     * Speakers and their talks, not the five community blocks.
+     *
+     * The blocks are how the day is *organised* — who owns which hour — and
+     * that is the right frame on the event page, where a reader is deciding
+     * which community to spend an afternoon with. It is the wrong frame here.
+     * Nobody scrolling past stops for "DEF CON Group SA, two talks"; they
+     * stop for a name and a title they want to hear. The credits survive on
+     * the page and on every speaker card.
+     *
+     * Titles verbatim from the CMS, including the malware's real name — it is
+     * the talk's name, and softening it on the card and not on the page would
+     * leave the two disagreeing.
+     *
+     * The village is last and flagged rather than timed: it runs all five
+     * hours, so a start time would file it as a seventh thing to be late for.
+     */
+    rows: [
+      {
+        at: "1:10",
+        who: "Richard Davey",
+        what: "Trust Each Other, Not Technology",
+      },
+      {
+        at: "1:50",
+        who: "Jacob Wellnitz",
+        what: "The Hackers Left. Now What?",
+      },
+      {
+        at: "2:15",
+        who: "Dante Moreno",
+        what: "Meow-ware: A Look at the Gayfemboy Malware",
+      },
+      { at: "2:50", who: "Keeban Villarreal", what: "How to Prepare for Q-Day" },
+      {
+        at: "3:50",
+        who: "Corey Hartman",
+        what: "Glyph: A binary analysis tool powered by machine learning",
+      },
+      { at: "4:50", who: "Mike Bell", what: "AI-powered Bug Bounty Hunting" },
+      {
+        // The hours in the time column rather than "all day", which it is
+        // not, or "all afternoon", which does not fit it. The green name and
+        // the tint behind the row are what say this one has no start time.
+        at: "1 \u2013 6 PM",
+        who: "Lockpicking Village",
+        what: "Alamo City Locksport \u00b7 drop in, no experience needed",
+        flag: "open",
+      },
+    ],
+    ctaLine: "Wed, Sept 30 \u00b7 1 \u2013 6 PM \u00b7 Geekdom, 3rd Floor",
+    ctaUrl: "sasw.co/schedule/access-granted",
+    /**
+     * One hold per step, plus the outro.
+     *
+     * The first is longer because a viewer arrives mid-scroll and needs a beat
+     * to read the name; the village gets an extra second because it is the one
+     * row that changes the offer — everything above it is a thing you turn up
+     * on time for, and that is the thing you cannot be late for.
+     */
+    reveal: [3, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 2.6, 4],
+  },
+
   {
     id: "access-granted-event",
     event: "access-granted",
@@ -1665,6 +1751,94 @@ export const CARDS = [
     // column the copy leaves it and clears the single-row strip below: the
     // marks run to x=750 and the lock’s body starts at 512.
     portrait: { height: 800, left: 512, bottom: 235 },
+  },
+
+  /**
+   * The event card, moving.
+   *
+   * Same card as `access-granted-event` — same wordmark, hook, facts and
+   * powered-by strip — with the padlock render swapped for the footage it was
+   * made from. Not a replacement: a still is what goes in a post that will be
+   * screenshotted, printed or mailed, and this is what goes in a feed.
+   *
+   * The two carry the lock at the same size in the same place on purpose, the
+   * way the PySA pair do. `portrait: { height: 800, left: 512, bottom: 235 }`
+   * puts the still’s padlock across x512–1030, y315–1115; `height`, `x` and
+   * `y` below put the clip’s lock across x506–1024, y315–1115. Anyone seeing
+   * both sees one card that happens to move.
+   *
+   * The clip’s ground is what makes this composite work at all, and it was
+   * measured rather than hoped for: every corner of the source frame reads
+   * rgb(1,1,1) against this template’s pure black, so the rectangle where the
+   * footage ends is invisible. The grid is drawn *over* the clip and carries
+   * across that edge; the bloom is dropped, because a green radial that stops
+   * where the footage stops is the one thing that would reveal it. See
+   * `if:transparent` in the template.
+   */
+  {
+    id: "access-granted-event-motion",
+    event: "access-granted",
+    /**
+     * Prepared, not the raw file, and it lives here rather than in `public/`.
+     *
+     * The supplied render is 1280x720 landscape with the lock in the middle
+     * third and a lot of black either side — placed whole it would be a lock
+     * six hundred pixels wide in a card that wants it five hundred tall. So
+     * the asset is cropped and scaled once, with lanczos, to the size the
+     * card draws it at, and the one resample that happens is the good one.
+     *
+     * The crop is x145–839 of the source and its *full* height, which is
+     * wider than the lock needs and is the point. A rectangle of footage laid
+     * on this card has four edges, and the clip's ground is not quite black —
+     * it carries a faint dark-green schematic of its own, around 8/255 against
+     * this template's 0. That is invisible at a glance and perfectly visible
+     * as a straight vertical line under a black-level stretch, which is what
+     * a phone in a dark room is. So the horizontal edges are put where they
+     * cannot be seen: this crop, at this scale, starts at x0 and runs to 1082,
+     * six pixels past the frame. Neither side has an edge inside the card.
+     *
+     * Top and bottom are still in frame, and the source's own first and last
+     * rows are darker — about 1/255, except during the 0.3s the lock flashes
+     * open, when they reach 6. So the asset ramps to black over its top and
+     * bottom 44 rows before scaling. The lock has 55 rows of clearance above
+     * and 107 below at its tallest, so the ramp never touches it.
+     *
+     * It is also closed into a loop: the source ends on a lock rotated away
+     * from camera and starts on one facing front, which cuts visibly when a
+     * feed wraps it. The last 0.7s dissolves into the first 0.7s instead,
+     * which costs 1.5s of the ten and makes the wrap seamless.
+     *
+     * `tools/social-cards/assets/` rather than `public/`, unlike
+     * `pysa2-loop.mp4`: that one is on the PySA page (`lib/pysa.ts`) and the
+     * card borrows it. Nothing on the site plays this one, and a megabyte and
+     * a half shipped to the CDN for a page that never asks for it is a cost
+     * with no reader. If the Access Granted band ever wants a moving lock,
+     * this moves to `public/` and both use it.
+     */
+    video: {
+      src: "tools/social-cards/assets/padlock-loop.mp4",
+      // The asset is already 1082x1122, so this is the size it was baked at
+      // and the renderer's own `scale` is a no-op.
+      height: 1122,
+      x: 0,
+      y: 159,
+      // One play. The file is a loop, so the feed's own wrap is the loop —
+      // playing it twice inside the file would only make a longer video that
+      // wraps in exactly the same place.
+      loops: 0,
+      seconds: 8.54,
+    },
+    // Everything below is `access-granted-event`, unchanged. The two cards
+    // are the same card.
+    wordmarkSize: 118,
+    logoCols: 6,
+    gridMask: "96% 70% at 52% 50%",
+    gridInk: 0.1,
+    scrimLeft:
+      "rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 26%, rgba(0, 0, 0, 0) 52%",
+    subtitle:
+      "Every other room this week is people talking about technology. This one is people taking it apart.",
+    facts: ["Wednesday, September 30", "1 \u2013 6 PM  \u00b7  Geekdom, 3rd Floor"],
   },
 
   {
