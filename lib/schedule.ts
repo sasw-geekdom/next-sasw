@@ -1976,14 +1976,30 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // giveaway is Friday midday, so the activation as a whole runs the week
     // and the rail says so.
     //
-    // Deliberately a span and not a `when`, even though Friday's hour is now
-    // fixed. `when` wins over `span` in the projection, so setting it would
-    // take Give-a-LOT off the all-week rail and put a single 12 PM block on
-    // Friday — which loses the four days of collection that are the point,
-    // and drags the week's hour axis back to noon for one event. The rail
-    // already covers Friday; the hour lives in `detail.programme` and on the
-    // registration page the button goes to.
-    span: { from: "2026-09-28", to: "2026-10-02" },
+    /**
+     * The giveaway's own hour, confirmed by the organisers.
+     *
+     * This record was a span and no `when` for two reasons, and both have
+     * gone. The hour was unconfirmed; it is now 12 to 2:30. And `when` used
+     * to win over `span` outright, so setting it would have taken the four
+     * days of collection off the rail — the projection is per day now, so it
+     * does not.
+     *
+     * What this buys: on Friday's page the Central Library column shows the
+     * giveaway at noon instead of a bar labelled "Sep 28 – Oct 2", which on
+     * that day was the less true of the two — collection had finished the
+     * night before. It also publishes an Event rich result, which a span
+     * cannot.
+     */
+    when: {
+      start: "2026-10-02T12:00:00-05:00",
+      end: "2026-10-02T14:30:00-05:00",
+    },
+    // Ends Thursday, not Friday. The drop-off runs Monday to Thursday and
+    // Friday is the giveaway, which the card facts have said all along
+    // ("Drop-off · Sept 28 – Oct 1"). The span claiming Friday was the model
+    // disagreeing with the copy.
+    span: { from: "2026-09-28", to: "2026-10-01" },
     // Linux and open source software, taught and installed. The room's other
     // two sessions are Small Business & Solopreneur, but a room is not a
     // circuit — The Rand carries three between its three activations.
@@ -3781,15 +3797,51 @@ export function weekCalendar(
 
   const dayIndex = new Map(EVENT_DAYS.map((d, i) => [d.iso, i]));
   const spans: CalendarSpan[] = resolved
-    // `when` wins where an activation somehow carries both — see the note on
-    // `span`. Drawing it on the axis and the rail reads as two events.
-    .filter((s) => s.span && !s.when)
+    /**
+     * Both is allowed now, and Give-a-LOT is why.
+     *
+     * This used to be `s.span && !s.when` — `when` won outright, on the
+     * reasoning that drawing the same thing on the axis and on the rail reads
+     * as two events. That is true on any one day and it is not true across a
+     * week: Give-a-LOT collects machines for four days and gives them away in
+     * a fixed two and a half hours on the Friday, which genuinely is a rail
+     * and a block, on different days.
+     *
+     * So the rule is per day rather than absolute. A session carrying both
+     * draws as a block on its `when` day and as a span on the others, and the
+     * trim below is what keeps those from ever landing on the same day.
+     */
+    .filter((s) => s.span)
     .flatMap((s) => {
-      const from = dayIndex.get(s.span!.from);
-      const to = dayIndex.get(s.span!.to);
+      let from = dayIndex.get(s.span!.from);
+      let to = dayIndex.get(s.span!.to);
       // A span reaching outside the week is dropped rather than clamped: it
       // means the dates are wrong, and a silently shortened bar hides that.
       if (from === undefined || to === undefined || to < from) return [];
+      /**
+       * Trim the `when` day off the span, so the two never share a day.
+       *
+       * Only handles a `when` at one end or the other, which is the shape a
+       * run of days ending in an event actually takes. A `when` in the middle
+       * would need the span split in two, and rather than draw it twice the
+       * span is dropped — better a missing bar than a day claiming the same
+       * thing twice, and the console line says which session to look at.
+       */
+      if (s.when) {
+        const at = dayIndex.get(dayKey(s.when.start));
+        if (at !== undefined && at >= from && at <= to) {
+          if (at === from) from += 1;
+          else if (at === to) to -= 1;
+          else {
+            console.warn(
+              `[schedule] ${s.slug}: \`when\` falls inside its \`span\`; ` +
+                `the span is dropped. Split it into two sessions.`,
+            );
+            return [];
+          }
+          if (to < from) return [];
+        }
+      }
       return [
         {
           slug: s.slug,
