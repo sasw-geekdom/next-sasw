@@ -1082,7 +1082,17 @@ async function main() {
                 const box = card.portraits?.[n] ?? {};
                 return (
                   `<img src="${pp.file}" alt="" style="height:${box.height ?? 520}px` +
-                  `;right:${box.top ?? n * 180}px" />`
+                  `;right:${box.top ?? n * 180}px` +
+                  // Lifts one figure off the row's baseline. 0 for everyone
+                  // unless a card says otherwise, because a row is bottom-
+                  // anchored so its crops line up at the foot.
+                  //
+                  // It exists for the case where a crop is tighter than its
+                  // neighbours': shrinking that figure to match head sizes
+                  // drops its crown, which reads as standing further back, so
+                  // the height comes down and `bottom` puts the crown back.
+                  // The cost is a gap under that figure at the card's foot.
+                  `;bottom:${box.bottom ?? 0}px" />`
                 );
               })
               // Reversed, and no z-index on the tag. Painting order comes from
@@ -1142,6 +1152,7 @@ async function main() {
             orgA: a.org,
             heightA: card.portraits[0].height,
             topA: card.portraits[0].top,
+            bottomA: card.portraits[0].bottom ?? 0,
             faceB: b.file,
             firstB: b.name.split(" ")[0],
             lastB: b.name.split(" ").slice(1).join(" "),
@@ -1149,6 +1160,7 @@ async function main() {
             orgB: b.org,
             heightB: card.portraits[1].height,
             topB: card.portraits[1].top,
+            bottomB: card.portraits[1].bottom ?? 0,
           }
         : {}),
     };

@@ -114,6 +114,7 @@
         letter-spacing: 0.02em;
         color: #8b8b8b;
       }
+
       .crowd-names b {
         font-weight: 500;
         color: #ededed;
@@ -121,6 +122,31 @@
         letter-spacing: 0.06em;
       }
       <!--/if:faces-->
+
+      <!--if:moderatorName-->
+      /* Who is chairing, as a line rather than a face.
+         Ported from the-model.html, which is the only other card here with a
+         moderator, and the reasoning carries: a thumbnail beside the credit
+         reads as a speaker at a smaller size, and the person chairing is not
+         one of the people the card is about. Under the names, because it is
+         the last thing about the bill rather than part of it. */
+      .mod {
+        margin-top: 14px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 15px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #8b8b8b;
+      }
+      /* White, not the magenta the rest of this card emphasises with. The
+         line sits directly above the bolt, and magenta type at 15px over a
+         magenta shape stops being a highlight and becomes camouflage — the
+         name is the part that has to read. */
+      .mod .who {
+        color: #fff;
+        font-weight: 500;
+      }
+      <!--/if:moderatorName-->
 
       <!--if:faceB-->
       /* The two of them in the lower right, overlapping, the nearer one in
@@ -141,14 +167,21 @@
         z-index: 2;
         filter: grayscale(1);
       }
+      /* `bottom` per figure, 0 unless a card says otherwise. Same lever the
+         crowd row has and for the same case: when one crop is tighter than
+         the other, matching their head sizes means shrinking that figure,
+         which drops its crown and reads as standing further back. Height
+         down, `bottom` up, crown back on the line. */
       .pair img.a {
         height: {{heightA}}px;
         right: {{topA}}px;
+        bottom: {{bottomA}}px;
         z-index: 3;
       }
       .pair img.b {
         height: {{heightB}}px;
         right: {{topB}}px;
+        bottom: {{bottomB}}px;
       }
       /* Both names in the copy column, where a single speaker's name sits.
          Keeping them off the figures is what lets the figures overlap. */
@@ -508,6 +541,9 @@
       <!--if:faces-->
       <div class="crowd-names">{{crowd}}</div>
       <!--/if:faces-->
+      <!--if:moderatorName-->
+      <p class="mod">Moderated by <span class="who">{{moderatorName}}</span></p>
+      <!--/if:moderatorName-->
 
       <div class="spacer"></div>
 

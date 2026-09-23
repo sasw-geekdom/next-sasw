@@ -2154,6 +2154,91 @@ export const CARDS = [
   },
 
   {
+    id: "tpr-speaker-dan-hoverman",
+    event: "tpr",
+    speaker: "dan-hoverman",
+    // Broken after "to", not at a colon \u2014 the title has no colon and the
+    // name is the whole hook. "Y\u2019ALL STREET" draws 643px at 110, well
+    // inside the measure, so it gets the size a two-word headline can carry.
+    headline: "Welcome to<br />Y\u2019all Street",
+    headlineSize: 110,
+    /**
+     * The abstract\u2019s own turn, which is sharper than its news.
+     *
+     * It opens on headlines \u2014 TXSE ringing its first bell, Nasdaq Texas
+     * launching at the Alamo, IPOs in 2027 \u2014 and then says the real
+     * question is quieter. A card that lists the milestones is a card about
+     * Texas; this one is about the founder reading it.
+     */
+    subtitle:
+      "The headlines are everywhere. The quieter question is what any of it means for a pre-seed founder here.",
+    circuit: "Capital",
+    /**
+     * Shortened from the CMS\u2019s "Managing Director, Head of Corporate &
+     * Investment Banking", which is 56 characters where this slot holds 33.
+     * Set whole it ran from x=74 to x=845 and his jacket starts at 556 \u2014
+     * 289px of magenta type over a lapel.
+     *
+     * The title rather than the division, because the line under it says
+     * Texas Capital Bank and a managing director at that bank talking about
+     * Texas capital markets needs no further explaining. The full title is on
+     * his speaker page.
+     */
+    role: "Managing Director",
+    // 780, not the probe's 645. The probe sizes a head to match the rest of
+    // this stage, which is right for a card where the figure is a portrait
+    // beside copy; this one wanted the figure to hold the right side, and at
+    // 645 his ink stopped at x=867 with 210px of black beside it. His cutout
+    // reaches his frame's right edge, so filling the card is a matter of
+    // scale and offset. Solved off his drawn silhouette rather than his
+    // bounding box \u2014 his ink only reaches the frame edge at the rows the
+    // card crops away \u2014 so 780 at left 520 puts his shoulder on 1079.
+    portrait: { height: 780, left: 520 },
+  },
+
+  {
+    id: "tpr-behind-the-build",
+    event: "tpr",
+    speakers: ["sheridan-chambers", "dan-cornell", "john-dickson"],
+    circuit: "Tech & Builders",
+    // The title, split at its own colon. Both halves earn their line: the
+    // first is what the hour is, the second is whose story it is, and
+    // neither works alone on a card for people who may not know the firm.
+    headline: "Behind the Build:<br />The Denim Group Story",
+    headlineSize: 76,
+    // Their own closing line, and the reason this is on the main stage
+    // rather than in a security room: the deal is the hook, staying is the
+    // point.
+    subtitle:
+      "Three founders who built it here, sold it here, and are still here.",
+    // No facts of its own, so it takes the venue and street every other card
+    // on this stage shows. The slot is known — Tuesday, 11:00 — and left off
+    // deliberately: a day plus a 45-minute range runs that line out to the
+    // width of the headline above it, and this block is meant to sit quietly
+    // under three faces.
+    /**
+     * Three crops solved to draw three heads the same size, then spaced off
+     * where the faces actually are.
+     *
+     * Their head-to-frame ratios run 38.5% (Dan), 42.6% (John) and 44.7%
+     * (Sheridan), so equal heads need heights that differ by as much —
+     * 740/859/777 against Sheridan as the reference.
+     *
+     * `top` is distance from the right edge, and it is solved rather than
+     * evenly spaced: a cutout is three times wider than the face in it, so
+     * even gaps between *figures* put one man's shoulder across the next
+     * one's face. Measured off the alpha channel, their face centres sit at
+     * 534, 515 and 546 of their own 1080 frames, and these numbers put those
+     * centres 280px apart on the card.
+     */
+    portraits: [
+      { height: 740, top: 501 },
+      { height: 859, top: 161 },
+      { height: 777, top: -67 },
+    ],
+  },
+
+  {
     id: "tpr-quest-to-shelf",
     event: "tpr",
     speakers: [
@@ -2207,28 +2292,201 @@ export const CARDS = [
   },
 
   {
+    id: "tpr-state-of-cpg",
+    event: "tpr",
+    speakers: ["andrew-m-anguiano", "charles-woodin"],
+    circuit: "Capital",
+    // The title, broken at its preposition. Whole it is 30 characters and
+    // wraps on its own under the ramp.
+    headline: "The State of CPG<br />in San Antonio",
+    headlineSize: 92,
+    // The abstract's own closing triplet, which does what the paragraph above
+    // it takes four sentences to do. "One of the country's most influential
+    // grocers is headquartered here" was the other candidate and it is the
+    // better fact, but it names H-E-B without naming them and reads as a
+    // riddle on a card.
+    subtitle:
+      "What the shelves want. What SA is shipping. What\u2019s next for CPG in Texas.",
+    /**
+     * Solved at the crown, as every pair on this template is, and then
+     * against the copy \u2014 which is the part that made this one work.
+     *
+     * Their crops are different shapes, not just different depths: Andrew\u2019s
+     * frame is 1080x1350 where Charles\u2019s is 750x938, so the same height
+     * draws two different figures. 644 and 660 land their crowns at y=743 and
+     * y=737.
+     *
+     * The pair card beside this one sits its figures at left 270 and works,
+     * because Maria\u2019s cutout carries transparent margin. These two are ink
+     * to the frame border, so the same numbers painted over the names and cut
+     * "ANDREW M. ANGUIANO" in half. The copy was measured instead of guessed
+     * \u2014 render the card with the portraits at 180 and the column shows \u2014
+     * and its longest line ends at x=455.
+     *
+     * `top` is distance from the right edge. Andrew sits as far left as his
+     * own silhouette allows: at the name rows his shoulder is the widest part
+     * of him, and at 160 it clears "CHARLES WOODIN" by about 30px. Charles
+     * takes the crop on the right instead, which costs an outer shoulder
+     * nobody reads.
+     */
+    portraits: [
+      { height: 644, top: 160 },
+      { height: 660, top: -130 },
+    ],
+  },
+
+  {
+    id: "tpr-the-long-haul",
+    event: "tpr",
+    speakers: ["josh-sanchez", "alberto-pina"],
+    // Cat Dizon chairs it \u2014 the description says so, and the card says so in
+    // a line rather than a third face. Her CMS record still has her down as a
+    // speaker on this session.
+    moderator: "cat-dizon",
+    circuit: "Founder",
+    // The title\u2019s first half. Whole it is 51 characters; the second half is
+    // what the hook is for, and "The Long Haul" is the part that works as a
+    // name for the hour.
+    headline: "The Long Haul",
+    headlineSize: 118,
+    // The title\u2019s other half, then the description\u2019s own framing. "Not the
+    // launch story. The middle." is the sentence that says why this is a
+    // different panel from every other founder hour on the week.
+    subtitle:
+      "Building in San Antonio past Series\u00a0A. Not the launch story \u2014 the middle.",
+    /**
+     * Level crowns, and Josh in front so his bigger head is the near one.
+     *
+     * His crop is much tighter than Alberto's — 41.9% of frame against
+     * 33.4% — so the two cannot both have equal heads and level crowns.
+     * Equal heads puts him at 590 against 740 and drops his crown 134px.
+     *
+     * `bottom` was the fix on the pre-seed card and it does not work here.
+     * Shrinking him and lifting him back leaves black under him at the
+     * card's foot, and this template bleeds its figures off the bottom, so
+     * the edge of that gap reads as a straight cut across his suit — checked
+     * at 134px and again at 39px, visible both times. So: 730 against 740,
+     * crowns level on 654, no gap, and his head draws about 24% larger than
+     * Alberto's. On the figure standing behind that is the wrong way round,
+     * Josh leads, so that reads as depth rather than as an error — which is
+     * what it was when he stood behind.
+     *
+     * `top` is distance from the right edge, solved off their face centres
+     * (532 and 543 of their own 1080) to put those centres 230px apart, with
+     * Alberto\u2019s ink clearing the name column at x=375.
+     */
+    // 50px below this template's default, to get the bolt's tip out of the
+    // moderator line. At 430 the point reaches y=501 and the line sets at
+    // 508-518, so a magenta wedge 16px wide ran straight through "BY".
+    boltTop: 480,
+    poweredLabel: "Sponsored by",
+    // Active Capital, whose co-founder chairs the hour. Same partner lookup
+    // the startup bash card uses.
+    logos: [{ partner: "Active Capital", height: 46 }],
+    portraits: [
+      { height: 730, top: 136 },
+      { height: 740, top: -104 },
+    ],
+  },
+
+  {
+    id: "tpr-pre-seed-age-of-ai",
+    event: "tpr",
+    speakers: [
+      "kelsey-waters",
+      "brian-sierakowski",
+      "ray-cantu",
+      "franklin-morris",
+    ],
+    // Name only, no face \u2014 the treatment the-model.html uses and the one
+    // tpr.html gained for this card. The person chairing is not one of the
+    // people the card is about, and a thumbnail beside the credit reads as a
+    // speaker at a smaller size.
+    moderator: "jasper-sundeen",
+    circuit: "Founder",
+    headline: "Pre-seed in the<br />Age of AI",
+    headlineSize: 92,
+    // The abstract's own test, which is the useful half. "The tools have
+    // changed" is the setup and every founder reading this already knows it;
+    // what they have not been told is whether it is working.
+    subtitle:
+      "What AI is actually doing inside their companies. Where it\u2019s earning its keep \u2014 and where it isn\u2019t.",
+    /**
+     * One height for all four rather than four solved for equal heads.
+     *
+     * Equal heads is the rule for portraits at one distance; it is the wrong
+     * rule for a bottom-anchored row, where a shorter figure sits with its
+     * crown lower and reads as standing further back. The CPG pitch card
+     * learned this the expensive way.
+     *
+     * It also sidesteps a bad measurement: the probe puts Franklin's head at
+     * 57.1% of his frame against 36.1% for Brian, which would make him barely
+     * two thirds their height. That is the chin detection failing, which the
+     * probe's own note warns about \u2014 not a real difference of that size.
+     *
+     * `top` is distance from the right edge, solved off their face centres
+     * (546, 541, 542, 554 of their own 1080) to put those centres 200px
+     * apart, then the row anchored so the last figure's ink lands on the
+     * card's edge — off the drawn silhouette rather than the bounding box,
+     * because these cutouts are widest above the rows a shoulder actually
+     * occupies and a bbox solve left a 60px gap. Re-solved when Ray and
+     * Franklin swapped: their silhouettes differ on that side, so the gap
+     * came back and the whole row moved 60px right again.
+     */
+    portraits: [
+      { height: 660, top: 439 },
+      { height: 660, top: 237 },
+      { height: 660, top: 43 },
+      { height: 580, top: -131, bottom: 74 },
+    ],
+  },
+
+  {
     id: "tpr-sa-cpg-pitch-social",
     event: "tpr",
     /**
-     * Two hosts, Maria Flores and Chris Cook, so the card takes the
-     * template's pair layout — the figure slot splits into two windows in
-     * the lower right rather than one figure bleeding off the bottom.
+     * Four founders now, not the two this card shipped with \u2014 so it takes
+     * the crowd row rather than the pair layout, and the names move to a
+     * credits line under the hook.
      *
-     * The headline is the description's own promise rather than the session
-     * name. "SA CPG Pitch & Social" says the format; "San Antonio's next
+     * The headline is the description\u2019s own promise rather than the session
+     * name. "SA CPG Pitch & Social" says the format; "San Antonio\u2019s next
      * shelf staples" says what is being pitched, which is the part a reader
      * scrolling past has any reason to care about.
      */
-    speakers: ["maria-flores", "chris-cook"],
-    // Solved at the crown, as every pair in this set is: their crops start at
-    // different depths — hers 76px into the frame, his 53 — so equal offsets
-    // would sit one of them lower and read as them being different heights.
-    // `height` is the figure's height; this template's pair layout reuses
-    // `top` as the distance from the right edge. Solved so their crowns land
-    // level and the two overlap by about a third.
+    speakers: ["maria-flores", "chris-cook", "kellee-everts", "daniel-mezza"],
+    /**
+     * Kellee and Daniel match Chris\u2019s 644 rather than the 552 and 518 that
+     * would draw their heads the size of his.
+     *
+     * Equal heads was the first solve \u2014 their head-to-frame ratios run 31.0%
+     * (Maria) to 41.9% (Daniel), so equal heads needs a 35% spread in figure
+     * height \u2014 and it is right for a row of portraits at one distance. It is
+     * wrong here: these are bottom-anchored, so a shorter figure sits with
+     * its crown lower, and the row read as two founders standing behind the
+     * other two rather than beside them. Matching the figures levels the row;
+     * the cost is that Kellee\u2019s and Daniel\u2019s heads draw about 17% and 24%
+     * larger than Chris\u2019s, because their crops are tighter.
+     *
+     * `top` is distance from the right edge, solved from where each face
+     * actually sits in its own frame \u2014 their centres are 553, 564, 555 and
+     * 548 of their own 1080 \u2014 to put those centres 215px apart on the card.
+     * Re-solved after the heights changed: the scale moves the face with it,
+     * so the old offsets would have bunched the last two.
+     *
+     * Then the whole row moved 147px right, which is what it took to land
+     * Daniel on the card\u2019s edge. His frame already ran 4px past it \u2014 the
+     * measurement that matters is his ink, and his cutout carries enough
+     * transparent margin on that side that the row was stopping at x=933.
+     * Shifting the set rather than him alone keeps the 215px between faces.
+     * Spacing the *figures* evenly instead puts one person\u2019s shoulder across
+     * the next one\u2019s face, which is the note quest-to-shelf carries.
+     */
     portraits: [
-      { height: 700, top: 250 },
-      { height: 664, top: 20 },
+      { height: 700, top: 475 },
+      { height: 644, top: 287 },
+      { height: 644, top: 68 },
+      { height: 644, top: -151 },
     ],
     headline: "San Antonio\u2019s Next<br />Shelf Staples",
     headlineSize: 92,
