@@ -120,6 +120,18 @@
          a figure stands in the middle and a name has to read across it, and
          wrong on a card whose picture is small and parked on the right — there
          it blacks out the one thing filling the space. */
+      <!--if:greyscale-->
+      /* A mono cut of the same card. The token already existed for the
+         community template; this stage had never asked for one because its
+         figures are the only colour on a black-and-green card. Mike Bell's
+         is the exception \u2014 a full-length figure in a hood with a sword, which
+         is a photograph rather than a headshot, and the desaturated cut reads
+         as the poster the colour one cannot be. */
+      .portrait img {
+        filter: grayscale(1);
+      }
+      <!--/if:greyscale-->
+
       .portrait::after {
         content: "";
         position: absolute;

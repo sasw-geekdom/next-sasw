@@ -111,6 +111,78 @@
         height: {{portraitHeight}}px;
         width: auto;
       }
+      <!--if:faces-->
+      /* Three or more on one bill, the way tpr.html draws a panel.
+         The third layout this template carries, after one figure and a pair.
+         AITX brought it: an interactive panel is three founders, and until
+         now `face` resolved to the first of them and the card quietly drew
+         one person for a session run by three.
+
+         No greyscale, unlike tpr.html's row. That template desaturates every
+         figure because its bolt runs at full charge and a colour photograph
+         fights it; a community card is a colour card and the group's own
+         mark sets the palette. */
+      .crowd {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .crowd img {
+        position: absolute;
+        bottom: 0;
+        width: auto;
+        /* Under the frame, which sits at 2 — the same z-order tpr.html's row
+           takes, so the facts and the strip stay legible over a shoulder. */
+        z-index: 1;
+      }
+      /* The same scrim the single and pair layouts carry, and a row needs it
+         more: a figure at the left of a three-up stands directly under the
+         names, the facts and the strip. Without it the credits line ran over
+         Brenda Gentry's hair and the second fact went with it \u2014 legible
+         only because her hair is dark, which is not a thing to rely on.
+
+         Weaker than the portrait's, which goes to solid black across its
+         first fifth. That is right when the figure it covers is off to one
+         side; here the leftmost person is *in* that fifth, and at full
+         strength the scrim took Brenda Gentry down to a silhouette. 0.72
+         falling to clear by the halfway mark keeps the copy off her face
+         without erasing her. */
+      .crowd::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+          linear-gradient(
+            to right,
+            rgba(0, 0, 0, 0.72) 0%,
+            rgba(0, 0, 0, 0.42) 20%,
+            rgba(0, 0, 0, 0) 50%
+          ),
+          linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 14%);
+      }
+      /* The credits, one line under the hook. Three names cannot take the
+         size one or two get, and they cannot sit beside the row either: the
+         figures need the whole bottom band. */
+      .crowd-names {
+        margin-top: 20px;
+        max-width: 880px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 22px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 16px;
+        letter-spacing: 0.02em;
+        color: #8b8b8b;
+      }
+      .crowd-names b {
+        font-weight: 500;
+        color: #fff;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      <!--/if:faces-->
+
       <!--if:faceB-->
       /* Two on one bill, presented the way tpr.html presents a pair.
          The talks that bring two people to one of these hours were, until
@@ -346,6 +418,10 @@
     <!--ifnot:face-->
     <img class="bolt-hero" src="bolt-current.png" alt="" />
     <!--/ifnot:face-->
+    <!--if:faces-->
+    <div class="crowd">{{faces}}</div>
+    <!--/if:faces-->
+    <!--ifnot:faces-->
     <!--if:face-->
     <!--ifnot:faceB-->
     <div class="portrait"><img src="{{face}}" alt="" /></div>
@@ -357,6 +433,7 @@
     </div>
     <!--/if:faceB-->
     <!--/if:face-->
+    <!--/ifnot:faces-->
 
     <div class="frame">
       <div class="top">
@@ -370,6 +447,10 @@
       <!--if:subtitle-->
       <p class="subtitle">{{subtitle}}</p>
       <!--/if:subtitle-->
+
+      <!--if:faces-->
+      <div class="crowd-names">{{crowd}}</div>
+      <!--/if:faces-->
 
       <div class="spacer"></div>
 
@@ -396,7 +477,7 @@
            empty block sitting in the HTML, and every single-speaker card on
            this template renders a pair's name block with nobody in it. Same
            failure `faceB` caused on tpr.html, same note in render.mjs. -->
-      <!--ifnot:faceB--><!--if:first-->
+      <!--ifnot:faces--><!--ifnot:faceB--><!--if:first-->
       <div class="name">
         {{first}}<!--if:last--><br />{{last}}<!--/if:last-->
       </div>
@@ -404,7 +485,7 @@
       <!--if:org-->
       <div class="org">{{org}}</div>
       <!--/if:org-->
-      <!--/if:first--><!--/ifnot:faceB-->
+      <!--/if:first--><!--/ifnot:faceB--><!--/ifnot:faces-->
 
       <div class="facts">
         <div class="fact"><span class="pip"></span>{{fact1}}</div>

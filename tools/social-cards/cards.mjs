@@ -408,6 +408,22 @@ export const EVENTS = {
    * What it needed was for "Main Stage" to stop being typed into the markup —
    * see `stage` in render.mjs.
    */
+  /**
+   * Women Founders Network's hour at the Central Library, on the same shape
+   * `rand` uses: this stage's template with the room swapped out.
+   *
+   * `stage` carries the host rather than the room. The ramp caption reads
+   * circuit then stage, and for a session whose whole draw is which group is
+   * convening it, "Women Founders Network" is the more useful of the two \u2014
+   * the library is in the facts a few lines down.
+   */
+  "women-founders-network": {
+    template: "tpr.html",
+    stage: "Women Founders Network",
+    facts: ["Friday, October 2  \u00b7  9 \u2013 10 AM", "Central Library"],
+    logos: [],
+  },
+
   rand: {
     template: "tpr.html",
     stage: "The Rand",
@@ -822,6 +838,47 @@ const THURSDAY_HEAD = {
   headline: "Thursday, October 1",
   subtitle: "Six rooms \u00b7 Sixteen sessions \u00b7 Downtown San Antonio",
   note: "All times subject to change \u00b7 sastw.com/schedule",
+};
+
+/**
+ * Mike Bell, in colour and in mono.
+ *
+ * Two cards off one set of values rather than two cards to keep in step: the
+ * mono cut differs by one flag, and a second copy of the hook is a second
+ * thing to remember to edit.
+ */
+const MIKE_BELL = {
+  event: "access-granted",
+  speaker: "mike-bell",
+  event: "access-granted",
+  speaker: "mike-bell",
+  // The title whole, at 76 rather than the set's 118. "BUG BOUNTY HUNTING"
+  // is 18 characters and draws 666px there; at 118 it runs past the
+  // measure and past the figure with it.
+  headline: "AI-powered<br />Bug Bounty Hunting",
+  headlineSize: 76,
+  // His own sentence, minus the "how to". The tools are the news and the
+  // last clause is the reason anyone turns up.
+  subtitle:
+    "Find real vulnerabilities and write the reports that get you paid \u2014 with Claude, Codex and Deepseek.",
+  /**
+   * Not a headshot: a three-quarter figure in a beanie and leather coat,
+   * holding a sword. The probe wants 1360 to draw his head the size this
+   * stage draws everyone else's, which is taller than the card \u2014 his head
+   * is 20.9% of his frame where the rest of this set runs 33\u201344%.
+   *
+   * So the pose carries it rather than the face, the way `edwin-jung` does
+   * on PySanAntonio. 940 is the ceiling: his crown lands at 477 and the
+   * headline\u2019s second line runs to x=738 at y 380\u2013440, so any taller and
+   * his hood climbs into "BUG BOUNTY HUNTING". Left 447 lands his ink on
+   * the card\u2019s right edge \u2014 solved off his ink (188\u2013897 of his 1080)
+   * rather than his frame, which carries 188px of empty alpha on one side
+   * and 183 on the other.
+   *
+   * Re-solved when his picture changed: the new cut is hooded and sits
+   * lower, crown 97px into the frame against 42.
+   */
+  portrait: { height: 940, left: 447 },
 };
 
 export const CARDS = [
@@ -1264,6 +1321,52 @@ export const CARDS = [
     // A fuller crop than the rest — his head is 33.8% of the frame against
     // ~38% — so it takes a taller image to draw the same size head.
     portrait: { height: 1020, left: 410 },
+  },
+
+  {
+    id: "aitx-ai-and-startups",
+    event: "aitx",
+    speakers: ["brenda-gentry", "jesus-rafael-burgoa", "joseph-delong"],
+    headline: "AI and Startups",
+    headlineSize: 96,
+    // Named work, then the turn. Their own summary \u2014 "what works, what
+    // doesn't work, and how founders can start small" \u2014 is the shape of an
+    // answer without any of it; the three areas they list are the specific
+    // part, and "just adds steps" is the half nobody else on the week is
+    // saying out loud.
+    subtitle:
+      "Research, product, operations \u2014 where AI actually saves a small team time, and where it just adds steps.",
+    /**
+     * Near-equal figure heights, with `bottom` levelling the crowns.
+     *
+     * The probe measures head *height* and Brenda has a lot of hair, so
+     * matching on it put her at 917 against Joseph's 660 \u2014 and her head
+     * silhouette then drew 425px against his 174. Measured three ways: her
+     * face is 184 against his 169, barely wider, while her hair makes the
+     * whole head two and a half times his. The probe was sizing her hair.
+     *
+     * So heights sit together (701/660/690) the way the Denim Group card's
+     * three do, and her hair reads as hair rather than as a scaling error.
+     * Her face ends up the smallest of the three at 137; that is what a
+     * person with that much hair looks like beside two who have none.
+     *
+     * `bottom` levels the crowns on 724, since three different crops start at
+     * three different depths. Negative numbers cost nothing here \u2014 this row
+     * bleeds off the card's foot, so pushing a figure down crops it rather
+     * than leaving the gap a positive lift does.
+     *
+     * `top` is distance from the right edge, solved off their face centres
+     * (582, 546, 375 of their own frames) to put those centres 250px apart,
+     * then the whole row moved 110px right. That was worth it twice over:
+     * Brenda was cut 88px by the left edge, and the row now sits further off
+     * the copy the scrim has to hold it clear of. Jesus takes 62px of crop on
+     * the outer shoulder in exchange.
+     */
+    portraits: [
+      { height: 690, top: 416, bottom: -40 },
+      { height: 701, top: 140, bottom: -13 },
+      { height: 660, top: -91 },
+    ],
   },
 
   {
@@ -2721,6 +2824,35 @@ export const CARDS = [
   },
 
   {
+    id: "wfn-speaker-laney-cloud",
+    event: "women-founders-network",
+    speaker: "laney-cloud",
+    circuit: "Founder",
+    // Her company, not the session's registered title. "Women Founders
+    // Network: The Village with Laney Cloud" is 51 characters and names the
+    // host, the venture and the speaker \u2014 the ramp above already says the
+    // host and the block below already says her name, so the headline gets
+    // the one thing neither of them covers.
+    headline: "The Village",
+    headlineSize: 118,
+    /**
+     * Her own reason for building it, which is sharper than what it is.
+     *
+     * "A day spa and members-only social club for women" describes the
+     * business; "the infrastructure she wishes she'd had a decade ago" is why
+     * a room of founders should care. The description gives both \u2014 this
+     * keeps the second and enough of the first to place it.
+     */
+    subtitle:
+      "A day spa and members-only social club for women \u2014 the infrastructure she wishes she\u2019d had a decade ago.",
+    // Off the probe: her head is 37.6% of her frame, which puts her at 755 to
+    // draw the head this template's figures draw. Left 504 rather than the
+    // set's 439, which is where her ink lands on the card's right edge \u2014 at
+    // 439 her shoulder stopped at 1007 with 73px of black beside it.
+    portrait: { height: 755, left: 504 },
+  },
+
+  {
     id: "rand-speaker-rachel-davis",
     event: "rand",
     speaker: "rachel-davis",
@@ -3443,6 +3575,13 @@ export const CARDS = [
     org: "TOOOL affiliate",
     portrait: { height: 370, left: 555, bottom: 320 },
   },
+
+  { ...MIKE_BELL, id: "access-granted-speaker-mike-bell" },
+  // The same card desaturated. His picture is the only colour on this
+  // template's black and green, and it is a photograph rather than a
+  // headshot — mono reads as a poster where the colour cut reads as a
+  // snapshot. Both ship; pick per placement.
+  { ...MIKE_BELL, id: "access-granted-speaker-mike-bell-bw", greyscale: true },
 
   {
     id: "access-granted-speaker-corey-hartman",
