@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -161,6 +162,16 @@ export function SessionManager({
   const [activation, setActivation] = React.useState("");
   /** Which day the rail is showing; "all" is the whole week. */
   const [railDay, setRailDay] = React.useState<string>("all");
+  /**
+   * The room the page is filtered to, alongside the day rail above it.
+   *
+   * It began as an export-only picker sitting beside the download button, and
+   * that was the wrong shape: it looked like a filter, so selecting The Rand
+   * and still seeing TPR rows read as a bug. A control that narrows a list
+   * should narrow the list. The export follows it rather than the other way
+   * round, which also means you can see what you are about to download.
+   */
+  const [railRoom, setRailRoom] = React.useState("");
   const [day, setDay] = React.useState("");
   const [startTime, setStartTime] = React.useState("");
   const [endTime, setEndTime] = React.useState("");
@@ -290,15 +301,35 @@ export function SessionManager({
     [],
   );
 
+  /**
+   * The room filter applied first, so the day chips count what the room
+   * actually has on. Counting every room while a room is selected makes the
+   * chips disagree with the list under them.
+   *
+   * Legacy rows hold free text in `location` — "The Rand", "the rand" — so
+   * the comparison goes through `roomSlugFromLegacy`, the same way the export
+   * route's does. Without it an old row drops out of its own room.
+   */
+  const inRoom = React.useMemo(
+    () =>
+      railRoom
+        ? rows.filter(
+            (r) => (roomSlugFromLegacy(r.location) ?? r.location) === railRoom,
+          )
+        : rows,
+    [rows, railRoom],
+  );
+
   const dayCounts = React.useMemo(() => {
     const c: Record<string, number> = {};
-    for (const r of rows) c[dayOf(r)] = (c[dayOf(r)] ?? 0) + 1;
+    for (const r of inRoom) c[dayOf(r)] = (c[dayOf(r)] ?? 0) + 1;
     return c;
-  }, [rows, dayOf]);
+  }, [inRoom, dayOf]);
 
   const visible = React.useMemo(
-    () => (railDay === "all" ? rows : rows.filter((r) => dayOf(r) === railDay)),
-    [rows, railDay, dayOf],
+    () =>
+      railDay === "all" ? inRoom : inRoom.filter((r) => dayOf(r) === railDay),
+    [inRoom, railDay, dayOf],
   );
 
   /** Activation slug to its display title, for the group headings. */
@@ -340,6 +371,17 @@ export function SessionManager({
     (s) => !participants.some((p) => p.speakerId === s.id),
   );
 
+  /**
+   * The room an export is scoped to, separate from anything the table filters.
+   *
+   * The rail above already filters by day and the export reads it, so picking
+   * Thursday and then The Rand gives the run sheet a room actually asks for.
+   * Empty means every room, which is the whole schedule.
+   */
+  const exportQs = new URLSearchParams();
+  if (railRoom) exportQs.set("venue", railRoom);
+  if (railDay !== "all") exportQs.set("day", railDay);
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between gap-3">
@@ -355,7 +397,7 @@ export function SessionManager({
           value={railDay}
           onChange={setRailDay}
           options={[
-            { key: "all", label: "All", count: rows.length },
+            { key: "all", label: "All", count: inRoom.length },
             ...EVENT_DAYS.map((d) => ({
               key: d.iso,
               label: d.label,
@@ -363,9 +405,31 @@ export function SessionManager({
             })),
           ]}
         />
-        <Button className="ml-auto" onClick={() => open("new")}>
-          Add session
-        </Button>
+        <Combobox
+          value={railRoom}
+          onChange={setRailRoom}
+          placeholder="All rooms"
+          size="sm"
+          className="w-44"
+          options={[
+            { value: "", label: "All rooms" },
+            ...VENUE_OPTIONS.map((v) => ({ value: v.slug, label: v.name })),
+          ]}
+        />
+        {/* Takes whatever the rail and the room picker are set to, so the file
+            is the list on screen. Built because The Rand asked for its own
+            daily run sheet; every room can ask now, and so can the week. */}
+        <div className="ml-auto flex items-center gap-2">
+          <ButtonLink
+            href={`/api/admin/sessions/export${exportQs.toString() ? `?${exportQs}` : ""}`}
+            prefetch={false}
+            variant="outline"
+            size="sm"
+          >
+            Export CSV
+          </ButtonLink>
+          <Button onClick={() => open("new")}>Add session</Button>
+        </div>
       </div>
 
       {visible.length === 0 ? (
