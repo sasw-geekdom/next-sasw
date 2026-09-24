@@ -9,15 +9,15 @@ import {
   Clock,
   MapPin,
 } from "lucide-react";
-import {
-  SessionBento,
-  type SessionCard,
-} from "@/components/site/session-bento";
 import { ButtonLink } from "@/components/ui/button";
 import { eventLocation } from "@/lib/calendar";
 import { ARROW_MOTION } from "@/lib/motion";
 import { AccessContinuous } from "@/components/site/access-continuous";
-import { ACCESS_GREEN, accessBlockFor } from "@/lib/access-granted";
+import {
+  ACCESS_CONTINUOUS,
+  ACCESS_GREEN,
+  accessBlockFor,
+} from "@/lib/access-granted";
 import { ActivationDetail } from "@/components/site/activation-detail";
 import {
   ActivationSessions,
@@ -25,25 +25,30 @@ import {
 } from "@/components/site/activation-sessions";
 import type { CardSpeaker } from "@/components/site/speaker-card";
 import {
-  listPartners,
   listSponsors,
   listSessions,
   listSpeakers,
 } from "@/lib/admin/cms-queries";
 import type { SessionRow } from "@/lib/admin/cms-types";
 import {
+  activationSearchText,
+  allSessions,
   dayMeta,
+  standaloneItems,
+  weekCalendar,
   resolveSchedule,
   scheduleSlugs,
   sessionDay,
-  spanLabel,
   venueRedirect,
   RETIRED_PAGES,
   whenLabels,
-  type CalendarItem,
   type ResolvedSession,
 } from "@/lib/schedule";
-import { liveCalendarItems } from "@/lib/live-schedule";
+import {
+  VenueAgenda,
+  type AgendaDay,
+  type AgendaEntry,
+} from "@/components/site/venue-agenda";
 import { EVENT_DAYS } from "@/lib/event";
 import { PYSA } from "@/lib/pysa";
 import { MODEL_LAVENDER } from "@/lib/the-model";
@@ -1419,90 +1424,162 @@ export default async function VenueSchedulePage({
   if (to) permanentRedirect(to);
 
   const { room, sessions } = schedule;
-  const partners = await safeList(listPartners());
 
   /**
-   * The room's own CMS sessions, which this page did not used to read at all.
+   * The room's week as one running order — see VenueAgenda.
    *
-   * `resolveSchedule` builds a venue's list from the hardcoded array, so a
-   * standalone session entered in the admin reached the week grid and the day
-   * view and never reached the page headed "What's running here." A room
-   * running a dozen half-hour talks would have shown the two activations
-   * around them and nothing else — a heading contradicted by its own contents.
-   *
-   * Same rule the calendar applies: rows with no activation, in this room. A
-   * row that names an activation belongs inside it, and already renders there.
+   * Built from the same week calendar the day pages draw, so the two cannot
+   * disagree about what is in this room: curated blocks and the room's own
+   * CMS talks, the talks that sit inside an activation folded into it, and
+   * Access Granted's village at the foot of its afternoon. The page used to
+   * read the curated list and the CMS talks separately and draw them in two
+   * shapes — cards and rows — which is what made a day read as two lists.
    */
-  const talksByDay = new Map<string, CalendarItem[]>();
-  for (const item of await liveCalendarItems()) {
+  const rows = await safeList(listSessions());
+  const week = weekCalendar(standaloneItems(rows), activationSearchText(rows));
+  const blurbs = new Map(allSessions().map((s) => [s.slug, s.blurb ?? ""]));
+  const localDay = (ms: number) =>
+    new Date(ms).toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
+  const minuteOf = (ms: number) => {
+    const [h, m] = new Date(ms)
+      .toLocaleTimeString("en-GB", {
+        timeZone: "America/Chicago",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      .split(":")
+      .map(Number);
+    return h * 60 + m;
+  };
+  // Speakers first, a moderator last and marked — the person chairing is not
+  // one of the people the session is about.
+  const peopleOf = (r: SessionRow) => {
+    const on = r.participants.filter((p) => p.role !== "moderator" && p.name);
+    const mod = r.participants.filter((p) => p.role === "moderator" && p.name);
+    return (
+      [
+        on.map((p) => p.name).join(", "),
+        mod.length ? `Moderated by ${mod.map((p) => p.name).join(", ")}` : "",
+      ]
+        .filter(Boolean)
+        .join(" · ") || undefined
+    );
+  };
+
+  const byDay = new Map<string, AgendaEntry[]>();
+  for (const item of week.items) {
     if (item.venueSlug !== room.slug) continue;
-    const bucket = talksByDay.get(item.dayIso) ?? [];
-    bucket.push(item);
-    talksByDay.set(item.dayIso, bucket);
+    const slug = item.href?.split("/").pop() ?? item.slug;
+    let entry: AgendaEntry;
+    if (item.href?.startsWith("/schedule/talk/")) {
+      const row = rows.find((r) => r.slug === slug);
+      entry = {
+        kind: "talk",
+        key: item.slug,
+        startMin: item.startMin,
+        title: item.longTitle || item.title,
+        href: item.href,
+        people: row ? peopleOf(row) : item.people,
+        circuit: item.circuit || undefined,
+      };
+    } else {
+      const talks = rows
+        .filter(
+          (r) =>
+            r.activation === slug &&
+            r.location === room.slug &&
+            r.startsAt &&
+            localDay(r.startsAt) === item.dayIso,
+        )
+        .sort((x, y) => x.startsAt - y.startsAt)
+        .map((r) => ({
+          key: r.id,
+          startMin: minuteOf(r.startsAt),
+          title: r.title,
+          href: `/schedule/talk/${r.slug}`,
+          people: peopleOf(r),
+        }));
+      entry = {
+        kind: "block",
+        key: `${item.slug}-${item.dayIso}`,
+        startMin: item.startMin,
+        timeLabel: item.timeLabel,
+        title: item.longTitle || item.title,
+        href: item.href,
+        brand: item.brand,
+        blurb: blurbs.get(item.slug) || undefined,
+        circuit: item.circuit || undefined,
+        talks,
+        continuous:
+          slug === "access-granted"
+            ? ACCESS_CONTINUOUS.items.map((c) => ({ name: c.name, by: c.by }))
+            : [],
+      };
+    }
+    const list = byDay.get(item.dayIso) ?? [];
+    list.push(entry);
+    byDay.set(item.dayIso, list);
   }
 
-  // Same lockup resolution as /schedule — a session that borrows a partner's
-  // mark tracks whatever the admin has uploaded rather than a file in the repo.
-  const cards: SessionCard[] = sessions.map((s) => {
-    if (s.logo) return { ...s, logoSrc: s.logo.src, logoAlt: s.logo.alt };
-    if (s.logoFromPartner) {
-      const needle = s.logoFromPartner.toLowerCase();
-      const match = partners.find((p) => p.name.toLowerCase().includes(needle));
-      if (match?.imageUrl) {
-        return { ...s, logoSrc: match.imageUrl, logoAlt: match.name };
-      }
-    }
-    return s;
+  const agendaDays: AgendaDay[] = EVENT_DAYS.flatMap((d) => {
+    const entries = byDay.get(d.iso);
+    const meta = dayMeta(d.iso);
+    if (!entries || !meta) return [];
+    return [
+      {
+        ...meta,
+        entries: entries.sort((x, y) => (x.startMin ?? 0) - (y.startMin ?? 0)),
+      },
+    ];
   });
 
-  // One bucket per day this room actually runs, in week order, plus whatever
-  // has no slot yet. `sessions` already arrives in date order, so pushing into
-  // an insertion-ordered Map keeps the days in order without a second sort.
-  const groups = new Map<
-    string,
-    {
-      iso: string;
-      weekday: string;
-      label: string;
-      cards: SessionCard[];
-      talks: CalendarItem[];
-    }
-  >();
-  // A span is not undated — it runs across days rather than on one. Filing it
-  // under "slot to be confirmed" said the opposite of the truth for the one
-  // activation whose dates were settled first.
-  const spanned: SessionCard[] = [];
-  const undated: SessionCard[] = [];
-  for (const card of cards) {
-    const day = sessionDay(card);
-    if (!day) {
-      (card.span ? spanned : undated).push(card);
-      continue;
-    }
-    const bucket = groups.get(day.iso) ?? { ...day, cards: [], talks: [] };
-    bucket.cards.push(card);
-    groups.set(day.iso, bucket);
-  }
-
-  // A day can be all talks and no activation — a room running a speaker track
-  // on a day nothing else is booked in it — so the buckets are opened from
-  // both sources rather than only from the cards.
-  for (const [iso, talks] of talksByDay) {
-    const day = dayMeta(iso);
-    if (!day) continue;
-    const bucket = groups.get(iso) ?? { ...day, cards: [], talks: [] };
-    bucket.talks = talks.sort((a, b) => a.startMin - b.startMin);
-    groups.set(iso, bucket);
-  }
-
-  // Explicitly by date now. Insertion order was enough while every bucket came
-  // from one already-sorted list; with a second source opening buckets of its
-  // own, a Tuesday entered after a Thursday would have printed in that order.
-  const dayGroups = [...groups.values()].sort(
-    (a, b) =>
-      EVENT_DAYS.findIndex((d) => d.iso === a.iso) -
-      EVENT_DAYS.findIndex((d) => d.iso === b.iso),
-  );
+  // A span runs across days rather than on one — the Give-a-LOT drop-off —
+  // and an undated activation has no day yet. Both stay in the list, headed
+  // for what they are, rather than being filed under a day they are not on.
+  const spanDays: AgendaDay[] = week.spans
+    .filter((sp) => sp.venueSlug === room.slug)
+    .map((sp) => ({
+      iso: `span-${sp.slug}`,
+      weekday: "All week",
+      label: sp.dayLabel,
+      entries: [
+        {
+          kind: "block" as const,
+          key: sp.slug,
+          // Blank, because the heading already says "All week" and the dates;
+          // in the time column the range wrapped onto two lines to say it again.
+          timeLabel: "",
+          title: sp.title,
+          href: sp.page ? `/schedule/${sp.page}` : null,
+          brand: sp.brand,
+          blurb: blurbs.get(sp.slug) || undefined,
+          circuit: sp.circuit || undefined,
+          talks: [],
+          continuous: [],
+        },
+      ],
+    }));
+  const undated = sessions.filter((s) => !sessionDay(s) && !s.span);
+  const undatedDay: AgendaDay[] = undated.length
+    ? [
+        {
+          iso: "undated",
+          weekday: "To be confirmed",
+          label: "Slot to come",
+          entries: undated.map((s) => ({
+            kind: "block" as const,
+            key: s.slug,
+            timeLabel: "TBC",
+            title: s.title,
+            href: s.page ? `/schedule/${s.page}` : null,
+            blurb: s.blurb,
+            circuit: s.circuit,
+            talks: [],
+            continuous: [],
+          })),
+        },
+      ]
+    : [];
 
   return (
     <main>
@@ -1632,141 +1709,9 @@ export default async function VenueSchedulePage({
             </p>
           </div>
 
-          {/* Grouped by day, not one flat grid.
-          
-              A room's week arrived as cards ordered by date with the day
-              printed small on each, which reads as a pile: nothing told you The
-              Rand runs four things on Tuesday and one on Friday without
-              checking five cards. The same data under day headings is a
-              schedule — and it is the "this location, this day" view the grid
-              pages cannot give, because they are one day or one week and never
-              one room across both.
-          
-              Anything without a confirmed slot keeps the old ungrouped grid at
-              the foot. A day heading over a session that has no day would be
-              inventing one. */}
-          {dayGroups.map((group) => (
-            <div key={group.iso} className="mt-12 lg:mt-14">
-              <div className="flex items-baseline gap-3 border-b border-white/10 pb-3">
-                <h3 className="font-display text-xl font-bold uppercase leading-none tracking-tight text-white sm:text-2xl">
-                  {group.weekday}
-                </h3>
-                <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
-                  {group.label} · {group.cards.length + group.talks.length}{" "}
-                  {group.cards.length + group.talks.length === 1
-                    ? "session"
-                    : "sessions"}
-                </p>
-              </div>
-              {group.cards.length > 0 && (
-                <div className="mt-6 lg:mt-8">
-                  <SessionBento
-                    sessions={group.cards}
-                    matchTitleSize
-                    inContext
-                  />
-                </div>
-              )}
-
-              {/* The room's own talks, as rows rather than cards.
-              
-                  A bento card is ~260px and earns it for an activation: a
-                  lockup, a hero, five hours and a partner to credit. A
-                  thirty-minute talk by one person has none of that, and a
-                  dozen of them in card form is 3,000px of scrolling for a
-                  running order. Rows put the same day on one screen.
-              
-                  The split matches the one the week grid already makes
-                  between a block and a summary: the shape follows how much is
-                  behind it, not what kind of record it came from. */}
-              {group.talks.length > 0 && (
-                <ul
-                  className={group.cards.length > 0 ? "mt-8" : "mt-6 lg:mt-8"}
-                >
-                  {group.talks.map((talk) => (
-                    <li
-                      key={talk.slug}
-                      className="group relative flex items-baseline justify-between gap-6 border-b border-white/10 py-4"
-                    >
-                      <div className="min-w-0">
-                        {/* The whole row, via the stretched `::after` the grid
-                            blocks use — a 14px title is a small target and the
-                            time on the far right is part of the same thing.
-                            `href` is null for a talk inside an activation,
-                            which is not reachable here (this list is built
-                            from standalone sessions) but is cheap to honour
-                            rather than assume. */}
-                        {talk.href ? (
-                          <Link
-                            href={talk.href}
-                            className="block text-pretty font-medium text-white transition-colors duration-200 after:absolute after:inset-0 hover:text-magenta focus-visible:text-magenta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-magenta"
-                          >
-                            {talk.title}
-                          </Link>
-                        ) : (
-                          <p className="text-pretty font-medium text-white">
-                            {talk.title}
-                          </p>
-                        )}
-                        {talk.people && (
-                          <p className="mt-1 text-pretty text-sm text-white/60">
-                            {talk.people}
-                          </p>
-                        )}
-                      </div>
-                      {/* The time, and — where the row leads somewhere — the
-                          house arrow beside it. Without it the row announced
-                          nothing at rest and only turned magenta on hover,
-                          which is no affordance at all for anyone who does
-                          not happen to sweep the mouse across it. */}
-                      <p className="flex shrink-0 items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-white/55">
-                        {talk.timeLabel}
-                        {talk.href && (
-                          <ArrowUpRight
-                            className={cn(
-                              ARROW_MOTION,
-                              "h-3.5 w-3.5 group-hover:-translate-y-px group-hover:translate-x-px group-hover:text-magenta",
-                            )}
-                            strokeWidth={2}
-                            aria-hidden="true"
-                          />
-                        )}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-
-          {spanned.map((card) => (
-            <div key={card.slug} className="mt-12 lg:mt-14">
-              <div className="flex items-baseline gap-3 border-b border-white/10 pb-3">
-                <h3 className="font-display text-xl font-bold uppercase leading-none tracking-tight text-white sm:text-2xl">
-                  All week
-                </h3>
-                <p className="font-mono text-[11px] uppercase tracking-widest text-white/45">
-                  {card.span ? spanLabel(card.span) : ""}
-                </p>
-              </div>
-              <div className="mt-6 lg:mt-8">
-                <SessionBento sessions={[card]} matchTitleSize inContext />
-              </div>
-            </div>
-          ))}
-
-          {undated.length > 0 && (
-            <div className="mt-12 lg:mt-14">
-              {dayGroups.length > 0 && (
-                <p className="border-b border-white/10 pb-3 font-mono text-[11px] uppercase tracking-widest text-white/45">
-                  Slot to be confirmed
-                </p>
-              )}
-              <div className={dayGroups.length > 0 ? "mt-6 lg:mt-8" : ""}>
-                <SessionBento sessions={undated} matchTitleSize />
-              </div>
-            </div>
-          )}
+          {/* Grouped by day, one running order per day. See VenueAgenda
+              for why a day is a single list now rather than cards over rows. */}
+          <VenueAgenda days={[...spanDays, ...agendaDays, ...undatedDay]} />
         </div>
       </section>
 
