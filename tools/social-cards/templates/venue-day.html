@@ -1,0 +1,682 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: "OswaldLocal";
+        src: url("oswald.woff") format("woff");
+        font-weight: 700;
+        font-display: block;
+      }
+      /* One room's day, posted the morning of.
+
+         Built from tpr.html's parts rather than as a new look — the header,
+         the five-pip circuit ramp, the Oswald headline, the mono facts with
+         magenta pips — because this card goes out beside that room's speaker
+         cards and should read as the same set. What it adds is the one thing
+         a speaker card cannot carry: every session in the room, in order.
+
+         The list comes off the CMS at render time (see `venueDay` in
+         render.mjs), so the same card definition works for any room on any
+         day, and `window.fit` below sizes the type to however many sessions
+         that turns out to be. */
+      :root {
+        --magenta: #ff32a0;
+        /* Set by fit(). Everything in the list is sized off it, so a room
+           with five sessions and a room with eleven fill the same space. */
+        --s: 1;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1080px;
+        height: 1350px;
+        background: #000;
+        color: #fff;
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* The bolt as ground, not subject — the one real departure from
+         tpr.html, and forced. That template runs it at 0.62 because a speaker
+         card has a whole empty quadrant to give it. A list has none: the
+         first pass parked it upper right at full charge and it crossed the
+         headline and the dates, and the scrim that stopped it above the list
+         left a hard horizontal cut. At full charge under the list it would
+         swallow the magenta times, which is the camouflage tpr.html's corner
+         scrim exists to prevent.
+
+         So it takes the community cards' treatment instead — large, low,
+         blurred, bleeding off two edges — which is still this week's mark in
+         this week's colour, and costs the type nothing. */
+      .bolt {
+        position: absolute;
+        z-index: 0;
+        left: {{boltLeft}}px;
+        top: {{boltTop}}px;
+        width: 1180px;
+        height: auto;
+        opacity: 0.2;
+        filter: blur(7px);
+      }
+
+      <!--if:field-->
+      /* The Startup Bash field, instead of the one big bolt.
+         Same bolts, same depth cues — size, opacity and a sub-pixel blur
+         driven off one scalar, so near ones are larger, brighter and sharper
+         together — and the same rule that card holds to: no bolt lands on a
+         word. There the positions are pasted in, because that card's layout
+         is fixed. Here the list is whatever the day holds, so they are placed
+         after layout by `field()` below, around the type that actually drew. */
+      .field {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        overflow: hidden;
+      }
+      .field img {
+        position: absolute;
+        display: block;
+      }
+      <!--/if:field-->
+
+      <!--if:venueArt-->
+      /* The room's own portrait, from the site.
+         The magenta ASCII the venue sections draw for each room
+         (lib/locations.ts `image`), as a band across the top of the card —
+         TPR's is the building itself, the bolt-shaped glass and the tower
+         sign, which says which room this is better than a caption could.
+
+         A band and not a ground. Behind the list it would be ASCII texture
+         under every title, which is a word sitting on type. Up here nothing
+         sits on it but the lockup, over a darkened top edge, and the
+         headline, over the fade at its foot.
+
+         No pip ramp, no big bolt and no field in this variant: the facade
+         *is* a bolt, and a second one beside it is a repeat. */
+      .art {
+        position: absolute;
+        z-index: 0;
+        left: 0;
+        top: 0;
+        width: 1080px;
+        height: {{venueArtHeight}}px;
+        overflow: hidden;
+      }
+      .art img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: {{venueArtPosition}};
+      }
+      /* Two fades, because the band has two things to keep legible and one
+         thing to keep whole.
+         ::before darkens the top edge for the lockup and the dates — TPR's
+         mast runs straight up through where the dates sit — and ends the band
+         at its foot, across the full width.
+         ::after is the heavy fade the headline stands on, and only on the
+         left, where the headline is. Across the full width it ate the tower
+         sign to "TEXAS PUBLIC RAD": the sign is past the end of the headline,
+         so the fade that holds the type has no business reaching it. */
+      .art::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+          linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.92) 0%,
+            rgba(0, 0, 0, 0.8) 14%,
+            rgba(0, 0, 0, 0) 27%
+          ),
+          linear-gradient(to bottom, rgba(0, 0, 0, 0) 88%, #000 100%);
+      }
+      .art::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0) 44%,
+          rgba(0, 0, 0, 0.88) 74%,
+          #000 90%
+        );
+        -webkit-mask-image: linear-gradient(to right, #000 58%, transparent 73%);
+        mask-image: linear-gradient(to right, #000 58%, transparent 73%);
+      }
+      .frame h1 {
+        margin-top: {{venueArtGap}}px;
+      }
+      <!--if:venueArtRight-->
+      /* Near-square art — The Rand's "g" over its building — on the right at
+         full height instead of across the top. Spread to the card's width it
+         would draw 1114 tall and the band would keep half the letter. Here the
+         whole mark shows; it fades in from the left, where the headline is,
+         and out at its foot above the list. The full-width variant's two fades
+         are replaced, not stacked: its left-only fade is the wrong side here. */
+      .art {
+        left: auto;
+        right: 0;
+        width: {{venueArtWidth}}px;
+      }
+      .art img {
+        object-fit: contain;
+        object-position: 100% 0%;
+      }
+      .art::after {
+        -webkit-mask-image: none;
+        mask-image: none;
+        background:
+          linear-gradient(to right, #000 0%, rgba(0, 0, 0, 0.55) 22%, rgba(0, 0, 0, 0) 44%),
+          linear-gradient(to bottom, rgba(0, 0, 0, 0) 76%, #000 100%);
+      }
+      <!--/if:venueArtRight-->
+      <!--/if:venueArt-->
+
+      .frame {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        padding: 74px 72px 70px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .top img {
+        height: 58px;
+        width: auto;
+      }
+      .dates {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 19px;
+        letter-spacing: 0.22em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* tpr.html's ramp, unchanged. */
+      .circuits {
+        margin-top: 50px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 100px;
+        width: max-content;
+      }
+      .circuits::before {
+        content: "";
+        position: absolute;
+        left: 5px;
+        right: 5px;
+        top: 50%;
+        height: 2px;
+        transform: translateY(-1px);
+        background: linear-gradient(
+          to right,
+          rgba(255, 50, 160, 0.35),
+          rgba(255, 50, 160, 1)
+        );
+      }
+      .circuits span {
+        position: relative;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 12px currentColor;
+      }
+      .c1 { color: rgba(255, 50, 160, 0.35); }
+      .c2 { color: rgba(255, 50, 160, 0.5); }
+      .c3 { color: rgba(255, 50, 160, 0.65); }
+      .c4 { color: rgba(255, 50, 160, 0.8); }
+      .c5 { color: rgb(255, 50, 160); }
+      .tag {
+        margin-top: 18px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 20px;
+        letter-spacing: 0.26em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+      }
+
+      /* Without the ramp above it the caption is the first thing under the
+         lockup, and takes the ramp's gap. */
+      .tag.bare {
+        margin-top: 56px;
+      }
+      h1 {
+        margin-top: 30px;
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: {{headlineSize}}px;
+        line-height: 0.96;
+        letter-spacing: 0.005em;
+        text-transform: uppercase;
+        /* One line per <br />, never a wrap of its own: fit() steps the size
+           down instead, so "Wednesday at The Rand" is a smaller headline and
+           not a taller one. */
+        white-space: nowrap;
+      }
+      .summary {
+        margin-top: 18px;
+        font-size: 27px;
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      /* The day. Flex-filled, so the rows spread to the facts line whatever
+         their count, and fit() grows or shrinks the type first so the spread
+         is a little air rather than a gulf. */
+      .list {
+        margin-top: 40px;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .slot {
+        display: flex;
+        align-items: baseline;
+        gap: calc(28px * var(--s));
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        padding-top: calc(16px * var(--s));
+      }
+      .slot:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+      .at {
+        flex: none;
+        width: calc(124px * var(--s));
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: calc(24px * var(--s));
+        color: var(--magenta);
+        letter-spacing: 0.02em;
+      }
+      .at span {
+        margin-left: 0.35em;
+        font-size: 0.62em;
+        letter-spacing: 0.14em;
+        color: rgba(255, 50, 160, 0.72);
+      }
+      .title {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: calc(34px * var(--s));
+        line-height: 1.04;
+        text-transform: uppercase;
+        letter-spacing: 0.005em;
+        /* A title that wraps breaks into even halves — "Herding Clankers
+           into / the Pit of Success", not "…the Pit of / Success". */
+        text-wrap: balance;
+      }
+      /* The community block's mark, over the talk it runs. Its height is
+         set inline, per group, off the size that group's own card uses. */
+      .group {
+        margin-bottom: calc(10px * var(--s));
+        display: flex;
+        align-items: center;
+      }
+      .group-mark {
+        display: block;
+        width: auto;
+      }
+      .group-name {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: calc(17px * var(--s));
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--magenta);
+      }
+      /* A block with more than one talk: its mark heads it once, with the
+         block's hours beside it, and the talks follow as rows of their own
+         with no rule between the head and the first — they are its contents,
+         not the next thing on the list. */
+      .slot.head .group {
+        margin-bottom: 0;
+        gap: calc(18px * var(--s));
+      }
+      .slot.head + .slot.in {
+        border-top: 0;
+        padding-top: calc(10px * var(--s));
+      }
+      .range {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: calc(17px * var(--s));
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #8b8b8b;
+      }
+      /* The talks inside a block, a step down from a block's own row. */
+      .slot.in .title {
+        font-size: calc(29px * var(--s));
+      }
+      /* Something that runs the whole block — the lockpicking village. The
+         hours in words where the clock would be, and the title in the brand
+         colour so it does not read as one more talk with a start time. */
+      .slot.open .at {
+        font-size: calc(17px * var(--s));
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+      .slot.open .title {
+        color: var(--magenta);
+      }
+      /* The typeset marks, as components/site/calendar/marks.tsx sets them:
+         Access Granted in the display face with its first word in the green,
+         The Model in mono with its second caught in a selection block. */
+      .wm {
+        white-space: nowrap;
+        text-transform: uppercase;
+      }
+      .wm-display {
+        font-family: "OswaldLocal", Impact, sans-serif;
+        font-weight: 700;
+        font-size: calc(30px * var(--s));
+        line-height: 1;
+      }
+      .wm-mono {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-weight: 500;
+        font-size: calc(26px * var(--s));
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .wm-mono .hl {
+        padding: 0 0.25em;
+      }
+      /* A block with nothing inside it carries its page's one-liner. */
+      .blurb {
+        margin-top: calc(8px * var(--s));
+        max-width: 760px;
+        font-size: calc(20px * var(--s));
+        line-height: 1.35;
+        color: rgba(255, 255, 255, 0.66);
+      }
+      /* A wordmark standing in for a word — the Nopalera talk. The site's
+         own seating (components/site/calendar/marks.tsx): 0.78em against the
+         cap and 0.08em under the baseline, in em so it tracks fit(). */
+      .title .word {
+        display: inline-block;
+        height: 0.78em;
+        width: auto;
+        vertical-align: -0.08em;
+      }
+      /* The credits line from tpr.html's crowd row: mono, names in white
+         caps, spaced rather than comma'd so a row of five still scans as
+         five people. */
+      .people {
+        margin-top: calc(8px * var(--s));
+        display: flex;
+        flex-wrap: wrap;
+        gap: calc(4px * var(--s)) calc(18px * var(--s));
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: calc(15px * var(--s));
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .people b {
+        font-weight: 500;
+        color: #ededed;
+      }
+      .people .mod {
+        color: #8b8b8b;
+      }
+      .people .mod b {
+        margin-left: 0.4em;
+      }
+
+      .facts {
+        margin-top: 40px;
+        display: flex;
+        gap: 34px;
+      }
+      .fact {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 21px;
+        letter-spacing: 0.06em;
+        color: #ededed;
+      }
+      .fact .pip {
+        width: 9px;
+        height: 9px;
+        background: var(--magenta);
+        flex: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!--if:venueArt-->
+    <div class="art"><img src="{{venueArt}}" alt="" /></div>
+    <!--/if:venueArt-->
+    <!--ifnot:venueArt--><!--ifnot:field-->
+    <img class="bolt" src="bolt.svg" alt="" />
+    <!--/ifnot:field--><!--/ifnot:venueArt-->
+    <!--if:field-->
+    <div class="field"></div>
+    <!--/if:field-->
+
+    <div class="frame">
+      <div class="top">
+        <img src="sastw.png" alt="" />
+        <div class="dates">{{week}}</div>
+      </div>
+
+      <!--ifnot:venueArt-->
+      <!-- The ramp means "all five circuits land here", which is TPR's claim
+           as the anchor room and not every room's. A card for any other room
+           sets `ramp: false` and keeps the caption. -->
+      <!--if:ramp-->
+      <div class="circuits" role="img" aria-label="All five circuits run here">
+        <span class="c1"></span><span class="c2"></span><span class="c3"></span
+        ><span class="c4"></span><span class="c5"></span>
+      </div>
+      <!--/if:ramp-->
+      <div class="tag<!--ifnot:ramp--> bare<!--/ifnot:ramp-->">{{stage}} · {{dayLabel}}</div>
+      <!--/ifnot:venueArt-->
+
+      <h1>{{headline}}</h1>
+      <p class="summary">{{count}} · {{span}}</p>
+
+      <div class="list">
+        {{slots}}
+      </div>
+
+      <div class="facts">
+        <div class="fact"><span class="pip"></span>{{fact1}}</div>
+        <div class="fact"><span class="pip"></span>{{fact2}}</div>
+      </div>
+    </div>
+
+    <script>
+      /**
+       * The largest type that fits.
+       *
+       * Binary search on --s between 0.6 and 1.3: a room with five sessions
+       * gets bigger type rather than a list spaced out like a menu, and one
+       * with twelve gets smaller type rather than an overflow. "Fits" means
+       * the rows, at their natural height plus a floor of air between them,
+       * stay inside the space the list is given.
+       */
+      window.fit = function () {
+        // The headline first, since its height decides the list's.
+        const h1 = document.querySelector("h1");
+        let size = parseFloat(getComputedStyle(h1).fontSize);
+        while (h1.scrollWidth > h1.clientWidth + 1 && size > 40) {
+          size -= 2;
+          h1.style.fontSize = size + "px";
+        }
+        const list = document.querySelector(".list");
+        const root = document.documentElement.style;
+        const rows = [...list.children];
+        const fits = () => {
+          const need = rows.reduce((a, r) => a + r.offsetHeight, 0);
+          return need + (rows.length - 1) * 14 <= list.clientHeight;
+        };
+        // A day that is one or two things — Monday at TPR is Mission Pitch
+        // and nothing else — would otherwise sit at the list's normal size at
+        // the top of an empty card. It may grow a long way instead, and a
+        // single row centres in the space rather than hanging from the top.
+        // Three rows and up keep the 1.3 ceiling every other card was set at.
+        const sparse = rows.length <= 2;
+        if (rows.length === 1) list.style.justifyContent = "center";
+        let lo = 0.6;
+        // 1.8, not more: the time column scales with the type, and past this
+        // it opens a gap between the time and the title wider than either.
+        let hi = sparse ? 1.8 : 1.3;
+        for (let i = 0; i < 12; i++) {
+          const mid = (lo + hi) / 2;
+          root.setProperty("--s", String(mid));
+          if (fits()) lo = mid;
+          else hi = mid;
+        }
+        root.setProperty("--s", String(lo));
+        if (window.field) window.field();
+      };
+    </script>
+    <!--if:field-->
+    <script>
+      /**
+       * Scatter the field around the type.
+       *
+       * Every line of text on the card is measured as it drew — line boxes
+       * off a Range, not element boxes, because a heading is a full-width
+       * block and its box would clear the whole row of bolts beside a
+       * three-word title — padded, and treated as ground no bolt may touch.
+       * Hairlines too: a bolt sitting on a rule reads as struck through.
+       *
+       * Two passes, as on Startup Bash. A random pass gives the arrangement;
+       * then a grid walks the card and puts one into any cell the first pass
+       * left empty, so the field thins out rather than stopping with a hole
+       * big enough to look like one.
+       *
+       * Seeded, because a card that reshuffles its own weather every render
+       * cannot be diffed against the last one.
+       */
+      window.field = function () {
+        const W = 1080;
+        const H = 1350;
+        const PAD = 16;
+        let a = {{seed}};
+        const rnd = () => {
+          a = (a + 0x6d2b79f5) | 0;
+          let t = Math.imul(a ^ (a >>> 15), 1 | a);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+
+        const blocked = [];
+        const text = document.querySelectorAll(
+          // Every line the card sets. `.blurb` was missing from the first
+          // version and the field dropped bolts into Mission Pitch's sentence.
+          ".top img, .dates, .circuits, .tag, h1, .summary, .at, .title, .people, .blurb, .group, .fact",
+        );
+        for (const el of text) {
+          const r = document.createRange();
+          r.selectNodeContents(el);
+          const boxes = [...r.getClientRects()];
+          if (!boxes.length || el.tagName === "IMG") boxes.push(el.getBoundingClientRect());
+          for (const b of boxes) {
+            if (b.width && b.height)
+              blocked.push([b.left - PAD, b.top - PAD, b.right + PAD, b.bottom + PAD]);
+          }
+          for (const img of el.querySelectorAll("img")) {
+            const b = img.getBoundingClientRect();
+            blocked.push([b.left - PAD, b.top - PAD, b.right + PAD, b.bottom + PAD]);
+          }
+        }
+        for (const s of document.querySelectorAll(".slot + .slot")) {
+          const b = s.getBoundingClientRect();
+          blocked.push([b.left - 6, b.top - 6, b.right + 6, b.top + 6]);
+        }
+
+        const placed = [];
+        const MIN = 14;
+        // Startup Bash's range runs 14–92 with a median of 35. The ceiling is
+        // lower here because the open ground is: past 84 a bolt has nowhere
+        // on this card to land that is not a word.
+        const MAX = 84;
+        const free = (x, y, size) => {
+          const box = [x - size * 0.1, y - size * 0.1, x + size * 1.1, y + size * 1.1];
+          if (box[0] < -size * 0.5 || box[1] < -size * 0.5 || box[2] > W + size * 0.5 || box[3] > H + size * 0.5)
+            return false;
+          for (const b of blocked)
+            if (box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1]) return false;
+          for (const p of placed) {
+            const dx = p.x + p.size / 2 - (x + size / 2);
+            const dy = p.y + p.size / 2 - (y + size / 2);
+            if (Math.hypot(dx, dy) < (p.size + size) * 0.75 + 10) return false;
+          }
+          return true;
+        };
+        const add = (x, y, size) => placed.push({ x, y, size });
+
+        // Random pass: small ones are common and big ones rare, which is what
+        // reads as depth rather than as a scatter of mixed sizes.
+        for (let i = 0; i < 3000 && placed.length < 90; i++) {
+          const size = Math.round(MIN + Math.pow(rnd(), 1.5) * (MAX - MIN));
+          const x = rnd() * (W - size);
+          const y = rnd() * (H - size);
+          if (free(x, y, size)) add(x, y, size);
+        }
+        // Grid pass: no empty cell large enough to read as the field stopping.
+        const CELL = 150;
+        for (let gy = 0; gy < H; gy += CELL)
+          for (let gx = 0; gx < W; gx += CELL) {
+            const hit = placed.some(
+              (p) => p.x >= gx && p.x < gx + CELL && p.y >= gy && p.y < gy + CELL,
+            );
+            if (hit) continue;
+            for (let k = 0; k < 40; k++) {
+              const size = Math.round(MIN + rnd() * 16);
+              const x = gx + rnd() * (CELL - size);
+              const y = gy + rnd() * (CELL - size);
+              if (free(x, y, size)) {
+                add(x, y, size);
+                break;
+              }
+            }
+          }
+
+        const host = document.querySelector(".field");
+        host.innerHTML = "";
+        for (const p of placed) {
+          const near = (p.size - MIN) / (MAX - MIN);
+          const img = document.createElement("img");
+          img.src = "bolt.svg";
+          img.alt = "";
+          img.style.cssText =
+            `left:${p.x.toFixed(0)}px;top:${p.y.toFixed(0)}px;` +
+            `width:${p.size}px;height:${p.size}px;` +
+            `opacity:${(0.14 + near * 0.7).toFixed(3)};` +
+            `transform:rotate(${(rnd() * 50 - 25).toFixed(1)}deg);` +
+            `filter:blur(${((1 - near) * 1.4).toFixed(2)}px)`;
+          host.appendChild(img);
+        }
+      };
+    </script>
+    <!--/if:field-->
+    <script>
+      void 0;
+    </script>
+  </body>
+</html>

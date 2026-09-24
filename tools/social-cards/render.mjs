@@ -81,6 +81,298 @@ function minutesOf(hhmm) {
  * "12:05 - 12:25 PM", not "12:05 PM - 12:25 PM", and "11:30 AM - 1 PM" when
  * the range crosses noon. Same rule `compactRange` follows in lib/schedule.ts.
  */
+/**
+ * One room's day, as rows for venue-day.html.
+ *
+ * `card.venueDay` is `{ venue, day }` — a room slug and an ISO date — and the
+ * list is whatever /schedule/day/<day> puts in that room's lane. That comes
+ * from day-source.ts, which runs the page's own `dayCalendar`, so the curated
+ * blocks in lib/schedule arrive with the CMS talks. Reading the sessions
+ * collection alone is what left Cup of Capital off the first TPR card.
+ *
+ * People come from the CMS rows where there is one, matched on the talk's
+ * slug, because the calendar joins them into one string and a moderator needs
+ * telling apart. A curated block has no row and uses the calendar's string.
+ *
+ * `titles` maps a slug to the words the card should use. Otherwise a title over
+ * 60 characters with a colon is cut there — the half before it is the half
+ * that reads at a glance, and the full title is one tap away. The PySA Short
+ * settled the same question the same way. 60 rather than the 44 this started
+ * at: under it, a cut threw away the half that says what the talk is —
+ * "Glyph", "Behind the Answer" — for a title that would have fitted anyway.
+ */
+const escapeHtml = (v) =>
+  String(v)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+/**
+ * day-source.ts, bundled once per run.
+ *
+ * esbuild is not a dependency of this repo, for the reason Playwright is not:
+ * it serves a tool nobody runs during a build. Only venue-day cards need it,
+ * so it is imported here rather than at the top and every other card renders
+ * without it. Bare imports stay external and resolve from the repo's own
+ * node_modules — firebase-admin is the app's, pinned where AGENTS.md says it
+ * must be — and `server-only` is stubbed, since outside Next it throws on
+ * import by design.
+ */
+let daySourceModule;
+async function daySource() {
+  if (daySourceModule) return daySourceModule;
+  let esbuild;
+  try {
+    esbuild = await import("esbuild");
+  } catch {
+    throw new Error(
+      "venue-day cards need esbuild, which is not a dependency of this repo.\n" +
+        "  pnpm add -D esbuild   (and leave it out of the commit)",
+    );
+  }
+  const out = join(CACHE, "day-source.mjs");
+  await esbuild.build({
+    entryPoints: [join(HERE, "day-source.ts")],
+    outfile: out,
+    bundle: true,
+    platform: "node",
+    format: "esm",
+    target: "node20",
+    packages: "external",
+    tsconfig: join(REPO, "tsconfig.json"),
+    logLevel: "error",
+    plugins: [
+      {
+        name: "server-only",
+        setup(b) {
+          b.onResolve({ filter: /^server-only$/ }, () => ({
+            path: "server-only",
+            namespace: "stub",
+          }));
+          b.onLoad({ filter: /.*/, namespace: "stub" }, () => ({
+            contents: "",
+          }));
+        },
+      },
+    ],
+  });
+  daySourceModule = await import(out + "?" + Date.now());
+  return daySourceModule;
+}
+
+async function venueDay(card, sessions, work) {
+  const { venue, day } = card.venueDay;
+  const { venueDayItems } = await daySource();
+  const list = await venueDayItems(day, venue);
+  if (!list.length) {
+    throw new Error(`${card.id}: nothing at ${venue} on ${day}`);
+  }
+  const cms = new Map(sessions.map((x) => [x.slug, x]));
+
+  const title = (x) => {
+    if (card.titles?.[x.slug]) return card.titles[x.slug];
+    const t = (x.longTitle || x.title).replace(/\s+/g, " ").trim();
+    // " : " as well as ": " — "AI Steering Wheel : Giving Humans Control…".
+    const cut = t.search(/\s?:\s/);
+    return t.length > 60 && cut > 0 ? t.slice(0, cut).trim() : t;
+  };
+  // Speakers by name; a moderator last and marked, because the person
+  // chairing is not one of the people the session is about.
+  const people = (x) => {
+    const row = cms.get(x.slug);
+    if (!row) {
+      return x.people
+        ? x.people.split(/\s*[·,]\s*/).map((n) => `<b>${escapeHtml(n)}</b>`).join("")
+        : "";
+    }
+    const on = row.people.filter((p) => p.role !== "moderator").map((p) => p.name);
+    const mod = row.people.filter((p) => p.role === "moderator").map((p) => p.name);
+    return [
+      ...on.map((n) => `<b>${escapeHtml(n)}</b>`),
+      ...mod.map(
+        (n) => `<span class="mod">Moderated by <b>${escapeHtml(n)}</b></span>`,
+      ),
+    ].join("");
+  };
+  // Minutes past midnight, local, as the calendar keeps them.
+  const clock = (m) => {
+    const h = Math.floor(m / 60);
+    return [`${h % 12 || 12}:${String(m % 60).padStart(2, "0")}`, h < 12 ? "AM" : "PM"];
+  };
+  const short = (m) => {
+    const [t, ap] = clock(m);
+    return `${t.replace(":00", "")} ${ap}`;
+  };
+
+  /**
+   * A company's wordmark in place of its name inside a title.
+   *
+   * The site already does this for the Nopalera talk on every calendar
+   * surface — `TITLE_MARKS` in components/site/calendar/marks.tsx — and the
+   * card borrows the same file and the same seating: 0.78em tall against the
+   * cap, nudged 0.08em below the baseline, because the mark's box is its ink.
+   * Matched on the word as well as the slug, so a retitled talk falls back to
+   * type rather than dropping a logo into a sentence without the name in it.
+   */
+  const marks = {};
+  for (const [slug, m] of Object.entries(card.titleMarks ?? {})) {
+    marks[slug] = {
+      ...m,
+      file: await stage(work, join(REPO, m.repo), `title-mark-${slug}${extname(m.repo)}`),
+    };
+  }
+  const titleHtml = (x) => {
+    const t = title(x);
+    const m = marks[x.slug];
+    const at = m ? t.toLowerCase().indexOf(m.word.toLowerCase()) : -1;
+    if (at < 0) return escapeHtml(t);
+    return (
+      escapeHtml(t.slice(0, at)) +
+      `<img class="word" src="${m.file}" alt="${escapeHtml(m.word)}" />` +
+      escapeHtml(t.slice(at + m.word.length))
+    );
+  };
+
+  /**
+   * A community block, and what runs inside it.
+   *
+   * On the day page a group's hour is one block — the CMS talks that belong
+   * to it (`activation` on the session) fold into it rather than drawing
+   * beside it. A card that did the same would list "AITX Community" and never
+   * say what AITX are talking about, which is the thing a reader decides on.
+   *
+   * One talk in the block: one row, the group's mark over the talk. More than
+   * one — The Model, Access Granted, PySanAntonio, Linux San Antonio — and the
+   * mark heads the block once and every talk takes its own row with its own
+   * time, because under one clock six talks read as six things at 1 PM.
+   *
+   * Marks are the site's: `brand` off the calendar item, a lockup file where
+   * there is one and otherwise the typeset wordmark marks.tsx sets. Lockups
+   * are sized between equal height and equal area — at one height an 8:1
+   * wordmark (.NET) drew twice the ink of a 4:1 lockup (AITX); at equal area
+   * (all four measured 26–31% ink, so box area is ink area) the compact ones
+   * went tall and AITX shouted instead. Aspect to the 0.3 is the optical
+   * middle, and is what reads as one size stacked in a column.
+   *
+   * A block with nothing inside it (College Night, Open Circuit) is its own
+   * title, with the page's one-liner under it.
+   */
+  const localDay = (ms) =>
+    new Date(ms).toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
+  const inside = (x) =>
+    sessions
+      .filter(
+        (s) =>
+          s.activation === x.slug &&
+          s.location === venue &&
+          localDay(s.startsAt) === day,
+      )
+      .sort((a, b) => a.startsAt - b.startsAt);
+  const minuteOf = (ms) => {
+    const [h, m] = new Date(ms)
+      .toLocaleTimeString("en-GB", { timeZone: "America/Chicago", hour: "2-digit", minute: "2-digit" })
+      .split(":")
+      .map(Number);
+    return h * 60 + m;
+  };
+  const MARK_H = 30; // at a 5:1 mark; see above
+  const markFor = async (x) => {
+    const b = x.brand;
+    if (b?.lockup?.src) {
+      const src = join(REPO, "public", b.lockup.src);
+      const file = await stage(work, src, `group-${x.slug}${extname(src)}`);
+      const aspect = b.lockup.width / b.lockup.height;
+      const h = MARK_H * Math.pow(5 / aspect, 0.3);
+      return `<img class="group-mark" src="${file}" alt="" style="height:calc(${h.toFixed(1)}px * var(--s))" />`;
+    }
+    // The typeset ones, as marks.tsx sets them.
+    if (b?.wordmark === "access-granted")
+      return `<span class="wm wm-display"><span style="color:${b.accent}">Access</span> Granted</span>`;
+    if (b?.wordmark === "the-model")
+      return `<span class="wm wm-mono">The <span class="hl" style="background:${b.accent};color:${b.ink}">Model</span></span>`;
+    return "";
+  };
+  const talkBody = (s) => {
+    const x = { slug: s.slug, title: s.title, longTitle: s.title, people: "" };
+    const who = people(x);
+    return (
+      `<div class="title">${titleHtml(x)}</div>` +
+      (who ? `<div class="people">${who}</div>` : "")
+    );
+  };
+  const slot = (min, body, cls = "") => {
+    const [t, m] = min == null ? ["", ""] : clock(min);
+    return (
+      `<div class="slot${cls}">` +
+      `<div class="at">${t}${m ? `<span>${m}</span>` : ""}</div>` +
+      `<div class="body">${body}</div></div>`
+    );
+  };
+
+  let count = 0;
+  const rows = [];
+  for (const x of list) {
+    const talks = inside(x);
+    const extra = x.continuous ?? [];
+    const mark = talks.length ? await markFor(x) : "";
+    const head = mark || `<span class="group-name">${escapeHtml(x.longTitle)}</span>`;
+    if (talks.length === 1 && !extra.length) {
+      count += 1;
+      rows.push(slot(x.startMin, `<div class="group">${head}</div>` + talkBody(talks[0])));
+    } else if (talks.length) {
+      count += talks.length;
+      const range = x.timeLabel ?? "";
+      rows.push(
+        slot(null, `<div class="group">${head}<span class="range">${escapeHtml(range)}</span></div>`, " head"),
+      );
+      for (const t of talks) rows.push(slot(minuteOf(t.startsAt), talkBody(t), " in"));
+      // The continuous things last and flagged: no start time, so the block's
+      // own hours where the clock would be — "1 – 6", not "all day", which it
+      // is not.
+      const [from, to] = (x.timeLabel ?? "").split(" \u2013 ");
+      for (const c of extra) {
+        rows.push(
+          `<div class="slot in open"><div class="at">${escapeHtml(from ?? "")}\u2013${escapeHtml((to ?? "").replace(/ (AM|PM)$/, ""))}<span>${escapeHtml((to ?? "").slice(-2))}</span></div>` +
+            `<div class="body"><div class="title">${escapeHtml(c.name)}</div>` +
+            (c.by ? `<div class="people"><span class="mod">Powered by <b>${escapeHtml(c.by)}</b></span></div>` : "") +
+            `</div></div>`,
+        );
+      }
+    } else {
+      count += 1;
+      const who = people(x);
+      rows.push(
+        slot(
+          x.startMin,
+          `<div class="title">${titleHtml(x)}</div>` +
+            (who
+              ? `<div class="people">${who}</div>`
+              : x.blurb && !cms.has(x.slug)
+                ? `<div class="blurb">${escapeHtml(x.blurb)}</div>`
+                : ""),
+        ),
+      );
+    }
+  }
+
+  const last = Math.max(...list.map((x) => x.endMin));
+  const words = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven",
+    "Eight", "Nine", "Ten", "Eleven", "Twelve"];
+  // Talks, not blocks: a day that is one activation is still eight sessions.
+  const n = count;
+  // The first time drops its meridiem when the last one shares it —
+  // "1 – 5 PM", the way every fact line in this set is written.
+  const a = short(list[0].startMin);
+  const b = short(last);
+
+  return {
+    slots: rows.join("\n        "),
+    slotCount: n,
+    span: `${a.slice(-2) === b.slice(-2) ? a.slice(0, -3) : a} \u2013 ${b}`,
+    count: `${words[n] ?? n} session${n === 1 ? "" : "s"}`,
+  };
+}
+
 function clockRange(fromMin, toMin) {
   const one = (m) => {
     const h = Math.floor(m / 60);
@@ -350,10 +642,13 @@ async function loadSpeakers() {
   if (!getApps().length) initializeApp({ credential: cert(JSON.parse(json)) });
 
   const db = getFirestore();
-  const [speakers, partners, sponsors] = await Promise.all([
+  const [speakers, partners, sponsors, sessionDocs] = await Promise.all([
     db.collection("speakers").get(),
     db.collection("partners").get(),
     db.collection("sponsors").get(),
+    // For the venue-day cards, which list a room's day straight from the CMS
+    // rather than from a copy typed into cards.mjs. See `venueDay` below.
+    db.collection("sessions").get(),
   ]);
 
   const bySlug = new Map();
@@ -393,7 +688,35 @@ async function loadSpeakers() {
   for (const d of [...sponsors.docs, ...partners.docs])
     byPartner.set((d.get("name") || "").toLowerCase(), d.get("imageUrl") || "");
 
-  return { bySlug, byPartner };
+  /**
+   * Every dated session, with its people resolved to names.
+   *
+   * A venue-day card is a room's whole day, and the thing it must never do is
+   * disagree with the schedule page an hour after it is posted. Reading the
+   * CMS at render time is what the headshots already do for the same reason:
+   * a card re-rendered after an edit picks the edit up, and a card whose list
+   * was typed into cards.mjs would not.
+   */
+  const nameById = new Map(speakers.docs.map((d) => [d.id, d.get("name") || ""]));
+  const sessions = sessionDocs.docs
+    .map((d) => {
+      const x = d.data();
+      return {
+        title: x.title || "",
+        slug: x.slug || "",
+        activation: x.activation || "",
+        location: x.location || "",
+        track: x.track || "",
+        startsAt: x.startsAt?.toMillis?.() ?? null,
+        endsAt: x.endsAt?.toMillis?.() ?? null,
+        people: (x.participants || [])
+          .map((p) => ({ name: nameById.get(p.speakerId) || "", role: p.role }))
+          .filter((p) => p.name),
+      };
+    })
+    .filter((x) => x.startsAt);
+
+  return { bySlug, byPartner, sessions };
 }
 
 // ─── assets ─────────────────────────────────────────────────────────────────
@@ -504,7 +827,7 @@ async function main() {
     process.exit(1);
   }
 
-  const { bySlug, byPartner } = await loadSpeakers();
+  const { bySlug, byPartner, sessions } = await loadSpeakers();
   await mkdir(outDir, { recursive: true });
 
   const work = join(HERE, ".work");
@@ -783,7 +1106,89 @@ async function main() {
       "utf8",
     );
 
+    /**
+     * An activation's lineup, one speaker to a scene — the Short that walks
+     * the afternoon a face at a time. See `activationTalks` in day-source.ts
+     * for why the running order is read rather than typed here.
+     *
+     * Each scene is the talk's first speaker, full height at the foot of the
+     * frame, under the hour, the title, the name and the group that runs the
+     * hour. `card.portraits` is keyed by speaker slug because every headshot
+     * is cropped differently: the numbers are that speaker's own card's,
+     * scaled to this frame.
+     */
+    let scenes = "";
+    let sceneCount = 0;
+    if (card.lineupOf) {
+      const { activationTalks } = await daySource();
+      const talks = await activationTalks(card.lineupOf);
+      const hhmm = (ms) => {
+        const [t, ap] = new Date(ms)
+          .toLocaleTimeString("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "2-digit" })
+          .split(" ");
+        return `${t}<span>${ap}</span>`;
+      };
+      const out = [];
+      for (const [n, t] of talks.entries()) {
+        const who = t.speakers[0];
+        if (!who) continue;
+        const sp = bySlug.get(who.slug);
+        if (!sp?.imageUrl) throw new Error(`${card.id}: ${who.slug} has no headshot`);
+        const as = `scene-${n}${extname(sp.imageUrl.split("?")[0]) || ".png"}`;
+        await stage(work, await fetchCached(sp.imageUrl), as);
+        const box = card.portraits?.[who.slug] ?? {};
+        const name = t.speakers.map((p) => escapeHtml(p.name)).join(" &amp; ");
+        const titleText = card.titles?.[t.slug] ?? t.title.replace(/\.$/, "");
+        out.push(
+          `<section class="scene talk">` +
+            `<img class="figure" src="${as}" alt="" style="height:${box.height ?? 1240}px;` +
+            `margin-left:${box.shift ?? 0}px;bottom:${box.bottom ?? 0}px" />` +
+            `<div class="copy">` +
+            `<div class="at">${hhmm(t.startsAt)}</div>` +
+            `<h2>${escapeHtml(titleText)}</h2>` +
+            `<div class="who">${name}</div>` +
+            (t.poweredBy
+              ? `<div class="by"><span>&gt;_</span> Powered by ${escapeHtml(t.poweredBy)}</div>`
+              : "") +
+            `</div></section>`,
+        );
+      }
+      scenes = out.join("\n    ");
+      sceneCount = out.length;
+      if (card.village) {
+        await stage(work, join(REPO, card.village.logo), "village-logo.png");
+      }
+    }
+
     const data = {
+      ...(card.venueDay ? await venueDay(card, sessions, work) : {}),
+      scenes,
+      sceneCount,
+      // The lineup Short's last scene before the outro — see `village` in
+      // cards.mjs. Its logo is staged with the scenes above.
+      villageWhen: card.village?.when ?? "",
+      villageTitle: card.village?.title ?? "",
+      villageLine: card.village?.line ?? "",
+      villageBy: card.village?.by ?? "",
+      dayLabel: card.dayLabel ?? "",
+      // venue-day.html's Startup Bash field, in place of the one big bolt,
+      // and the seed that fixes where it falls.
+      field: card.boltField ? "1" : "",
+      ramp: card.ramp === false ? "" : "1",
+      // venue-day.html's third look: the room's ASCII portrait from
+      // lib/locations.ts as a band across the top. Fetched through the cache,
+      // like every remote asset here, so a replaced image is picked up.
+      venueArt: card.venueArt
+        ? await stage(work, await fetchCached(card.venueArt.url), "venue-art.png")
+        : "",
+      // Prefixed: `artWidth` already belongs to activation-poster.html, and a
+      // later key of the same name in this object silently zeroed this one.
+      venueArtHeight: card.venueArt?.height ?? 520,
+      venueArtPosition: card.venueArt?.position ?? "50% 0%",
+      venueArtGap: card.venueArt?.gap ?? 300,
+      venueArtRight: card.venueArt?.side === "right" ? "1" : "",
+      venueArtWidth: card.venueArt?.width ?? 1080,
+      seed: [...card.id].reduce((h, ch) => (Math.imul(h, 31) + ch.charCodeAt(0)) | 0, 7),
       // Blank unless a card asks for it — `activation-poster` guards its dates
       // row on this token, and Access Granted's poster gives that corner to
       // DEVSA instead.
@@ -1201,6 +1606,10 @@ async function main() {
     page.on("requestfailed", onFail);
     await page.goto("file://" + file, { waitUntil: "networkidle" });
     await page.evaluate(() => document.fonts.ready);
+    // A template that sizes itself to its content does it here, once the
+    // faces it measures with have loaded. Same seam as `reveal`: the renderer
+    // only calls it, and what fitting means is the template's business.
+    await page.evaluate(() => window.fit?.());
     await page.waitForTimeout(900);
     page.off("requestfailed", onFail);
 
@@ -1499,7 +1908,9 @@ async function main() {
   }
 
   await browser.close();
-  await rm(work, { recursive: true, force: true });
+  // KEEP_WORK=1 leaves the filled pages behind, for when a card renders wrong
+  // and the question is what the browser was actually given.
+  if (!process.env.KEEP_WORK) await rm(work, { recursive: true, force: true });
   console.log(`\n${wanted.length} card(s) -> ${outDir}`);
 }
 

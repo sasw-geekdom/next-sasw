@@ -881,6 +881,116 @@ const MIKE_BELL = {
   portrait: { height: 940, left: 447 },
 };
 
+/** A day on the main stage. See `randDay` for the same thing at The Rand. */
+const tprDay = (iso, weekday, date) => ({
+  event: "tpr",
+  template: "venue-day.html",
+  venueDay: { venue: "tpr", day: iso },
+  // The date without the weekday — the headline already says it.
+  dayLabel: date,
+  headline: `${weekday} at TPR`,
+  headlineSize: 104,
+  // tpr.html's own placement for a card with no figure: right and down,
+  // bleeding off the right edge and the bottom.
+  boltLeft: 40,
+  boltTop: 250,
+  // Pinned when the colon rule moved from 44 characters to 60: at 59 this
+  // would now print whole and wrap, on a card that was approved with it cut.
+  titles: {
+    "the-truth-about-startups-what-are-you-going-to-do-about-it":
+      "The Truth About Startups",
+  },
+  // The wordmark the site sets in this title everywhere it draws it. See
+  // TITLE_MARKS in components/site/calendar/marks.tsx — same file.
+  titleMarks: {
+    "building-nopalera-on-her-own-terms": {
+      repo: "public/brand/nopalera-wordmark.png",
+      word: "Nopalera",
+    },
+  },
+});
+
+/** TPR's three looks for one day: faint bolt, bolt field, the building. */
+const tprDayCards = (iso, weekday, date) => {
+  const base = tprDay(iso, weekday, date);
+  return [
+    { id: `venue-day-tpr-${iso}`, ...base },
+    // The Startup Bash field in place of the one big bolt.
+    { id: `venue-day-tpr-${iso}-bolts`, ...base, boltField: true },
+    // The room's own portrait — the magenta ASCII of the building the site
+    // draws in its venue section (`image` on TPR in lib/locations.ts).
+    {
+      id: `venue-day-tpr-${iso}-building`,
+      ...base,
+      venueArt: {
+        url: "https://firebasestorage.googleapis.com/v0/b/sasw2026-783a5.firebasestorage.app/o/sasw-assets%2Fsastw-tpr-magenta.png?alt=media",
+        // Tall enough, and lifted enough, that the tower sign ends above the
+        // band's foot: the image draws 720 tall at full width, and 18% of the
+        // 120 it overflows puts the "O" of RADIO at y≈540 of 600.
+        height: 600,
+        position: "50% 18%",
+        gap: 290,
+      },
+    },
+  ];
+};
+
+/**
+ * A day at The Rand — Geekdom's third floor, where the community groups DEVSA
+ * hosts all year each take an hour, and the three activations with brands of
+ * their own take an afternoon. Each row is a block and the talks inside it;
+ * see `venueDay` in render.mjs.
+ */
+const randDay = (iso, weekday, date) => ({
+  event: "rand",
+  template: "venue-day.html",
+  venueDay: { venue: "the-rand", day: iso },
+  // Not the ramp: its five pips say every circuit lands in this room, which
+  // is TPR's claim as the main stage, not The Rand's.
+  ramp: false,
+  stage: "Geekdom, 3rd Floor",
+  dayLabel: date,
+  headline: `${weekday} at The Rand`,
+  headlineSize: 96,
+  // The `rand` event's facts are one Thursday session's; this is the room.
+  facts: ["The Rand", "110 E Houston St"],
+  boltLeft: 40,
+  boltTop: 250,
+  titles: {
+    // A sentence rather than a title, with no colon to cut at. The LEGO is
+    // the hook, so it stays.
+    "maybe-thats-not-the-problem":
+      "Maybe That\u2019s Not the Problem \u2014 with LEGO\u00ae",
+    // The parenthetical is the subtitle; the site's cards split it the same.
+    "i-spy-with-my-kernel-eye-what-your-box-is-doing-before-you-ever-log-in":
+      "I Spy With My Kernel Eye",
+  },
+});
+
+/** The Rand's three looks for one day: faint bolt, bolt field, building. */
+const randDayCards = (iso, weekday, date) => {
+  const base = randDay(iso, weekday, date);
+  return [
+    { id: `venue-day-the-rand-${iso}`, ...base },
+    { id: `venue-day-the-rand-${iso}-bolts`, ...base, boltField: true },
+    // The Rand's own portrait from lib/locations.ts — the Geekdom "g" over
+    // the building. Near-square, so it stands on the right rather than
+    // spanning the top the way TPR's does, and the headline takes two lines.
+    {
+      id: `venue-day-the-rand-${iso}-building`,
+      ...base,
+      headline: `${weekday} at<br />The Rand`,
+      venueArt: {
+        url: "https://firebasestorage.googleapis.com/v0/b/sasw2026-783a5.firebasestorage.app/o/sasw-assets%2Fglogo-rand.jpg?alt=media",
+        side: "right",
+        width: 540,
+        height: 557,
+        gap: 110,
+      },
+    },
+  ];
+};
+
 export const CARDS = [
   {
     ...THURSDAY_HEAD,
@@ -1692,6 +1802,56 @@ export const CARDS = [
      * on time for, and that is the thing you cannot be late for.
      */
     reveal: [3, 1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 2.6, 4],
+  },
+
+  /**
+   * The second Access Granted Short: the afternoon a face at a time.
+   *
+   * The first Short is the running order as a list. This one gives each
+   * speaker a frame — hour, title, name, the group whose hour it is — and
+   * then the village, then the outro. Nothing about the talks is typed here:
+   * `lineupOf` reads them off the CMS in running order, with the group each
+   * falls under from `accessBlockFor`, the same credit the event page prints.
+   *
+   * Composited behind the padlock clip the same way the first Short is, so
+   * the two open alike.
+   */
+  {
+    id: "access-granted-short-speakers",
+    event: "access-granted",
+    template: "access-granted-speakers.html",
+    size: { width: 1080, height: 1920 },
+    scale: 1,
+    lineupOf: "access-granted",
+    subtitle:
+      "Every other room this week is people talking about technology. This one is people taking it apart.",
+    kicker: "Six speakers \u00b7 Wed, Sept 30",
+    /**
+     * Only the exceptions; everyone else takes the default 1240, about 1.35x
+     * their feed cards' 918, because here the figure has the whole width and
+     * the bottom two-thirds to stand in.
+     *
+     * Corey's is an illustration rather than a headshot, with 146px of empty
+     * alpha under it — his feed card pushes that off the edge with a negative
+     * `bottom`, and so does this, scaled — and its mass sits left of its own
+     * box, so it is nudged right to stand where the others do. Mike's is full
+     * length, so it runs a little shorter to keep his head where theirs are.
+     */
+    portraits: {
+      "corey-hartman-ph-d": { height: 940, bottom: -102, shift: 100 },
+      "mike-bell": { height: 1200 },
+    },
+    village: {
+      logo: "public/access-granted/orgs/locksport-fall.png",
+      when: "1 \u2013 6 PM \u00b7 all afternoon",
+      title: "Lockpicking Village",
+      line: "Pick locks in the open. All ages welcome, no experience needed.",
+      by: "Alamo City Locksport",
+    },
+    ctaLine: "Wed, Sept 30 \u00b7 1 \u2013 6 PM \u00b7 Geekdom, 3rd Floor",
+    ctaUrl: "sasw.co/schedule/access-granted",
+    // Opener, six speakers, the village, the outro.
+    reveal: [2.8, 2.4, 2.4, 2.4, 2.4, 2.4, 2.4, 2.8, 4],
   },
 
   {
@@ -3392,11 +3552,12 @@ export const CARDS = [
     id: "linux-satx-speaker-beck",
     event: "linux-satx",
     speaker: "beck",
-    // Tentative — his words. If it firms up, this and the subtitle are the
-    // only two strings that change.
-    headline: "From Closed to Open",
+    // The title firmed up, and splits at its own colon: the half before it
+    // is the hook, the half after says what the talk covers. Broken after
+    // "the" so "Rest of Us" stays together — it is the phrase that lands.
+    headline: "Linux for the<br />Rest of Us",
     headlineSize: 96,
-    subtitle: "The opening keynote",
+    subtitle: "Freedom, community, and the power of FOSS",
     greyscale: true,
     // The second mononym in the set, after wolfy. See the note on `.name` in
     // community-group.html for what the default split did with it.
@@ -3408,6 +3569,40 @@ export const CARDS = [
     // from the crown instead — and the crown that matters is the knot, since
     // that is where the silhouette starts.
     portrait: { height: 840, left: 470 },
+  },
+
+  {
+    id: "dotnet-user-group-speaker-jon-roberts",
+    event: "dotnet-user-group",
+    speaker: "jon-roberts",
+    // Two lines, broken before "the Pit" so each half is a phrase and the
+    // idiom "pit of success" is never split across the break.
+    headline: "Herding Clankers into<br />the Pit of Success",
+    headlineSize: 80,
+    // The description's argument, not a paraphrase of its opening. The
+    // talk's claim is that the prompt is not where agents succeed or fail:
+    // the stack and architecture are, and it proves it by walking through an
+    // F# codebase. An earlier "Getting AI agents to write reliably good F#"
+    // said the opposite, that F# was the output rather than the reason.
+    // Also the one place the title explains what a clanker is.
+    subtitle:
+      // Non-breaking space after "F#" — balanced wrapping otherwise breaks
+      // there and strands the language from the word it qualifies.
+      "More than the perfect prompt: the F#\u00a0stack that keeps AI agents on track",
+    // His CMS record has no title or company, and this template prints the
+    // role line regardless. From his bio, which leads with it.
+    role: "25 years building software",
+    // The probe fails here the way it did on Beck, for a different reason:
+    // the silhouette widens at the hat brim, so it measured the brim as the
+    // head and asked for 2018, about twice life size. Sized by eye from the
+    // hat crown instead. 840 rather than the set's usual 860 because the
+    // brim is wider than any head: at 860 its tip ran into the right edge.
+    // Here it stops about 30px short.
+    portrait: { height: 840, left: 460 },
+    // Lowered toward the name, date and room, but only so far: at 700 its
+    // lower edge ran behind his right shoulder, and a tint over a figure is
+    // the thing this template's note on `.bolt` says to avoid.
+    boltTop: 560,
   },
 
   {
@@ -3432,6 +3627,30 @@ export const CARDS = [
     // anything taller puts his hair into the type.
     portrait: { height: 860, left: 439 },
   },
+
+  // ─── Venue days ───────────────────────────────────────────────────────────
+  /**
+   * One card per room per day, posted the morning of.
+   *
+   * The list is not in here. `venueDay` names a room and a date and the
+   * renderer reads that room's sessions for that day out of the CMS — see
+   * `venueDay` in render.mjs — so a session moved or added after this was
+   * written is on the card the next time it renders, and adding the rest of
+   * the week is one entry per room per day with nothing to retype.
+   *
+   * `event` supplies the room's facts line and template defaults, the same
+   * way it does for that room's speaker cards.
+   */
+  // Friday has nothing on the main stage, so there is no Friday card.
+  ...tprDayCards("2026-09-28", "Monday", "September 28"),
+  ...tprDayCards("2026-09-29", "Tuesday", "September 29"),
+  ...tprDayCards("2026-09-30", "Wednesday", "September 30"),
+  ...tprDayCards("2026-10-01", "Thursday", "October 1"),
+  ...randDayCards("2026-09-28", "Monday", "September 28"),
+  ...randDayCards("2026-09-29", "Tuesday", "September 29"),
+  ...randDayCards("2026-09-30", "Wednesday", "September 30"),
+  ...randDayCards("2026-10-01", "Thursday", "October 1"),
+  ...randDayCards("2026-10-02", "Friday", "October 2"),
 
   // ─── Give-a-LOT ───────────────────────────────────────────────────────────
   {
