@@ -991,6 +991,65 @@ const randDayCards = (iso, weekday, date) => {
   ];
 };
 
+/**
+ * A day at Central Library — Launch SA's floor inside the library, where the
+ * week's small-business programme runs. Launch SA's own sessions arrive as CMS
+ * talks (with their Eventbrite links), 1 Million Cups, VentureLab IGNITE and
+ * Give-a-LOT as curated blocks; the card lists both, as the day page does.
+ */
+const libraryDay = (iso, weekday, date) => ({
+  // Any event serves for defaults the card overrides; this one is already a
+  // Central Library event.
+  event: "women-founders-network",
+  template: "venue-day.html",
+  venueDay: { venue: "central-library", day: iso },
+  // Not the ramp: its five pips are TPR's claim as the main stage.
+  ramp: false,
+  stage: "Launch SA, 1st Floor",
+  dayLabel: date,
+  headline: `${weekday} at Central Library`,
+  headlineSize: 96,
+  facts: ["Central Library", "600 Soledad St"],
+  boltLeft: 40,
+  boltTop: 250,
+  titles: {
+    // The half before the colon is the vague half here; the event is the
+    // launch it names after it.
+    "one-vision-one-alliance-the-bdo-alliance-san-antonio-launch-celebration":
+      "BDO Alliance-San Antonio Launch & Celebration",
+  },
+});
+
+/** Central Library's three looks for one day: faint bolt, bolt field, building. */
+const libraryDayCards = (iso, weekday, date) => {
+  const base = libraryDay(iso, weekday, date);
+  return [
+    { id: `venue-day-central-library-${iso}`, ...base },
+    { id: `venue-day-central-library-${iso}-bolts`, ...base, boltField: true },
+    // Launch SA's portrait from lib/locations.ts — their mark over the
+    // library. Near-square (819x720), so it stands on the right like The
+    // Rand's, and the headline takes two lines beside it.
+    {
+      id: `venue-day-central-library-${iso}-building`,
+      ...base,
+      // The host rather than the building on this one: the art is Launch SA's
+      // own mark, so the headline names who the art already shows. Two lines,
+      // like The Rand's, and short enough to clear it.
+      headline: `${weekday} at<br />Launch SA`,
+      venueArt: {
+        url: "https://firebasestorage.googleapis.com/v0/b/sasw2026-783a5.firebasestorage.app/o/sasw-assets%2Fsastw-launchsa.jpg?alt=media",
+        side: "right",
+        width: 500,
+        height: 440,
+        // Below the lockup and dates, so the blue Launch SA mark at the top of
+        // the portrait is not under them or their shade.
+        top: 130,
+        gap: 110,
+      },
+    },
+  ];
+};
+
 export const CARDS = [
   {
     ...THURSDAY_HEAD,
@@ -3651,6 +3710,11 @@ export const CARDS = [
   ...randDayCards("2026-09-30", "Wednesday", "September 30"),
   ...randDayCards("2026-10-01", "Thursday", "October 1"),
   ...randDayCards("2026-10-02", "Friday", "October 2"),
+  ...libraryDayCards("2026-09-28", "Monday", "September 28"),
+  ...libraryDayCards("2026-09-29", "Tuesday", "September 29"),
+  ...libraryDayCards("2026-09-30", "Wednesday", "September 30"),
+  ...libraryDayCards("2026-10-01", "Thursday", "October 1"),
+  ...libraryDayCards("2026-10-02", "Friday", "October 2"),
 
   // ─── Give-a-LOT ───────────────────────────────────────────────────────────
   {

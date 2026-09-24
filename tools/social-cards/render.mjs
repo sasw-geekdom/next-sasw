@@ -349,7 +349,13 @@ async function venueDay(card, sessions, work) {
               ? `<div class="people">${who}</div>`
               : x.blurb && !cms.has(x.slug)
                 ? `<div class="blurb">${escapeHtml(x.blurb)}</div>`
-                : ""),
+                : // A session with nobody named and nothing to quote — Launch
+                  // SA's, whose presenters are in the copy rather than the
+                  // CMS — says its circuit, as the venue page's list does,
+                  // rather than floating a title over an empty line.
+                  x.circuit
+                  ? `<div class="people"><span class="mod">${escapeHtml(x.circuit)}</span></div>`
+                  : ""),
         ),
       );
     }
@@ -1188,6 +1194,11 @@ async function main() {
       venueArtGap: card.venueArt?.gap ?? 300,
       venueArtRight: card.venueArt?.side === "right" ? "1" : "",
       venueArtWidth: card.venueArt?.width ?? 1080,
+      // Right-side art can drop below the header. Launch SA's mark is at the
+      // very top of its portrait, and at top 0 it sat under the dates and the
+      // shade that keeps them legible — so moved down, it loses the shade.
+      venueArtTop: card.venueArt?.top ?? 0,
+      venueArtClearTop: card.venueArt?.top ? "1" : "",
       seed: [...card.id].reduce((h, ch) => (Math.imul(h, 31) + ch.charCodeAt(0)) | 0, 7),
       // Blank unless a card asks for it — `activation-poster` guards its dates
       // row on this token, and Access Granted's poster gives that corner to

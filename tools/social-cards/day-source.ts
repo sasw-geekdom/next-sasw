@@ -48,6 +48,7 @@ export async function venueDayItems(iso: string, venue: string) {
       endMin: i.endMin,
       timeLabel: i.timeLabel,
       people: i.people ?? "",
+      circuit: i.circuit ?? "",
       blurb: blurbs.get(i.slug) ?? "",
       // The block's mark as the site draws it: a lockup file, or the name of
       // a typeset wordmark and its colours. See components/site/calendar/marks.

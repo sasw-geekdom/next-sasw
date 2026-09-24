@@ -170,8 +170,16 @@
       .art {
         left: auto;
         right: 0;
+        top: {{venueArtTop}}px;
         width: {{venueArtWidth}}px;
       }
+      <!--if:venueArtClearTop-->
+      /* Dropped below the header, the art has nothing over its top edge to
+         keep legible, so the top shade goes and only the foot fades. */
+      .art::before {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 86%, #000 100%);
+      }
+      <!--/if:venueArtClearTop-->
       .art img {
         object-fit: contain;
         object-position: 100% 0%;
