@@ -51,8 +51,13 @@ export async function saveEmailCopy(
     .set(
       {
         [key]: v.data,
-        updatedAt: FieldValue.serverTimestamp(),
-        updatedBy: user.email,
+        // Per template. There was one doc-level updatedAt/updatedBy for all
+        // eight, so saving the Speaker email changed the "last saved" line
+        // shown on Know before you go. A merged nested map leaves every other
+        // template's entry alone.
+        saved: {
+          [key]: { at: FieldValue.serverTimestamp(), by: user.email },
+        },
       },
       { merge: true },
     );

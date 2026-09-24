@@ -27,8 +27,7 @@ export default async function EmailsPage() {
       />
       <EmailManager
         initial={config.copies}
-        updatedAt={config.updatedAt}
-        updatedBy={config.updatedBy}
+        saved={config.saved}
         adminEmail={user.email}
         knowBeforeYouGo={kbyg}
       />

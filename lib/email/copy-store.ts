@@ -16,10 +16,15 @@ import {
 const emailSettingsDoc = () =>
   adminDb.collection(COLLECTIONS.settings).doc(EMAIL_SETTINGS_DOC);
 
+export interface SavedStamp {
+  at: number;
+  by: string;
+}
+
 export interface EmailCopyConfig {
   copies: Record<EmailTemplateKey, EmailCopy>;
-  updatedAt: number | null;
-  updatedBy: string | null;
+  /** When and by whom each template was last saved; absent if never. */
+  saved: Partial<Record<EmailTemplateKey, SavedStamp>>;
 }
 
 export async function getEmailCopyConfig(): Promise<EmailCopyConfig> {
@@ -29,11 +34,14 @@ export async function getEmailCopyConfig(): Promise<EmailCopyConfig> {
   for (const t of EMAIL_TEMPLATES) {
     copies[t.key] = mergeCopy(t.defaults, d[t.key]);
   }
-  return {
-    copies,
-    updatedAt: d.updatedAt instanceof Timestamp ? d.updatedAt.toMillis() : null,
-    updatedBy: typeof d.updatedBy === "string" ? d.updatedBy : null,
-  };
+  const saved: EmailCopyConfig["saved"] = {};
+  for (const t of EMAIL_TEMPLATES) {
+    const s = d.saved?.[t.key];
+    if (s?.at instanceof Timestamp && typeof s.by === "string") {
+      saved[t.key] = { at: s.at.toMillis(), by: s.by };
+    }
+  }
+  return { copies, saved };
 }
 
 /** The merged copy for one template — used by the send routes. */

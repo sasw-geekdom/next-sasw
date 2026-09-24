@@ -23,6 +23,7 @@ import {
   type EmailActionResult,
 } from "@/lib/admin/email-actions";
 import type { KnowBeforeYouGoStatus } from "@/lib/email/know-before-you-go";
+import type { EmailCopyConfig } from "@/lib/email/copy-store";
 
 type Drafts = Record<EmailTemplateKey, EmailCopy>;
 
@@ -33,8 +34,8 @@ const PRIMARY: EmailTemplateKey[] = ["registration", "knowBeforeYouGo"];
 
 interface Props {
   initial: Drafts;
-  updatedAt: number | null;
-  updatedBy: string | null;
+  /** Last save per template — see `saved` in lib/email/copy-store. */
+  saved: EmailCopyConfig["saved"];
   adminEmail: string;
   knowBeforeYouGo: KnowBeforeYouGoStatus;
 }
@@ -53,8 +54,7 @@ interface Props {
  */
 export function EmailManager({
   initial,
-  updatedAt,
-  updatedBy,
+  saved,
   adminEmail,
   knowBeforeYouGo,
 }: Props) {
@@ -235,9 +235,10 @@ export function EmailManager({
         </div>
 
         <div className="flex items-center gap-2">
-          {updatedAt && updatedBy && (
+          {saved[active] && (
             <span className="hidden text-xs text-muted-foreground md:inline">
-              Last saved {formatDateTime(updatedAt)} by {updatedBy}
+              Last saved {formatDateTime(saved[active].at)} by{" "}
+              {saved[active].by}
             </span>
           )}
           <Button
