@@ -101,6 +101,16 @@
         line-height: 1.45;
         color: rgba(255, 255, 255, 0.86);
       }
+      /* A name in the blurb that is the point of the card — the host of a
+         block the card is about. The Model's lavender in semibold, the colour
+         of the headline's "hit", so it reads as part of that highlight.
+         Tried as a lavender block like the hit itself (a second box split the
+         card's one spotlight in two) and in the roles' cyan (read as one more
+         job title); lavender type spotlights it without competing. */
+      .blurb .host {
+        color: var(--lav);
+        font-weight: 600;
+      }
       <!--/if:subtitle-->
 
       .pair {
@@ -156,6 +166,54 @@
           #000 100%
         );
       }
+      <!--if:faceC-->
+      /* Three: a hosted block with three presenters — AlamoCityAI's hour.
+         Same grammar as the pair at a third the width rather than a half, so
+         the windows are shorter, the names a step down, and the roles allowed
+         to wrap under them. */
+      .pair.trio {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+      }
+      /* Taller than a third of the pair's 408 would suggest: the title here
+         is one line and none of the three has a company on record, so the
+         column has the height and the window takes it. */
+      .trio .who .shot {
+        height: 460px;
+        /* A third of the width cuts every crop at the shoulders, and the
+           window's straight sides only disappear against a dark shirt:
+           Derek's is light, and read as a grey box. So the sides fade into
+           the black the way the foot already does, on all three alike. */
+        -webkit-mask-image: linear-gradient(
+          to right,
+          transparent 0%,
+          #000 18%,
+          #000 82%,
+          transparent 100%
+        );
+        mask-image: linear-gradient(
+          to right,
+          transparent 0%,
+          #000 18%,
+          #000 82%,
+          transparent 100%
+        );
+      }
+      .trio .who .nm {
+        font-size: 38px;
+      }
+      .trio .who .rl {
+        font-size: 19px;
+        line-height: 1.25;
+      }
+      .trio .who .og {
+        font-size: 14px;
+      }
+      .who.c .shot img {
+        height: {{heightC}}px;
+        top: {{topC}}px;
+      }
+      <!--/if:faceC-->
       .who .nm {
         margin-top: 18px;
         font-family: "OswaldLocal", Impact, sans-serif;
@@ -240,7 +298,7 @@
       <p class="blurb">{{subtitle}}</p>
       <!--/if:subtitle-->
 
-      <div class="pair">
+      <div class="pair<!--if:faceC--> trio<!--/if:faceC-->">
         <div class="who a">
           <div class="shot"><img src="{{faceA}}" alt="" /></div>
           <div class="nm">{{firstA}}<br />{{lastA}}</div>
@@ -253,6 +311,14 @@
           <div class="rl">{{roleB}}</div>
           <div class="og">{{orgB}}</div>
         </div>
+        <!--if:faceC-->
+        <div class="who c">
+          <div class="shot"><img src="{{faceC}}" alt="" /></div>
+          <div class="nm">{{firstC}}<br />{{lastC}}</div>
+          <div class="rl">{{roleC}}</div>
+          <div class="og">{{orgC}}</div>
+        </div>
+        <!--/if:faceC-->
       </div>
 
       <div class="spacer"></div>

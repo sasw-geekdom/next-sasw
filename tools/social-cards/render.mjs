@@ -1585,6 +1585,36 @@ async function main() {
             bottomB: card.portraits[1].bottom ?? 0,
           }
         : {}),
+      /**
+       * Three people as three columns, on a template that has them — the
+       * Model pair's `trio`. Opt-in rather than keyed on the count: three or
+       * more is the crowd row everywhere else, and tpr.html guards its pair
+       * block on `faceB`, so filling these for every three-person card would
+       * draw a pair's names under a crowd.
+       */
+      // Always present, so `<!--if:faceC-->` resolves on every card: `fill`
+      // only strips a guard whose key is in the data, and a guard left in
+      // place inside the-model-pair's `class` attribute turned "pair" into
+      // "pair<!--if:faceC-->" and broke both existing pair cards' grid.
+      faceC: "",
+      ...(card.trio && people.length === 3
+        ? Object.fromEntries(
+            people.flatMap((pp, i) => {
+              const k = "ABC"[i];
+              const box = card.portraits[i];
+              return [
+                [`face${k}`, pp.file],
+                [`first${k}`, pp.name.split(" ")[0]],
+                [`last${k}`, pp.name.split(" ").slice(1).join(" ")],
+                [`role${k}`, card.roles?.[i] ?? pp.role],
+                [`org${k}`, pp.org],
+                [`height${k}`, box.height],
+                [`top${k}`, box.top],
+                [`bottom${k}`, box.bottom ?? 0],
+              ];
+            }),
+          )
+        : {}),
     };
 
     const file = join(work, `${card.id}.html`);

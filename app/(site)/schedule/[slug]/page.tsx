@@ -1221,12 +1221,22 @@ function ActivationPage({
             aside={
               isPysa ? <PysaAside /> : isModel ? <ModelAside /> : undefined
             }
-            /* Only Access Granted. Its afternoon is four community groups
-               with an hour each rather than one programme — see
-               `ACCESS_BLOCKS`. Every other activation passes nothing and
-               every row draws as it always has. */
+            /* Access Granted's afternoon is five community groups with an
+               hour each — see `ACCESS_BLOCKS`. The Model has one hosted block
+               inside it: AlamoCityAI's hour, three presenters and a panel,
+               entered as one session. Keyed on its slug rather than a time
+               window, because it is one session and not an hour of several.
+               Every other activation passes nothing and every row draws as it
+               always has. */
             credit={
-              isAccessGranted ? (s) => accessBlockFor(s.startsAt) : undefined
+              isAccessGranted
+                ? (s) => accessBlockFor(s.startsAt)
+                : isModel
+                  ? (s) =>
+                      s.slug === "alamo-city-ai"
+                        ? { name: "AlamoCityAI", href: "https://alamocityai.com/" }
+                        : undefined
+                  : undefined
             }
             creditAccent={isAccessGranted ? ACCESS_GREEN : undefined}
           />

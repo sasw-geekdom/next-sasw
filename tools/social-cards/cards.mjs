@@ -1257,6 +1257,32 @@ export const CARDS = [
     portrait: { height: 960, left: 439 },
   },
 
+  /**
+   * AlamoCityAI's hour inside The Model: three presenters, then a panel with
+   * all three. One session in the CMS (`alamo-city-ai`), so one card with
+   * three columns — the pair template's `trio`.
+   *
+   * Joe, Matthew, Derek: the exhibit first, then the VFX shot, then the
+   * game — reordered from the overview's sequence to lead with Joe. The three crops are framed alike, so one height and a top solved
+   * off each crown (Joe 104, Derek 73, Matthew 100 of 1350) line the heads up:
+   * top ≈ 20 − crown × 590 / 1350.
+   */
+  {
+    id: "the-model-speakers-alamo-city-ai",
+    event: "the-model",
+    trio: true,
+    speakers: ["joe-guerra", "matthew-bell", "derek-alexander"],
+    headline: "Big Work, <span class=\"hit\">Small Teams</span>",
+    subtitle:
+      'Studio-level film, games and interactive work, in the hands of one person. Hosted by <span class="host">AlamoCityAI</span>.',
+    // In `speakers` order: Joe, Matthew, Derek.
+    portraits: [
+      { height: 590, top: -26 },
+      { height: 590, top: -24 },
+      { height: 590, top: -12 },
+    ],
+  },
+
   {
     id: "the-model-speakers-rose-chavez",
     event: "the-model",
@@ -3662,6 +3688,32 @@ export const CARDS = [
     // lower edge ran behind his right shoulder, and a tint over a figure is
     // the thing this template's note on `.bolt` says to avoid.
     boltTop: 560,
+  },
+
+  {
+    id: "linux-satx-speaker-satish-mantripragada",
+    event: "linux-satx",
+    speaker: "satish-mantripragada-mba",
+    // The half before the colon, which is the talk's own name for itself. The
+    // question after it is the subtitle's job, cut to what it asks.
+    // One line. At the set's 96 it runs about 850px, which fits: the title
+    // sits well above his head, so nothing on the right is in its way.
+    headline: "Agentic Leadership",
+    headlineSize: 96,
+    subtitle: "How do you bring AI agents into enterprise and government?",
+    // "MBA" is part of his CMS name, as "Ph.D." is Corey Hartman's, and it
+    // would print as a third word on a two-line name. The card names him; the
+    // credential is on his page.
+    name: ["Satish", "Mantripragada"],
+    // A tight headshot: the head is 47% of the file's height, where the set
+    // runs 14–30%, so he is drawn well under the set's 860. The cutout reaches
+    // both edges of its file, and at 700 the right one stopped at x=1030 — a
+    // straight cut down his shoulder, 50px short of the card. 780 from 480
+    // runs it off the edge, as every other figure in the set does.
+    portrait: { height: 780, left: 480 },
+    // Down behind the name, date and room, as on Jon Roberts's card, instead
+    // of the gap under the subtitle.
+    boltTop: 600,
   },
 
   {
