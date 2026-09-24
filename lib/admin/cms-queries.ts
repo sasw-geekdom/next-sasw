@@ -151,6 +151,8 @@ export async function listSessions(): Promise<SessionRow[]> {
       track: d.track ?? null,
       activation: d.activation ?? null,
       participants,
+      registerUrl:
+        typeof d.registerUrl === "string" && d.registerUrl ? d.registerUrl : null,
       createdAt: toMillis(d.createdAt) ?? 0,
     };
   });

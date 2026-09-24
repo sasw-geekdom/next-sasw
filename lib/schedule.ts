@@ -3749,6 +3749,12 @@ export function standaloneItems(rows: SessionRow[]): CalendarItem[] {
             .map((who) => who.name)
             .filter(Boolean)
             .join(", ") || undefined,
+        // Searchable by who runs the room and by what the session says, not
+        // only by its title. Launch SA's week came in as fourteen sessions
+        // with no CMS speakers — the presenters are named in the copy — so
+        // "Launch SA" and "Howie Nestel" both found nothing. The room's host
+        // covers the first, the description the second.
+        searchText: [venue.host, row.description].filter(Boolean).join(" "),
         exportable: true,
       },
     ];

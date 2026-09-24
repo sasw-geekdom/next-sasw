@@ -87,6 +87,8 @@ export interface SessionRow {
    */
   activation: string | null;
   participants: ResolvedParticipant[];
+  /** The organiser's own registration page, where they seat it themselves. */
+  registerUrl: string | null;
   createdAt: number;
 }
 

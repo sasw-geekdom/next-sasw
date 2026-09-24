@@ -567,6 +567,25 @@ export function SessionManager({
               )}
             </div>
 
+            {/* For a session its organiser seats themselves — Launch SA runs
+                every one of theirs through Eventbrite. The talk page shows a
+                Register button when this is set; blank leaves the week's own
+                registration as the way in. */}
+            <div>
+              <Label htmlFor="registerUrl">Registration link (optional)</Label>
+              <Input
+                id="registerUrl"
+                name="registerUrl"
+                type="url"
+                inputMode="url"
+                placeholder="https://www.eventbrite.com/e/…"
+                defaultValue={current?.registerUrl ?? ""}
+              />
+              {issues.registerUrl?.[0] && (
+                <FieldError>{issues.registerUrl[0]}</FieldError>
+              )}
+            </div>
+
             {/* Day, then start, then end — three short lists instead of two
                 free-text datetimes.
             

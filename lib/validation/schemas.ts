@@ -218,6 +218,19 @@ export const sessionSchema = z.object({
     .optional()
     .or(z.literal("").transform(() => null)),
   participants: z.array(participant).default([]),
+  /**
+   * Where to register, for a session its organiser seats themselves — Launch
+   * SA runs every one of theirs through Eventbrite. Blank means the week's
+   * own registration covers it, which is every session until now.
+   */
+  registerUrl: z
+    .string()
+    .trim()
+    .url("Paste the full link, starting https://")
+    .max(500)
+    .nullable()
+    .optional()
+    .or(z.literal("").transform(() => null)),
 });
 export type SessionInput = z.infer<typeof sessionSchema>;
 

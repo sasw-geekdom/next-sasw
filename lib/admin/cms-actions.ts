@@ -349,6 +349,7 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
     track: form.get("track") ?? "",
     activation: form.get("activation") ?? "",
     participants,
+    registerUrl: form.get("registerUrl") ?? "",
   });
   if (!parsed.success) {
     return {
@@ -421,6 +422,7 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
     track: data.track ?? null,
     activation: data.activation ?? null,
     participants: data.participants,
+    registerUrl: data.registerUrl ?? null,
   };
 
   if (id) {

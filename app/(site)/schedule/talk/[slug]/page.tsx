@@ -433,6 +433,29 @@ export default async function TalkPage({
             )}
 
             <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+              {/* The organiser's own registration, where they seat it
+                  themselves — Launch SA runs every one of theirs through
+                  Eventbrite. Filled and first, because for these it is the one
+                  thing a reader has to do; the week's registration does not
+                  get them a seat. "Save a seat", the phrase every activation's
+                  RSVP button already uses. */}
+              {row.registerUrl && (
+                <a
+                  href={row.registerUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex items-center gap-2 rounded-full bg-magenta px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-white transition-opacity duration-300 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                >
+                  {/eventbrite\./i.test(row.registerUrl)
+                    ? "Save a seat on Eventbrite"
+                    : "Save a seat"}
+                  <ArrowUpRight
+                    className={ARROW_OUT}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                </a>
+              )}
               {/* First, and the only filled button in the row, because for a
                   session inside an activation it is the better destination
                   than either of the two beside it: the rest of the day is a
