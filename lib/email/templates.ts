@@ -50,15 +50,28 @@ export interface TemplateVars {
   sessionTitle?: string;
 }
 
+// Rewritten for the week itself. It promised "schedule drops soon" and a
+// follow-up with where to be; the schedule is live and people now register
+// days out, or on the morning. So it is the follow-up: the schedule, the
+// badge, parking and the Bash — the FAQ's answers, cut to what someone needs
+// on the way in (lib/faq.ts is the source; keep the two agreeing).
+//
+// Plain text by design. `renderBody` escapes HTML, so addresses go in bare
+// with the www — the form mail clients reliably turn into links.
 export const DEFAULT_REGISTRATION_COPY: EmailCopy = {
-  subject: "You're on the list. Plug in.",
+  subject: "You're in. The schedule is live.",
   heading: "You're in.",
   body: [
     "See you downtown, {firstName}.",
-    "San Antonio Startup + Tech Week runs Sept 28 – Oct 2, anchored at Texas Public Radio.",
-    "Schedule drops soon. We'll send the sessions, the Bash, and where to be.",
+    "San Antonio Startup + Tech Week runs Sept 28 – Oct 2 — five days, six rooms, anchored at Texas Public Radio. Registration is free.",
+    "The schedule is live. Every day has its own running order, and every session page adds the hour to your calendar with the room and address already in it.\nwww.sasw.co/schedule",
+    "Your badge: pick it up at Texas Public Radio, The Rand or Central Library — whichever you reach first. Check-in is by name, so there is nothing to print. A badge from any desk works all week.",
+    "A few rooms keep their own list — Trinity's Stumberg final is ticketed, and the Alamo Angels brunch is by invitation. Each session page says so.",
+    "Parking: $10 flat, all day, at the City garages. City Tower on N Flores is closest to The Rand and a short walk to TPR. From 5 PM Thursday, City garages are free.",
+    "Thursday, Oct 1 closes on the Startup Bash — 6 to 8 PM at Legacy Park.",
+    "Badges, parking and access, in full:\nwww.sasw.co/faq",
   ].join("\n\n"),
-  ctaIntro: "Lock the dates now:",
+  ctaIntro: "Put the week on your calendar:",
   signoff: "Plug in.",
 };
 
