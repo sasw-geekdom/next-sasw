@@ -28,7 +28,11 @@ const LOGO_URL =
 export interface EmailCopy {
   subject: string;
   heading: string;
-  /** Blank-line-separated paragraphs. Supports {firstName} and {sessionTitle}. */
+  /**
+   * Blank-line-separated paragraphs. Supports {firstName} and {sessionTitle}.
+   * A paragraph starting "## " is a section subhead, and bare URLs
+   * (https://… or www.…) become links.
+   */
   body: string;
   /** Line shown just above the add-to-calendar block. Blank to omit. */
   ctaIntro: string;
@@ -43,33 +47,33 @@ export type EmailTemplateKey =
   | "speakerDeclined"
   | "getInvolvedSponsor"
   | "getInvolvedHost"
-  | "getInvolvedGeneral";
+  | "getInvolvedGeneral"
+  | "knowBeforeYouGo";
 
 export interface TemplateVars {
   firstName: string;
   sessionTitle?: string;
 }
 
-// Rewritten for the week itself. It promised "schedule drops soon" and a
-// follow-up with where to be; the schedule is live and people now register
-// days out, or on the morning. So it is the follow-up: the schedule, the
-// badge, parking and the Bash — the FAQ's answers, cut to what someone needs
-// on the way in (lib/faq.ts is the source; keep the two agreeing).
-//
-// Plain text by design. `renderBody` escapes HTML, so addresses go in bare
-// with the www — the form mail clients reliably turn into links.
+// The confirmation, now the schedule is live and people register days out or
+// on the morning. It carries what someone needs on the way in — where to get a
+// badge, where to park, where the schedule is — as blocks rather than prose:
+// the first version was eight paragraphs and read as a wall. Facts are
+// lib/faq.ts's; keep the two agreeing. See "Body blocks" below for the markers.
 export const DEFAULT_REGISTRATION_COPY: EmailCopy = {
   subject: "You're in. The schedule is live.",
   heading: "You're in.",
   body: [
-    "See you downtown, {firstName}.",
-    "San Antonio Startup + Tech Week runs Sept 28 – Oct 2 — five days, six rooms, anchored at Texas Public Radio. Registration is free.",
-    "The schedule is live. Every day has its own running order, and every session page adds the hour to your calendar with the room and address already in it.\nwww.sasw.co/schedule",
-    "Your badge: pick it up at Texas Public Radio, The Rand or Central Library — whichever you reach first. Check-in is by name, so there is nothing to print. A badge from any desk works all week.",
-    "A few rooms keep their own list — Trinity's Stumberg final is ticketed, and the Alamo Angels brunch is by invitation. Each session page says so.",
-    "Parking: $10 flat, all day, at the City garages. City Tower on N Flores is closest to The Rand and a short walk to TPR. From 5 PM Thursday, City garages are free.",
-    "Thursday, Oct 1 closes on the Startup Bash — 6 to 8 PM at Legacy Park.",
-    "Badges, parking and access, in full:\nwww.sasw.co/faq",
+    "See you downtown, {firstName}.\nSept 28 – Oct 2, six rooms, free.",
+    "[See the schedule](https://www.sasw.co/schedule)",
+    "## Badge pickup",
+    "> Check in by name at any desk. Nothing to print — one badge works all week.",
+    "Texas Public Radio | 321 W Commerce St\nThe Rand | 110 E Houston St, 3rd Floor\nCentral Library | 600 Soledad St",
+    "## Parking",
+    "City Tower | 60 N Flores St · $10 all day\nSt. Mary's Garage | 205 E Travis St · $10 all day\nHouston Street | 111 College St · $10 all day\nCentral Library | 600 Soledad St · 3 hrs free, then $5",
+    "## Thursday night",
+    "Startup Bash | Oct 1 · 6 – 8 PM · Legacy Park",
+    "Badges, parking and access in full: www.sasw.co/faq",
   ].join("\n\n"),
   ctaIntro: "Put the week on your calendar:",
   signoff: "Plug in.",
@@ -167,6 +171,36 @@ export interface EmailTemplateMeta {
   sample: TemplateVars;
 }
 
+// The one email here that is not a reply to something someone did: staff send
+// it to every registrant from the admin, days before the week. Blocks, not
+// prose — a list of desks, a list of garages, a line a day — so it can be read
+// in the time it takes to find a parking space. Everything is the site's:
+// badges and parking from lib/faq.ts, rooms from lib/locations.ts, the days
+// from the schedule. When those change, change this.
+//
+// Dates, never "Monday" or "next week": it is re-sent to anyone who registers
+// after the first send, and has to read right on the Wednesday too.
+export const DEFAULT_KNOW_BEFORE_YOU_GO_COPY: EmailCopy = {
+  subject: "Know before you go: San Antonio Startup + Tech Week",
+  heading: "Know before you go.",
+  body: [
+    "Sept 28 – Oct 2, {firstName}.\nHere's what you need on the way in.",
+    "## Badge pickup",
+    "> Check in by name at any desk. Nothing to print — one badge works all week.",
+    "Texas Public Radio | 321 W Commerce St\nThe Rand | 110 E Houston St, 3rd Floor\nCentral Library | 600 Soledad St",
+    "## Parking",
+    "City Tower | 60 N Flores St · $10 all day\nSt. Mary's Garage | 205 E Travis St · $10 all day\nHouston Street | 111 College St · $10 all day\nCentral Library | 600 Soledad St · 3 hrs free, then $5",
+    "## The week",
+    "Mon, Sept 28 | The Model · Mission Pitch\nTue, Sept 29 | Cup of Capital · founder & CPG talks at TPR · College Night\nWed, Sept 30 | 1 Million Cups · Access Granted · Latin Tech Pitch\nThu, Oct 1 | Texas Venture Fest · Startup Bash, 6 PM\nFri, Oct 2 | Give-a-LOT · PySanAntonio",
+    "[See the full schedule](https://www.sasw.co/schedule)\n[Read the FAQ](https://www.sasw.co/faq)",
+    "Questions? Reply to this email — a person reads every one.",
+  ].join("\n\n"),
+  // No calendar block: they registered, and the week is already in the
+  // confirmation's. A blank intro drops the buttons with it (see renderEmail).
+  ctaIntro: "",
+  signoff: "See you downtown. Plug in.",
+};
+
 export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
   {
     key: "registration",
@@ -175,6 +209,15 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
     description: "Sent automatically when someone registers to attend.",
     tokens: ["{firstName}"],
     defaults: DEFAULT_REGISTRATION_COPY,
+    sample: { firstName: "Alex" },
+  },
+  {
+    key: "knowBeforeYouGo",
+    label: "Know before you go",
+    flow: "Send to registrants",
+    description: "Badge pickup, parking and the week, sent by staff to every registrant.",
+    tokens: ["{firstName}"],
+    defaults: DEFAULT_KNOW_BEFORE_YOU_GO_COPY,
     sample: { firstName: "Alex" },
   },
   {
@@ -267,7 +310,11 @@ function pick(value: string | undefined | null, fallback: string): string {
 // ─── Rendering (pure) ───────────────────────────────────────────────────────
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 /** Plain-text token substitution (for the subject line). */
@@ -317,22 +364,113 @@ function paragraph(text: string): string {
   return `<p style="font-size:15px;line-height:22px;color:${INK};margin:0 0 14px 0;">${text}</p>`;
 }
 
-/** Turn admin-authored body text into safe paragraph HTML with tokens applied. */
+// ─── Body blocks ────────────────────────────────────────────────────────────
+// The body is written in the admin as plain text, one block per blank-line-
+// separated paragraph. Plain paragraphs read as a wall in a logistics email —
+// the know-before-you-go was one — so four markers turn a paragraph into
+// something an eye can find without reading:
+//
+//   ## Badge pickup                 a section heading, magenta bar
+//   The Rand | 110 E Houston St     one row per line: a boxed two-column list
+//   > Free after 5 PM Thursday.     a highlighted tip
+//   [See the schedule](https://…)   a button (one per line; several sit side by side)
+//
+// Anything else is a paragraph, and bare URLs in it become links. Tables and
+// inline styles only: email clients drop <style> blocks and most CSS layout.
+
+const RULE = "#e4e4e7";
+const TINT = "#fff0f7"; // magenta at ~6% on white — the tip box ground
+
+function sectionHead(text: string): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:26px 0 12px 0;"><tr><td style="border-left:4px solid ${MAGENTA};padding:2px 0 2px 10px;font-size:15px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:${INK};">${text}</td></tr></table>`;
+}
+
+function rows(pairs: [string, string][]): string {
+  const tr = pairs
+    .map(
+      ([label, value], i) =>
+        `<tr><td style="padding:11px 14px;${i ? `border-top:1px solid ${RULE};` : ""}font-size:14px;line-height:20px;font-weight:700;color:${INK};width:42%;vertical-align:top;">${label}</td>` +
+        `<td style="padding:11px 14px;${i ? `border-top:1px solid ${RULE};` : ""}font-size:14px;line-height:20px;color:${INK};vertical-align:top;">${value}</td></tr>`,
+    )
+    .join("");
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${RULE};border-radius:8px;border-collapse:separate;margin:0 0 14px 0;">${tr}</table>`;
+}
+
+function callout(text: string): string {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 14px 0;"><tr><td style="background:${TINT};border-left:4px solid ${MAGENTA};border-radius:0 8px 8px 0;padding:12px 14px;font-size:14px;line-height:20px;color:${INK};">${text}</td></tr></table>`;
+}
+
+function buttons(links: [string, string][]): string {
+  const cells = links
+    .map(
+      ([label, href]) =>
+        `<td style="padding:0 8px 0 0;"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:8px;background:${BLACK};"><a href="${href}" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;">${label}</a></td></tr></table></td>`,
+    )
+    .join("");
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:4px 0 16px 0;"><tr>${cells}</tr></table>`;
+}
+
+// Bare URLs to links, on text that is already escaped. `www.` gets a scheme so
+// the href works; trailing punctuation stays outside the link.
+function linkify(escaped: string): string {
+  return escaped.replace(
+    /\b((?:https?:\/\/|www\.)[^\s<]*[^\s<.,;:!?)])/g,
+    (url) =>
+      `<a href="${url.startsWith("www.") ? `https://${url}` : url}" style="color:${INK};font-weight:600;">${url}</a>`,
+  );
+}
+
+const BUTTON_LINE = /^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/;
+
+/** Turn admin-authored body text into safe block HTML with tokens applied. */
 function renderBody(body: string, vars: TemplateVars): string {
   const first = escapeHtml(vars.firstName);
   const title = vars.sessionTitle
     ? `<strong>${escapeHtml(vars.sessionTitle)}</strong>`
     : "";
+  // Escape, then fill tokens — the token values are escaped already.
+  const text = (raw: string) =>
+    escapeHtml(raw.trim())
+      .replace(/\{firstName\}/g, first)
+      .replace(/\{sessionTitle\}/g, title);
+
   return body
     .split(/\n{2,}/)
     .map((para) => para.trim())
     .filter(Boolean)
     .map((para) => {
-      const safe = escapeHtml(para)
-        .replace(/\{firstName\}/g, first)
-        .replace(/\{sessionTitle\}/g, title)
-        .replace(/\n/g, "<br/>");
-      return paragraph(safe);
+      const lines = para.split("\n").map((l) => l.trim()).filter(Boolean);
+
+      if (para.startsWith("## ")) return sectionHead(text(para.slice(3)));
+
+      if (lines.every((l) => l.startsWith(">"))) {
+        return callout(
+          linkify(lines.map((l) => text(l.replace(/^>\s?/, ""))).join("<br/>")),
+        );
+      }
+
+      if (lines.every((l) => BUTTON_LINE.test(l))) {
+        return buttons(
+          lines.map((l) => {
+            const [, label, href] = l.match(BUTTON_LINE)!;
+            return [text(label), escapeHtml(href)] as [string, string];
+          }),
+        );
+      }
+
+      if (lines.every((l) => l.includes(" | "))) {
+        return rows(
+          lines.map((l) => {
+            const at = l.indexOf(" | ");
+            return [
+              text(l.slice(0, at)),
+              linkify(text(l.slice(at + 3))),
+            ] as [string, string];
+          }),
+        );
+      }
+
+      return paragraph(linkify(text(para)).replace(/\n/g, "<br/>"));
     })
     .join("");
 }
@@ -377,7 +515,7 @@ function calendarBlock(): string {
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:2px 0 8px 0;">
   <tr>
     <td style="border-radius:8px;background:${MAGENTA};">
-      <a href="${googleCalUrl()}" style="display:inline-block;padding:12px 22px;color:${BLACK};font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;">Add to Google Calendar &rarr;</a>
+      <a href="${googleCalUrl()}" style="display:inline-block;padding:12px 22px;color:${BLACK};font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;">Add to Google Calendar</a>
     </td>
   </tr>
 </table>
@@ -468,4 +606,12 @@ export function internalNotificationEmail(input: {
         `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">${rows}</table>`,
     ),
   };
+}
+
+/** Know before you go, for one registrant. Used by the send-to-all action. */
+export function knowBeforeYouGoEmail(
+  input: { name: string },
+  copy: EmailCopy = DEFAULT_KNOW_BEFORE_YOU_GO_COPY,
+): { subject: string; html: string } {
+  return renderEmail(copy, { firstName: firstNameOf(input.name) });
 }

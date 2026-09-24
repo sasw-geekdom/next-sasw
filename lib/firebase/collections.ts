@@ -19,6 +19,9 @@ export const COLLECTIONS = {
   partners: "partners",
   staff: "staff",
   settings: "settings",
+  // One doc per staff send of a one-to-many email (the know-before-you-go),
+  // plus a lock doc per template so two sends cannot overlap.
+  emailSends: "emailSends",
 } as const;
 
 // Doc id within the `settings` collection holding admin-edited email copy.
