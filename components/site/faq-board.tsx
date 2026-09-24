@@ -2,7 +2,12 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { FAQ, BADGE_DESKS, GARAGES } from "@/lib/faq";
 import { ROOMS } from "@/lib/locations";
-import { DowntownMap, type MapPin } from "@/components/site/downtown-map";
+import { allSessions, resolveSessions, whenShort } from "@/lib/schedule";
+import {
+  DowntownMap,
+  type MapPin,
+  type MapTrace,
+} from "@/components/site/downtown-map";
 
 /**
  * The one-pager.
@@ -37,7 +42,53 @@ const LABEL_AT: Record<
   // The inset is a third the width, so a name that clears the frame on the
   // main map runs off this one. Both of these sit under their pin.
   "central-library": { dx: 0, dy: -38, anchor: "middle" },
+  // Two blocks north of The Rand, on Main — clear of everything above it.
+  "300-main": { dx: 0, dy: -44, anchor: "middle" },
+  "centre-club": { dx: 34, dy: 0, anchor: "start" },
+  "utsa-san-pedro-ii": { dx: 34, dy: 0, anchor: "start" },
 };
+
+/**
+ * The circuit drawn between the rooms — see MapTrace. The two badge desks
+ * downtown are the hubs: TPR for the main stage and San Pedro II a block
+ * south-west of it, The Rand for the community floor and the two venues just
+ * north of it.
+ */
+const TRACES: MapTrace[] = [
+  { from: "tpr", to: "the-rand" },
+  { from: "tpr", to: "utsa-san-pedro-ii" },
+  { from: "the-rand", to: "300-main" },
+  { from: "the-rand", to: "centre-club" },
+];
+
+/**
+ * The partner venues: popups in lib/schedule — events at a place of their own
+ * rather than one of the week's six rooms — that publish an address. Read off
+ * the schedule, so a new popup with an address arrives here on its own.
+ * Alamo Angels' brunch names its building and not its street, so it has no
+ * `place` and is left off, as the schedule leaves it off everywhere else.
+ */
+function partnerVenues() {
+  const seen = new Set<string>();
+  return resolveSessions(allSessions())
+    .filter((s) => s.venuePopup && s.venue.place?.coords && s.when)
+    .filter((s) => (seen.has(s.venue.slug) ? false : seen.add(s.venue.slug)))
+    .map((s) => {
+      const { day, time } = whenShort(s.when!);
+      return {
+        id: s.venue.slug,
+        name: s.venue.name,
+        short: s.venue.shortName ?? s.venue.name,
+        address:
+          s.venue.place!.address +
+          (s.venueDetail ? ` · ${s.venueDetail}` : ""),
+        coords: s.venue.place!.coords!,
+        event: s.title,
+        when: `${day} · ${time}`,
+        href: s.page ? `/schedule/${s.page}` : "/schedule",
+      };
+    });
+}
 
 /** What a room is called on the map, where its own name is too long. */
 const SHORT: Record<string, string> = {
@@ -75,8 +126,29 @@ function mapPins(): MapPin[] {
       href: `/schedule/${room.slug}`,
       hrefLabel: "What's here",
       label: LABEL_AT[room.slug],
+      anchor: room.tier === "anchor",
+      image: room.image
+        ? {
+            src: room.image,
+            width: room.imageWidth ?? 1280,
+            height: room.imageHeight ?? 720,
+          }
+        : undefined,
     };
   });
+  const partners: MapPin[] = partnerVenues().map((v) => ({
+    id: v.id,
+    kind: "partner",
+    name: v.name,
+    short: v.short,
+    address: v.address,
+    note: `${v.event} — ${v.when}.`,
+    lat: v.coords.lat,
+    lon: v.coords.lon,
+    href: v.href,
+    hrefLabel: "The event",
+    label: LABEL_AT[v.id],
+  }));
   const garages: MapPin[] = GARAGES.map((g) => ({
     id: g.name,
     kind: "parking",
@@ -96,7 +168,7 @@ function mapPins(): MapPin[] {
   }));
   // Parking last, so a garage's pin sits over a room's where they share a
   // doorway rather than under it.
-  return [...rooms, ...garages];
+  return [...rooms, ...partners, ...garages];
 }
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -161,6 +233,7 @@ function Answer({
 }
 
 export function FaqBoard() {
+  const partners = partnerVenues();
   const desks = BADGE_DESKS.map((d) => {
     const room = ROOMS.find((r) => r.slug === d.room);
     if (!room) throw new Error(`faq: no room "${d.room}"`);
@@ -187,7 +260,7 @@ export function FaqBoard() {
           rather than inside either. */}
       <section className="border-t border-white/10">
         <div className="mx-auto w-full max-w-7xl px-6 py-8 lg:py-10">
-          <DowntownMap pins={mapPins()} />
+          <DowntownMap pins={mapPins()} traces={TRACES} />
         </div>
       </section>
 
@@ -306,6 +379,41 @@ export function FaqBoard() {
               </li>
             ))}
           </ul>
+
+          {/* The partner venues, after the six and apart from them — the same
+              line the schedule draws. Each is one event somewhere of its own,
+              so the card leads with the venue and says what is on and when. */}
+          {partners.length > 0 && (
+            <>
+              <p className="mt-12 font-mono text-xs uppercase tracking-widest text-white/50">
+                Partner venues · one event each
+              </p>
+              <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {partners.map((v) => (
+                  <li
+                    key={v.id}
+                    className="rounded-xl border border-dashed border-white/20 transition-colors hover:border-white/40"
+                  >
+                    <Link href={v.href} className="block p-5">
+                      <p className="font-display text-base font-bold uppercase leading-tight tracking-tight text-white">
+                        {v.name}
+                      </p>
+                      <p className="mt-1 font-mono text-xs uppercase tracking-widest text-white/50">
+                        {v.address}
+                      </p>
+                      <p className="mt-3 text-sm text-white/60">
+                        {v.event}
+                        {" · "}
+                        <span className="whitespace-nowrap text-white/40">
+                          {v.when}
+                        </span>
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       </section>
 

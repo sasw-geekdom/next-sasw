@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { DOWNTOWN, NORTH, project, type MapView } from "@/lib/downtown-map";
 import { cn } from "@/lib/utils";
@@ -22,7 +23,7 @@ import { cn } from "@/lib/utils";
  * a laptop is a map you scroll rather than read.
  */
 
-export type MapPinKind = "badge" | "parking" | "room";
+export type MapPinKind = "badge" | "parking" | "room" | "partner";
 
 export interface MapPin {
   id: string;
@@ -48,6 +49,30 @@ export interface MapPin {
    * algorithm would take fifty lines to do worse.
    */
   label?: { dx: number; dy: number; anchor: "start" | "middle" | "end" };
+  /**
+   * The room's ASCII portrait — the same art its venue section and day card
+   * use — shown in the panel when the pin is open.
+   */
+  image?: { src: string; width: number; height: number };
+  /**
+   * The anchor room glows, the way it does on the homepage's venue flow: one
+   * room throws light and the rest are lit by it. See room-flow.tsx.
+   */
+  anchor?: boolean;
+}
+
+/**
+ * A trace between two pins: the week drawn as a circuit.
+ *
+ * Laid the way a PCB trace is — a straight run, a 45° corner, a straight run —
+ * rather than along the streets, because it is a claim about which rooms are
+ * near each other, not a route. The walking time on it is computed from the
+ * two pins (street distance at 80 m a minute), so it cannot disagree with the
+ * map it is drawn on.
+ */
+export interface MapTrace {
+  from: string;
+  to: string;
 }
 
 /** Google Maps, with the coordinate rather than a search string. */
@@ -84,7 +109,23 @@ const KIND = {
     chip: "bg-white/25 text-white",
     swatch: "bg-white/40",
   },
+  /**
+   * Not one of the week's six — a partner's event somewhere of its own, like
+   * the Alamo Inventors panel in UTSA's San Pedro II. Hollow, so it reads as
+   * a place the week visits rather than one it lives in.
+   */
+  partner: {
+    label: "Partner venues",
+    dot: "fill-transparent",
+    ring: "stroke-white/60",
+    chip: "border border-white/40 text-white",
+    swatch: "border border-white/70",
+  },
 } as const;
+
+/** Street distance between two projected points, in minutes on foot. */
+const walkMinutes = (a: { x: number; y: number }, b: { x: number; y: number }) =>
+  Math.max(1, Math.round((Math.abs(a.x - b.x) + Math.abs(a.y - b.y)) / 80));
 
 const GROUND = "#050505";
 
@@ -96,9 +137,11 @@ function Plan({
   className,
   scale = 1,
   hit,
+  traces = [],
 }: {
   view: MapView;
   pins: MapPin[];
+  traces?: MapTrace[];
   openId: string | null;
   onOpen: (id: string | null) => void;
   className?: string;
@@ -112,8 +155,27 @@ function Plan({
    */
   hit?: number;
 }) {
-  const [x0, , w] = view.frame;
+  const [x0, y0, w, h] = view.frame;
+  // `scale` is for the inset, which draws at a third the width beside the
+  // main map from sm up. On a phone both stack full width, so the phone sizes
+  // stay unscaled — at 1.7 the inset's pins came out bigger than the main
+  // map's and it read as the more important of the two.
   const s = (n: number) => Math.round(n * scale);
+  const uid = React.useId().replace(/:/g, "");
+  const xy = new Map(pins.map((p) => [p.id, project(view, p.lat, p.lon)]));
+  // Street names under a pin or its name are hidden rather than overlapped:
+  // "TRAVIS" was reading "RAVIS" under St. Mary's.
+  const clear = (x: number, y: number) =>
+    pins.every((p) => {
+      const q = xy.get(p.id)!;
+      const lab = p.label;
+      const near = Math.hypot(q.x - x, q.y - y) > 70 * scale;
+      const nearLabel = lab
+        ? Math.hypot(q.x + lab.dx * scale - x, q.y + lab.dy * scale - y) >
+          70 * scale
+        : true;
+      return near && nearLabel;
+    });
   return (
     <svg
       viewBox={view.frame.join(" ")}
@@ -129,21 +191,45 @@ function Plan({
       style={
         {
           background: GROUND,
-          "--map-street": `${s(19)}px`,
+          "--map-street": "19px",
           "--map-street-sm": `${s(13)}px`,
-          "--map-type": `${s(26)}px`,
+          "--map-type": "26px",
           "--map-type-sm": `${s(17)}px`,
-          "--map-r": `${s(24)}px`,
+          "--map-r": "24px",
           "--map-r-sm": `${s(16)}px`,
-          "--map-r-room": `${s(18)}px`,
+          "--map-r-room": "18px",
           "--map-r-room-sm": `${s(12)}px`,
-          "--map-ring": `${s(42)}px`,
+          "--map-ring": "42px",
           "--map-ring-sm": `${s(32)}px`,
+          "--map-bolt": "70",
+          "--map-bolt-sm": `${s(48)}`,
         } as React.CSSProperties
       }
       role="img"
       aria-label="Map of downtown San Antonio showing badge pickup desks and parking garages"
     >
+      <defs>
+        {/* The ground: a breadboard's dot pitch rather than flat black, so the
+            map reads as the week's circuit board and not a borrowed tile. */}
+        <pattern
+          id={`${uid}-grid`}
+          width={32}
+          height={32}
+          patternUnits="userSpaceOnUse"
+        >
+          <circle cx={2} cy={2} r={1.8} fill="white" opacity={0.07} />
+        </pattern>
+        <filter id={`${uid}-glow`} x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation={12} />
+        </filter>
+        <style>{`
+          @keyframes ${uid}-current { to { stroke-dashoffset: -60; } }
+          .${uid}-flow { animation: ${uid}-current 1.8s linear infinite; }
+          @media (prefers-reduced-motion: reduce) { .${uid}-flow { animation: none; } }
+        `}</style>
+      </defs>
+      <rect x={x0} y={y0} width={w} height={h} fill={`url(#${uid}-grid)`} />
+
       {/* Water first, then streets over it — the river passes under most of
           these blocks, and a bridge drawn under its own road reads as a gap in
           the street. */}
@@ -156,8 +242,10 @@ function Plan({
         // compounds where they cross and the band came out nearly solid. One
         // opacity on the group composites the whole thing once.
         className="text-space-blue"
-        opacity={0.5}
-        strokeWidth={12}
+        // Up from 0.5 and 12: at those the river was a smudge you had to be
+        // told was there, and it is the one landmark everyone downtown knows.
+        opacity={0.9}
+        strokeWidth={16}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -196,7 +284,7 @@ function Plan({
           size that reads on a 900px map is five pixels on a phone. `scale`
           carries the inset, and the media query carries the phone. */}
       <g className="select-none fill-white/35 font-mono uppercase tracking-[0.18em]">
-        {view.labels.map((l) => (
+        {view.labels.filter((l) => clear(l.x, l.y)).map((l) => (
           <text
             key={l.t}
             x={l.x}
@@ -210,8 +298,62 @@ function Plan({
         ))}
       </g>
 
+      {/* The circuit: traces between the rooms, with the walk on each. Under
+          the pins, over the streets. A dim line, and a brighter dash running
+          along it — current, in the brand's own metaphor — which stops for
+          anyone who has asked for less motion. */}
+      {traces.map((t) => {
+        const a = xy.get(t.from);
+        const b = xy.get(t.to);
+        if (!a || !b) return null;
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const c = Math.min(Math.abs(dx), Math.abs(dy), 40);
+        const sx = Math.sign(dx) || 1;
+        const sy = Math.sign(dy) || 1;
+        const d = `M ${a.x} ${a.y} H ${b.x - c * sx} L ${b.x} ${a.y + c * sy} V ${b.y}`;
+        // The time sits on the longer leg, just off the line.
+        const onH = Math.abs(dx) >= Math.abs(dy);
+        const lx = onH ? (a.x + b.x - c * sx) / 2 : b.x + 14;
+        const ly = onH ? a.y - 14 : (a.y + c * sy + b.y) / 2;
+        return (
+          <g key={`${t.from}-${t.to}`} className="pointer-events-none">
+            <path
+              d={d}
+              fill="none"
+              className="stroke-magenta"
+              strokeOpacity={0.35}
+              strokeWidth={5}
+              strokeLinejoin="round"
+            />
+            <path
+              d={d}
+              fill="none"
+              className={cn("stroke-magenta", `${uid}-flow`)}
+              strokeWidth={5}
+              strokeLinecap="round"
+              strokeDasharray="6 54"
+            />
+            <text
+              x={lx}
+              y={ly}
+              textAnchor={onH ? "middle" : "start"}
+              dominantBaseline="central"
+              className="select-none fill-magenta font-mono uppercase tracking-widest [font-size:var(--map-street)] sm:[font-size:var(--map-street-sm)]"
+              style={{
+                paintOrder: "stroke",
+                stroke: GROUND,
+                strokeWidth: 5,
+              }}
+            >
+              {walkMinutes(a, b)} min
+            </text>
+          </g>
+        );
+      })}
+
       {pins.map((pin) => {
-        const { x, y } = project(view, pin.lat, pin.lon);
+        const { x, y } = xy.get(pin.id)!;
         const k = KIND[pin.kind];
         const isOpen = pin.id === openId;
         const flip = x > x0 + w * 0.62;
@@ -257,6 +399,16 @@ function Plan({
                 )}
               />
             )}
+            {pin.anchor && (
+              <circle
+                cx={x}
+                cy={y}
+                r={s(46)}
+                className="pointer-events-none fill-magenta"
+                opacity={0.5}
+                filter={`url(#${uid}-glow)`}
+              />
+            )}
             <circle
               cx={x}
               cy={y}
@@ -266,15 +418,34 @@ function Plan({
               // reaches no handler at all, because the target is a sibling
               // rather than an ancestor.
               className={cn(
-                k.dot,
+                pin.kind === "badge" ? "fill-[#050505]" : k.dot,
+                pin.kind === "partner" && "stroke-white/70",
                 "pointer-events-none",
-                pin.kind === "room"
+                pin.kind === "room" || pin.kind === "partner"
                   ? "[r:var(--map-r-room)] sm:[r:var(--map-r-room-sm)]"
                   : "[r:var(--map-r)] sm:[r:var(--map-r-sm)]",
               )}
-              stroke={GROUND}
+              stroke={pin.kind === "partner" ? undefined : GROUND}
               strokeWidth={4}
             />
+            {/* A badge desk is marked with the week's own bolt rather than a
+                dot — the one pin everybody needs first carries the mark.
+                Sized by CSS so the phone and desktop sizes can differ inside
+                one viewBox, the same trick the dots use; the outer group
+                places it, the inner one scales a unit-sized image. */}
+            {pin.kind === "badge" && (
+              <g transform={`translate(${x} ${y})`} className="pointer-events-none">
+                <g className="[transform:scale(var(--map-bolt))] sm:[transform:scale(var(--map-bolt-sm))]">
+                  <image
+                    href="/brand/sastw-bolt.svg"
+                    x={-0.5}
+                    y={-0.5}
+                    width={1}
+                    height={1}
+                  />
+                </g>
+              </g>
+            )}
             {pin.kind === "parking" && (
               <text
                 x={x}
@@ -297,7 +468,9 @@ function Plan({
               className={cn(
                 "pointer-events-none select-none font-display font-bold uppercase tracking-tight",
                 "[font-size:var(--map-type)] sm:[font-size:var(--map-type-sm)]",
-                pin.kind === "room" ? "fill-white/55" : "fill-white",
+                pin.kind === "room" || pin.kind === "partner"
+                  ? "fill-white/60"
+                  : "fill-white",
               )}
               style={{
                 paintOrder: "stroke",
@@ -315,7 +488,13 @@ function Plan({
   );
 }
 
-export function DowntownMap({ pins }: { pins: MapPin[] }) {
+export function DowntownMap({
+  pins,
+  traces = [],
+}: {
+  pins: MapPin[];
+  traces?: MapTrace[];
+}) {
   const [openId, setOpenId] = React.useState<string | null>(null);
   const open = pins.find((p) => p.id === openId) ?? null;
   const NORTH_IDS = new Set(["central-library", "Library Garage"]);
@@ -328,12 +507,15 @@ export function DowntownMap({ pins }: { pins: MapPin[] }) {
         <Plan
           view={DOWNTOWN}
           pins={here}
+          traces={traces}
           openId={openId}
           onOpen={setOpenId}
           className="border-b border-white/10"
         />
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 bg-white/[0.03] px-4 py-3">
-          {(["badge", "parking", "room"] as const).map((k) => (
+          {(["badge", "parking", "room", "partner"] as const)
+            .filter((k) => pins.some((p) => p.kind === k))
+            .map((k) => (
             <span
               key={k}
               className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-white/50 sm:text-[11px]"
@@ -346,7 +528,7 @@ export function DowntownMap({ pins }: { pins: MapPin[] }) {
               />
               {KIND[k].label}
             </span>
-          ))}
+            ))}
           {/* ODbL's condition, not decoration — see tools/downtown-map. */}
           <span className="ml-auto font-mono text-[10px] uppercase tracking-widest text-white/30">
             ©{" "}
@@ -365,9 +547,26 @@ export function DowntownMap({ pins }: { pins: MapPin[] }) {
       <div className="flex flex-col gap-6 lg:sticky lg:top-24 lg:self-start">
         {/* The panel holds its place whether or not a pin is open, so
             selecting one does not shunt the page under the reader's thumb. */}
-        <div className="min-h-[13rem] rounded-xl border border-white/10 bg-white/5 p-5">
+        {/* Hidden on a phone until a pin is open: stacked under the map, the
+            empty "The map" note took a screen of its own to say "tap a pin". */}
+        <div
+          className={cn(
+            "min-h-[13rem] rounded-xl border border-white/10 bg-white/5 p-5",
+            !open && "hidden lg:block",
+          )}
+        >
           {open ? (
             <>
+              {open.image && (
+                <Image
+                  src={open.image.src}
+                  alt=""
+                  width={open.image.width}
+                  height={open.image.height}
+                  sizes="20rem"
+                  className="mb-4 aspect-[3/2] w-full rounded-lg object-cover"
+                />
+              )}
               <p
                 className={cn(
                   "inline-block rounded px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest",
@@ -416,8 +615,9 @@ export function DowntownMap({ pins }: { pins: MapPin[] }) {
                 The map
               </p>
               <p className="mt-3 text-pretty text-sm text-white/70">
-                Three badge desks, four garages and the rooms between them. Tap
-                a pin for the address, the rate and directions.
+                Three badge desks, four garages, and the rooms and partner
+                venues between them — with the walk between each. Tap a pin for
+                the address, the rate and directions.
               </p>
             </>
           )}

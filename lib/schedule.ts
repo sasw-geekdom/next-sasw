@@ -79,6 +79,12 @@ export interface FeaturedSession {
      * `venueReveal` was built for, with the name filled in.
      */
     address?: string;
+    /**
+     * Where the address is, for the /faq map. Only with an `address` — a
+     * venue whose street is not ours to publish has no business being a pin.
+     * Geocoded to the house number (OpenStreetMap), like the rooms'.
+     */
+    coords?: { lat: number; lon: number };
   };
   /**
    * Everything on this page fits the screen: the hero carries the message and
@@ -801,6 +807,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       name: "UTSA San Pedro II",
       shortName: "San Pedro II",
       address: "622 Dolorosa St",
+      coords: { lat: 29.4240727, lon: -98.4966465 },
     },
     venueDetail: "1st Floor",
     // Alamo Inventors' own SIG badge, beside the copy rather than in place of
@@ -1819,6 +1826,8 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       name: "Centre Club",
       shortName: "Centre Club",
       address: "112 E Pecan St",
+      // Weston Centre, which is the building Centre Club is in.
+      coords: { lat: 29.4283812, lon: -98.4923407 },
     },
     // Required by the type and never looked up while `venuePopup` is set.
     // The Rand is the nearest of the six — 110 E Houston St, one block south
@@ -4141,7 +4150,12 @@ export function resolveSessions(
         desc: s.blurb,
         tag: s.circuit,
         ...(s.venuePopup.address
-          ? { place: { address: s.venuePopup.address } }
+          ? {
+              place: {
+                address: s.venuePopup.address,
+                ...(s.venuePopup.coords ? { coords: s.venuePopup.coords } : {}),
+              },
+            }
           : {}),
         port: "p0",
         tier: "single",

@@ -319,6 +319,10 @@ export const ROOMS: Room[] = [
     name: "300 Main",
     place: {
       address: "300 N Main Ave",
+      // Geocoded to the house number (OpenStreetMap). It had no coordinate,
+      // so it was the one room missing from the /faq map — and the Thursday
+      // brunch there starts at 7:30 AM, before anyone has found anything.
+      coords: { lat: 29.427564, lon: -98.493694 },
       postalCode: "78205",
     },
     host: "Startup + Tech Week · AI & Applied Innovation",

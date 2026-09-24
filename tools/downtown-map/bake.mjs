@@ -59,11 +59,21 @@ const VIEWS = {
       "st-marys": [29.42763, -98.491139],
       "houston-st": [29.425947, -98.491052],
       "legacy-park": [29.4263, -98.4947],
+      // The partner venues — popups in lib/schedule, not the week's six —
+      // that publish an address. Geocoded from OpenStreetMap (Nominatim) to
+      // the house number. Alamo Angels' Merchant Ice Building is left off on
+      // purpose: they have not given us an address to publish.
+      "300-main": [29.427564, -98.493694],
+      "centre-club": [29.4283812, -98.4923407],
+      "san-pedro-ii": [29.4240727, -98.4966465],
     },
-    // Wide, because this one has to fit above the fold on a laptop: the pins
-    // span 590 x 190 m, and the padding is what turns that into a picture
-    // rather than a line of dots.
-    pad: { x: 150, y: 175 },
+    // Wide, because this one has to fit above the fold on a laptop. San
+    // Pedro II sits 250 m south-west of TPR and Centre Club a block north of
+    // The Rand, which took the pins from 190 m tall to 480; the vertical
+    // padding came down from 175 to 80 — past the outer pins it was a block
+    // of empty street at each end — so the picture grew by a fifth rather
+    // than by half.
+    pad: { x: 150, y: 80 },
   },
   NORTH: {
     pins: {
