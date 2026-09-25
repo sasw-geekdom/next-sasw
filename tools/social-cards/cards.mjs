@@ -3654,6 +3654,9 @@ export const CARDS = [
     // from the crown instead — and the crown that matters is the knot, since
     // that is where the silhouette starts.
     portrait: { height: 840, left: 470 },
+    // Behind the name, role and date rather than the gap under the subtitle —
+    // the set's placement for Linux San Antonio, as on Satish's card.
+    boltTop: 600,
   },
 
   {
@@ -3717,6 +3720,29 @@ export const CARDS = [
   },
 
   {
+    id: "linux-satx-speaker-adam-bark",
+    event: "linux-satx",
+    speaker: "adam-bark",
+    // The title less its "How to", which is what it takes to hold two lines
+    // above his head at the set's size; the imperative still says it is a
+    // how-to.
+    headline: "Manage Your Business<br />with Free Software",
+    headlineSize: 88,
+    // What the talk actually demos, from the abstract: Odoo Community
+    // Edition as the one place for the whole business, minus the lock-in.
+    subtitle:
+      "Odoo Community Edition: the whole business in one place, without a vendor\u2019s lock-in.",
+    // The probe reads his head at 41% of the frame and it is his hair — long,
+    // and read as head by the shoulder test, as on Brenda Gentry's card. His
+    // face is the set's usual size, and the crop stops short of the file's
+    // edges, so the set's usual height.
+    portrait: { height: 880, left: 440 },
+    // Behind the name, role and date rather than the gap under the subtitle —
+    // the set's placement for Linux San Antonio, as on Satish's card.
+    boltTop: 600,
+  },
+
+  {
     id: "linux-satx-speaker-paul-christiansen",
     event: "linux-satx",
     speaker: "paul-christiansen",
@@ -3737,6 +3763,9 @@ export const CARDS = [
     // choice: the crown lands at y=556 and the subtitle ends at 535, so
     // anything taller puts his hair into the type.
     portrait: { height: 860, left: 439 },
+    // Behind the name, role and date rather than the gap under the subtitle —
+    // the set's placement for Linux San Antonio, as on Satish's card.
+    boltTop: 600,
   },
 
   // ─── Venue days ───────────────────────────────────────────────────────────
@@ -4145,6 +4174,29 @@ export const CARDS = [
     subtitle:
       "A practical roadmap to post-quantum cryptography, before today\u2019s encryption is obsolete.",
     portrait: { height: 918, left: 442 },
+  },
+
+  {
+    id: "access-granted-speaker-gabriel-green",
+    event: "access-granted",
+    speaker: "gabriel-green",
+    // UTSA Cyber Jedis' second talk — the one `ACCESS_BLOCKS` in
+    // lib/access-granted.ts was waiting for. It lands inside their window, so
+    // the event page credits it to them without anything changing there.
+    //
+    // 104, not the 118 Keeban's card beside it uses: "DATA BATTLEFIELDS" is
+    // 17 characters against his 14, which at 118 runs past the 936 the frame
+    // allows.
+    headline: "The New Age of<br />Data Battlefields",
+    headlineSize: 104,
+    // The abstract, tightened: "an informational session on the growing
+    // field of cyberwarfare and all the nations within it".
+    // No-break before "it", which the 520px rule otherwise strands alone.
+    subtitle: "Cyberwarfare, and the nations fighting\u00a0it.",
+    // A tight headshot — the head is 43% of the file, where the set runs
+    // 14–30% — so well under the set's 918, and placed to run off the right
+    // edge as every figure on this template does.
+    portrait: { height: 760, left: 480 },
   },
 
   {
