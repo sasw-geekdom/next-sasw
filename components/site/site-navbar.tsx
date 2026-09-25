@@ -8,10 +8,19 @@ import { ButtonLink } from "@/components/ui/button";
 
 // Schedule before Speakers — the schedule is what most people arrive looking
 // for, and the lineup reads as a detail of it rather than the other way round.
+// FAQ third: in the week itself the questions are badges and parking, and the
+// page that answers them was reachable only from the footer.
 const LINKS = [
   { label: "Schedule", href: "/schedule" },
   { label: "Speakers", href: "/speakers" },
+  { label: "FAQ", href: "/faq" },
 ];
+
+// The one filled button, and in the week it is Register rather than Get
+// involved. Hosting and sponsoring were the ask while the programme was being
+// built; days out, the action nearly everyone arriving here wants is a free
+// badge. Get involved is still in the footer.
+const CTA = { label: "Register", href: "/register" };
 const EASE = [0.32, 0.72, 0, 1] as const;
 
 export function SiteNavbar() {
@@ -39,8 +48,8 @@ export function SiteNavbar() {
               {l.label}
             </Link>
           ))}
-          <ButtonLink href="/get-involved" size="sm">
-            Get involved
+          <ButtonLink href={CTA.href} size="sm">
+            {CTA.label}
           </ButtonLink>
         </nav>
 
@@ -97,11 +106,11 @@ export function SiteNavbar() {
                 }}
               >
                 <ButtonLink
-                  href="/get-involved"
+                  href={CTA.href}
                   onClick={() => setOpen(false)}
                   className="mt-2 w-full"
                 >
-                  Get involved
+                  {CTA.label}
                 </ButtonLink>
               </motion.div>
             </div>
