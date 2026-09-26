@@ -206,7 +206,18 @@ export function clockOf(ms: number): string {
 
 // ── Marks, logos, people ─────────────────────────────────────────────────────
 
-export function Mark({ mark, h, accent }: { mark: TvMark; h: number; accent?: string }) {
+export function Mark({
+  mark,
+  h,
+  accent,
+  wrap = false,
+}: {
+  mark: TvMark;
+  h: number;
+  accent?: string;
+  /** Let a typeset mark take two lines — a hero has the room, a row doesn't. */
+  wrap?: boolean;
+}) {
   if (mark.kind === "image") {
     // Optically balanced: a squarer mark (Open Circuit's is 1.6:1) is set
     // taller than a long wordmark, or it reads as an afterthought beside
@@ -226,7 +237,7 @@ export function Mark({ mark, h, accent }: { mark: TvMark; h: number; accent?: st
   const at = mark.accent ? mark.text.lastIndexOf(mark.accent) : -1;
   return (
     <span
-      className="block whitespace-nowrap font-display font-bold uppercase leading-[0.92]"
+      className={`block font-display font-bold uppercase leading-[0.92] ${wrap ? "text-balance" : "whitespace-nowrap"}`}
       style={{ fontSize: h * 0.9 }}
     >
       {at >= 0 ? (
@@ -263,10 +274,10 @@ export function Person({ p, size = 180, accent }: { p: TvPerson; size?: number; 
         <img
           src={p.imageUrl}
           alt=""
-          className="shrink-0 rounded-[14px] object-cover"
+          className="tv-photo-fade shrink-0 rounded-t-[14px] object-cover"
           // Cropped from the top, not the middle: headshots are portrait,
           // and a centred square crop takes the top of the head off.
-          style={{ width: size, height: size, objectPosition: "50% 12%", boxShadow: "0 20px 50px rgba(0,0,0,0.6)" }}
+          style={{ width: size, height: size, objectPosition: "50% 12%" }}
         />
       ) : null}
       <div className="min-w-0">

@@ -143,7 +143,7 @@ function Spotlight({
   extra?: React.ReactNode;
 }) {
   const people = talk.people;
-  const size = people.length > 3 ? 132 : people.length > 1 ? 168 : 230;
+  const size = people.length > 3 ? 160 : people.length > 2 ? 190 : people.length > 1 ? 215 : 290;
   return (
     <div className="absolute inset-x-29 top-52.5 bottom-35 z-10 flex flex-col">
       <div className="tv-rise" style={rise(0, 0.2)}>
@@ -179,7 +179,7 @@ function Spotlight({
         className="tv-rise mt-auto grid gap-x-16 gap-y-8"
         style={{
           ...rise(2, 0.6, 0.6),
-          gridTemplateColumns: `repeat(${Math.min(people.length, people.length > 3 ? 3 : 2) || 1}, minmax(0, 1fr))`,
+          gridTemplateColumns: `repeat(${Math.min(people.length, 3) || 1}, minmax(0, 1fr))`,
         }}
       >
         {people.map((p) => (
@@ -526,7 +526,7 @@ function blockWho(b: TvBlock): string {
 
 function BlockSpotlight({ b, state, accent }: { b: TvBlock; state: SlotState; accent: string }) {
   const people = [...new Map(b.talks.flatMap((t) => t.people).map((p) => [p.name, p])).values()];
-  const size = people.length > 4 ? 120 : people.length > 2 ? 140 : 190;
+  const size = people.length > 4 ? 140 : people.length > 2 ? 175 : 235;
   return (
     <div className="absolute inset-x-29 top-50 bottom-35 z-10 flex flex-col">
       <div className="tv-rise flex items-center" style={rise(0, 0.2)}>
@@ -725,8 +725,17 @@ function GroupLoop({ data }: { data: TvGroupData }) {
               <StateChip state={state} accent={accent} />
             </div>
             <div data-tv-keep className="tv-rise mt-10" style={rise(1, 0.4)}>
-              <Mark mark={b.mark} h={b.mark.kind === "image" ? 150 : 150} accent={accent} />
+              <Mark mark={b.mark} h={150} accent={accent} wrap />
             </div>
+            {b.tagline ? (
+              <p
+                data-tv-keep
+                className="tv-rise mt-8 max-w-275 text-[50px] font-medium leading-[1.2] text-white/90"
+                style={rise(2, 0.5)}
+              >
+                {b.tagline}
+              </p>
+            ) : null}
             <p
               data-tv-keep
               className="tv-rise mt-12 font-mono text-[34px] tracking-[0.06em] text-white/80"

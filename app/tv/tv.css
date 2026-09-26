@@ -111,3 +111,18 @@
 [data-scene="hero"]:not([data-leaving]) > .tv-hero-visual {
   opacity: 1;
 }
+
+/* Speaker photos melt into the stage at the bottom instead of ending on a
+   hard edge. An eased ramp (many stops along a smooth curve) rather than a
+   two-stop linear one, which shows a visible band where the fade begins. */
+.tv-photo-fade {
+  --fade: linear-gradient(
+    to bottom,
+    #000 0%, #000 48%,
+    rgba(0, 0, 0, 0.97) 54%, rgba(0, 0, 0, 0.9) 60%, rgba(0, 0, 0, 0.79) 66%,
+    rgba(0, 0, 0, 0.64) 72%, rgba(0, 0, 0, 0.47) 78%, rgba(0, 0, 0, 0.3) 84%,
+    rgba(0, 0, 0, 0.15) 90%, rgba(0, 0, 0, 0.05) 95%, transparent 100%
+  );
+  -webkit-mask-image: var(--fade);
+  mask-image: var(--fade);
+}

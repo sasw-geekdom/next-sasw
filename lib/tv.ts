@@ -81,6 +81,8 @@ export type TvMark =
 export interface TvBlock {
   /** The /tv/<slug> this block owns. */
   slug: string;
+  /** Its page on the site: an activation's own, or /schedule/talk/<slug>. */
+  href: string;
   title: string;
   startsAt: number;
   endsAt: number;
@@ -88,6 +90,13 @@ export interface TvBlock {
   circuit: string;
   mark: TvMark;
   blurb: string;
+  /**
+   * The rest of a standalone session's title, when its mark is only the head:
+   * "Maybe That's Not the Problem" carries "Look sideways. Pull it apart…"
+   * as its line. Taken from the title rather than written here, so an edit in
+   * the CMS reaches the screen.
+   */
+  tagline?: string;
   talks: TvTalk[];
   poweredBy: TvLogo[];
 }
@@ -442,6 +451,11 @@ function block(
     : item.brand?.wordmark === "college-night"
       ? { kind: "text", text: "College Night", accent: "Night" }
       : { kind: "text", text: headOf(item.title) };
+  const fullTitle = talkRows[0]?.title ?? item.longTitle ?? item.title;
+  const tail =
+    mark.kind === "text" && fullTitle.startsWith(mark.text)
+      ? fullTitle.slice(mark.text.length).replace(/^[\s.:—–]+/, "").trim()
+      : "";
 
   return {
     slug,
@@ -451,7 +465,9 @@ function block(
     timeLabel: item.timeLabel,
     circuit: item.circuit,
     mark,
+    href: item.href ?? `/schedule/${slug}`,
     blurb: session?.blurb ?? "",
+    ...(tail ? { tagline: tail } : {}),
     talks: talkRows
       .sort((a, b) => a.startsAt - b.startsAt)
       .map((r) => talk(r, speakers)),
@@ -494,7 +510,7 @@ export async function tvGroup(slug: string): Promise<TvGroupData | null> {
       block: b,
       after: blocks.slice(i + 1),
       sponsor: sponsorFor(b.circuit, sponsors),
-      url: `sasw.co/schedule/${slug}`,
+      url: `sasw.co${b.href}`,
     };
   }
   return null;
