@@ -264,7 +264,9 @@ export function Person({ p, size = 180, accent }: { p: TvPerson; size?: number; 
           src={p.imageUrl}
           alt=""
           className="shrink-0 rounded-[14px] object-cover"
-          style={{ width: size, height: size, boxShadow: "0 20px 50px rgba(0,0,0,0.6)" }}
+          // Cropped from the top, not the middle: headshots are portrait,
+          // and a centred square crop takes the top of the head off.
+          style={{ width: size, height: size, objectPosition: "50% 12%", boxShadow: "0 20px 50px rgba(0,0,0,0.6)" }}
         />
       ) : null}
       <div className="min-w-0">

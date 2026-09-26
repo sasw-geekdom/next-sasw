@@ -233,7 +233,9 @@ function people(
  */
 export function headOf(title: string): string {
   // A colon, a spaced dash, an opening parenthesis or a full stop ends it.
-  const m = title.match(/^(.{10,}?)(?::\s|\s[—–]\s|\s\(|\.\s)/);
+  // A full stop only when a real subtitle follows it: "The Hackers Left. Now
+  // What?" is one line with a punchline, not a head and a tail.
+  const m = title.match(/^(.{10,}?)(?::\s|\s[—–]\s|\s\(|\.\s(?=.{30,}))/);
   return (m ? m[1] : title).trim();
 }
 
@@ -278,8 +280,23 @@ function sponsorFor(
 
 // ── The events: Monday, Wednesday, Friday ────────────────────────────────────
 
+/** Alamo City Locksport's fall mark, the one the week's cards use. */
+const LOCKSPORT_FALL = "/access-granted/orgs/locksport-fall.png";
+
 export const TV_EVENTS = ["the-model", "access-granted", "pysanantonio"] as const;
 type TvEventSlug = (typeof TV_EVENTS)[number];
+
+/**
+ * The circuit a TV credits, where it differs from the schedule's.
+ *
+ * Access Granted and PySanAntonio sit under other circuits on the site, but
+ * their screens carry AI & Applied Innovation and its sponsor, Webhead and
+ * Quantum Realm Computing — the organisers' call for the room.
+ */
+const TV_CIRCUIT: Partial<Record<TvEventSlug, string>> = {
+  "access-granted": "AI & Applied Innovation",
+  pysanantonio: "AI & Applied Innovation",
+};
 
 const EVENT_DAY: Record<TvEventSlug, string> = {
   "the-model": "2026-09-28",
@@ -315,7 +332,7 @@ export async function tvEvent(slug: TvEventSlug): Promise<TvEventData> {
     dateLabel: dateLabel(iso),
     place: "The Rand, 3rd Floor",
     talks,
-    sponsor: sponsorFor(session?.circuit, sponsors),
+    sponsor: sponsorFor(TV_CIRCUIT[slug] ?? session?.circuit, sponsors),
     url: `sasw.co/schedule/${slug}`,
   };
 
@@ -344,11 +361,11 @@ export async function tvEvent(slug: TvEventSlug): Promise<TvEventData> {
         by: village.by ?? "Alamo City Locksport",
         // ACCESS_CONTINUOUS's note, cut to what reads from across a room.
         note: "A TOOOL affiliate, picking locks in the open. All ages welcome, no experience needed.",
-        logo: { name: locksport.name, src: locksport.logo, h: 200 },
+        logo: { name: locksport.name, src: LOCKSPORT_FALL, h: 200 },
       },
       organizers: ACCESS_ORGANIZERS.map((o) => ({
         name: o.name,
-        src: o.logo,
+        src: o.name === "Alamo City Locksport" ? LOCKSPORT_FALL : o.logo,
         h: tvHeight(o.heightClass, 2.2),
       })),
     };
