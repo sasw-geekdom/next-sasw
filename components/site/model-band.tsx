@@ -1,6 +1,5 @@
 import { ArrowUpRight, CalendarDays, Clock, MapPin } from "lucide-react";
-import { ModelFlow } from "@/components/site/model-flow";
-import { ModelMascots } from "@/components/site/model-mascots";
+import { ModelRoamers } from "@/components/site/model-roamers";
 import { OrganizerLogo } from "@/components/site/organizer-logo";
 import { ButtonLink } from "@/components/ui/button";
 import { listPartners } from "@/lib/admin/cms-queries";
@@ -119,33 +118,12 @@ const META = [
   },
 ];
 
-/**
- * The artwork, and nothing else in the column.
- *
- * It previously sat above a bordered, scanlined caption strip carrying the
- * keynote. Both are gone — the strip because a ruled panel next to a picture
- * that floats free on black made the picture look pasted onto a card, and the
- * keynote because the hero should say what this is, not name one session.
+/*
+ * The node graph that stood here is gone from the band: the Claude Code
+ * mascots roaming the whole section are its visual now (ModelRoamers). The
+ * graph is still components/site/model-flow.tsx, which the schedule hero's
+ * hover peek uses.
  */
-function Artwork() {
-  /*
-    A node graph — two inputs, the model, the output, with the pointer walking
-    it. The two-column version it replaced is still at
-    components/site/model-selection.tsx, unused, so the two can be compared
-    before either is deleted. public/the-model/code-select.png is still in the
-    repo as the reference the earlier staircase was measured from, but nothing
-    renders it; see the note above MODEL_TOOLS in lib/the-model.ts for why the
-    staircase came out.
-
-    No fixed height and no crop: it sizes to its own content, and the type scale
-    is chosen so the whole thing fits the room available at every width.
-
-    Both placements animate identically now: one eased walk, played once, fired
-    when the graph reaches the viewport. The scroll-linked version /schedule
-    used is gone — see the note at the top of ModelFlow.
-  */
-  return <ModelFlow />;
-}
 
 export async function ModelBand({
   detailHref,
@@ -192,13 +170,11 @@ export async function ModelBand({
           "roomy:flex roomy:min-h-[calc(100vh-4rem)] roomy:flex-col roomy:justify-center",
       )}
     >
-      {/* The mascot layer spans this whole section rather than the artwork's
-          own box, so a mascot clicked out of the Claude Code node can walk
-          across the copy and out to the bleed edge. The provider renders its
-          children untouched and adds one absolutely positioned layer over
-          them; this `section` is the positioned ancestor that makes `inset-0`
-          mean "the band". */}
-      <ModelMascots>
+      {/* The mascots walk the whole section — this `section` is the
+          positioned ancestor that makes the layer's `inset-0` mean "the band".
+          They sit under the copy (z-10 against its z-20) and fade behind
+          anything in the `data-roam-keep` column. */}
+      <ModelRoamers color={MODEL_LAVENDER} />
         <div
           className={cn(
             "relative z-20 mx-auto w-full max-w-7xl px-6 pb-16 lg:pb-28",
@@ -223,7 +199,7 @@ export async function ModelBand({
             keeps the bottom rungs of the staircase in the frame at laptop
             width. */}
           <div className="flex flex-col lg:grid lg:grid-cols-[auto_1fr] lg:items-center lg:gap-12 xl:gap-16">
-            <div className="contents lg:block lg:max-w-xl xl:max-w-2xl">
+            <div data-roam-keep className="contents lg:block lg:max-w-xl xl:max-w-2xl">
               <div className="order-1">
                 <Marker>The Rand · AI &amp; Applied Innovation</Marker>
               </div>
@@ -256,14 +232,7 @@ export async function ModelBand({
               <Heading className="order-2 mt-4">
                 <span className="block font-mono text-4xl font-medium uppercase leading-[1.05] tracking-tight text-white/85 sm:text-6xl">
                   The{" "}
-                  {/* Where the mascots launch from — see ModelMascots. An
-                      attribute rather than a ref, because this band is a
-                      server component and cannot hold one. */}
-                  <Selected
-                    color={MODEL_LAVENDER}
-                    className="px-1.5"
-                    data-mascot-origin=""
-                  >
+                  <Selected color={MODEL_LAVENDER} className="px-1.5">
                     Model
                   </Selected>
                 </span>
@@ -345,50 +314,13 @@ export async function ModelBand({
               )}
             </div>
 
-            {/*
-            Nothing behind the artwork. Both layers that used to be here are
-            gone, and the picture is better for it.
-
-            The schematic grid was there to give the staircase's clipped left
-            edge something to run off into. But the artwork is itself a grid of
-            ruled blocks, so a second ruling behind it read as two grids at
-            different pitches fighting — and it turned out the lines stopping in
-            black don't read as a fault at all, they read as a frame.
-
-            The glow was the discarded sheet's amber. Under an artwork whose own
-            colours are blue, green and lavender it sat as a warm cast over the
-            cool half of the palette and dirtied it. Softening it only made a
-            dirty cast subtle.
-
-            Full width on mobile and not hidden there. The artwork is the
-            event's mark now, and it degrades honestly on a phone — more of the
-            staircase runs off the left edge, and what stays in frame is the lit
-            end with the cursor, which is the part that carries it.
-          */}
-            {/*
-            Out of the container, to the right edge of the screen, from `lg`.
-
-            Held inside the grid column this was 592px against an artwork that
-            wants ~620 at laptop size, so it lost its left rungs on exactly the
-            machine most people will read it on — a 13" MacBook. It is the
-            subject of the section, not an illustration beside it, so it takes
-            the room instead of being trimmed to fit.
-
-            The margin eats the container's own 24px padding, plus half of
-            whatever the viewport has over `max-w-7xl` — which is the distance
-            from the container's right content edge to the screen edge. `max()`
-            keeps it at just the padding below 1280px, where there is no gutter
-            to reclaim. The section already clips, so nothing here can produce a
-            horizontal scrollbar.
-          */}
-            <div className="relative order-4 my-10 w-full lg:order-0 lg:my-0 lg:mr-[calc(-24px-max(0px,(100vw-80rem)/2))]">
-              <div className="relative">
-                <Artwork />
-              </div>
-            </div>
+            {/* Open ground for the mascots where the graph used to sit: on a
+                phone, between the tagline and the details, so they have
+                somewhere to walk that isn't behind a line of copy; from lg,
+                the right-hand column. */}
+            <div data-roam-field aria-hidden="true" className="order-4 my-6 h-72 w-full sm:h-80 lg:order-0 lg:my-0 lg:h-auto lg:min-h-112" />
           </div>
         </div>
-      </ModelMascots>
     </section>
   );
 }
