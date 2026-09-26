@@ -1267,6 +1267,41 @@ export const CARDS = [
    * off each crown (Joe 104, Derek 73, Matthew 100 of 1350) line the heads up:
    * top ≈ 20 − crown × 590 / 1350.
    */
+  /**
+   * Storytelling & AI — a 1:45 panel on The Model, moderated.
+   *
+   * Katherine Rico chairs it and has no speaker record in the CMS, so her
+   * name is given here (`moderatorName`) rather than looked up by slug. When
+   * she is added to the session as its moderator, this can become
+   * `moderator: "<her slug>"`, like the other moderated cards.
+   */
+  {
+    id: "the-model-speakers-storytelling-ai",
+    event: "the-model",
+    speakers: ["joshua-collins", "michael-smith"],
+    // The hit mid-line rather than opening one, so it gives back the 12px the
+    // template pulls it left by — at the start of a line that lines the block
+    // up with the text; here it ate the space before it.
+    headline:
+      'Storytelling <span class="hit" style="margin-left:4px">&amp; AI</span>',
+    // The abstract's own promise, which is the hook: real examples, not
+    // theory.
+    subtitle:
+      "Real examples, not theory: what AI means for storytelling, and the risks for creative work.",
+    moderatorName: "Katherine Rico",
+    // Not his CMS title ("Community Builder | Storyteller | Producer"): the
+    // team gave his role for this card as Operations Manager. Set here, so his
+    // speaker page and this card disagree until the record is updated.
+    roles: ["Operations Manager"],
+    // Framed alike, and the probe misreads both — Michael's hair puts his
+    // crown high — so one height, and tops solved off each crown (Joshua
+    // 124, Michael 99 of 1350): top ≈ 20 − crown × 640 / 1350.
+    portraits: [
+      { height: 640, top: -39 },
+      { height: 640, top: -27 },
+    ],
+  },
+
   {
     id: "the-model-speakers-alamo-city-ai",
     event: "the-model",

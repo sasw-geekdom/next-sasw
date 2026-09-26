@@ -812,7 +812,16 @@ async function main() {
     outIdx === -1
       ? join(HERE, "out")
       : argv[outIdx + 1].replace(/^~/, process.env.HOME);
-  const ids = argv.filter((a, i) => !a.startsWith("--") && i !== outIdx + 1);
+  // `--scale 2` renders every wanted card at that pixel ratio, whatever the
+  // card asks for — for reuse at a size the feed never needed, like the TV
+  // loops, which put a card on a 4K screen. The layout is unchanged; only the
+  // sample rate moves (see `scale` below).
+  const scaleIdx = argv.indexOf("--scale");
+  const scaleOverride = scaleIdx === -1 ? null : Number(argv[scaleIdx + 1]);
+  const ids = argv.filter(
+    (a, i) =>
+      !a.startsWith("--") && i !== outIdx + 1 && i !== scaleIdx + 1,
+  );
 
   const wanted = ids.length ? CARDS.filter((c) => ids.includes(c.id)) : CARDS;
   if (!wanted.length) {
@@ -1551,7 +1560,9 @@ async function main() {
       // A card may override what the CMS says — see mason-egger.
       role: card.role ?? a?.role ?? "",
       org: card.org ?? a?.org ?? "",
-      moderatorName: moderator?.name ?? "",
+      // A name the card can give directly, for a chair who has no speaker
+      // record yet — Katherine Rico on Storytelling & AI.
+      moderatorName: card.moderatorName ?? moderator?.name ?? "",
       portraitHeight: card.portrait?.height,
       portraitLeft: card.portrait?.left,
       // Lifts the figure off the bottom edge. 0 for every portrait — a person
@@ -1639,7 +1650,7 @@ async function main() {
      * The layout is unchanged — the CSS box is still `size`. Only the sample
      * rate moves, and the filename reports what the file actually holds.
      */
-    const scale = card.scale ?? 1;
+    const scale = scaleOverride ?? card.scale ?? 1;
     const page = await pageAt(scale, size);
 
     const missing = [];

@@ -113,6 +113,30 @@
       }
       <!--/if:subtitle-->
 
+      <!--if:moderatorName-->
+      /* The chair, as a line under the hook — the-model.html's, unchanged, so
+         a moderated talk reads the same whether it has one speaker or two.
+         No face: a thumbnail beside the credit reads as a third speaker. */
+      .mod {
+        margin-top: 18px;
+        padding-left: 29px;
+        font-size: 22px;
+        color: rgba(255, 255, 255, 0.72);
+      }
+      .mod .label {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 15px;
+        letter-spacing: 0.2em;
+        color: #8b8b8b;
+        text-transform: uppercase;
+        margin-right: 12px;
+      }
+      .mod .who {
+        font-weight: 600;
+        color: var(--lav);
+      }
+      <!--/if:moderatorName-->
+
       .pair {
         margin-top: 40px;
         display: grid;
@@ -297,6 +321,9 @@
       <!--if:subtitle-->
       <p class="blurb">{{subtitle}}</p>
       <!--/if:subtitle-->
+      <!--if:moderatorName-->
+      <p class="mod"><span class="label">Moderated by</span><span class="who">{{moderatorName}}</span></p>
+      <!--/if:moderatorName-->
 
       <div class="pair<!--if:faceC--> trio<!--/if:faceC-->">
         <div class="who a">
