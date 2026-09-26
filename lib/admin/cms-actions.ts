@@ -29,11 +29,14 @@ function revalidate(entity: CmsEntity) {
   // session write moves speaker chips even though no speaker doc changed.
   if (entity === "partners" || entity === "sponsors") {
     revalidatePath("/");
+    revalidateTvPages();
   }
   if (entity === "speakers") {
     revalidatePath("/");
     revalidatePath("/speakers");
     revalidateSpeakerPages();
+    // Names, titles and photos on the TV loops' spotlights.
+    revalidateTvPages();
   }
   if (entity === "sessions") {
     revalidatePath("/speakers");
@@ -43,6 +46,7 @@ function revalidate(entity: CmsEntity) {
     // and it stays invisible on /schedule/<activation> for five minutes —
     // the same failure partners and sponsors hit on reorder.
     revalidateActivationPages();
+    revalidateTvPages();
   }
 }
 
@@ -67,6 +71,15 @@ function revalidateActivationPages() {
   // itself still wrong for five minutes.
   revalidatePath("/schedule/talk/[slug]", "page");
   revalidatePath("/(site)/schedule/talk/[slug]", "page");
+}
+
+// The /tv loops read sessions, speakers, partners and sponsors, all ISR'd at
+// 300s like the rest. Outside the (site) group, so one spelling each. The
+// stage re-requests the page every five minutes, so a bust here reaches a TV
+// on its next refresh rather than after a further revalidate window.
+function revalidateTvPages() {
+  revalidatePath("/tv");
+  revalidatePath("/tv/[slug]", "page");
 }
 
 function revalidateSpeakerPages() {
