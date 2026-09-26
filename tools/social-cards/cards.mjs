@@ -3353,6 +3353,32 @@ export const CARDS = [
     boltTop: 505,
   },
 
+  // The emcees. No talk of their own, so the card is about the role: the
+  // headline says what they are, and the ramp's caption says the whole room
+  // is theirs — every circuit runs through this stage and they host all of
+  // it. Days are left off on purpose until the hosting schedule is set.
+  {
+    id: "tpr-emcee-saige-thomas",
+    event: "tpr",
+    speaker: "saige-thomas",
+    headline: "Your Emcee",
+    headlineSize: 124,
+    subtitle: "Hosting the main stage at Texas Public Radio",
+    circuit: "All five circuits",
+    portrait: { height: 860, left: 530 },
+  },
+
+  {
+    id: "tpr-emcee-emily-latour",
+    event: "tpr",
+    speaker: "emily-latour",
+    headline: "Your Emcee",
+    headlineSize: 124,
+    subtitle: "Hosting the main stage at Texas Public Radio",
+    circuit: "All five circuits",
+    portrait: { height: 860, left: 470 },
+  },
+
   {
     id: "tpr-speaker-bill-gonzalez",
     event: "tpr",
@@ -3375,22 +3401,14 @@ export const CARDS = [
     subtitle: "The Technology, the Hype, and the Algorithms",
     circuit: "AI & Applied Innovation",
     /**
-     * 780, against the probe's 561 — the largest correction this tool has
-     * needed, and the clearest case of what it warns about.
-     *
-     * His is the tightest crop on this stage: head and neck measure 50.7% of
-     * the frame, where Patrick's read 46% and Oscar's 33%. A tight crop means
-     * a short figure draws a big head, so the suggestion comes back small —
-     * and at 561 the card had him floating low in the right half with the
-     * middle of it empty, because the figure is anchored to the bottom edge
-     * and there was not enough of him to reach up into the card.
-     *
-     * Sized against Patrick's, the other AI & Applied Innovation card he
-     * posts beside: their heads now draw within 4% of each other. It leaves
-     * his org line 60px of clearance before his shoulder, which is why
-     * "Webhead, Quantum Realm Computing" can stay whole.
+     * Sized for his new photo (Sept 26): a loose waist-up shot, arms crossed,
+     * where the old one was a tight head-and-shoulders crop tuned at 780/439.
+     * At the old numbers the head drew small and the org line ran into his
+     * forearm. 870 brings the head back to the size Patrick's card draws;
+     * 490 moves him right until "Webhead, Quantum Realm Computing" clears
+     * his elbow, with the hair still below the headline's last line.
      */
-    portrait: { height: 780, left: 439 },
+    portrait: { height: 870, left: 490 },
   },
 
   {

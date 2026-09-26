@@ -818,9 +818,14 @@ async function main() {
   // sample rate moves (see `scale` below).
   const scaleIdx = argv.indexOf("--scale");
   const scaleOverride = scaleIdx === -1 ? null : Number(argv[scaleIdx + 1]);
+  // The value after each flag is not an id — but only for a flag that is
+  // present. Unguarded, a missing flag's index is -1, so `-1 + 1` excluded
+  // argv[0], dropped the first id, and a one-card render quietly became all.
   const ids = argv.filter(
     (a, i) =>
-      !a.startsWith("--") && i !== outIdx + 1 && i !== scaleIdx + 1,
+      !a.startsWith("--") &&
+      (outIdx === -1 || i !== outIdx + 1) &&
+      (scaleIdx === -1 || i !== scaleIdx + 1),
   );
 
   const wanted = ids.length ? CARDS.filter((c) => ids.includes(c.id)) : CARDS;
