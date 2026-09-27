@@ -631,12 +631,20 @@ export async function tvFireside(): Promise<TvFiresideData> {
 // ── The Model's pre-show ─────────────────────────────────────────────────────
 //
 // Two videos played before doors, then the screen hands itself to The Model's
-// loop. The files are too big for the repo (about 200 MB together), so they
+// fireside screen — the programme opens with the two fireside chats. The files are too big for the repo (about 200 MB together), so they
 // live in Firebase Storage like the gallery video; paste each file's download
 // URL here, in playing order.
 
-export const THE_MODEL_PRESHOW: string[] = [];
+export const THE_MODEL_PRESHOW: string[] = [
+  "https://firebasestorage.googleapis.com/v0/b/sasw2026-783a5.firebasestorage.app/o/sasw-assets%2Fthe-model-preshow-1.mp4?alt=media&token=77d13668-ec55-4d04-b586-7f06677d7c2c",
+  "https://firebasestorage.googleapis.com/v0/b/sasw2026-783a5.firebasestorage.app/o/sasw-assets%2Fthe-model-preshow-2.mp4?alt=media&token=aa837841-d92a-4830-9889-40bf9941e576",
+];
 
-export function tvPreshow(): TvPreshowData {
-  return { kind: "preshow", videos: THE_MODEL_PRESHOW, next: "/tv/the-model" };
+/**
+ * Both videos back to back, or — with `only` — one of them on its own, for
+ * when they play at different moments. Either way it ends on the loop.
+ */
+export function tvPreshow(only?: number): TvPreshowData {
+  const videos = only ? THE_MODEL_PRESHOW.slice(only - 1, only) : THE_MODEL_PRESHOW;
+  return { kind: "preshow", videos, next: "/tv/the-model-fireside" };
 }

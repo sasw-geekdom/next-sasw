@@ -32,6 +32,8 @@ export async function generateStaticParams() {
     { slug: "give-a-lot" },
     { slug: "the-model-fireside" },
     { slug: "the-model-preshow" },
+    { slug: "the-model-preshow-1" },
+    { slug: "the-model-preshow-2" },
     ...TV_EVENTS.map((slug) => ({ slug })),
     ...Object.keys(TV_DAYS).map((slug) => ({ slug })),
     ...groups.map((g) => ({ slug: g.slug })),
@@ -43,6 +45,8 @@ async function load(slug: string): Promise<TvData | null> {
   if (slug === "give-a-lot") return tvGive();
   if (slug === "the-model-fireside") return tvFireside();
   if (slug === "the-model-preshow") return tvPreshow();
+  if (slug === "the-model-preshow-1") return tvPreshow(1);
+  if (slug === "the-model-preshow-2") return tvPreshow(2);
   if ((TV_EVENTS as readonly string[]).includes(slug))
     return tvEvent(slug as (typeof TV_EVENTS)[number]);
   if (slug in TV_DAYS) return tvDay(slug);
@@ -54,6 +58,8 @@ const NAMES: Record<string, string> = {
   "give-a-lot": "Give-a-LOT",
   "the-model-fireside": "The Model · Fireside chats",
   "the-model-preshow": "The Model · Pre-show",
+  "the-model-preshow-1": "The Model · Pre-show video 1",
+  "the-model-preshow-2": "The Model · Pre-show video 2",
   "the-model": "The Model",
   "access-granted": "Access Granted",
   pysanantonio: "PySanAntonio",

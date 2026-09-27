@@ -1418,12 +1418,35 @@ function FiresideLoop({ data }: { data: TvFiresideData }) {
  * once, when they set the TV up — and after that it runs unattended to the
  * end and hands off. With no videos configured it goes straight to the loop.
  */
+/** Seconds the last video takes to fade to black, sound and picture together. */
+const PRESHOW_FADE = 1.5;
+
 function Preshow({ data }: { data: TvPreshowData }) {
   const router = useRouter();
   const [i, setI] = React.useState(0);
   const [blocked, setBlocked] = React.useState(false);
+  const [fading, setFading] = React.useState(false);
   const ref = React.useRef<HTMLVideoElement>(null);
   const src = data.videos[i];
+  const last = i === data.videos.length - 1;
+
+  // Load the next screen while the videos play, so the hand-off lands on a
+  // page that's ready and builds in from black rather than on a loading one.
+  React.useEffect(() => {
+    router.prefetch(data.next);
+  }, [router, data.next]);
+
+  // The last video's end: the picture fades to black and the sound follows it
+  // down over the same seconds, then the next screen takes over.
+  function onTime() {
+    const v = ref.current;
+    if (!v || !last || !v.duration) return;
+    const left = v.duration - v.currentTime;
+    if (left <= PRESHOW_FADE) {
+      if (!fading) setFading(true);
+      v.volume = Math.max(0, Math.min(1, left / PRESHOW_FADE));
+    }
+  }
 
   React.useEffect(() => {
     if (!src) {
@@ -1448,7 +1471,9 @@ function Preshow({ data }: { data: TvPreshowData }) {
         playsInline
         preload="auto"
         className="absolute inset-0 h-full w-full object-contain"
-        onEnded={() => setI((n) => n + 1)}
+        style={{ opacity: fading ? 0 : 1, transition: `opacity ${PRESHOW_FADE}s ease-in` }}
+        onTimeUpdate={onTime}
+        onEnded={() => (last ? router.replace(data.next) : setI((n) => n + 1))}
       />
       {/* Preload the next one so the cut between them is a cut, not a wait. */}
       {data.videos[i + 1] ? <link rel="preload" as="video" href={data.videos[i + 1]} /> : null}
@@ -1460,7 +1485,7 @@ function Preshow({ data }: { data: TvPreshowData }) {
         >
           <span className="font-display text-[96px] font-bold uppercase">Click to start</span>
           <span className="font-mono text-[28px] uppercase tracking-[0.16em] text-white/70">
-            {data.videos.length} videos, then The Model&rsquo;s loop
+            {data.videos.length === 1 ? "Then" : `${data.videos.length} videos, then`} The Model&rsquo;s fireside screen
           </span>
         </button>
       ) : null}

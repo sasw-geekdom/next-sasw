@@ -73,7 +73,9 @@ export default async function TvIndex() {
           {EVENTS.map((e) => (
             <Row key={e.slug} href={`/tv/${e.slug}`} title={e.title} when={e.when} />
           ))}
-          <Row href="/tv/the-model-preshow" title="The Model · pre-show videos, then the loop" when="Monday · before doors" />
+          <Row href="/tv/the-model-preshow-1" title="The Model · pre-show video 1, then the fireside screen" when="Monday · 4:23" />
+          <Row href="/tv/the-model-preshow-2" title="The Model · pre-show video 2, then the fireside screen" when="Monday · 3:27" />
+          <Row href="/tv/the-model-preshow" title="The Model · both pre-show videos, then the fireside screen" when="Monday · before doors" />
           <Row href="/tv/the-model-fireside" title="The Model · during the fireside chats" when="Monday · the first two sessions" />
         </Section>
         <Section label="Community days at Geekdom">
