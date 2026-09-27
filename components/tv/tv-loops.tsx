@@ -21,6 +21,7 @@ import {
   type SceneDef,
   type SlotState,
 } from "@/components/tv/tv-kit";
+import { useRouter } from "next/navigation";
 import { useNow } from "@/components/tv/tv-stage";
 import type {
   TvBlock,
@@ -32,6 +33,8 @@ import type {
   TvTalk,
   TvWeekData,
   TvGiveData,
+  TvFiresideData,
+  TvPreshowData,
 } from "@/lib/tv";
 
 const MAGENTA = "#ff32a0";
@@ -48,6 +51,10 @@ export function TvLoop({ data }: { data: TvData }) {
       return <WeekLoop data={data} />;
     case "give":
       return <GiveLoop data={data} />;
+    case "fireside":
+      return <FiresideLoop data={data} />;
+    case "preshow":
+      return <Preshow data={data} />;
   }
 }
 
@@ -1324,6 +1331,139 @@ function GiveLoop({ data }: { data: TvGiveData }) {
         }
       />
       <SceneLoop scenes={scenes} />
+    </div>
+  );
+}
+
+// ── The Model, during the fireside chats ────────────────────────────────────
+
+/**
+ * One screen, no scenes: the wordmark and its hook, the mascots roaming the
+ * whole stage, the partners, and a single line naming the chat that's on —
+ * never a running order. Behind a conversation the screen is the room's
+ * atmosphere, not its agenda.
+ */
+function FiresideLoop({ data }: { data: TvFiresideData }) {
+  const now = useNow();
+  const accent = EVENT_ACCENT["the-model"];
+  const states = slotStates(data.talks, now);
+  const onIdx = states.indexOf("now");
+  const t = data.talks[onIdx >= 0 ? onIdx : Math.max(0, states.indexOf("next"))];
+  const who = t
+    ? t.people.filter((p) => p.role !== "moderator").map((p) => p.name).join(" & ")
+    : "";
+  const mod = t?.people.find((p) => p.role === "moderator")?.name;
+
+  return (
+    <div className="absolute inset-0">
+      <Glow color={accent} />
+      <Mascots color={accent} count={18} />
+      <Chrome
+        accent={accent}
+        url={data.url}
+        when={
+          <>
+            {data.dateLabel.replace(/^\w+, /, "")} · <b className="font-medium" style={{ color: accent }}>{data.timeLabel}</b> · {data.place}
+          </>
+        }
+      />
+      <div className="tv-scene absolute left-29 top-60 z-10 w-250">
+        <div className="tv-rise" style={rise(0, 0.2)}>
+          <Eyebrow accent={accent}>{data.dayWord} at Geekdom</Eyebrow>
+        </div>
+        <div data-tv-keep className="tv-rise mt-7 inline-block" style={rise(1, 0.4)}>
+          <EventWordmark brand="the-model" />
+        </div>
+        <p
+          data-tv-keep
+          className="tv-rise mt-12 max-w-225 border-l-4 border-[#00B4FC] pl-8 text-[40px] leading-[1.38] text-white/90"
+          style={rise(2, 0.6, 0.6)}
+        >
+          {data.hook.setup} {data.hook.turn}
+        </p>
+      </div>
+      {t ? (
+        <div data-tv-keep className="tv-scene absolute bottom-40 left-29 z-10 max-w-275">
+          <p className="font-mono text-[24px] uppercase tracking-[0.18em]" style={{ color: accent }}>
+            Fireside chat{onIdx >= 0 ? " · now" : ""}
+          </p>
+          <p className="mt-3 text-[40px] font-semibold leading-[1.15]">{t.short}</p>
+          {who ? (
+            <p className="mt-2 text-[28px] text-white/70">
+              {who}
+              {mod ? ` · moderated by ${mod}` : ""}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+      {data.organizers.length ? (
+        <div data-tv-keep className="tv-scene absolute bottom-40 right-29 z-10 flex items-center gap-12">
+          {data.organizers.map((o) => (
+            <Logo key={o.name} logo={o} scale={0.75} />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+// ── The Model's pre-show ─────────────────────────────────────────────────────
+
+/**
+ * The pre-show videos in order, full screen with their sound, then the
+ * screen moves itself on to The Model's loop.
+ *
+ * Browsers refuse to autoplay video with sound until someone has interacted
+ * with the page. So the first frame waits behind one click — the AV person's,
+ * once, when they set the TV up — and after that it runs unattended to the
+ * end and hands off. With no videos configured it goes straight to the loop.
+ */
+function Preshow({ data }: { data: TvPreshowData }) {
+  const router = useRouter();
+  const [i, setI] = React.useState(0);
+  const [blocked, setBlocked] = React.useState(false);
+  const ref = React.useRef<HTMLVideoElement>(null);
+  const src = data.videos[i];
+
+  React.useEffect(() => {
+    if (!src) {
+      router.replace(data.next);
+      return;
+    }
+    const v = ref.current;
+    if (!v) return;
+    v.play().then(
+      () => setBlocked(false),
+      () => setBlocked(true),
+    );
+  }, [src, data.next, router]);
+
+  if (!src) return null;
+  return (
+    <div className="absolute inset-0 bg-black">
+      <video
+        key={src}
+        ref={ref}
+        src={src}
+        playsInline
+        preload="auto"
+        className="absolute inset-0 h-full w-full object-contain"
+        onEnded={() => setI((n) => n + 1)}
+      />
+      {/* Preload the next one so the cut between them is a cut, not a wait. */}
+      {data.videos[i + 1] ? <link rel="preload" as="video" href={data.videos[i + 1]} /> : null}
+      {blocked ? (
+        <button
+          type="button"
+          onClick={() => ref.current?.play().then(() => setBlocked(false), () => {})}
+          className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-6 bg-black/70 text-white"
+        >
+          <span className="font-display text-[96px] font-bold uppercase">Click to start</span>
+          <span className="font-mono text-[28px] uppercase tracking-[0.16em] text-white/70">
+            {data.videos.length} videos, then The Model&rsquo;s loop
+          </span>
+        </button>
+      ) : null}
     </div>
   );
 }

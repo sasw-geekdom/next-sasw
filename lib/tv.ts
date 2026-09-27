@@ -178,7 +178,18 @@ export interface TvGiveData {
   url: string;
 }
 
-export type TvData = TvEventData | TvDayData | TvGroupData | TvWeekData | TvGiveData;
+export interface TvFiresideData extends Omit<TvEventData, "kind"> {
+  kind: "fireside";
+}
+
+export interface TvPreshowData {
+  kind: "preshow";
+  videos: string[];
+  /** Where the screen goes when the last video ends. */
+  next: string;
+}
+
+export type TvData = TvEventData | TvDayData | TvGroupData | TvWeekData | TvGiveData | TvFiresideData | TvPreshowData;
 
 // ── Small helpers ────────────────────────────────────────────────────────────
 
@@ -603,4 +614,29 @@ export async function tvGive(): Promise<TvGiveData> {
     })),
     url: "sasw.co/schedule/give-a-lot",
   };
+}
+
+// ── The Model's fireside chats ───────────────────────────────────────────────
+//
+// The afternoon opens with two fireside chats, and the screens behind the
+// stage should carry the room rather than read out a schedule. Same data as
+// The Model's loop, cut to the first two sessions; the component shows only
+// the brand, the mascots and whichever chat is on.
+
+export async function tvFireside(): Promise<TvFiresideData> {
+  const event = await tvEvent("the-model");
+  return { ...event, kind: "fireside", talks: event.talks.slice(0, 2) };
+}
+
+// ── The Model's pre-show ─────────────────────────────────────────────────────
+//
+// Two videos played before doors, then the screen hands itself to The Model's
+// loop. The files are too big for the repo (about 200 MB together), so they
+// live in Firebase Storage like the gallery video; paste each file's download
+// URL here, in playing order.
+
+export const THE_MODEL_PRESHOW: string[] = [];
+
+export function tvPreshow(): TvPreshowData {
+  return { kind: "preshow", videos: THE_MODEL_PRESHOW, next: "/tv/the-model" };
 }

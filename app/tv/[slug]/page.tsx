@@ -11,6 +11,8 @@ import {
   tvGroups,
   tvWeek,
   tvGive,
+  tvFireside,
+  tvPreshow,
   type TvData,
 } from "@/lib/tv";
 
@@ -28,6 +30,8 @@ export async function generateStaticParams() {
   return [
     { slug: "week" },
     { slug: "give-a-lot" },
+    { slug: "the-model-fireside" },
+    { slug: "the-model-preshow" },
     ...TV_EVENTS.map((slug) => ({ slug })),
     ...Object.keys(TV_DAYS).map((slug) => ({ slug })),
     ...groups.map((g) => ({ slug: g.slug })),
@@ -37,6 +41,8 @@ export async function generateStaticParams() {
 async function load(slug: string): Promise<TvData | null> {
   if (slug === "week") return tvWeek();
   if (slug === "give-a-lot") return tvGive();
+  if (slug === "the-model-fireside") return tvFireside();
+  if (slug === "the-model-preshow") return tvPreshow();
   if ((TV_EVENTS as readonly string[]).includes(slug))
     return tvEvent(slug as (typeof TV_EVENTS)[number]);
   if (slug in TV_DAYS) return tvDay(slug);
@@ -46,6 +52,8 @@ async function load(slug: string): Promise<TvData | null> {
 const NAMES: Record<string, string> = {
   week: "Startup + Tech Week",
   "give-a-lot": "Give-a-LOT",
+  "the-model-fireside": "The Model · Fireside chats",
+  "the-model-preshow": "The Model · Pre-show",
   "the-model": "The Model",
   "access-granted": "Access Granted",
   pysanantonio: "PySanAntonio",
