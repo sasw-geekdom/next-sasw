@@ -31,6 +31,7 @@ import type {
   TvSponsor,
   TvTalk,
   TvWeekData,
+  TvGiveData,
 } from "@/lib/tv";
 
 const MAGENTA = "#ff32a0";
@@ -45,6 +46,8 @@ export function TvLoop({ data }: { data: TvData }) {
       return <GroupLoop data={data} />;
     case "week":
       return <WeekLoop data={data} />;
+    case "give":
+      return <GiveLoop data={data} />;
   }
 }
 
@@ -161,7 +164,7 @@ function Spotlight({
       </h2>
       {talk.title !== talk.short ? (
         <p data-tv-keep className="tv-rise mt-4 max-w-375 text-[40px] font-medium leading-[1.2] text-white/85" style={rise(1, 0.7)}>
-          {talk.title.slice(talk.short.length).replace(/^[\s:—–]+/, "")}
+          {talk.title.slice(talk.short.length).replace(/^[\s.:—–]+/, "")}
         </p>
       ) : null}
       {talk.lede ? (
@@ -675,11 +678,15 @@ function DayLoop({ data }: { data: TvDayData }) {
         </div>
       ),
     },
-    ...order.map((i) => ({
-      key: `block-${data.blocks[i].slug}`,
-      dur: 11,
-      node: <BlockSpotlight b={data.blocks[i]} state={states[i]} accent={accent} />,
-    })),
+    ...order.map((i) => {
+      const blk = data.blocks[i];
+      const full = SHOWCASE[blk.slug];
+      return {
+        key: `block-${blk.slug}`,
+        dur: full ? 14 : 11,
+        node: full ? full(blk, data.dayWord) : <BlockSpotlight b={blk} state={states[i]} accent={accent} />,
+      };
+    }),
     ...data.sponsors.map((s) => ({
       key: `sponsor-${s.circuit}`,
       dur: 10,
@@ -712,6 +719,7 @@ function GroupLoop({ data }: { data: TvGroupData }) {
   const [state] = slotStates([b], now);
   const talkStates = slotStates(b.talks, now);
   const afterStates = slotStates(data.after, now);
+  const showcase = SHOWCASE[b.slug];
 
   const scenes: SceneDef[] = [
     {
@@ -788,6 +796,12 @@ function GroupLoop({ data }: { data: TvGroupData }) {
       ),
     });
   if (data.sponsor) scenes.push({ key: "sponsor", dur: 10, node: <SponsorScene s={data.sponsor} accent={accent} /> });
+  // College Night and Open Circuit have a screen of their own: it stands in
+  // for the hero, the talk slides and the partners slide, which it carries.
+  if (showcase) {
+    const keep = scenes.filter((sc) => sc.key === "sponsor");
+    scenes.splice(0, scenes.length, { key: "showcase", dur: 30, node: showcase(b, data.dayWord) }, ...keep);
+  }
   if (data.after.length)
     scenes.push({
       key: "after",
@@ -1014,6 +1028,298 @@ function WeekLoop({ data }: { data: TvWeekData }) {
         when={
           <>
             Sept 28 – Oct 2 · <b className="font-medium text-[#ff32a0]">sasw.co</b>
+          </>
+        }
+      />
+      <SceneLoop scenes={scenes} />
+    </div>
+  );
+}
+
+// ── The showcases: College Night and Open Circuit ─────────────────────────────
+//
+// Screens of their own rather than talk slides, because neither has talks —
+// College Night is a room of students, Open Circuit an open stage. Both copy
+// decks are the activations' own page copy (lib/schedule.ts, `detail`), cut
+// to what reads from across a room.
+
+const SHOWCASE: Partial<Record<string, (b: TvBlock, dayWord: string) => React.ReactNode>> = {
+  "college-night": (b, dayWord) => <CollegeNightScreen b={b} dayWord={dayWord} />,
+  "open-circuit": (b, dayWord) => <OpenCircuitScreen b={b} dayWord={dayWord} />,
+};
+
+function PoweredStrip({ at }: { at: number }) {
+  return (
+    <>
+      <div className="tv-rise" style={rise(0, at)}>
+        <Eyebrow accent={MAGENTA}>Powered by</Eyebrow>
+      </div>
+      <div data-tv-keep className="tv-rise mt-4 flex items-center gap-12" style={rise(0, at + 0.4)}>
+        <img src="/brand/geekdom.png" alt="Geekdom" className="block h-[62px] w-auto" style={{ filter: "brightness(0) invert(1)" }} />
+        <img src="/access-granted/orgs/devsa.png" alt="DEVSA" className="block h-[74px] w-auto" />
+      </div>
+    </>
+  );
+}
+
+function Chips({ items, at }: { items: string[]; at: number }) {
+  return (
+    <div data-tv-keep className="mt-5 flex flex-wrap gap-3">
+      {items.map((x, i) => (
+        <span
+          key={x}
+          className="tv-rise rounded-full border border-white/25 px-5 py-2 font-mono text-[22px] uppercase tracking-[0.1em] text-white/85"
+          style={rise(i, at, 0.25)}
+        >
+          {x}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function CollegeNightScreen({ b, dayWord }: { b: TvBlock; dayWord: string }) {
+  const accent = MAGENTA;
+  return (
+    <>
+      <div className="tv-bolt-in pointer-events-none absolute right-10 top-37.5 z-0 w-195" style={{ animationDelay: "0.3s" }}>
+        <BoltShader color={accent} />
+      </div>
+      <div className="absolute left-29 top-34 bottom-50 z-10 flex w-260 flex-col">
+        <div className="tv-rise" style={rise(0, 0.2)}>
+          <Eyebrow accent={accent}>
+            {dayWord} at Geekdom · {b.timeLabel}
+          </Eyebrow>
+        </div>
+        <div data-tv-keep className="tv-rise mt-4" style={rise(0, 0.5)}>
+          <Mark mark={b.mark} h={130} accent={accent} />
+        </div>
+        <p data-tv-keep className="tv-rise mt-5 font-display text-[72px] font-bold uppercase leading-[1.05]" style={rise(0, 1.1)}>
+          Bring the
+          <br />
+          <span className="mt-2 inline-block px-4 text-black" style={{ background: accent }}>
+            whole club.
+          </span>
+        </p>
+        <p data-tv-keep className="tv-rise mt-5 text-[30px] leading-[1.38] text-white/85" style={rise(0, 1.7)}>
+          Computer science, AI, cybersecurity, data and electrical engineering. Any of it, at any campus in San Antonio.
+        </p>
+        <Chips items={["Alamo Colleges", "UTSA", "St. Mary\u2019s", "Trinity", "Texas A&M-San Antonio", "UIW"]} at={2.3} />
+        <p data-tv-keep className="tv-rise mt-5 font-mono text-[22px] uppercase tracking-[0.14em]" style={{ ...rise(0, 4.0), color: accent }}>
+          Free · no badge · no pitch
+        </p>
+        <div className="mt-auto pt-8">
+          <PoweredStrip at={4.6} />
+          <p data-tv-keep className="tv-rise mt-4 font-mono text-[22px] tracking-[0.06em] text-white/75" style={rise(0, 5.4)}>
+            <b className="font-medium" style={{ color: accent }}>{b.timeLabel}</b> · The Rand, 3rd Floor
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function OpenCircuitScreen({ b, dayWord }: { b: TvBlock; dayWord: string }) {
+  const accent = MAGENTA;
+  return (
+    <>
+      {b.mark.kind === "image" ? (
+        <div data-tv-keep className="tv-bolt-in absolute right-17.5 top-62.5 z-0 w-205" style={{ animationDelay: "0.3s" }}>
+          <div
+            aria-hidden="true"
+            className="tv-breathe absolute inset-[-12%] rounded-full"
+            style={{ background: `radial-gradient(circle, ${accent}40 0%, transparent 65%)`, filter: "blur(30px)", animationDuration: "6s" }}
+          />
+          <img src={b.mark.src} alt="Open Circuit" className="relative block w-full object-contain" />
+        </div>
+      ) : null}
+      <div className="absolute left-29 top-41 bottom-41 z-10 flex w-225 flex-col">
+        <div className="tv-rise" style={rise(0, 0.2)}>
+          <Eyebrow accent={accent}>
+            {dayWord} at Geekdom · {b.timeLabel}
+          </Eyebrow>
+        </div>
+        <p data-tv-keep className="tv-rise mt-6 font-display text-[84px] font-bold uppercase leading-none" style={rise(0, 1.0)}>
+          5 circuits. 1 stage.
+          <br />
+          <span className="mt-2 inline-block px-4 text-black" style={{ background: accent }}>
+            Show what you built.
+          </span>
+        </p>
+        <Chips items={["Code", "Interfaces", "Agents", "Hardware", "Media"]} at={1.8} />
+        <p data-tv-keep className="tv-rise mt-7 text-[32px] leading-[1.4] text-white/85" style={rise(0, 3.2)}>
+          Five minutes, one screen, and whatever you actually built. No pitch deck, no slide.
+        </p>
+        <p data-tv-keep className="tv-rise mt-5 font-mono text-[22px] uppercase tracking-[0.14em]" style={{ ...rise(0, 3.7), color: accent }}>
+          Slots go in the order people turn up
+        </p>
+        <div className="mt-auto pt-6">
+          <PoweredStrip at={4.3} />
+          <p data-tv-keep className="tv-rise mt-5 font-mono text-[22px] tracking-[0.06em] text-white/75" style={rise(0, 5.1)}>
+            <b className="font-medium" style={{ color: accent }}>{b.timeLabel}</b> · The Rand, 3rd Floor · before the Bash
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Give-a-LOT ───────────────────────────────────────────────────────────────
+
+const GIVE_AMBER = "#FFB400";
+const GIVE_PLUM = "#800069";
+
+/**
+ * The drive, in its own amber and plum (lib/give-a-lot.ts), with every line
+ * from there too. Five centred screens: the hook, what a machine leaves as,
+ * donate, receive, and where.
+ */
+function GiveLoop({ data }: { data: TvGiveData }) {
+  const A = GIVE_AMBER;
+  const center = "absolute inset-x-29 top-0 bottom-35 z-10 flex flex-col items-center justify-center text-center";
+  const states = [
+    ["vendor-locked", "linux + open source"],
+    ["unsupported", "patched and current"],
+    ["slow and tracked", "fast and private"],
+    ["headed for landfill", "yours to keep"],
+  ];
+  const way = (label: string, when: string, body: string, list?: string[]) => (
+    <div className={center}>
+      <div className="tv-rise" style={rise(0, 0.2)}>
+        <Eyebrow accent={A}>{when}</Eyebrow>
+      </div>
+      <p data-tv-keep className="tv-rise mt-6 font-display text-[170px] font-bold uppercase leading-none" style={{ ...rise(0, 0.5), color: A }}>
+        {label}
+      </p>
+      {list ? (
+        <div data-tv-keep className="mt-12 flex max-w-325 flex-wrap justify-center gap-4">
+          {list.map((x, i) => (
+            <span key={x} className="tv-rise rounded-full border-2 px-7 py-3 text-[34px] font-medium" style={{ ...rise(i, 1.0, 0.25), borderColor: `${A}88` }}>
+              {x}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      <p data-tv-keep className="tv-rise mt-12 max-w-287.5 text-[40px] leading-[1.4] text-white/85" style={rise(0, list ? 2.4 : 1.1)}>
+        {body}
+      </p>
+    </div>
+  );
+
+  const scenes: SceneDef[] = [
+    {
+      key: "hero",
+      dur: 10,
+      node: (
+        <div className={center}>
+          <div className="tv-rise" style={rise(0, 0.2)}>
+            <Eyebrow accent={A}>All week at Launch SA · Central Library</Eyebrow>
+          </div>
+          <img
+            data-tv-keep
+            src="/give-a-lot/lockup.svg"
+            alt="Give-a-LOT"
+            className="tv-bolt-in mt-8 block h-auto w-160"
+            style={{ filter: `drop-shadow(0 0 40px ${A}44)` }}
+          />
+          <p data-tv-keep className="tv-rise mt-10 font-display text-[80px] font-bold uppercase leading-[0.98]" style={rise(0, 1.0)}>
+            Old machines.
+            <br />
+            <span style={{ color: A }}>New life.</span>
+          </p>
+          <p data-tv-keep className="tv-rise mt-8 max-w-275 text-[44px] leading-[1.35] text-white/85" style={rise(0, 1.6)}>
+            See how Linux and open source brought them back. Then take one home.
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: "states",
+      dur: 11,
+      node: (
+        <div className={center}>
+          <div className="tv-rise" style={rise(0, 0.2)}>
+            <Eyebrow accent={A}>What a machine leaves as</Eyebrow>
+          </div>
+          <div className="mt-10 w-full max-w-325">
+            {states.map(([before, after], i) => (
+              <div
+                key={before}
+                data-tv-keep
+                className="tv-rise grid grid-cols-[1fr_auto_1fr] items-center gap-8 border-t border-white/12 py-7 first:border-t-0"
+                style={rise(i, 0.6, 1.2)}
+              >
+                <span className="text-right font-mono text-[36px] text-white/50 line-through decoration-white/40">{before}</span>
+                <span className="font-display text-[48px] font-bold" style={{ color: GIVE_PLUM }}>
+                  →
+                </span>
+                <span className="text-left font-display text-[52px] font-bold uppercase leading-none" style={{ color: A }}>
+                  {after}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "donate",
+      dur: 10,
+      node: way(
+        "Donate",
+        "Mon – Thu · Central Library",
+        "No printers, no CRTs, nothing broken. Drives are erased as part of the rebuild, and certified if you need that.",
+        ["Laptops", "Desktops", "Monitors", "Keyboards", "Drives", "Chargers"],
+      ),
+    },
+    {
+      key: "receive",
+      dur: 10,
+      node: way(
+        "Receive",
+        "Fri, Oct 2 · 12 – 2:30 PM",
+        "Learn how Linux and open source brought these computers back to life, then leave with one of your own. Registration is through learnOPENtech.",
+      ),
+    },
+    {
+      key: "close",
+      dur: 10,
+      node: (
+        <div className={center}>
+          <div className="tv-rise" style={rise(0, 0.2)}>
+            <Eyebrow accent={A}>Powered by</Eyebrow>
+          </div>
+          <div data-tv-keep className="tv-rise mt-10 flex flex-wrap items-center justify-center gap-x-20 gap-y-10" style={rise(0, 0.5)}>
+            {data.organizers.map((o) => (
+              <Logo key={o.name} logo={o} scale={1.5} />
+            ))}
+          </div>
+          <p data-tv-keep className="tv-rise mt-16 font-display text-[80px] font-bold uppercase leading-[0.95]" style={rise(0, 1.1)}>
+            Launch SA
+            <br />
+            <span style={{ color: A }}>Central Library, 1st Floor</span>
+          </p>
+          <p data-tv-keep className="tv-rise mt-10 font-mono text-[30px] tracking-[0.06em] text-white/80" style={rise(0, 1.6)}>
+            Drop off Sept 28 – Oct 1 · Giveaway Fri 12 – 2:30 PM
+          </p>
+          <p data-tv-keep className="tv-rise mt-6 font-mono text-[30px] tracking-[0.06em]" style={{ ...rise(0, 2.0), color: A }}>
+            Register for the giveaway at learnopen.tech
+          </p>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className="absolute inset-0">
+      <Glow color={A} x={960} y={520} />
+      <MiniBolts count={28} opacity={0.35} />
+      <Chrome
+        accent={A}
+        url={data.url}
+        when={
+          <>
+            Sept 28 – Oct 2 · <b className="font-medium" style={{ color: A }}>Launch SA</b> · Central Library
           </>
         }
       />

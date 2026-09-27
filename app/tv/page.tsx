@@ -66,6 +66,9 @@ export default async function TvIndex() {
         <Section label="The week">
           <Row href="/tv/week" title="Startup + Tech Week" when="All week" />
         </Section>
+        <Section label="All week at Launch SA">
+          <Row href="/tv/give-a-lot" title="Give-a-LOT Computer Donation Drive" when="Mon – Fri · Central Library" />
+        </Section>
         <Section label="Events at Geekdom">
           {EVENTS.map((e) => (
             <Row key={e.slug} href={`/tv/${e.slug}`} title={e.title} when={e.when} />

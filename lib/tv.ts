@@ -14,6 +14,7 @@ import type {
 import { ACCESS_CONTINUOUS, ACCESS_GRANTED, ACCESS_ORGANIZERS, accessBlockFor } from "@/lib/access-granted";
 import { circuitSponsor } from "@/lib/circuit-sponsors";
 import { EVENT_DAYS } from "@/lib/event";
+import { giveALotOrganizers } from "@/lib/give-a-lot";
 import { PYSA_ORGANIZERS } from "@/lib/pysa";
 import {
   activationSearchText,
@@ -171,7 +172,13 @@ export interface TvWeekData {
   url: string;
 }
 
-export type TvData = TvEventData | TvDayData | TvGroupData | TvWeekData;
+export interface TvGiveData {
+  kind: "give";
+  organizers: TvLogo[];
+  url: string;
+}
+
+export type TvData = TvEventData | TvDayData | TvGroupData | TvWeekData | TvGiveData;
 
 // ── Small helpers ────────────────────────────────────────────────────────────
 
@@ -575,5 +582,25 @@ export async function tvWeek(): Promise<TvWeekData> {
     sponsors: sponsors.filter((s) => s.imageUrl).map(logo),
     partners: partners.filter((p) => p.imageUrl).map(logo),
     url: "sasw.co/schedule",
+  };
+}
+
+// ── Give-a-LOT ───────────────────────────────────────────────────────────────
+//
+// The drive runs all week at Launch SA in the Central Library, not at The
+// Rand, so it has its own loop rather than a slot in a day. Its copy lives in
+// the component with lib/give-a-lot.ts as the source; only the partner marks
+// come from the CMS here, as the band's do.
+
+export async function tvGive(): Promise<TvGiveData> {
+  const partners = await safe(listPartners);
+  return {
+    kind: "give",
+    organizers: giveALotOrganizers(partners).map((o) => ({
+      name: o.name,
+      src: o.logo,
+      h: tvHeight(o.heightClass, 2.4),
+    })),
+    url: "sasw.co/schedule/give-a-lot",
   };
 }
