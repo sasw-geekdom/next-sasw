@@ -3357,6 +3357,26 @@ export const CARDS = [
   // headline says what they are, and the ramp's caption says the whole room
   // is theirs — every circuit runs through this stage and they host all of
   // it. Days are left off on purpose until the hosting schedule is set.
+  // Both emcees on one card — the pair layout the CPG card uses, with the
+  // role as the headline in the plural.
+  {
+    id: "tpr-emcees",
+    event: "tpr",
+    speakers: ["emily-latour", "saige-thomas"],
+    headline: "Your Emcees",
+    headlineSize: 124,
+    subtitle: "Hosting the main stage at Texas Public Radio",
+    circuit: "All five circuits",
+    // `top` is distance from the right edge. Emily sits far enough right
+    // that "Texas Fashion Industry Initiative", the longest line in the
+    // copy column, clears her shoulder; Saige overlaps her and takes the
+    // crop at the card's edge.
+    portraits: [
+      { height: 640, top: 90 },
+      { height: 660, top: -140 },
+    ],
+  },
+
   {
     id: "tpr-emcee-saige-thomas",
     event: "tpr",
