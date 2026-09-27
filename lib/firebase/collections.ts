@@ -22,6 +22,9 @@ export const COLLECTIONS = {
   // One doc per staff send of a one-to-many email (the know-before-you-go),
   // plus a lock doc per template so two sends cannot overlap.
   emailSends: "emailSends",
+  // Emails the team writes in the admin and sends to every registrant: one
+  // doc per email, draft through sent. See lib/email/broadcasts.ts.
+  broadcasts: "broadcasts",
 } as const;
 
 // Doc id within the `settings` collection holding admin-edited email copy.

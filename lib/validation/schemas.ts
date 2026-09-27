@@ -244,3 +244,12 @@ export const emailCopySchema = z.object({
   signoff: z.string().trim().max(120),
 });
 export type EmailCopyInput = z.infer<typeof emailCopySchema>;
+
+/** A team email to every registrant (Admin → Emails → New email). */
+export const broadcastSchema = z.object({
+  subject: z.string().trim().min(1, "Subject is required.").max(160),
+  preheader: z.string().trim().max(160),
+  heading: z.string().trim().max(120),
+  body: z.string().trim().min(1, "Body is required.").max(8000),
+});
+export type BroadcastInput = z.infer<typeof broadcastSchema>;

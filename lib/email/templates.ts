@@ -324,10 +324,20 @@ function applyTokens(s: string, vars: TemplateVars): string {
     .replace(/\{sessionTitle\}/g, vars.sessionTitle ?? "");
 }
 
-function shell(bodyInner: string): string {
+function shell(
+  bodyInner: string,
+  opts: { preheader?: string; footerExtra?: string } = {},
+): string {
+  // The preheader is the grey line inboxes show after the subject. Hidden in
+  // the body; the run of zero-width joiners stops clients padding it out with
+  // the email's first lines of text.
+  const preheader = opts.preheader?.trim()
+    ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(opts.preheader.trim())}${"&#8204;&nbsp;".repeat(60)}</div>`
+    : "";
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f4f4f5;font-family:Helvetica,Arial,sans-serif;color:${INK};">
+    ${preheader}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:32px 0;">
       <tr>
         <td align="center">
@@ -345,7 +355,7 @@ function shell(bodyInner: string): string {
             <tr>
               <td style="padding:0 28px 28px 28px;color:${MUTED};font-size:12px;line-height:18px;">
                 San Antonio Startup + Tech Week · Downtown at TPR<br/>
-                The current runs through SA. Plug in.
+                The current runs through SA. Plug in.${opts.footerExtra ?? ""}
               </td>
             </tr>
           </table>
@@ -614,4 +624,44 @@ export function knowBeforeYouGoEmail(
   copy: EmailCopy = DEFAULT_KNOW_BEFORE_YOU_GO_COPY,
 ): { subject: string; html: string } {
   return renderEmail(copy, { firstName: firstNameOf(input.name) });
+}
+
+// ─── Team emails to every registrant ────────────────────────────────────────
+// Written by staff in Admin → Emails → New email. The team writes the words;
+// the logo, colours and footer stay locked, and every one carries an
+// unsubscribe link (these are the app's only emails that aren't a direct
+// reply to something the reader did).
+
+export interface BroadcastContent {
+  subject: string;
+  preheader: string;
+  heading: string;
+  body: string;
+}
+
+export const EMPTY_BROADCAST: BroadcastContent = {
+  subject: "",
+  preheader: "",
+  heading: "",
+  body: "Hi {firstName},\n\n",
+};
+
+/** One team email for one registrant. `unsubscribeUrl` is theirs alone. */
+export function broadcastEmail(
+  content: BroadcastContent,
+  input: { name: string },
+  unsubscribeUrl: string,
+): { subject: string; html: string } {
+  const vars = { firstName: firstNameOf(input.name) };
+  return {
+    subject: applyTokens(content.subject, vars).trim(),
+    html: shell(
+      (content.heading.trim() ? heading(escapeHtml(applyTokens(content.heading, vars))) : "") +
+        renderBody(content.body, vars),
+      {
+        preheader: applyTokens(content.preheader, vars),
+        footerExtra: `<br/><br/>You're getting this because you registered for San Antonio Startup + Tech Week. <a href="${escapeHtml(unsubscribeUrl)}" style="color:${MUTED};">Unsubscribe</a> from team updates.`,
+      },
+    ),
+  };
 }

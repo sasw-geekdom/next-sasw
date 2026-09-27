@@ -38,6 +38,8 @@ interface Props {
   saved: EmailCopyConfig["saved"];
   adminEmail: string;
   knowBeforeYouGo: KnowBeforeYouGoStatus;
+  /** The team-email composer, shown in place of the template editor. */
+  composer: React.ReactNode;
 }
 
 /**
@@ -57,8 +59,10 @@ export function EmailManager({
   saved,
   adminEmail,
   knowBeforeYouGo,
+  composer,
 }: Props) {
   const router = useRouter();
+  const [compose, setCompose] = React.useState(false);
   const [active, setActive] = React.useState<EmailTemplateKey>("registration");
   const [drafts, setDrafts] = React.useState<Drafts>(initial);
   const [baseline, setBaseline] = React.useState<Drafts>(initial);
@@ -94,6 +98,7 @@ export function EmailManager({
   }
 
   function switchTo(key: EmailTemplateKey) {
+    setCompose(false);
     setNotice(null);
     setIssues({});
     setActive(key);
@@ -192,7 +197,7 @@ export function EmailManager({
             className="inline-flex gap-1 rounded-lg border border-border bg-muted/40 p-1"
           >
             {PRIMARY.map((key) => {
-              const on = active === key;
+              const on = !compose && active === key;
               return (
                 <button
                   key={key}
@@ -218,9 +223,25 @@ export function EmailManager({
                 </button>
               );
             })}
+            <button
+              role="tab"
+              aria-selected={compose}
+              onClick={() => {
+                setNotice(null);
+                setCompose(true);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
+                compose
+                  ? "bg-foreground text-white shadow-sm"
+                  : "text-muted-foreground hover:bg-white hover:text-foreground",
+              )}
+            >
+              Email everyone
+            </button>
           </div>
           <Combobox
-            value={PRIMARY.includes(active) ? "" : active}
+            value={compose || PRIMARY.includes(active) ? "" : active}
             onChange={(v) => v && switchTo(v as EmailTemplateKey)}
             placeholder="Other emails…"
             size="sm"
@@ -234,7 +255,7 @@ export function EmailManager({
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className={cn("flex items-center gap-2", compose && "hidden")}>
           {saved[active] && (
             <span className="hidden text-xs text-muted-foreground md:inline">
               Last saved {formatDateTime(saved[active].at)} by{" "}
@@ -265,7 +286,9 @@ export function EmailManager({
         </div>
       </div>
 
-      {notice && (
+      {compose ? composer : null}
+
+      {!compose && notice && (
         <p
           className={cn(
             "text-sm font-medium",
@@ -276,11 +299,11 @@ export function EmailManager({
         </p>
       )}
 
-      {active === "knowBeforeYouGo" && (
+      {!compose && active === "knowBeforeYouGo" && (
         <SendBar status={knowBeforeYouGo} dirty={dirty} />
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      <div className={cn("grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]", compose && "hidden")}>
         {/* Editor */}
         <div className="flex flex-col gap-4">
           <p className="text-sm text-muted-foreground">{meta.description}</p>
