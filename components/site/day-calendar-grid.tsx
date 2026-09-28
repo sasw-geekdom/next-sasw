@@ -11,6 +11,7 @@ import {
   StackSpanBar,
 } from "@/components/site/calendar/blocks";
 import { DayRail } from "@/components/site/calendar/day-rail";
+import { SaveDay } from "@/components/site/live/save-day";
 import {
   ExportBar,
   Filters,
@@ -154,6 +155,8 @@ export function DayCalendarGrid({
             onQuery={setQuery}
           />
         </div>
+        {/* Keep a copy: the room filter above decides which rooms it holds. */}
+        <SaveDay iso={activeDay} venue={venue} />
       </div>
 
       {columns.length === 0 || shownItems.length === 0 ? (
