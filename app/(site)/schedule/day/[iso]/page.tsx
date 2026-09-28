@@ -18,6 +18,9 @@ import { listTalks } from "@/lib/talks";
 import { localDayKey } from "@/lib/event";
 import { dayGraph, jsonLd } from "@/lib/structured-data";
 import { liveSchedule } from "@/lib/live-schedule";
+import { HappeningNow } from "@/components/site/live/happening-now";
+import { ScheduleChanges } from "@/components/site/live/schedule-changes";
+import { venueGetThere } from "@/lib/locations";
 import { TRACK_NAMES } from "@/lib/tracks";
 
 // One day of the week, at full resolution.
@@ -195,6 +198,11 @@ export default async function ScheduleDayPage({
           heading={`${day.weekday}, ${day.label}`}
         />
 
+        {/* Flagged changes for this day, then — on the day itself — what's
+            on now and next, above every room. */}
+        <ScheduleChanges changes={live.changes} iso={iso} className="mt-8" />
+        <HappeningNow items={items} venues={venueGetThere()} className="mt-4" />
+
         <Suspense fallback={<div className="mt-10 h-[42rem]" />}>
           <DayCalendarGrid
             activeDay={iso}
@@ -203,6 +211,7 @@ export default async function ScheduleDayPage({
             spans={spans}
             axis={axis}
             circuits={circuits}
+            getThere={venueGetThere()}
           />
         </Suspense>
 

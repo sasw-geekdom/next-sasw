@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TvLoop } from "@/components/tv/tv-loops";
+import QRCode from "qrcode";
 import { TvStage } from "@/components/tv/tv-stage";
 import {
   TV_DAYS,
@@ -84,8 +85,19 @@ export default async function TvPage({
   const { slug } = await params;
   const data = await load(slug);
   if (!data) notFound();
+  // The screen's own page, as a QR code in its corner. Not on the pre-show,
+  // which is a full-screen video.
+  const qr =
+    data.kind === "preshow"
+      ? null
+      : await QRCode.toString(`https://www.${data.url}`, {
+          type: "svg",
+          margin: 0,
+          errorCorrectionLevel: "M",
+          color: { dark: "#000000", light: "#ffffff" },
+        });
   return (
-    <TvStage>
+    <TvStage qr={qr}>
       <TvLoop data={data} />
     </TvStage>
   );

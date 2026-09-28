@@ -7,9 +7,10 @@
    gain; a plain <img> is the honest tool. */
 
 import * as React from "react";
+import { cn } from "@/lib/utils";
 import { TOOL_MARKS } from "@/lib/tool-marks";
 import type { TvLogo, TvMark, TvPerson } from "@/lib/tv";
-import { STAGE_H, STAGE_W, useNow, useStageScale } from "@/components/tv/tv-stage";
+import { STAGE_H, STAGE_W, useNow, useStageQr, useStageScale } from "@/components/tv/tv-stage";
 
 // ── Scenes ───────────────────────────────────────────────────────────────────
 //
@@ -104,6 +105,7 @@ export function Chrome({
   accent?: string;
 }) {
   const now = useNow();
+  const qr = useStageQr();
   const clock = now
     ? new Date(now).toLocaleTimeString("en-US", {
         hour: "numeric",
@@ -126,12 +128,21 @@ export function Chrome({
       >
         {when}
       </div>
-      <p
-        data-tv-keep
-        className="absolute bottom-14 left-29 z-20 font-mono text-[23px] tracking-[0.08em] text-white/55"
-      >
-        <span style={{ color: accent }}>{"//"}</span> {url}
-      </p>
+      {/* The screen's own page as a QR code where the stage has one, so a
+          phone in the room can pick up the schedule it's looking at. */}
+      <div data-tv-keep className="absolute bottom-10 left-29 z-20 flex items-end gap-5">
+        {qr ? (
+          <div
+            aria-hidden="true"
+            className="size-[104px] shrink-0 rounded-md bg-white p-2 [&>svg]:block [&>svg]:size-full"
+            dangerouslySetInnerHTML={{ __html: qr }}
+          />
+        ) : null}
+        <p className={cn("font-mono text-[23px] tracking-[0.08em] text-white/55", qr && "pb-1")}>
+          {qr ? <span className="mb-1 block text-[18px] uppercase tracking-[0.16em] text-white/45">Scan for the schedule</span> : null}
+          <span style={{ color: accent }}>{"//"}</span> {url}
+        </p>
+      </div>
       <p
         data-tv-keep
         className="absolute bottom-13 right-29 z-20 font-mono text-[30px] tabular-nums tracking-[0.06em] text-white/70"

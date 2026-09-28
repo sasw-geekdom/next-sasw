@@ -76,7 +76,13 @@ export function useStageScale() {
   return React.useContext(ScaleContext);
 }
 
-export function TvStage({ children }: { children: React.ReactNode }) {
+// The QR code for the screen's own page — drawn by Chrome, beside the link.
+const QrContext = React.createContext<string | null>(null);
+export function useStageQr() {
+  return React.useContext(QrContext);
+}
+
+export function TvStage({ children, qr = null }: { children: React.ReactNode; qr?: string | null }) {
   const router = useRouter();
   const [box, setBox] = React.useState({ s: 1, x: 0, y: 0 });
   const [idle, setIdle] = React.useState(false);
@@ -150,7 +156,9 @@ export function TvStage({ children }: { children: React.ReactNode }) {
           transform: `translate(${box.x}px, ${box.y}px) scale(${box.s})`,
         }}
       >
-        <ScaleContext.Provider value={box.s}>{children}</ScaleContext.Provider>
+        <ScaleContext.Provider value={box.s}>
+          <QrContext.Provider value={qr}>{children}</QrContext.Provider>
+        </ScaleContext.Provider>
       </div>
     </div>
   );

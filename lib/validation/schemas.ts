@@ -231,6 +231,15 @@ export const sessionSchema = z.object({
     .nullable()
     .optional()
     .or(z.literal("").transform(() => null)),
+  /** A late change, in a few words the public will read. Blank clears it. */
+  changeNote: z
+    .string()
+    .trim()
+    .max(140, "Keep it under 140 characters — it shows on a schedule block.")
+    .nullable()
+    .optional()
+    .or(z.literal("").transform(() => null)),
+  cancelled: z.boolean().optional().default(false),
 });
 export type SessionInput = z.infer<typeof sessionSchema>;
 

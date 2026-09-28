@@ -20,6 +20,8 @@ import { listSponsors } from "@/lib/admin/cms-queries";
 import { circuitSponsor } from "@/lib/circuit-sponsors";
 import { CircuitSponsorLine } from "@/components/site/circuit-sponsor-line";
 import { cn } from "@/lib/utils";
+import { TalkStatus } from "@/components/site/live/talk-status";
+import { venueGetThere } from "@/lib/locations";
 
 export const revalidate = 300;
 
@@ -343,6 +345,17 @@ export default async function TalkPage({
             <h1 className="mt-3 text-pretty font-display text-3xl font-bold uppercase leading-[1] tracking-tight text-white sm:text-4xl lg:text-5xl">
               {row.title}
             </h1>
+
+            {/* Live: happening now, starting soon, ended, cancelled or
+                changed — worked out in the browser against the clock. */}
+            <TalkStatus
+              startsAt={row.startsAt}
+              endsAt={endsAt}
+              where={room ? [room.name, room.place?.floor].filter(Boolean).join(", ") : null}
+              directions={room ? venueGetThere()[room.slug]?.directions : undefined}
+              changeNote={row.changeNote}
+              cancelled={row.cancelled}
+            />
 
             <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-widest text-white/50">
               <div className="flex items-center gap-2">

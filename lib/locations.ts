@@ -387,6 +387,42 @@ export const ROOMS: Room[] = [
  */
 export const VENUE_OPTIONS = ROOMS.map((r) => ({ slug: r.slug, name: r.name }));
 
+/** What a visitor needs to get to a room: its name, floor and a directions link. */
+export interface VenueGetThere {
+  name: string;
+  floor?: string;
+  address?: string;
+  directions?: string;
+}
+
+/**
+ * Directions for every room, keyed by slug — for the live "Happening now"
+ * strip, which is a client component and so takes this as plain data rather
+ * than importing the room copy. Coordinates where a room has them (they land
+ * on the door, not the block); the street address otherwise.
+ */
+export function venueGetThere(): Record<string, VenueGetThere> {
+  return Object.fromEntries(
+    ROOMS.map((r) => {
+      const p = r.place;
+      const dest = p?.coords
+        ? `${p.coords.lat},${p.coords.lon}`
+        : p?.address
+          ? encodeURIComponent(`${r.name}, ${p.address}, San Antonio, TX${p.postalCode ? ` ${p.postalCode}` : ""}`)
+          : "";
+      return [
+        r.slug,
+        {
+          name: r.name,
+          ...(p?.floor ? { floor: p.floor } : {}),
+          ...(p?.address ? { address: p.address } : {}),
+          ...(dest ? { directions: `https://www.google.com/maps/dir/?api=1&destination=${dest}` } : {}),
+        },
+      ];
+    }),
+  );
+}
+
 export const VENUE_SLUGS = ROOMS.map((r) => r.slug) as [string, ...string[]];
 
 /**

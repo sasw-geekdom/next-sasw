@@ -20,6 +20,8 @@ import {
   markKind,
 } from "@/components/site/calendar/marks";
 import type { CalendarItem, CalendarSpan } from "@/lib/schedule";
+import { liveState, useChicagoNow } from "@/lib/live-clock";
+import { LiveChip, pastClass } from "@/components/site/live/live-chip";
 
 // What a calendar draws inside a column: one activation, a venue's whole run
 // of them, or a bar on the all-day rail. Shared by the week view and the day
@@ -220,6 +222,21 @@ export const TIER_CHARGE: Record<string, string> = {
   single: "border-white/25 bg-white/[0.06] hover:bg-white/[0.11]",
 };
 
+function ChangeLine({ item, className }: { item: CalendarItem; className?: string }) {
+  if (!item.cancelled && !item.changeNote) return null;
+  return (
+    <p
+      className={cn(
+        "relative z-10 font-mono text-[9px] font-semibold uppercase leading-tight tracking-widest text-magenta",
+        className,
+      )}
+    >
+      {item.cancelled ? "Cancelled" : "Changed"}
+      {item.changeNote ? <span className="font-normal normal-case tracking-normal text-white/80"> · {item.changeNote}</span> : null}
+    </p>
+  );
+}
+
 export function Block({
   item,
   picked,
@@ -372,6 +389,7 @@ export function Block({
    */
   preferTypeset?: boolean;
 }) {
+  const live = liveState(item, useChicagoNow());
   const brand = item.brand;
   const accent = brand?.accent;
   // Whether `BrandMark` will draw something. Computed rather than inferred
@@ -498,6 +516,8 @@ export function Block({
       className={cn(
         "group relative flex flex-col overflow-hidden rounded border px-2 py-1.5 transition-colors duration-200",
         fill && "h-full",
+        live === "past" && pastClass,
+        item.cancelled && "opacity-60 [&_a]:line-through",
         // An activation with an accent of its own is drawn in it; everything
         // else takes the house charge from its room's tier. Not both — an
         // inline colour and a `hover:bg-*` utility can't co-exist, since the
@@ -594,6 +614,7 @@ export function Block({
           too, which is the one figure here that is not axis-only. */}
       {spare && item.page === "access-granted" && <CipherField />}
 
+      <ChangeLine item={item} className="mb-1" />
       {/* The link is stretched over the whole block rather than wrapped
           around it: the select button lives inside, and a button inside an
           anchor is invalid markup that browsers resolve by dropping one of
@@ -728,6 +749,7 @@ export function Block({
         // explicit layer settles it: PySA's block was drawing its performer
         // over its own time and room.
         <p className="relative z-10 mt-1.5 shrink-0 truncate font-mono text-[9px] uppercase tracking-widest text-white/60">
+          <LiveChip state={live} className="mr-1.5 align-[1px]" />
           {item.timeLabel}
           {showVenue && (
             <span className="text-white/55"> · {item.venueShort}</span>
@@ -996,6 +1018,7 @@ export function StackBlock({
    */
   showAction?: boolean;
 }) {
+  const live = liveState(item, useChicagoNow());
   const brand = item.brand;
   const accent = brand?.accent;
   // STACK_MARK_MAX, not a bare call: the two `BrandMark`s below pass it, and a
@@ -1017,6 +1040,8 @@ export function StackBlock({
   return (
     <div
       className={cn(
+        live === "past" && pastClass,
+        item.cancelled && "opacity-60 [&_a]:line-through",
         // gap-2 and a w-24 meta rather than gap-3 and w-28: at the wider
         // settings the left column came out ~106px, so `max-w-full` clamped
         // every wide wordmark and they drew at inconsistent sizes — PySA at
@@ -1098,6 +1123,7 @@ export function StackBlock({
           Positioning the copy puts it back in the same phase as the layers,
           where source order decides — and the copy comes last. */}
       <div className="relative min-w-0 flex-1">
+        <ChangeLine item={item} className="mb-1" />
         {item.href ? (
           <Link
             href={item.href}
@@ -1156,6 +1182,7 @@ export function StackBlock({
           Week, not to Access Granted; in the activation's own accent it would
           say the strand is the event's rather than the week's. */}
       <div className="relative flex w-24 shrink-0 flex-col items-end gap-0.5 text-right font-mono text-[9px] uppercase leading-tight tracking-widest lg:w-32 lg:text-[10px]">
+        <LiveChip state={live} />
         <span className="text-white/70">{item.timeLabel}</span>
         <span className="text-white/50">{item.venueShort}</span>
         {/* Omitted rather than empty — see the note in Block. */}

@@ -363,6 +363,8 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
     activation: form.get("activation") ?? "",
     participants,
     registerUrl: form.get("registerUrl") ?? "",
+    changeNote: form.get("changeNote") ?? "",
+    cancelled: form.get("cancelled") === "on",
   });
   if (!parsed.success) {
     return {
@@ -436,6 +438,8 @@ export async function saveSession(form: FormData): Promise<SaveResult> {
     activation: data.activation ?? null,
     participants: data.participants,
     registerUrl: data.registerUrl ?? null,
+    changeNote: data.changeNote ?? null,
+    cancelled: data.cancelled ?? false,
   };
 
   if (id) {

@@ -5,6 +5,9 @@ import { TRACK_NAMES } from "@/lib/tracks";
 import { WeekCalendarGrid } from "@/components/site/week-calendar-grid";
 import type { Option } from "@/components/site/calendar/controls";
 import { CalendarFallbackList } from "@/components/site/calendar/fallback-list";
+import { HappeningNow } from "@/components/site/live/happening-now";
+import { ScheduleChanges } from "@/components/site/live/schedule-changes";
+import { venueGetThere } from "@/lib/locations";
 
 // The week on an hour axis — five columns, Monday to Friday.
 //
@@ -111,6 +114,11 @@ export async function WeekCalendar() {
           byDay
           heading="The week, day by day"
         />
+
+        {/* During the week: what's on now and next, before the whole week.
+            Invisible on every other day — see HappeningNow. */}
+        <ScheduleChanges changes={live.changes} className="mb-4" />
+        <HappeningNow items={items} venues={venueGetThere()} linkDay className="mb-8" />
 
         <Suspense fallback={<div className="mt-10 h-[42rem]" />}>
           <WeekCalendarGrid

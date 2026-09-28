@@ -191,13 +191,19 @@ export function ActivationSessions({
                   sideways on a phone. The same note `column-board` carries
                   about `min-height`. */}
           <div className="min-w-0">
+            {(s.cancelled || s.changeNote) && (
+              <p className="mb-1 font-mono text-[11px] font-semibold uppercase tracking-widest text-magenta">
+                {s.cancelled ? "Cancelled" : "Changed"}
+                {s.changeNote ? <span className="font-normal normal-case tracking-normal text-white/80"> · {s.changeNote}</span> : null}
+              </p>
+            )}
             {/* The title is a link, and that is what pays for the clamp
                     below it. Every CMS session has a page now — /schedule/talk
                     used to be standalone-only, on the reasoning that an
                     activation page was already a session's home, which held
                     right up until that page stopped printing the whole
                     abstract. See `listTalks`. */}
-            <h3 className="text-pretty text-lg font-medium">
+            <h3 className={cn("text-pretty text-lg font-medium", s.cancelled && "line-through opacity-60")}>
               <Link
                 href={`/schedule/talk/${s.slug}`}
                 className="group/talk rounded-sm text-white transition-colors duration-200 hover:text-magenta focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-magenta"

@@ -586,6 +586,32 @@ export function SessionManager({
               )}
             </div>
 
+            {/* Late changes, shown to the public on the schedule block, the
+                day page and the talk page while set. Clear the note once the
+                change is old news. */}
+            <div className="rounded-md border border-magenta/30 bg-magenta/5 p-3">
+              <Label htmlFor="changeNote">Change note (optional)</Label>
+              <Input
+                id="changeNote"
+                name="changeNote"
+                maxLength={140}
+                placeholder="Moved to 2:30 PM · Room change: now at TPR · New speaker"
+                defaultValue={current?.changeNote ?? ""}
+              />
+              {issues.changeNote?.[0] && (
+                <FieldError>{issues.changeNote[0]}</FieldError>
+              )}
+              <label className="mt-3 flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="cancelled"
+                  defaultChecked={current?.cancelled ?? false}
+                  className="size-4 accent-magenta"
+                />
+                Cancelled — keep it on the schedule, struck through
+              </label>
+            </div>
+
             {/* Day, then start, then end — three short lists instead of two
                 free-text datetimes.
             

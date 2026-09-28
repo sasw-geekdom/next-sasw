@@ -153,6 +153,9 @@ export async function listSessions(): Promise<SessionRow[]> {
       participants,
       registerUrl:
         typeof d.registerUrl === "string" && d.registerUrl ? d.registerUrl : null,
+      changeNote:
+        typeof d.changeNote === "string" && d.changeNote ? d.changeNote : null,
+      cancelled: d.cancelled === true,
       createdAt: toMillis(d.createdAt) ?? 0,
     };
   });

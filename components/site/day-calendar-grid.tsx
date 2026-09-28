@@ -3,6 +3,7 @@
 import * as React from "react";
 import { matchesQuery } from "@/lib/calendar-search";
 import type { CalendarItem, CalendarSpan, DayVenue } from "@/lib/schedule";
+import type { VenueGetThere } from "@/lib/locations";
 import { ColumnBoard } from "@/components/site/calendar/column-board";
 import {
   SpanBar,
@@ -23,6 +24,7 @@ export function DayCalendarGrid({
   items,
   spans,
   circuits,
+  getThere,
 }: {
   /** This day's ISO date, for the rail's active segment. */
   activeDay: string;
@@ -31,6 +33,8 @@ export function DayCalendarGrid({
   spans: CalendarSpan[];
   axis: { startMin: number; endMin: number };
   circuits: Option[];
+  /** Directions per room, for the phone list's "Getting there". */
+  getThere?: Record<string, VenueGetThere>;
 }) {
   const [circuit, setCircuit] = useUrlFilter("circuit");
   const [venue, setVenue] = useUrlFilter("venue");
@@ -207,51 +211,74 @@ export function DayCalendarGrid({
             emptyLabel={filtering ? "Nothing matching" : "Nothing here"}
           />
 
-          {/* Below lg, one venue after another rather than side by side.
-              Columns need width and a phone has none to give. */}
-          <div className="mt-10 flex flex-col gap-8 lg:hidden">
-            {columns.map((col) => {
-              const inColumn = shownItems
-                .filter((i) => i.venueSlug === col.key)
-                .sort((a, b) => a.startMin - b.startMin);
-              const colSpans = shownSpans.filter(
-                (s) => s.venueSlug === col.key,
-              );
-              return (
-                <div key={col.key} className="flex flex-col gap-3">
-                  {/* Matching the column heads above — the room in the
-                      display face, its count in mono. */}
-                  <p className="flex items-baseline gap-2">
-                    <span className="font-display text-xl font-bold uppercase leading-none tracking-tight text-white">
-                      {col.label}
-                    </span>
-                    {/* Counted here rather than taken from `col.sublabel`.
-                        That count excludes the all-week bars, which is right
-                        for the desktop board — there they ride above every
-                        column rather than inside one. In this stack they are
-                        inside the room, so the borrowed number put "0
-                        sessions" directly above a Give-a-LOT card. */}
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-white/45">
-                      {inColumn.length + colSpans.length === 1
-                        ? "1 session"
-                        : `${inColumn.length + colSpans.length} sessions`}
-                    </span>
-                  </p>
-                  {colSpans.map((span) => (
-                    <StackSpanBar key={span.slug} span={span} />
-                  ))}
-                  {inColumn.map((item) => (
-                    <StackBlock
-                      key={item.slug}
-                      item={item}
-                      flat
-                      picked={picked.includes(item.slug)}
-                      onToggle={toggle}
-                    />
-                  ))}
-                </div>
-              );
-            })}
+          {/* Below lg, one list in time order across every room — the
+              question on a phone this week is "what's on next", not "what's
+              in this building" — with each row naming its room, and a way
+              to get to each room at the foot. The desktop board above keeps
+              the room-by-room columns. */}
+          <div className="mt-10 flex flex-col gap-3 lg:hidden">
+            {shownSpans.length > 0 && (
+              <>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-white/45">All week</p>
+                {shownSpans.map((span) => (
+                  <StackSpanBar key={span.slug} span={span} />
+                ))}
+                <p className="mt-4 font-mono text-[10px] uppercase tracking-widest text-white/45">By the clock</p>
+              </>
+            )}
+            {[...shownItems]
+              .sort((a, b) => a.startMin - b.startMin || a.venueName.localeCompare(b.venueName))
+              .map((item) => (
+                <StackBlock
+                  key={item.slug}
+                  item={item}
+                  flat
+                  picked={picked.includes(item.slug)}
+                  onToggle={toggle}
+                />
+              ))}
+
+            {getThere && columns.length > 0 && (
+              <div className="mt-8 rounded-lg border border-white/10 px-4 py-4">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-white/55">
+                  <span className="text-magenta">{"//"}</span> Getting there
+                </p>
+                <ul className="mt-2">
+                  {columns.map((col) => {
+                    const v = getThere[col.key];
+                    if (!v) return null;
+                    return (
+                      <li
+                        key={col.key}
+                        className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-t border-white/10 py-2.5 text-sm first:border-t-0"
+                      >
+                        <span className="text-white">
+                          {v.name}
+                          {v.floor ? <span className="text-white/60">, {v.floor}</span> : null}
+                          {v.address ? <span className="block text-xs text-white/50">{v.address}</span> : null}
+                        </span>
+                        {v.directions && (
+                          <a
+                            href={v.directions}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="font-mono text-[11px] uppercase tracking-widest text-magenta"
+                          >
+                            Directions
+                          </a>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+                <a
+                  href="/faq#parking"
+                  className="mt-2 inline-block text-xs text-white/70 underline decoration-white/30 underline-offset-2"
+                >
+                  Parking near each venue
+                </a>
+              </div>
+            )}
           </div>
         </>
       )}

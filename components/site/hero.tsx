@@ -1,7 +1,10 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { HeroShell } from "@/components/site/hero-shell";
+import { EVENT_DAYS } from "@/lib/event";
+import { useChicagoNow } from "@/lib/live-clock";
 import { cn } from "@/lib/utils";
 import {
   TRACK_NAMES,
@@ -17,6 +20,8 @@ import {
 const SWEEP = TRACK_NAMES.map((n) => CIRCUIT_COLORS[n]);
 
 export function Hero() {
+  const now = useChicagoNow();
+  const today = EVENT_DAYS.some((d) => d.iso === now.iso) ? now.iso : null;
   // Hovering (or tapping) a circuit feeds its colour to the bolt. The canvas
   // sweep and this can't fire at once — one cursor, two targets — so they
   // hand off cleanly.
@@ -91,11 +96,29 @@ export function Hero() {
       // the end were always this paragraph's best line. "Free" leads because
       // on the page's first sentence it is worth more than anywhere else.
       blurb="San Antonio Startup + Tech Week — five days, six rooms downtown, and every session free. For everyone from pre-seed to Series A, solopreneur to scale-up, local to regional."
-      cta={{
-        href: "/register",
-        label: "Get on the list.",
-        note: "Free registration.",
-      }}
+      // During the week the first thing to offer is today's programme;
+      // registering is still one line under it.
+      cta={
+        today
+          ? {
+              href: `/schedule/day/${today}`,
+              label: "See what's on today.",
+              note: (
+                <>
+                  Not registered?{" "}
+                  <Link href="/register" className="underline underline-offset-2">
+                    Get on the list
+                  </Link>{" "}
+                  — it&rsquo;s free.
+                </>
+              ),
+            }
+          : {
+              href: "/register",
+              label: "Get on the list.",
+              note: "Free registration.",
+            }
+      }
       bolt={{
         color,
         sweep: SWEEP,

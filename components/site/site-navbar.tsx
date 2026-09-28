@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { ButtonLink } from "@/components/ui/button";
+import { EVENT_DAYS } from "@/lib/event";
+import { useChicagoNow } from "@/lib/live-clock";
 
 // Schedule before Speakers — the schedule is what most people arrive looking
 // for, and the lineup reads as a detail of it rather than the other way round.
@@ -25,6 +27,12 @@ const EASE = [0.32, 0.72, 0, 1] as const;
 
 export function SiteNavbar() {
   const [open, setOpen] = React.useState(false);
+  // During the week, "Today" leads — the one link a visitor on the day wants
+  // first. Worked out in the browser (the header is on cached pages), and
+  // absent on every other day.
+  const now = useChicagoNow();
+  const today = EVENT_DAYS.some((d) => d.iso === now.iso) ? `/schedule/day/${now.iso}` : null;
+  const links = today ? [{ label: "Today", href: today }, ...LINKS] : LINKS;
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur">
@@ -39,12 +47,17 @@ export function SiteNavbar() {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          {LINKS.map((l) => (
+          {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className={
+                l.href === today
+                  ? "inline-flex items-center gap-1.5 text-sm font-semibold text-foreground"
+                  : "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              }
             >
+              {l.href === today && <span className="size-1.5 animate-pulse rounded-full bg-magenta" aria-hidden="true" />}
               {l.label}
             </Link>
           ))}
@@ -53,6 +66,17 @@ export function SiteNavbar() {
           </ButtonLink>
         </nav>
 
+        {/* On a phone the links fold into the menu, so Today stays out here
+            beside it — one tap from any page to what's on now. */}
+        {today && (
+          <Link
+            href={today}
+            className="ml-auto mr-3 inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-sm font-semibold text-foreground md:hidden"
+          >
+            <span className="size-1.5 animate-pulse rounded-full bg-magenta" aria-hidden="true" />
+            Today
+          </Link>
+        )}
         <button
           onClick={() => setOpen((o) => !o)}
           aria-label={open ? "Close menu" : "Open menu"}
@@ -81,7 +105,7 @@ export function SiteNavbar() {
             transition={{ duration: 0.28, ease: EASE }}
           >
             <div className="mx-auto flex w-full max-w-7xl flex-col gap-1 px-6 py-4">
-              {LINKS.map((l, i) => (
+              {links.map((l, i) => (
                 <motion.div
                   key={l.href}
                   initial={{ opacity: 0, y: -8 }}
@@ -101,7 +125,7 @@ export function SiteNavbar() {
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  delay: 0.08 + LINKS.length * 0.05,
+                  delay: 0.08 + links.length * 0.05,
                   duration: 0.2,
                 }}
               >

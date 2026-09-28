@@ -4,6 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { matchesQuery } from "@/lib/calendar-search";
 import type { CalendarItem, CalendarSpan } from "@/lib/schedule";
+import { useChicagoNow } from "@/lib/live-clock";
 import { CircuitBus } from "@/components/site/circuit-bus";
 import { ColumnBoard } from "@/components/site/calendar/column-board";
 import {
@@ -220,6 +221,22 @@ export function WeekCalendarGrid({
   venues: Option[];
 }) {
   const [view, setView] = useWeekView();
+
+  // During the week, a phone opening the schedule lands on today rather than
+  // the hero: the question on the day is what's on now. Once per load, only
+  // below lg (the desktop board shows all five days at once), and never over
+  // an anchor or a filter the visitor came in with.
+  const now = useChicagoNow();
+  const jumped = React.useRef(false);
+  React.useEffect(() => {
+    if (jumped.current || !now.ms) return;
+    jumped.current = true;
+    if (window.matchMedia("(min-width: 1024px)").matches) return;
+    if (window.location.hash || window.location.search.replace(/[?&]at=[^&]*/, "")) return;
+    // The live strip above the week when there is one, else today's heading.
+    const el = document.getElementById("happening-now") ?? document.getElementById(`week-${now.iso}`);
+    if (el) el.scrollIntoView({ block: "start" });
+  }, [now]);
   /**
    * The view on its way out, held only for the length of its exit.
    *
@@ -365,7 +382,8 @@ export function WeekCalendarGrid({
             <div
               key={day.iso}
               // What the day jump links land on. See `renderAgenda`.
-              id={anchors ? `agenda-${day.iso}` : undefined}
+              // `week-` in the phone's week list: where it opens on the day.
+              id={anchors ? `agenda-${day.iso}` : `week-${day.iso}`}
               // `+1` so the banner above it leads. See globals.css.
               style={{ "--i": dayIndex + 1 } as React.CSSProperties}
               className={cn(

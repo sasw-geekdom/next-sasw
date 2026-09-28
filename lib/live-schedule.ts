@@ -3,7 +3,9 @@ import "server-only";
 import { listSessions } from "@/lib/admin/cms-queries";
 import {
   activationSearchText,
+  scheduleChanges,
   standaloneItems,
+  type ScheduleChange,
   type CalendarItem,
 } from "@/lib/schedule";
 
@@ -55,14 +57,16 @@ export async function liveCalendarItems(): Promise<CalendarItem[]> {
 export async function liveSchedule(): Promise<{
   items: CalendarItem[];
   attached: Record<string, string>;
+  changes: ScheduleChange[];
 }> {
   try {
     const rows = await listSessions();
     return {
       items: standaloneItems(rows),
       attached: activationSearchText(rows),
+      changes: scheduleChanges(rows),
     };
   } catch {
-    return { items: [], attached: {} };
+    return { items: [], attached: {}, changes: [] };
   }
 }

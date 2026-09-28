@@ -89,6 +89,13 @@ export interface SessionRow {
   participants: ResolvedParticipant[];
   /** The organiser's own registration page, where they seat it themselves. */
   registerUrl: string | null;
+  /**
+   * A short public note about a late change — "Moved to 2:30", "Room change:
+   * now at TPR". Shown on the schedule and the talk page while set.
+   */
+  changeNote: string | null;
+  /** Called off. Stays on the schedule, struck through, rather than vanishing. */
+  cancelled: boolean;
   createdAt: number;
 }
 

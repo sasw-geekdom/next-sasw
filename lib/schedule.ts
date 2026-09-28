@@ -3520,6 +3520,44 @@ export interface CalendarItem {
   searchText?: string;
   /** Whether a calendar file can be built for it — drives the export toggle. */
   exportable: boolean;
+  /** A late change the organisers have flagged in the CMS. See SessionRow. */
+  changeNote?: string;
+  /** Called off — drawn struck through rather than removed. */
+  cancelled?: boolean;
+}
+
+/**
+ * A flagged change to any session, standalone or inside an activation, for
+ * the notice at the top of the day page. Activation talks never draw a block
+ * of their own on the grid, so without this a change inside one would only
+ * show on the activation's page.
+ */
+export interface ScheduleChange {
+  id: string;
+  title: string;
+  href: string;
+  dayIso: string;
+  startMin: number;
+  note: string | null;
+  cancelled: boolean;
+}
+
+export function scheduleChanges(rows: SessionRow[]): ScheduleChange[] {
+  return rows
+    .filter((r) => (r.changeNote || r.cancelled) && r.startsAt)
+    .map((r) => {
+      const iso = new Date(r.startsAt).toISOString();
+      return {
+        id: r.id,
+        title: r.title,
+        href: `/schedule/talk/${r.slug}`,
+        dayIso: dayKey(iso),
+        startMin: minutesInTz(iso),
+        note: r.changeNote,
+        cancelled: r.cancelled,
+      };
+    })
+    .sort((a, b) => a.dayIso.localeCompare(b.dayIso) || a.startMin - b.startMin);
 }
 
 /** An activation that spans days and has no hour — the all-day rail. */
@@ -3755,7 +3793,9 @@ export function standaloneItems(rows: SessionRow[]): CalendarItem[] {
         // "Launch SA" and "Howie Nestel" both found nothing. The room's host
         // covers the first, the description the second.
         searchText: [venue.host, row.description].filter(Boolean).join(" "),
-        exportable: true,
+        exportable: !row.cancelled,
+        ...(row.changeNote ? { changeNote: row.changeNote } : {}),
+        ...(row.cancelled ? { cancelled: true } : {}),
       },
     ];
   });
