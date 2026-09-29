@@ -91,7 +91,7 @@ export default async function PrintDay({
                       <td className="py-2">
                         {(i.cancelled || i.changeNote) && (
                           <span className="block font-mono text-[10px] font-semibold uppercase tracking-widest text-[#c7277d]">
-                            {i.cancelled ? "Cancelled" : "Changed"}
+                            {i.cancelled ? "Canceled" : "Changed"}
                             {i.changeNote ? ` · ${i.changeNote}` : ""}
                           </span>
                         )}

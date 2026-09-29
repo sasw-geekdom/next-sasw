@@ -34,7 +34,7 @@ export function TalkStatus({
 
   if (cancelled) {
     tone = "note";
-    text = <>Cancelled{changeNote ? ` — ${changeNote}` : ""}</>;
+    text = <>Canceled{changeNote ? ` — ${changeNote}` : ""}</>;
   } else if (now.ms && now.ms >= startsAt && now.ms < endsAt) {
     tone = "live";
     text = <>Happening now{where ? ` in ${where}` : ""} · until {clockText(end.min)}</>;

@@ -608,7 +608,7 @@ export function SessionManager({
                   defaultChecked={current?.cancelled ?? false}
                   className="size-4 accent-magenta"
                 />
-                Cancelled — keep it on the schedule, struck through
+                Canceled — keep it on the schedule, struck through
               </label>
             </div>
 

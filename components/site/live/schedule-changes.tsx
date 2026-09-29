@@ -47,7 +47,7 @@ export function ScheduleChanges({
               </Link>
               <span className="text-white/75">
                 {" "}
-                · {c.cancelled ? "Cancelled" : ""}
+                · {c.cancelled ? "Canceled" : ""}
                 {c.cancelled && c.note ? " — " : ""}
                 {c.note}
               </span>

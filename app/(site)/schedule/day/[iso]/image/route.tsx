@@ -178,7 +178,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ iso: string }> 
                   <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
                     {(i.cancelled || i.changeNote) && (
                       <div style={{ display: "flex", fontFamily: "GeistMono", fontSize: 20, letterSpacing: 2, color: MAGENTA, marginBottom: 6 }}>
-                        {`${i.cancelled ? "CANCELLED" : "CHANGED"}${i.changeNote ? ` · ${i.changeNote}` : ""}`}
+                        {`${i.cancelled ? "CANCELED" : "CHANGED"}${i.changeNote ? ` · ${i.changeNote}` : ""}`}
                       </div>
                     )}
                     <div

@@ -36,7 +36,7 @@ export function SiteFooter() {
             <p className="mt-5 max-w-sm text-sm text-white/60">
               Five circuits, six rooms, one current — Sept 28 – Oct 2 in San
               Antonio, curated by Geekdom and Launch SA with anchor venues and
-              organisations across the city.
+              organizations across the city.
             </p>
           </div>
 

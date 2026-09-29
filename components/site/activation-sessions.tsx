@@ -193,7 +193,7 @@ export function ActivationSessions({
           <div className="min-w-0">
             {(s.cancelled || s.changeNote) && (
               <p className="mb-1 font-mono text-[11px] font-semibold uppercase tracking-widest text-magenta">
-                {s.cancelled ? "Cancelled" : "Changed"}
+                {s.cancelled ? "Canceled" : "Changed"}
                 {s.changeNote ? <span className="font-normal normal-case tracking-normal text-white/80"> · {s.changeNote}</span> : null}
               </p>
             )}

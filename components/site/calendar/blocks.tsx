@@ -231,7 +231,7 @@ function ChangeLine({ item, className }: { item: CalendarItem; className?: strin
         className,
       )}
     >
-      {item.cancelled ? "Cancelled" : "Changed"}
+      {item.cancelled ? "Canceled" : "Changed"}
       {item.changeNote ? <span className="font-normal normal-case tracking-normal text-white/80"> · {item.changeNote}</span> : null}
     </p>
   );
