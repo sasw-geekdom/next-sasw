@@ -1218,17 +1218,26 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // and broke the grid. What survives is what their version has that the
     // previous copy didn't: the floor, the DJ, both conversations by name,
     // and the fact that it costs nothing extra. The rest is on the page.
+    // Moved to Wednesday, Oct 7 — postponed from the week's Thursday for the
+    // storms and flooding. It says so first, since anyone who saved Thursday
+    // needs that before anything else.
     blurb:
-      "Espresso, brunch and DJ Novasoul on the 25th floor, plus two live conversations with the people building here. Ninety seats, RSVP with Creative Futures.",
+      "Now Wednesday, Oct 7 — moved for the weather. Espresso, brunch and DJ Novasoul on the 25th floor, plus two live conversations with the people building here.",
     // Doors 7:30. The organisers' first brief said "programme through 11:00",
     // but their revised running order ends the coffeehouse set at 11:30 — so
     // the event runs to 11:30 here. Leaving 11:00 would have put a hero that
     // says the morning ends at 11:00 directly above a programme row that runs
     // to 11:30, and shipped an .ics that clears an attendee's calendar while
     // the DJ is still playing. Worth confirming with them.
+    //
+    // Postponed from Thursday, Oct 1 to Wednesday, Oct 7 for severe weather
+    // and flooding (the organisers' Eventbrite, Sept 29). A date after the
+    // week: the week grid has no column for it, so the brunch drops off the
+    // five days and lives on its own page — which is where anyone holding the
+    // old date will land.
     when: {
-      start: "2026-10-01T07:30:00-05:00",
-      end: "2026-10-01T11:30:00-05:00",
+      start: "2026-10-07T07:30:00-05:00",
+      end: "2026-10-07T11:30:00-05:00",
     },
     capacity: 90,
     // "Save a seat.", not "Get a ticket.", even though this is Eventbrite.
@@ -1250,7 +1259,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // from this site to their share button.
     register: {
       label: "Save a seat.",
-      href: "https://www.eventbrite.com/e/the-creative-futures-brunchtm-x-san-antonio-startup-tech-week-tickets-2000480500027",
+      href: "https://www.eventbrite.com/e/the-creative-futures-brunchtm-the-startup-tech-week-protro-tickets-2000480500027",
     },
 
     site: {
@@ -1279,25 +1288,33 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       // conversation. What's left is the arc and the payoff.
       headline: "Come for the coffee. Leave with something to build.",
       lede: [
-        "Start Startup + Tech Week twenty-five floors up, espresso pulled fresh, brunch on the table, a DJ easing the morning open, and downtown San Antonio stretched out below.",
+        "Now Wednesday, October 7. The brunch was set to open Thursday of the week and has moved for the storms and flooding \u2014 same place, same morning, a week on.",
+        "Twenty-five floors up, espresso pulled fresh, brunch on the table, a DJ easing the morning open, and downtown San Antonio stretched out below \u2014 the week\u2019s after-party, served as breakfast.",
       ],
       programme: [
         {
           time: "7:30",
           title: "The Wake-Up \u2014 coffee, sound, skyline",
-          body: "Doors. Pulp Coffee\u2019s mobile espresso experience, brunch service, and DJ Novasoul setting the tone inside and out on the rooftop.",
+          body: "Doors. Pulp Coffee Roasters on espresso, brunch from Box St. Social and Loverboy: House Eats, and DJ Novasoul setting the tone inside and out on the rooftop.",
         },
         {
-          time: "8:45 \u2013 9:30",
-          series: "The Fifth Degree Live",
-          title: "The Collision: AI, Design, and What Gets Built Next",
+          time: "8:40 \u2013 9:35",
+          series: "The Down Market Conversation",
+          title: "Tech for the Places Culture Lives",
           feature: true,
-          // Full positioning as the organisers wrote it. An earlier pass cut
-          // these to "Co-founder, Rackspace" and "Family office advisor",
-          // which reads as a founder and a money person — it drops that both
-          // of them are hands-on in product design and AI, which is the whole
-          // reason this pairing makes sense on an AI & Applied Innovation
-          // morning.
+          people: [
+            { name: "Daniel Trevino", role: "Box Street Social \u00b7 Ma\u00eetre" },
+            { name: "Ben Hodge", role: "EEVET" },
+          ],
+          body: "Two builders solving real problems for real places \u2014 Ma\u00eetre, built to help restaurants open smarter and last longer, and EEVET, built to help venues, artists and promoters book better. Different rooms, same mission: giving creative businesses the information they\u2019ve always deserved.",
+        },
+        {
+          time: "9:45 \u2013 10:30",
+          series: "The Fifth Degree Live",
+          title: "AI, Design + What Gets Built Next",
+          feature: true,
+          // Full positioning as the organisers wrote it — both are hands-on in
+          // product design and AI, which is why the pairing makes sense.
           people: [
             {
               name: "Dirk Elmendorf",
@@ -1310,35 +1327,19 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
               speaker: "nicholas-mcginnis",
             },
           ],
-          body: "Will and Nate of The Fifth Degree podcast host a conversation at the intersection of AI, product design and engineering \u2014 and what it takes to build what comes next.",
+          body: "A conversation at the intersection of AI, product design and engineering \u2014 and what it takes to build what comes next.",
         },
         {
-          time: "9:45 \u2013 10:30",
-          series: "The Down Market Conversation",
-          title: "Keep the Doors Open: Tech for the Places Culture Lives",
-          feature: true,
-          people: [
-            { name: "Daniel Trevino", role: "Box Street Social \u00b7 Maitre" },
-            { name: "Ben Hodge", role: "EEVET" },
-          ],
-          body: "Madison King talks with two builders solving real problems for real places \u2014 Maitre, built to help restaurants open smarter and last longer, and EEVET, built to help venues, artists and promoters book better. Different rooms, same mission: giving creative businesses the information they\u2019ve always deserved.",
-        },
-        {
-          time: "10:30",
-          title: "The Reveal",
-          body: "From The Creative Futures, before the morning closes. You\u2019ll want to be in the room for this one.",
-        },
-        {
-          time: "10:35 \u2013 11:30",
-          title: "The Coffeehouse Set",
-          body: "DJ Novasoul takes it home. Stay, refill, meet the person next to you. That\u2019s the point.",
+          time: "10:45 \u2013 11:30",
+          title: "The Patio Set",
+          body: "DJ Novasoul on the patio. Stay, refill, meet the person next to you \u2014 that\u2019s the point.",
         },
       ],
       // Moved out of the intro. It's the argument rather than the invitation,
       // and it lands harder once the reader has seen the actual morning —
       // "some of the people building it live here" means more directly under
       // four names than three screens above them.
-      coda: "The Creative Futures Brunch has been bringing this city\u2019s creative and tech communities to the same table since 2019. This year it opens Thursday morning with a simple idea: creativity and technology aren\u2019t two different industries. They\u2019re one economy \u2014 and some of the people building it live here.",
+      coda: "The Creative Futures Brunch has been bringing this city\u2019s creative and tech communities to the same table since 2019. This year it lands the Wednesday after the week with a simple idea: creativity and technology aren\u2019t two different industries. They\u2019re one economy \u2014 and some of the people building it live here.",
       // The one operational thing a reader could get wrong: there is no
       // separate RSVP, and looking for one is how someone talks themselves
       // out of turning up.
@@ -1360,7 +1361,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       // real one, this takes a `register` override pointing at their own
       // capped RSVP — the arrangement Mission Pitch and Latin Tech Pitch use.
       access:
-        "The Skylounge seats ninety, and the good seats go early. Creative Futures hold the list on Eventbrite, and that RSVP is what saves your seat \u2014 it does not stand in for your Startup + Tech Week registration, so do both. The 25th floor at 300 Main, Skylounge and rooftop patio.",
+        "Seats are limited \u2014 they want people to actually meet each other \u2014 and Creative Futures hold the list on Eventbrite. That RSVP is what saves your seat \u2014 if you RSVP\u2019d for Thursday, check it there for the new date. The 25th floor at 300 Main, Sky Lounge and rooftop patio.",
     },
     // No logo: the title already carries both brands in full — "The Creative
     // Futures ™ Brunch powered by The Down Market" — so a mark would be the
