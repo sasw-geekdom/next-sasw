@@ -360,7 +360,7 @@ export const ROOMS: Room[] = [
       coords: { lat: 29.4263, lon: -98.4947 },
     },
     host: "Startup + Tech Week · Social",
-    desc: "Where the week unwinds — the Startup Bash, open-air.",
+    desc: "Where the week was to unwind. The Startup Bash has moved indoors to Geekdom, Tuesday, Oct 6, for the weather.",
     tag: "One night · social",
     port: "p5",
     tier: "single",

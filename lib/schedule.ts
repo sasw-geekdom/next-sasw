@@ -1708,11 +1708,16 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // Their own one-line summary, kept nearly whole — it is four verbs in the
     // order the day runs them, which is a better description of seven hours
     // than any sentence about young people could be.
+    // Rescheduled from Thursday of the week to Friday, Nov 6 for the weather
+    // (Sept 30), same place. Times kept at 9–4 until VentureLab says
+    // otherwise. -06:00, not -05:00: daylight saving ends Nov 1, and the
+    // summer offset would put it on the page as 8–3. A date after the week: it drops off the week grid and lives
+    // on its own page, which says it moved before anything else.
     blurb:
-      "Young founders learn, build, showcase and pitch — VentureLab’s day for the ones who are still in school.",
+      "Now Friday, Nov 6 at Launch SA \u2014 moved for the weather. Young founders learn, build, showcase and pitch: VentureLab’s day for the ones who are still in school.",
     when: {
-      start: "2026-10-01T09:00:00-05:00",
-      end: "2026-10-01T16:00:00-05:00",
+      start: "2026-11-06T09:00:00-06:00",
+      end: "2026-11-06T16:00:00-06:00",
     },
     // Their Eventbrite, which is where the count is held. Confirmed free
     // there, and confirmed 9–4 at Launch SA, 600 Soledad St.
@@ -1762,6 +1767,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       // Theirs, verbatim, and the best line on the listing.
       headline: "San Antonio’s next great founder may still be in school.",
       lede: [
+        "Now Friday, November 6. IGNITE was set for Thursday of the week and has moved for the weather \u2014 same place, Launch SA at Central Library.",
         "VentureLab gives the day to young people with ideas worth hearing. It is free and it is open to everyone from nine in the morning — you do not have to be an IGNITE finalist, a student, an educator or a mentor to walk in.",
         "More than a pitch event, in their own framing: a chance to see the work behind the pitch — the research, the prototyping, the feedback taken, and the nerve it takes to stand up.",
       ],
@@ -1910,13 +1916,19 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     slug: "startup-bash",
     page: "startup-bash",
     title: "Startup Bash",
-    room: "legacy-park",
+    // Moved indoors to Geekdom, and to Tuesday, Oct 6 5–7 PM — rescheduled
+    // from Thursday of the week at Legacy Park for the weather (Sept 30). A
+    // date after the week, so like the Creative Futures Brunch it drops off
+    // the week grid and lives on its own page. It says so first, since anyone
+    // who saved Thursday needs that before anything else.
+    room: "the-rand",
+    venueDetail: "3rd Floor",
     circuit: "Social",
     blurb:
-      "Where the week unwinds. Open-air, the whole ecosystem in one place, no badge scanning.",
+      "Now Tuesday, Oct 6, 5 \u2013 7 PM at Geekdom, 3rd floor of The Rand \u2014 moved for the weather. The whole ecosystem in one place, no badge scanning.",
     when: {
-      start: "2026-10-01T18:00:00-05:00",
-      end: "2026-10-01T20:00:00-05:00",
+      start: "2026-10-06T17:00:00-05:00",
+      end: "2026-10-06T19:00:00-05:00",
     },
     poweredBy: [{ name: "Active Capital" }],
     // Ours, so there is no organiser to hand off to — see `site.href`.
@@ -1924,13 +1936,14 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // No logo on purpose: this one is the week's own party, not a partner
     // brand, so the title is typeset like any other heading.
     //
-    // The art is Legacy Park's own magenta ASCII illustration, already in the
-    // asset bucket the venue images come from. It is near-black at 20/255, so
-    // unlike the photographs it never threatens the copy — the mask is doing
-    // composition here, not rescue.
+    // The art is The Rand's magenta ASCII illustration, from the asset bucket
+    // the venue images come from — the plain cut, not the venue card's
+    // Geekdom "g" version. It was Legacy Park's until the Bash moved indoors.
+    // Near-black like the park's, so it never threatens the copy — the mask
+    // is doing composition here, not rescue.
     hero: {
-      src: ASSET("sastw-legacypark.jpg"),
-      width: 784,
+      src: ASSET("sastw-rand.jpg"),
+      width: 870,
       height: 720,
       alt: "",
     },
@@ -2803,7 +2816,7 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // this page is the same number both times. Anyone "fixing" it back to the
     // usual three would be breaking a rhyme, not a typo.
     blurb:
-      "Five minutes, one screen, and whatever you actually built \u2014 an open-stage showcase across all five circuits, running straight into the week\u2019s closing bash.",
+      "Five minutes, one screen, and whatever you actually built \u2014 an open-stage showcase across all five circuits, and the last word on the week\u2019s Thursday.",
     detail: {
       // Not "The hour", which is what the other single-hour activations on
       // this floor use. Those are meetings that happen to run an hour; this
@@ -4342,6 +4355,11 @@ export const RETIRED_PAGES: Record<string, string> = {
   // it was renamed: it runs powered by learnOPENtech, Texas Linux Fest and
   // DEVSA rather than as TXLF itself.
   txlf: "linux-satx",
+  // Legacy Park's one activation. The Startup Bash moved indoors to The Rand
+  // for the weather, which left the park with nothing held in it — and the
+  // homepage and footer still name the park, with the Bash beside it. Its
+  // page says where it went.
+  "legacy-park": "startup-bash",
 };
 
 /**

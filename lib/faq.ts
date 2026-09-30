@@ -200,7 +200,7 @@ export const FAQ: FaqSection[] = [
       {
         q: "Anything free?",
         a: [
-          "Thursday evening. The City runs Downtown Thursday through the end of 2026 \u2014 free parking at its own garages from 5 PM to 2 AM \u2014 which covers the whole of the Startup Bash on October 1.",
+          "Thursday evening. The City runs Downtown Thursday through the end of 2026 \u2014 free parking at its own garages from 5 PM to 2 AM \u2014 which covers the evening sessions on October 1.",
         ],
         link: { label: "Downtown Thursday", href: SAPARK_AFFORDABLE },
       },

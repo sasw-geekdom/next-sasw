@@ -1163,7 +1163,7 @@ function OpenCircuitScreen({ b, dayWord }: { b: TvBlock; dayWord: string }) {
         <div className="mt-auto pt-6">
           <PoweredStrip at={4.3} />
           <p data-tv-keep className="tv-rise mt-5 font-mono text-[22px] tracking-[0.06em] text-white/75" style={rise(0, 5.1)}>
-            <b className="font-medium" style={{ color: accent }}>{b.timeLabel}</b> · The Rand, 3rd Floor · before the Bash
+            <b className="font-medium" style={{ color: accent }}>{b.timeLabel}</b> · The Rand, 3rd Floor
           </p>
         </div>
       </div>
