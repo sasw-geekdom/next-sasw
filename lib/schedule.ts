@@ -1936,14 +1936,14 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // No logo on purpose: this one is the week's own party, not a partner
     // brand, so the title is typeset like any other heading.
     //
-    // The art is The Rand's magenta ASCII illustration, from the asset bucket
-    // the venue images come from — the plain cut, not the venue card's
-    // Geekdom "g" version. It was Legacy Park's until the Bash moved indoors.
+    // The art is The Rand's magenta ASCII illustration with the Geekdom "g"
+    // over it, the same one the venue card uses — the Bash is at Geekdom now,
+    // and the "g" says so. It was Legacy Park's until the Bash moved indoors.
     // Near-black like the park's, so it never threatens the copy — the mask
     // is doing composition here, not rescue.
     hero: {
-      src: ASSET("sastw-rand.jpg"),
-      width: 870,
+      src: ASSET("glogo-rand.jpg"),
+      width: 698,
       height: 720,
       alt: "",
     },
