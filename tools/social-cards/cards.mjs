@@ -3658,6 +3658,37 @@ export const CARDS = [
     portrait: { height: 920, left: 470 },
   },
 
+  {
+    id: "tpr-speaker-andrew-smith",
+    event: "tpr",
+    speaker: "andrew-smith-2",
+    // "The Founder\u2019s Guide to the Modern AI Landscape" whole is three
+    // lines at any size this stage sets, and the third runs into the ramp.
+    // The landscape is the subject; "a founder\u2019s guide" is the framing,
+    // so it leads the subtitle instead of being dropped.
+    headline: "The Modern<br />AI Landscape",
+    headlineSize: 106,
+    // The abstract's own question, which is the decision a founder actually
+    // faces, rather than its tour of the stack.
+    subtitle:
+      "A founder\u2019s guide: when to lean on frontier models, when to run open ones on the edge.",
+    circuit: "Founder",
+    // Slotted now, so it carries its time where the other TPR cards carry
+    // the street. It runs the morning after this card was made. Andrew took
+    // this slot from Vibha Kurpad, the speaker it was first billed with.
+    // The day on its own line: joined to the time it ran to x=575 and into
+    // his shoulder. The template holds two facts, so the venue goes beside
+    // the time as TPR, which the ramp's "main stage" caption already names.
+    facts: ["Thursday, October 1", "11 \u2013 11:30 AM  \u00b7  TPR"],
+    // The same strip Vibha's card carried for this slot.
+    poweredLabel: "Presented by",
+    logos: [
+      { repo: "public/brand/google-for-startups-wordmark.png", height: 44 },
+    ],
+    // The probe's numbers, height checked by eye.
+    portrait: { height: 862, left: 439 },
+  },
+
   // ─── College Night ────────────────────────────────────────────────────────
   {
     id: "college-night",

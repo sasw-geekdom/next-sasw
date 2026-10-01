@@ -220,34 +220,38 @@ export async function featuredLineup(): Promise<FeaturedEntry[]> {
   //
   // What does not come off the record is the title. The other talk row above
   // is billed by its subject because the subject is a company with a mark;
-  // this one was picked as a person — her name and who she is here with are
-  // the draw, and "The Founder's Guide to the Modern AI Landscape" is the
+  // this one is billed as a person — the speaker and who they are here with
+  // are the draw, and "The Founder's Guide to the Modern AI Landscape" is the
   // talk, not the billing. The link carries the reader to it either way.
-  const vibha = talks.find(
+  //
+  // Andrew Smith, Startups Customer Engineer at Google, now gives this talk
+  // in Vibha Kurpad's place (Sept 30). Same session, same slot, same Google
+  // for Startups credit; only the name changed.
+  const talk = talks.find(
     (x) => x.row.slug === "the-founders-guide-to-the-modern-ai-landscape",
   );
   out.push({
-    day: vibha ? dayOf(vibha.row.startsAt) : "2026-10-01",
+    day: talk ? dayOf(talk.row.startsAt) : "2026-10-01",
     entry: {
-      key: "vibha-kurpad",
+      key: "talk-kurpad",
       // Falls back to the line this row carried while it was an
       // announcement. A slug that changes should cost the row its link, not
       // the row — the name and the credit are curated and are not recoverable
       // from the CMS.
-      meta: vibha
+      meta: talk
         ? [
-            new Date(vibha.row.startsAt).toLocaleDateString("en-US", {
+            new Date(talk.row.startsAt).toLocaleDateString("en-US", {
               weekday: "short",
               month: "short",
               day: "numeric",
               timeZone: "America/Chicago",
             }),
-            vibha.room?.name,
+            talk.room?.name,
           ]
             .filter(Boolean)
             .join(" · ")
         : "Thu, Oct 1 · Texas Public Radio",
-      title: [{ text: "Vibha Kurpad" }],
+      title: [{ text: "Andrew Smith" }],
       credit: google
         ? [
             { text: "with" },
@@ -259,7 +263,7 @@ export async function featuredLineup(): Promise<FeaturedEntry[]> {
             },
           ]
         : [{ text: "with Google for Startups" }],
-      href: vibha ? `/schedule/talk/${vibha.row.slug}` : undefined,
+      href: talk ? `/schedule/talk/${talk.row.slug}` : undefined,
     },
   });
 
@@ -302,7 +306,7 @@ export async function featuredLineup(): Promise<FeaturedEntry[]> {
   }
 
   /*
-   * The keynote, billed the way Vibha's row is: the person leads, the partner
+   * The keynote, billed the way the Google for Startups row is: the person leads, the partner
    * follows.
    *
    * It led with the title for a pass — "The Readiness Gap" is a good line —
