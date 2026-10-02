@@ -126,3 +126,53 @@
   -webkit-mask-image: var(--fade);
   mask-image: var(--fade);
 }
+
+/* Python Jeopardy (/tv/python-jeopardy). */
+.font-fraktur {
+  font-family: var(--font-fraktur), "Old English Text MT", serif;
+}
+.pj-dd-in {
+  animation: pj-dd-in 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+@keyframes pj-dd-in {
+  from { opacity: 0; transform: scale(0.4) rotate(-6deg); }
+  to { opacity: 1; transform: none; }
+}
+
+/* The answer: laid out from the start, hidden, then risen into place on
+   opacity and transform only, so it runs on the compositor. The glint is a
+   transform too, and starts once the card has landed. */
+.pj-answer {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0) scale(0.96);
+  transition:
+    opacity 0.35s ease-out,
+    transform 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.08);
+  will-change: opacity, transform;
+}
+.pj-answer[data-shown] {
+  opacity: 1;
+  transform: none;
+}
+.pj-glint {
+  background: linear-gradient(100deg, transparent 0%, rgba(237, 202, 0, 0.5) 50%, transparent 100%);
+  transform: translate3d(0, 0, 0);
+  animation: pj-glint 0.8s ease-out 0.35s both;
+}
+@keyframes pj-glint {
+  from { transform: translate3d(0, 0, 0); opacity: 1; }
+  to { transform: translate3d(420%, 0, 0); opacity: 0; }
+}
+
+/* The splash bolt strikes in: a flash to full, a dip, then it holds at a
+   level the white title still reads against. Opacity and transform only. */
+.pj-strike {
+  animation: pj-strike 0.9s ease-out both;
+}
+@keyframes pj-strike {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(1.15); }
+  12% { opacity: 1; }
+  24% { opacity: 0.25; }
+  36% { opacity: 0.9; }
+  100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+}
