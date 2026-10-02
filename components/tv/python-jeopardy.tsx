@@ -7,6 +7,8 @@ import {
   type JeopardyClue,
 } from "@/lib/python-jeopardy";
 import { cn } from "@/lib/utils";
+import { buttonClass } from "@/components/ui/button";
+import { PYSA } from "@/lib/pysa";
 import { ShaderCanvas } from "@/components/site/shader-canvas";
 import { MiniBolts } from "@/components/tv/tv-kit";
 
@@ -22,7 +24,6 @@ import { MiniBolts } from "@/components/tv/tv-kit";
 const KEY = "pysa-jeopardy-v2";
 const MAGENTA = "#ff32a0";
 const GOLD = "#edca00";
-const PYSA_BLUE = "#4a90d9";
 const MUTE_KEY = "pysa-jeopardy-muted";
 
 // ─── Sound ───────────────────────────────────────────────────────────────────
@@ -470,15 +471,28 @@ function Rules({ onStart }: { onStart: () => void }) {
     "Daily Doubles are hiding on the board. Those are yours alone. No steals.",
   ];
   return (
-    <section className="fixed inset-0 z-10 flex items-center overflow-y-auto bg-[#050608] px-[8vw] py-[4vh]">
-      <MiniBolts count={34} opacity={0.45} />
-      <div className="relative mx-auto grid w-full max-w-[1500px] grid-cols-[1.25fr_1fr] items-center gap-[4vw]">
+    <section className="fixed inset-0 z-10 flex flex-col overflow-y-auto bg-[#050608] px-[4vw] py-[4vh]">
+      {/* The bolts drift up the right half only, behind the mascot, and
+          leave the rules on clean black. MiniBolts lays its field out across
+          the full stage width, so clipping it to half keeps half of them;
+          the count is doubled to hold the density. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-1/2 overflow-hidden">
+        <MiniBolts count={70} opacity={0.55} />
+      </div>
+
+      {/* The two marks, where the board carries them: the week on the left,
+          PySanAntonio on the right. */}
+      <header className="relative flex items-center justify-between">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/sastw-horizontal-white.png" alt="San Antonio Startup + Tech Week" className="h-[5.6vh] w-auto" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/pysa/wordmark-dark.svg" alt="PySanAntonio" className="h-[5vh] w-auto" />
+      </header>
+
+      <div className="relative grid w-full flex-1 grid-cols-[1fr_1.15fr] items-center gap-[3vw] pl-[4vw]">
         <div>
-          <p className="font-mono text-[1vw] uppercase tracking-[0.16em]" style={{ color: MAGENTA }}>
-            PySanAntonio II · San Antonio Startup + Tech Week
-          </p>
-          <h2 className="mt-[0.25em] mb-[0.35em] font-display text-[7.5vw] font-bold uppercase leading-[0.92]">
-            <span style={{ color: GOLD }}>Python</span> <InlineBolt />
+          <h2 className="mb-[0.35em] font-display text-[7.5vw] font-bold uppercase leading-[0.92]">
+            <span style={{ color: GOLD }}>Python</span>
             <br />
             Jeopardy
           </h2>
@@ -492,30 +506,32 @@ function Rules({ onStart }: { onStart: () => void }) {
               </li>
             ))}
           </ol>
+          {/* The site's own primary button, so the game's first control looks
+              like every other one on sasw.co. */}
           <button
             type="button"
             autoFocus
             onClick={onStart}
-            className="rounded-full px-[1.4em] py-[0.6em] font-mono text-[1.1vw] uppercase tracking-[0.14em] text-[#111] focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-white"
-            style={{ background: GOLD }}
+            className={buttonClass("primary", "lg", "ring-offset-[#050608]")}
           >
             Play
           </button>
-          <div className="mt-[2em] flex items-center gap-5 font-mono text-[0.8vw] uppercase tracking-[0.14em] text-[#a9b6cc]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/sastw-horizontal-white.png" alt="San Antonio Startup + Tech Week" className="h-[4.2vh] w-auto" />
-            <span>×</span>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/pysa/wordmark-dark.svg" alt="PySanAntonio" className="h-[2.8vh] w-auto" />
-          </div>
         </div>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/pysa/mascot-block.webp"
-          alt="The PySanAntonio mascot: a luchador mariachi with a blue guitar"
-          className="w-full max-w-[520px] justify-self-center"
-          style={{ filter: `drop-shadow(0 0 60px ${PYSA_BLUE}59)` }}
-        />
+        {/* The mascot clip PySanAntonio's own TV loop plays, feathered the
+            same way so its near-black ground melts into the stage and the
+            bolts drift by behind it. */}
+        <div className="tv-soft-edge w-full">
+          <video
+            src={PYSA.video}
+            poster={PYSA.mascotStill}
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-label="The PySanAntonio mascot: a luchador mariachi with a blue guitar"
+            className="aspect-[1114/720] w-full object-cover object-top"
+          />
+        </div>
       </div>
     </section>
   );
