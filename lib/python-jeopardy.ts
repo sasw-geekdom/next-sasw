@@ -45,29 +45,28 @@ export interface JeopardyRound {
 
 const ROUND_ONE: readonly JeopardyCategory[] = [
   {
-    name: "Snakes on a Plane",
+    name: "Python After Dark",
     clues: [
       {
-        q: "In 2006, this actor had had it with these snakes on this plane.",
-        a: "Samuel L. Jackson",
-        ask: "Who is",
+        q: "It's 2 a.m. and nobody's awake to help, so developers explain their code out loud to this bath toy.",
+        a: "a rubber duck",
       },
       {
-        q: 'Every plane has a black box. Every tidy Python project runs this formatter, which calls itself "uncompromising."',
-        a: "Black",
+        q: "Write while True: and forget the break, and you've made this kind of loop. It'll keep everyone up all night.",
+        a: "an infinite loop",
       },
       {
-        q: "Despite its name, this Python workflow scheduler from Airbnb has never flown anything.",
-        a: "Apache Airflow",
+        q: "Python's time module has this function for when your code needs a nap.",
+        a: "sleep",
       },
       {
-        q: "In xkcd's \"Python\" comic, a stick figure takes off after typing this one line.",
-        a: "import antigravity",
-        mono: true,
+        q: "Background threads in Python, and processes that run all night on servers, are named after these supernatural spirits.",
+        a: "daemons",
+        ask: "What are",
       },
       {
-        q: "Python 3.13 added an experimental compiler with this three-letter name, which sounds like it should have wings.",
-        a: "a JIT",
+        q: "A process that has finished but whose parent never checked on it lingers as this undead thing.",
+        a: "a zombie",
       },
     ],
   },
