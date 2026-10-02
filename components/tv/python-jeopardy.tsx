@@ -365,12 +365,6 @@ function Game() {
 
       <footer className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 font-mono text-[0.8vw] uppercase tracking-[0.12em] text-[#a9b6cc]">
         <div className="flex items-center gap-[2vw]">
-          <div>
-            <b className="font-medium" style={{ color: MAGENTA }}>
-              PySanAntonio II
-            </b>{" "}
-            · Geekdom, 3rd Floor
-          </div>
           <ChargeMeter
             played={state.used.filter((id) => id.startsWith(`${state.round}-`)).length}
             total={round.categories.length * round.values.length}
@@ -395,7 +389,7 @@ function Game() {
       {open?.kind === "rules" && <Rules onStart={start} />}
       {open?.kind === "round" && (
         <Splash title="Double Jeopardy" cta="Show the board" onGo={back}>
-          Python across six industries. <strong style={{ color: GOLD }}>Values double</strong>, and two
+          Python out in the world, and straight from the source. <strong style={{ color: GOLD }}>Values double</strong>, and two
           Daily Doubles are hiding.
         </Splash>
       )}

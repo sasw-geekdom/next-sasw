@@ -9,7 +9,7 @@
  *
  * Two rounds, like the show: Jeopardy, then Double Jeopardy at twice the
  * values: round one is easy and entertaining, round two is Python across
- * industries.
+ * industries plus a category straight from python.org.
  *
  * Jeopardy's way round: the board shows a statement and the reply is a
  * question, so the reveal reads "What is Pygame?". `ask` is the front of
@@ -202,32 +202,32 @@ const ROUND_ONE: readonly JeopardyCategory[] = [
 
 // ─── Round two: Double Jeopardy, Python across industries ─────────────────────
 //
-// One field per column, and how Python runs through it.
+// One field per column and how Python runs through it, plus python.org's own.
 
 const ROUND_TWO: readonly JeopardyCategory[] = [
   {
-    name: "Lights, Camera, import",
+    // Everything here is from python.org and its official FAQ.
+    name: "Straight From python.org",
     clues: [
       {
-        q: "Python is named after this British comedy troupe, not the snake.",
-        a: "Monty Python",
-        ask: "Who is",
+        q: "Python's interactive prompt, all over python.org, is this many greater-than signs.",
+        a: "three",
       },
       {
-        q: "This free 3D suite, behind a lot of indie animation, lets you script everything in Python through a module called bpy.",
-        a: "Blender",
+        q: 'Python\'s official FAQ asks, "Do I have to like Monty Python\'s Flying Circus?" Its answer: "No, but" this.',
+        a: '"it helps"',
       },
       {
-        q: "Besides Python, Autodesk Maya has its own scripting language, known by these three letters.",
-        a: "MEL",
+        q: "Guido wanted a name that was short, unique and slightly this, so he picked Python.",
+        a: "mysterious",
       },
       {
-        q: "George Lucas's visual effects house has run Python in its pipeline since the 1990s. So yes, there was Python in a galaxy far, far away.",
-        a: "Industrial Light & Magic (ILM)",
+        q: "The Python Software Foundation produces this conference, the biggest yearly gathering of Python people.",
+        a: "PyCon US",
       },
       {
-        q: "Pixar open-sourced this three-letter scene format, now a film industry standard with Python bindings.",
-        a: "USD",
+        q: "Python's indentation came from this language Guido worked on in Amsterdam, named for the first letters of the alphabet.",
+        a: "ABC",
       },
     ],
   },
@@ -310,34 +310,35 @@ const ROUND_TWO: readonly JeopardyCategory[] = [
     ],
   },
   {
-    // After Styx's "Mr. Roboto".
-    name: "Domo Arigato, Mr. Python",
+    // Finance: Python on Wall Street and in the banks.
+    name: "Follow the Money",
     clues: [
       {
-        q: "This lean version of Python runs on tiny microcontrollers, and started life as a 2013 Kickstarter.",
-        a: "MicroPython",
+        q: "This Python library pulls stock prices from Yahoo Finance, and its name says so.",
+        a: "yfinance",
       },
       {
-        q: "Kids can program this toy company's SPIKE Prime robots in Python, and Thursday's workshop at Geekdom used its bricks too.",
-        a: "LEGO",
+        q: "Wes McKinney built this Python data library in 2008 while working at a hedge fund.",
+        a: "pandas",
       },
       {
-        q: "Boston Dynamics' robot dog has a Python SDK. Name the dog.",
-        a: "Spot",
+        q: "Python's built-in module for exact money math, so 0.1 plus 0.2 really comes out to 0.3.",
+        a: "decimal",
+        mono: true,
       },
       {
-        q: "Robots everywhere run on ROS, which you can program in Python. The letters stand for this.",
-        a: "the Robot Operating System",
+        q: "JPMorgan's trading and risk platform, built largely in Python, is named after this Greek goddess of wisdom.",
+        a: "Athena",
       },
       {
-        q: "Adafruit's beginner-friendly spin on MicroPython, made for blinking LEDs and building robots.",
-        a: "CircuitPython",
+        q: "Bank of America's Python platform shares its name with this mineral that keeps time in most watches.",
+        a: "Quartz",
       },
     ],
   },
   {
-    // Cybersecurity, in the city that calls itself Cyber City, USA.
-    name: "import secrets",
+    // Cybersecurity, under the nickname San Antonio gives itself for it.
+    name: "Cyber City, USA",
     clues: [
       {
         q: "This xkcd kid's full name is Robert'); DROP TABLE Students;-- and he's why you use parameterized queries. His mom calls him this.",
@@ -345,7 +346,7 @@ const ROUND_TWO: readonly JeopardyCategory[] = [
         ask: "Who is",
       },
       {
-        q: "Since Python 3.6, use this standard library module, not random, for passwords and tokens. It's also this category's name.",
+        q: "Since Python 3.6, use this standard library module, not random, for passwords and tokens. Its name is what you're keeping.",
         a: "secrets",
       },
       {
