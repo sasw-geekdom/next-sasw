@@ -232,28 +232,29 @@ const ROUND_TWO: readonly JeopardyCategory[] = [
     ],
   },
   {
-    name: "Houston, We Have a Python",
+    // Pharmaceuticals and drug discovery.
+    name: "Take Two Pythons and Call Me in the Morning",
     clues: [
       {
-        q: "Named for the study of the stars, this Python package is the core library for astronomy.",
-        a: "Astropy",
-      },
-      {
-        q: "In 2021, GitHub gave a badge to open-source contributors, Python and NumPy among them, for helping this Mars helicopter fly.",
-        a: "Ingenuity",
-      },
-      {
-        q: "In 2019 the Event Horizon Telescope revealed the first-ever image of one of these, with help from NumPy and Matplotlib.",
-        a: "a black hole",
-      },
-      {
-        q: "Launched on Christmas Day 2021, this space telescope sends its data through a calibration pipeline written in Python.",
-        a: "the James Webb Space Telescope",
-      },
-      {
-        q: "LIGO's 2015 detection of these ripples in spacetime, predicted by Einstein a century earlier, was analyzed with Python tools.",
-        a: "gravitational waves",
+        q: "Drug makers use Python to crunch the results of these studies, which test new medicines on volunteers.",
+        a: "clinical trials",
         ask: "What are",
+      },
+      {
+        q: "This Python toolkit for reading DNA and protein files is just \"bio\" plus the language's name.",
+        a: "Biopython",
+      },
+      {
+        q: 'This molecule viewer, a staple in drug labs, is the language\'s first two letters plus "MOL".',
+        a: "PyMOL",
+      },
+      {
+        q: "This DeepMind AI predicts how proteins fold, and its creators shared the 2024 Nobel Prize in Chemistry.",
+        a: "AlphaFold",
+      },
+      {
+        q: 'Chemists design drug molecules in Python with this open-source cheminformatics toolkit, which starts with "RD".',
+        a: "RDKit",
       },
     ],
   },
@@ -341,9 +342,8 @@ const ROUND_TWO: readonly JeopardyCategory[] = [
     name: "Cyber City, USA",
     clues: [
       {
-        q: "This xkcd kid's full name is Robert'); DROP TABLE Students;-- and he's why you use parameterized queries. His mom calls him this.",
-        a: "Little Bobby Tables",
-        ask: "Who is",
+        q: "Python is the go-to language in these hacking competitions, named after the summer-camp game where two teams race to grab each other's flag.",
+        a: "Capture the Flag",
       },
       {
         q: "Since Python 3.6, use this standard library module, not random, for passwords and tokens. Its name is what you're keeping.",
@@ -381,8 +381,10 @@ export const JEOPARDY_ROUNDS: readonly JeopardyRound[] = [
 ];
 
 export const JEOPARDY_FINAL = {
-  name: "The Zen of Python",
-  q: "The Zen of Python says there should be one obvious way to do it, then admits that way may not be obvious at first unless you are this nationality.",
-  a: "Dutch",
+  // A number the whole room can shout, to close five days of DEVSA events.
+  // Python 0.9.0 went public in February 1991.
+  name: "Happy Birthday, Python",
+  q: "Python's first public release came out in February 1991, which makes the language this many years old in 2026.",
+  a: "35",
   ask: "What is",
 } as const;
