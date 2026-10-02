@@ -270,9 +270,11 @@ const ROUND_TWO: readonly JeopardyCategory[] = [
         a: "Python",
       },
       {
-        q: 'In 2022, the NSA listed Python among these "safe" languages, alongside Rust, Go and Java.',
-        a: "memory-safe languages",
-        ask: "What are",
+        // Asks for the category, not the list: "among these languages" read
+        // as if Rust, Go and Java were the answer (feedback from the Python
+        // community).
+        q: 'In 2022, the NSA listed Python, alongside Rust, Go and Java, in this category of "safe" languages.',
+        a: "memory-safe",
       },
       {
         q: "The NSA open-sourced this reverse engineering tool in 2019, and you can script it in Python.",
