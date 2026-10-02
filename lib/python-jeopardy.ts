@@ -124,22 +124,20 @@ const ROUND_ONE: readonly JeopardyCategory[] = [
     name: "Deep in the Heart of Python",
     clues: [
       {
-        q: "Texas has rattlesnakes, copperheads and coral snakes, but none of these in the wild. And the language isn't even named after them.",
-        a: "pythons",
-        ask: "What are",
+        q: "Wrap this beaver-branded Texas road-trip stop's name in single quotes in Python, and its apostrophe ends the string early.",
+        a: "Buc-ee's",
       },
       {
-        q: 'The Alamo fell in 1836. Python 3.6 brought us these, so you can write f"Remember the {place}".',
-        a: "f-strings",
-        ask: "What are",
+        q: "Python's logo is blue and yellow. This burger chain, founded in Corpus Christi and now headquartered in San Antonio, sticks with orange and white.",
+        a: "Whataburger",
       },
       {
-        q: "Ask Python's zoneinfo for San Antonio's time zone and you'll type the name of this other city.",
-        a: "Chicago",
+        q: "This San Antonio grocery chain sponsored the first PySanAntonio, and one of its staff engineers is on today's lineup talking Python and test-driven development.",
+        a: "H-E-B",
       },
       {
-        q: "SpaceX builds and launches Starship from this South Texas spot, which voted to become an official city in 2025.",
-        a: "Starbase",
+        q: "SpaceX builds and launches Starship from Starbase, just down the road from this Rio Grande Valley city.",
+        a: "Brownsville",
       },
       {
         q: "This San Antonio company co-founded OpenStack with NASA in 2010, and OpenStack is written largely in Python.",
@@ -174,28 +172,27 @@ const ROUND_ONE: readonly JeopardyCategory[] = [
     ],
   },
   {
-    name: "Full-Court Py",
+    name: "Python Book Club",
     clues: [
       {
-        q: "Python counts from 0, so the Spurs' Victor Wembanyama wears what Python would call the second number.",
-        a: "1",
+        q: "O'Reilly programming books are famous for putting one of these on the cover.",
+        a: "an animal",
       },
       {
-        q: "Moneyball made baseball stats famous. This Python package, named for the sport, pulls MLB's Statcast data.",
-        a: "pybaseball",
+        q: "Al Sweigart's best-seller promises Python can take over the dull parts of your job.",
+        a: "Automate the Boring Stuff with Python",
       },
       {
-        q: "This unofficial Python package pulls stats straight from NBA.com, Spurs included.",
-        a: "nba_api",
-        mono: true,
+        q: "Zed Shaw's book admits up front, right in the title, that this won't be easy.",
+        a: "Learn Python the Hard Way",
       },
       {
-        q: "Formula 1 fans dig into race telemetry with this Python package. Handy for the U.S. Grand Prix in Austin.",
-        a: "FastF1",
+        q: "The Hitchhiker's Guide to Python borrows its title from Douglas Adams, whose answer to life, the universe and everything is this number.",
+        a: "42",
       },
       {
-        q: "Soccer analysts load this company's free match data into Python with a package that starts with its name.",
-        a: "StatsBomb",
+        q: "Luciano Ramalho's O'Reilly book teaches Python the idiomatic way. Its title is how you'd describe speaking a language like a native.",
+        a: "Fluent Python",
       },
     ],
   },
