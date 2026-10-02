@@ -146,8 +146,10 @@ const ROUND_ONE: readonly JeopardyCategory[] = [
     ],
   },
   {
-    // From the Python community, as sent.
-    name: "Django Unchained",
+    // Django, from the community's set plus djangoproject.com. The name is
+    // the Django FAQ's own: "Django is pronounced JANG-oh... The 'D' is
+    // silent."
+    name: "The D Is Silent",
     clues: [
       {
         q: "Django is named after Django Reinhardt, a world-famous legendary musician who played this style of guitar.",
@@ -158,16 +160,16 @@ const ROUND_ONE: readonly JeopardyCategory[] = [
         a: "Object-Relational Mapping",
       },
       {
-        q: "This 2012 Quentin Tarantino film starring Jamie Foxx shares the category's exact name.",
-        a: "Django Unchained",
-      },
-      {
         q: 'Instead of the traditional MVC (Model-View-Controller) architecture, Django describes its pattern as MVT, where "T" stands for this.',
         a: "Template",
       },
       {
-        q: "Django comes with a built-in, out-of-the-box user interface for managing site content, accessible by default at /admin.",
-        a: "the Django Admin Panel",
+        q: "In 2003, Django's creators Adrian Holovaty and Simon Willison ditched this language for Python.",
+        a: "PHP",
+      },
+      {
+        q: "Django went open source in the summer of this year, which makes it 21 this fall.",
+        a: "2005",
       },
     ],
   },
