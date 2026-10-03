@@ -97,7 +97,8 @@ export function Hero() {
       // on the page's first sentence it is worth more than anywhere else.
       blurb="San Antonio Startup + Tech Week — five days, six rooms downtown, and every session free. For everyone from pre-seed to Series A, solopreneur to scale-up, local to regional."
       // During the week the first thing to offer is today's programme;
-      // registering is still one line under it.
+      // registering is still one line under it. Outside it, the ask is year
+      // 12: sponsors, hosts and partners, the same switch the navbar made.
       cta={
         today
           ? {
@@ -114,9 +115,9 @@ export function Hero() {
               ),
             }
           : {
-              href: "/register",
-              label: "Get on the list.",
-              note: "Free registration.",
+              href: "/get-involved",
+              label: "Get involved.",
+              note: "Sponsor, host or partner on year 12.",
             }
       }
       bolt={{

@@ -423,3 +423,22 @@ h3,
     animation: none;
   }
 }
+
+/* The mini bolts on an activation hero (components/site/drifting-bolts.tsx):
+   up the full height of their box, forever. `cqh` is that box's height. */
+.bolt-drift {
+  animation-name: bolt-drift;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  transform: translateY(100cqh) rotate(var(--rot, 0deg));
+}
+@keyframes bolt-drift {
+  from { transform: translateY(100cqh) rotate(var(--rot, 0deg)); }
+  to { transform: translateY(-120%) rotate(var(--rot, 0deg)); }
+}
+/* Still, but spread down the box rather than parked below it. */
+@media (prefers-reduced-motion: reduce) {
+  .bolt-drift {
+    animation-play-state: paused;
+  }
+}

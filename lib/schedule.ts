@@ -1,6 +1,5 @@
 import { EVENT_DAYS } from "@/lib/event";
 import {
-  ASSET,
   ROOMS,
   roomSlugFromLegacy,
   type Room,
@@ -572,6 +571,12 @@ export interface FeaturedSession {
    * is set into the black rather than placed on top of it.
    */
   hero?: { src: string; width: number; height: number; alt: string };
+  /**
+   * The week's mini bolts drifting up the right of the hero instead of a
+   * photograph — the Startup Bash TV and social screens' texture. Same box,
+   * mask and desktop-only rule as `hero`; set one or the other.
+   */
+  heroBolts?: boolean;
 }
 
 /** The one activation big enough to carry the page on its own. */
@@ -1936,17 +1941,10 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
     // No logo on purpose: this one is the week's own party, not a partner
     // brand, so the title is typeset like any other heading.
     //
-    // The art is The Rand's magenta ASCII illustration with the Geekdom "g"
-    // over it, the same one the venue card uses — the Bash is at Geekdom now,
-    // and the "g" says so. It was Legacy Park's until the Bash moved indoors.
-    // Near-black like the park's, so it never threatens the copy — the mask
-    // is doing composition here, not rescue.
-    hero: {
-      src: ASSET("glogo-rand.jpg"),
-      width: 698,
-      height: 720,
-      alt: "",
-    },
+    // The week's own drifting bolts rather than a picture of a building:
+    // this is the week's party, and the bolts are what its TV and social
+    // screens wore. It had Legacy Park's ASCII art, then The Rand's.
+    heroBolts: true,
   },
 
   /**

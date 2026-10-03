@@ -3,7 +3,7 @@ import { FormPage } from "@/components/site/form-page";
 import { GetInvolvedForm } from "@/components/forms/get-involved-form";
 
 const DESCRIPTION =
-  "Sponsor, host an event, or ask a question — get involved with San Antonio Startup + Tech Week. Sept 28 – Oct 2.";
+  "Sponsor, host an event, or ask a question — get involved with year 12 of San Antonio Startup + Tech Week.";
 
 export const metadata: Metadata = {
   title: "Get Involved",
@@ -30,7 +30,9 @@ export default function GetInvolvedPage() {
           Power the <span className="text-magenta">week.</span>
         </>
       }
-      subtitle="Sponsor, host an event, or just ask — every connection feeds the grid. Sept 28 – Oct 2, downtown San Antonio."
+      // Year 11 has run, so this looks to the next one. No dates: year 12's
+      // are not set, and a guess would be the first thing a sponsor quotes.
+      subtitle="Year 12 starts here. Sponsor, host an event, or just ask — every connection feeds the grid."
     >
       <GetInvolvedForm />
     </FormPage>

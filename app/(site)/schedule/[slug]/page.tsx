@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { DriftingBolts } from "@/components/site/drifting-bolts";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import {
@@ -440,6 +441,7 @@ function ActivationPage({
   const heroTalks =
     !banded &&
     !session.hero &&
+    !session.heroBolts &&
     !session.detail?.ownProgramme &&
     sessions.length > 0 &&
     sessions.length <= 2
@@ -632,6 +634,19 @@ function ActivationPage({
     
               `lg` and up only. Below that the hero is one column and a
               photograph behind the type would just fight it. */}
+          {/* The drifting bolts, in the box a photograph would take and
+              faded toward the copy the same way. Paused by the reduced-motion
+              rule in globals.css rather than removed, so the box still holds
+              them. */}
+          {session.heroBolts && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 right-0 hidden w-[54%] [--hero-fade:28%] lg:block 2xl:w-[68%] 2xl:[--hero-fade:44%]"
+              style={{ maskImage: HERO_MASK, WebkitMaskImage: HERO_MASK }}
+            >
+              <DriftingBolts />
+            </div>
+          )}
           {session.hero && (
             <>
               <div

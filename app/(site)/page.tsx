@@ -1,7 +1,9 @@
 import { Hero } from "@/components/site/hero";
 import { jsonLd, weekEvent } from "@/lib/structured-data";
 import { liveSchedule } from "@/lib/live-schedule";
-import { weekCalendar } from "@/lib/schedule";
+import { allSessions, resolveSessions, weekCalendar, whenShort } from "@/lib/schedule";
+import { EVENT_DAYS } from "@/lib/event";
+import { StillToCome, type UpcomingItem } from "@/components/site/still-to-come";
 import { RoomFlow } from "@/components/site/room-flow";
 import { WeekBoard } from "@/components/site/week-board";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
@@ -22,6 +24,48 @@ export const revalidate = 300;
 // The homepage features the first six in admin drag order; the rest live on
 // /speakers. Reordering in the CMS is how you change who leads.
 const FEATURED = 6;
+
+/**
+ * Activations dated after the week — the ones the weather moved, and the last
+ * of Startup + Tech Week. Static: the dates are in lib/schedule.ts, and which
+ * of them have already happened is the browser's call (see StillToCome).
+ */
+const LAST_DAY = EVENT_DAYS[EVENT_DAYS.length - 1].iso;
+
+// A card name where the homepage wants something other than the schedule's.
+// The brunch goes by its organizers' own title for the rescheduled date — the
+// one on their Eventbrite listing.
+const CARD_TITLE: Record<string, string> = {
+  "the-creative-futures-brunch": "The Creative Futures Brunch\u2122 \u2014 The Startup + Tech Week Protro",
+};
+
+const UPCOMING: UpcomingItem[] = resolveSessions(allSessions())
+  .flatMap((s): UpcomingItem[] => {
+    if (!s.page || !s.when || s.when.start.slice(0, 10) <= LAST_DAY) return [];
+    const start = whenShort(s.when);
+    const end = whenShort({ start: s.when.end, end: s.when.end });
+    // The card wears what the event's own page does.
+    const art: UpcomingItem["art"] = s.heroBolts
+      ? { kind: "bolts" }
+      : s.logo
+        ? { kind: "logo", src: s.logo.src, width: s.logo.width, height: s.logo.height }
+        : s.hero
+          ? { kind: "photo", src: s.hero.src }
+          : { kind: "none" };
+    return [
+      {
+        slug: s.slug,
+        href: `/schedule/${s.page}`,
+        title: CARD_TITLE[s.slug] ?? s.title,
+        day: start.day,
+        time: `${start.time} – ${end.time}`,
+        venue: [s.venue.name, s.venueDetail].filter(Boolean).join(", "),
+        endMs: Date.parse(s.when.end),
+        art,
+      },
+    ];
+  })
+  .sort((a, b) => a.endMs - b.endMs);
 
 async function safeList<T>(promise: Promise<T[]>): Promise<T[]> {
   try {
@@ -76,6 +120,9 @@ export default async function Home() {
           its sections in it; without it there is no main landmark to skip to. */}
       <main>
         <Hero />
+        {/* What the weather pushed past the week, while any of it is still
+            ahead. Gone on its own after the last one. */}
+        <StillToCome items={UPCOMING} />
         {/* When before where: the hero says what the week is, this says when
             it happens, RoomFlow says where.
             

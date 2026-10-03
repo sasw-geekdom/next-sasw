@@ -18,11 +18,12 @@ const LINKS = [
   { label: "FAQ", href: "/faq" },
 ];
 
-// The one filled button, and in the week it is Register rather than Get
-// involved. Hosting and sponsoring were the ask while the programme was being
-// built; days out, the action nearly everyone arriving here wants is a free
-// badge. Get involved is still in the footer.
-const CTA = { label: "Register", href: "/register" };
+// The one filled button. It was Register through the week, when a free badge
+// was what nearly everyone arriving here wanted. With the week over, the ask
+// is the next one: sponsors, hosts and partners for year 12. Registration
+// still works for the activations the weather moved — the Startup Bash's page
+// links to it — it just isn't the headline any more.
+const CTA = { label: "Get involved", href: "/get-involved" };
 const EASE = [0.32, 0.72, 0, 1] as const;
 
 export function SiteNavbar() {
