@@ -190,7 +190,13 @@ export function activationEvent(session: ResolvedSession) {
     // carrying until `register` fixed it. The markup has to say what the page
     // says.
     offers: session.register
-      ? { ...FREE_OFFER, url: session.register.href }
+      ? {
+          ...FREE_OFFER,
+          // A partner's own page, or one of ours given as a path.
+          url: session.register.href.startsWith("http")
+            ? session.register.href
+            : `${SITE_URL}${session.register.href}`,
+        }
       : FREE_OFFER,
     url,
     image: [image],

@@ -55,7 +55,7 @@ export async function WeekCalendar() {
       // the viewport top sits underneath it. 5rem clears the 4rem bar and
       // leaves the section's own eyebrow visible rather than tucked against
       // the edge.
-      className="scroll-mt-20 border-t border-white/10 bg-black"
+      className="scroll-mt-20 bg-black"
     >
       {/* Wider than the site's max-w-7xl from 2xl. Every other section holds a
             reading measure, and should — but a calendar is a data grid, not

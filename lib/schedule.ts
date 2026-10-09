@@ -1724,11 +1724,12 @@ export const FEATURED_SESSIONS: FeaturedSession[] = [
       start: "2026-11-06T09:00:00-06:00",
       end: "2026-11-06T16:00:00-06:00",
     },
-    // Their Eventbrite, which is where the count is held. Confirmed free
-    // there, and confirmed 9–4 at Launch SA, 600 Soledad St.
+    // The week's own list. It was VentureLab's Eventbrite, which listed the
+    // Oct 1 date; the Nov 6 reschedule has no new listing, so seats come
+    // through /register. Point this back at theirs if they publish one.
     register: {
       label: "Save a seat.",
-      href: "https://www.eventbrite.com/e/2000262048633",
+      href: "/register",
     },
     // The IGNITE lockup, so the week grid and the agenda draw this activation
     // as a mark rather than as type. `logo` is the field both read — the

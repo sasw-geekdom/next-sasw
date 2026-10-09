@@ -1,4 +1,4 @@
-import { Hero } from "@/components/site/hero";
+import { HomeThanksHero } from "@/components/site/home-thanks-hero";
 import { jsonLd, weekEvent } from "@/lib/structured-data";
 import { liveSchedule } from "@/lib/live-schedule";
 import { allSessions, resolveSessions, weekCalendar, whenShort } from "@/lib/schedule";
@@ -62,6 +62,11 @@ const UPCOMING: UpcomingItem[] = resolveSessions(allSessions())
         venue: [s.venue.name, s.venueDetail].filter(Boolean).join(", "),
         endMs: Date.parse(s.when.end),
         art,
+        // For the one-left layout, which has the room to say more.
+        headline: s.detail?.headline,
+        blurb: s.blurb,
+        register: s.register,
+        programme: s.detail?.programme?.map((p) => ({ time: p.time, title: p.title })),
       },
     ];
   })
@@ -119,7 +124,9 @@ export default async function Home() {
       {/* The only page on the site that had no <main>. Every other one wraps
           its sections in it; without it there is no main landmark to skip to. */}
       <main>
-        <Hero />
+        {/* After the week: a thank-you over The Model's panel. The pre-week
+            hero is Hero in components/site/hero.tsx — swap it back for year 12. */}
+        <HomeThanksHero />
         {/* What the weather pushed past the week, while any of it is still
             ahead. Gone on its own after the last one. */}
         <StillToCome items={UPCOMING} />

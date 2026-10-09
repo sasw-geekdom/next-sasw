@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SessionsHero } from "@/components/site/schedule-hero";
+import { ScheduleThanksHero } from "@/components/site/schedule-thanks-hero";
 import { WeekCalendar } from "@/components/site/week-calendar";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
 import { ModelBand } from "@/components/site/model-band";
@@ -67,7 +67,10 @@ export default async function SessionsPage() {
         }}
       />
       <main>
-        <SessionsHero />
+        {/* After the week: a thank-you over the room. The pre-week hero is
+            SessionsHero in components/site/schedule-hero.tsx — swap it back for
+            year 12. */}
+        <ScheduleThanksHero />
 
         {/* The week on an hour axis, above the deep dives — the page's answer to
           "what's on Tuesday, and what am I giving up to be there?"

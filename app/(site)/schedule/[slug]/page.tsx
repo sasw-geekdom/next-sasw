@@ -541,7 +541,7 @@ function ActivationPage({
                   href={session.register?.href ?? "/register"}
                   size="lg"
                   className="w-full sm:w-auto"
-                  {...(session.register
+                  {...(session.register?.href.startsWith("http")
                     ? { target: "_blank", rel: "noreferrer" }
                     : {})}
                 >
@@ -1006,7 +1006,7 @@ function ActivationPage({
                         href={session.register?.href ?? "/register"}
                         size="lg"
                         className="w-full sm:w-auto"
-                        {...(session.register
+                        {...(session.register?.href.startsWith("http")
                           ? { target: "_blank", rel: "noreferrer" }
                           : {})}
                       >
