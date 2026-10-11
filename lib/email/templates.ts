@@ -55,27 +55,23 @@ export interface TemplateVars {
   sessionTitle?: string;
 }
 
-// The confirmation, now the schedule is live and people register days out or
-// on the morning. It carries what someone needs on the way in — where to get a
-// badge, where to park, where the schedule is — as blocks rather than prose:
-// the first version was eight paragraphs and read as a wall. Facts are
-// lib/faq.ts's; keep the two agreeing. See "Body blocks" below for the markers.
+// The confirmation after the week itself. Anyone registering now is coming
+// for VentureLab IGNITE — the last activation, moved to Nov 6 for the weather,
+// whose "Save a seat" sends people to /register — so it says that event and
+// nothing else: no badge desks or garages for rooms that have closed. Facts are
+// lib/schedule.ts's (the IGNITE entry) and lib/faq.ts's; keep them agreeing.
+// See "Body blocks" below for the markers.
 export const DEFAULT_REGISTRATION_COPY: EmailCopy = {
-  subject: "You're in. The schedule is live.",
+  subject: "You're in for VentureLab IGNITE.",
   heading: "You're in.",
   body: [
-    "See you downtown, {firstName}.\nSept 28 – Oct 2, six rooms, free.",
-    "[See the schedule](https://www.sasw.co/schedule)",
-    "## Badge pickup",
-    "> Check in by name at any desk. Nothing to print — one badge works all week.",
-    "Texas Public Radio | 321 W Commerce St\nThe Rand | 110 E Houston St, 3rd Floor\nCentral Library | 600 Soledad St",
+    "See you Friday, Nov 6, {firstName}.\nVentureLab IGNITE · 9 AM – 4 PM · Launch SA, Central Library, 1st Floor (600 Soledad St)",
+    "Young founders learn, build, showcase and pitch — the last event of San Antonio Startup + Tech Week, moved for the weather.",
+    "[See the day](https://www.sasw.co/schedule/venturelab-ignite)",
     "## Parking",
-    "City Tower | 60 N Flores St · $10 all day\nSt. Mary's Garage | 205 E Travis St · $10 all day\nHouston Street | 111 College St · $10 all day\nCentral Library | 600 Soledad St · 3 hrs free, then $5",
-    "## Startup Bash",
-    "Now Tuesday, Oct 6 · 5 – 7 PM · Geekdom, The Rand, 3rd Floor",
-    "Badges, parking and access in full: www.sasw.co/faq",
+    "Central Library garage | 600 Soledad St · 3 hrs free, then $5",
   ].join("\n\n"),
-  ctaIntro: "Put the week on your calendar:",
+  ctaIntro: "Put IGNITE on your calendar:",
   signoff: "Plug in.",
 };
 
@@ -122,28 +118,31 @@ export const DEFAULT_SPEAKER_DECLINED_COPY: EmailCopy = {
 };
 
 // Get Involved confirmations — response-time promises come from the 2026 form
-// requirements (sponsor: 2 business days, host: 5, general: 3).
+// requirements (sponsor: 2 business days, host: 5, general: 3). After the
+// week every path looks to year 12, and none carries a calendar block: the
+// 2027 dates are not set, and a blank ctaIntro drops the buttons with it (see
+// renderEmail). Put the intro back when there are dates to hold.
 export const DEFAULT_GET_INVOLVED_SPONSOR_COPY: EmailCopy = {
-  subject: "Got it — let's power the week.",
+  subject: "Got it — let's power year 12.",
   heading: "Got it.",
   body: [
     "Thanks, {firstName}.",
-    "Your sponsorship inquiry for San Antonio Startup + Tech Week (Sept 28 – Oct 2) is in. Someone from our sponsor team will be in touch within 2 business days.",
-    "Sponsors are the grid the current runs on. Let's build it.",
+    "Year 11 is in the books: five days, six rooms downtown, and a city full of builders who showed up rain and all. Your sponsorship inquiry for year 12 is in, and someone from our sponsor team will be in touch within 2 business days.",
+    "Sponsors are the grid the current runs on. Let's build the next one.",
   ].join("\n\n"),
-  ctaIntro: "Hold the dates while we connect:",
+  ctaIntro: "",
   signoff: "Plug in.",
 };
 
 export const DEFAULT_GET_INVOLVED_HOST_COPY: EmailCopy = {
-  subject: "Got your event. We're on it.",
+  subject: "Got your idea for year 12.",
   heading: "Got it.",
   body: [
     "Thanks, {firstName}.",
-    "We'll review your submission and get back to you within 5 business days. Some anchor events and key session dates/times are locked, so if we need to shift your time, we'll work it out with you.",
+    "We're starting to shape year 12 of San Antonio Startup + Tech Week, and your event is on the list. We'll review it and get back to you within 5 business days.",
     "Every room on the grid makes the current stronger.",
   ].join("\n\n"),
-  ctaIntro: "Block the week while we review:",
+  ctaIntro: "",
   signoff: "Plug in.",
 };
 
@@ -154,8 +153,41 @@ export const DEFAULT_GET_INVOLVED_GENERAL_COPY: EmailCopy = {
     "Thanks, {firstName}.",
     "We'll get back to you as soon as we can, typically within 3 business days.",
   ].join("\n\n"),
-  ctaIntro: "In the meantime, lock the dates:",
+  ctaIntro: "",
   signoff: "Plug in.",
+};
+
+// The events the add-to-calendar block can add — see that block below.
+export interface EmailCalendar {
+  event: CalendarEvent;
+  ics: string;
+}
+
+const WEEK_CAL: EmailCalendar = {
+  event: {
+    title: "San Antonio Startup + Tech Week",
+    details: `Year 11. Five days, five circuits, one current. Sessions, the Bash, and where to be. ${SITE_URL}`,
+    location: "Texas Public Radio, Downtown San Antonio",
+    start: "20260928",
+    end: "20261003",
+    allDay: true,
+  },
+  ics: `${SITE_URL}/sastw-2026.ics`,
+};
+
+// VentureLab IGNITE, rescheduled to Nov 6 — the registration confirmation's
+// event now. Mirrors its entry in lib/schedule.ts (kept out of this module,
+// which also runs in the admin's browser preview); -06:00 because daylight
+// saving has ended by then. The .ics is the activation page's own.
+export const IGNITE_CAL: EmailCalendar = {
+  event: {
+    title: "VentureLab IGNITE",
+    details: `Young founders learn, build, showcase and pitch. Part of San Antonio Startup + Tech Week. ${SITE_URL}/schedule/venturelab-ignite`,
+    location: "Launch SA, Central Library, 1st Floor, 600 Soledad St, San Antonio, TX",
+    start: "2026-11-06T09:00:00-06:00",
+    end: "2026-11-06T16:00:00-06:00",
+  },
+  ics: `${SITE_URL}/schedule/venturelab-ignite/calendar`,
 };
 
 export interface EmailTemplateMeta {
@@ -169,6 +201,11 @@ export interface EmailTemplateMeta {
   defaults: EmailCopy;
   /** Sample values used for previews and test sends. */
   sample: TemplateVars;
+  /**
+   * What the add-to-calendar block adds, when it is not the week. Shown only
+   * if the copy's ctaIntro is set.
+   */
+  calendar?: EmailCalendar;
 }
 
 // The one email here that is not a reply to something someone did: staff send
@@ -210,6 +247,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
     tokens: ["{firstName}"],
     defaults: DEFAULT_REGISTRATION_COPY,
     sample: { firstName: "Alex" },
+    calendar: IGNITE_CAL,
   },
   {
     key: "knowBeforeYouGo",
@@ -265,7 +303,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
     label: "Host an event",
     flow: "Get Involved",
     description:
-      "Sent automatically when someone proposes hosting an event during the week.",
+      "Sent automatically when someone proposes hosting an event for next year's week.",
     tokens: ["{firstName}"],
     defaults: DEFAULT_GET_INVOLVED_HOST_COPY,
     sample: { firstName: "Alex" },
@@ -486,51 +524,29 @@ function renderBody(body: string, vars: TemplateVars): string {
 }
 
 // ─── Add-to-calendar block (locked) ─────────────────────────────────────────
-// All-day, multi-day event (end date exclusive → Oct 3). Google is a
-// self-contained link; Apple/Outlook use the hosted .ics file.
-const CAL = {
-  title: "San Antonio Startup + Tech Week",
-  details: `Year 11. Five days, five circuits, one current. Sessions, the Bash, and where to be. ${SITE_URL}`,
-  location: "Texas Public Radio, Downtown San Antonio",
-  start: "20260928",
-  endExclusive: "20261003",
-  ics: `${SITE_URL}/sastw-2026.ics`,
-};
-
-const CAL_EVENT: CalendarEvent = {
-  title: CAL.title,
-  details: CAL.details,
-  location: CAL.location,
-  start: CAL.start,
-  end: CAL.endExclusive,
-  allDay: true,
-};
-
-function googleCalUrl(): string {
-  return googleCalendarUrl(CAL_EVENT);
-}
-
-function outlookCalUrl(): string {
+// The event a template's buttons add. The week is the default: all-day,
+// multi-day, end date exclusive. A template can name another (see `calendar`
+// on EmailTemplateMeta). Google is a self-contained link; Apple/Outlook use a
+// hosted .ics file.
+function outlookCalUrl(e: CalendarEvent): string {
   // Outlook wants dashed dates for an all-day span, not the compact form the
   // .ics and Google use.
-  return outlookCalendarUrl({
-    ...CAL_EVENT,
-    start: "2026-09-28",
-    end: "2026-10-03",
-  });
+  if (!e.allDay) return outlookCalendarUrl(e);
+  const dash = (d: string) => `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
+  return outlookCalendarUrl({ ...e, start: dash(e.start), end: dash(e.end) });
 }
 
-function calendarBlock(): string {
+function calendarBlock(cal: EmailCalendar): string {
   return `
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:2px 0 8px 0;">
   <tr>
     <td style="border-radius:8px;background:${MAGENTA};">
-      <a href="${googleCalUrl()}" style="display:inline-block;padding:12px 22px;color:${BLACK};font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;">Add to Google Calendar</a>
+      <a href="${escapeHtml(googleCalendarUrl(cal.event))}" style="display:inline-block;padding:12px 22px;color:${BLACK};font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;">Add to Google Calendar</a>
     </td>
   </tr>
 </table>
 <p style="font-size:13px;line-height:20px;color:${MUTED};margin:0 0 14px 0;">
-  Another app? <a href="${CAL.ics}" style="color:${INK};font-weight:600;">Apple / Outlook (.ics)</a> &middot; <a href="${outlookCalUrl()}" style="color:${INK};font-weight:600;">Outlook.com</a>
+  Another app? <a href="${cal.ics}" style="color:${INK};font-weight:600;">Apple / Outlook (.ics)</a> &middot; <a href="${escapeHtml(outlookCalUrl(cal.event))}" style="color:${INK};font-weight:600;">Outlook.com</a>
 </p>`;
 }
 
@@ -540,6 +556,7 @@ function calendarBlock(): string {
 export function renderEmail(
   copy: EmailCopy,
   vars: TemplateVars,
+  calendar: EmailCalendar = WEEK_CAL,
 ): { subject: string; html: string } {
   const ctaIntro = copy.ctaIntro.trim()
     ? paragraph(escapeHtml(applyTokens(copy.ctaIntro, vars)))
@@ -556,7 +573,7 @@ export function renderEmail(
         // Tied to the intro rather than always drawn: a template that clears
         // `ctaIntro` gets no calendar block either, instead of an unlabelled
         // pair of buttons under its last line.
-        (copy.ctaIntro.trim() ? calendarBlock() : "") +
+        (copy.ctaIntro.trim() ? calendarBlock(calendar) : "") +
         signoff,
     ),
   };
@@ -567,7 +584,8 @@ export function renderSample(
   key: EmailTemplateKey,
   copy: EmailCopy,
 ): { subject: string; html: string } {
-  return renderEmail(copy, templateMeta(key).sample);
+  const meta = templateMeta(key);
+  return renderEmail(copy, meta.sample, meta.calendar);
 }
 
 const firstNameOf = (name: string) => name.split(" ")[0] || name;
@@ -578,7 +596,7 @@ export function registrationEmail(
   input: { name: string },
   copy: EmailCopy = DEFAULT_REGISTRATION_COPY,
 ): { subject: string; html: string } {
-  return renderEmail(copy, { firstName: firstNameOf(input.name) });
+  return renderEmail(copy, { firstName: firstNameOf(input.name) }, IGNITE_CAL);
 }
 
 export function speakerSubmissionEmail(
