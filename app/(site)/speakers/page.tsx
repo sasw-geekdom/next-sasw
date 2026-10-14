@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SpeakerWall } from "@/components/site/speaker-wall";
-import { SpeakersHero } from "@/components/site/speakers-hero";
+import { PanelThanksHero } from "@/components/site/panel-thanks-hero";
 import { loadLineup, SPEAKERS_ANNOUNCED } from "@/lib/speakers";
 import { VENUE_OPTIONS } from "@/lib/locations";
 import { jsonLd, speakerListGraph } from "@/lib/structured-data";
@@ -62,11 +62,27 @@ export default async function SpeakersPage() {
           }}
         />
       )}
-      {/* Light hero into a black wall — the same rhythm the homepage and
-          /sessions run, so all three pages open the same way. */}
-      <SpeakersHero hasLineup={hasLineup} />
+      {/* After the week: a thank-you over the main stage at Texas Public
+          Radio. The pre-week hero is SpeakersHero in
+          components/site/speakers-hero.tsx — swap it back for year 12. */}
+      <PanelThanksHero
+        eyebrow="The lineup · Sept 28 – Oct 2"
+        image={{
+          wide: "/speakers/thank-you-stage.jpg",
+          tall: "/speakers/thank-you-stage-tall.jpg",
+          alt: "Five speakers on the main stage at Texas Public Radio under a screen reading Pre-Seed in the Age of AI",
+          pos: "60% 50%",
+        }}
+        title={
+          <>
+            Thank you to every <span className="text-magenta">speaker.</span>
+          </>
+        }
+        blurb="Founders, builders and operators who took the stage across five days and six rooms. Every one of them is below."
+        cta={{ href: "#the-lineup", label: "Meet the speakers." }}
+      />
 
-      <section className="bg-black">
+      <section id="the-lineup" className="scroll-mt-20 bg-black">
         <div className="mx-auto w-full max-w-7xl px-6 py-16 lg:py-28">
           {hasLineup ? (
             <>

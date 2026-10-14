@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ScheduleThanksHero } from "@/components/site/schedule-thanks-hero";
+import { PanelThanksHero } from "@/components/site/panel-thanks-hero";
 import { WeekCalendar } from "@/components/site/week-calendar";
 import { AccessGrantedBand } from "@/components/site/access-granted-band";
 import { ModelBand } from "@/components/site/model-band";
@@ -67,10 +67,19 @@ export default async function SessionsPage() {
         }}
       />
       <main>
-        {/* After the week: a thank-you over the room. The pre-week hero is
-            SessionsHero in components/site/schedule-hero.tsx — swap it back for
-            year 12. */}
-        <ScheduleThanksHero />
+        {/* After the week: a thank-you over The Model's panel. The pre-week
+            hero is SessionsHero in components/site/schedule-hero.tsx — swap
+            it back for year 12. */}
+        <PanelThanksHero
+          eyebrow="The schedule · Sept 28 – Oct 2"
+          title={
+            <>
+              Thanks for <span className="text-magenta">plugging in.</span>
+            </>
+          }
+          blurb="Founders, builders, students and first-timers filled every room. The schedule stays up below as a record of the week."
+          cta={{ href: "#the-week", label: "Look back at the week." }}
+        />
 
         {/* The week on an hour axis, above the deep dives — the page's answer to
           "what's on Tuesday, and what am I giving up to be there?"

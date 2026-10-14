@@ -1,4 +1,4 @@
-import { HomeThanksHero } from "@/components/site/home-thanks-hero";
+import { RecapHero } from "@/components/site/recap-hero";
 import { jsonLd, weekEvent } from "@/lib/structured-data";
 import { liveSchedule } from "@/lib/live-schedule";
 import { allSessions, resolveSessions, weekCalendar, whenShort } from "@/lib/schedule";
@@ -124,9 +124,10 @@ export default async function Home() {
       {/* The only page on the site that had no <main>. Every other one wraps
           its sections in it; without it there is no main landmark to skip to. */}
       <main>
-        {/* After the week: a thank-you over The Model's panel. The pre-week
-            hero is Hero in components/site/hero.tsx — swap it back for year 12. */}
-        <HomeThanksHero />
+        {/* After the week: the year 11 photo recap, scrolling over the
+            week's bolts. The pre-week hero is Hero in
+            components/site/hero.tsx — swap it back for year 12. */}
+        <RecapHero />
         {/* What the weather pushed past the week, while any of it is still
             ahead. Gone on its own after the last one. */}
         <StillToCome items={UPCOMING} />

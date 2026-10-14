@@ -442,3 +442,23 @@ h3,
     animation-play-state: paused;
   }
 }
+
+/* The homepage recap strip (components/site/recap-hero.tsx): the track holds
+   two copies of the photos and slides left by exactly one, forever. */
+.recap-marquee {
+  animation: recap-marquee 150s linear infinite;
+}
+/* The strip's pause button (recap-strip.tsx). Here rather than as a utility:
+   this rule is unlayered, so it would outrank anything in Tailwind's layer. */
+.recap-strip[data-paused] .recap-marquee {
+  animation-play-state: paused;
+}
+@keyframes recap-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .recap-marquee {
+    animation: none;
+  }
+}

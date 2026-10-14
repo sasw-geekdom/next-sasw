@@ -1,11 +1,12 @@
+import type * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-// The homepage hero after the week: a thank-you over The Model's panel, the
-// one photograph where the week's own screens ("San Antonio Startup + Tech
-// Week · Plug in.") are part of the scene. Hero (hero.tsx) is the pre-week
-// version and still in the tree; swap it back in app/(site)/page.tsx for
-// year 12.
+// A post-week thank-you hero over The Model's panel, the one photograph
+// where the week's own screens ("San Antonio Startup + Tech Week · Plug in.")
+// are part of the scene. It opened the homepage until the recap filmstrip
+// took that spot (recap-hero.tsx); now the schedule page carries it, with its
+// own words passed in, and the speakers page with its own photograph too.
 //
 // The photograph sits in the right of the frame rather than under the whole
 // width: full-bleed, a 2560px monitor put the headline over the first
@@ -24,7 +25,31 @@ const MASK =
 const COL = "max(1.5rem, calc((100vw - 80rem) / 2 + 1.5rem))";
 const SHADE = `linear-gradient(to right, rgba(0,0,0,var(--edge)) 0px, rgba(0,0,0,0.95) ${COL}, rgba(0,0,0,0.9) calc(${COL} + 36rem), rgba(0,0,0,0.6) 100%), linear-gradient(to bottom, transparent 55%, #000 100%)`;
 
-export function HomeThanksHero() {
+const PANEL = {
+  wide: "/home/thank-you-panel.jpg",
+  tall: "/home/thank-you-panel-tall.jpg",
+  alt: "A panel on the Geekdom stage at The Rand, beside a screen reading San Antonio Startup + Tech Week, Plug in.",
+  pos: "78% 50%",
+};
+
+export function PanelThanksHero({
+  eyebrow = "Year 11 \u00b7 Sept 28 \u2013 Oct 2, 2026",
+  image = PANEL,
+  title,
+  blurb,
+  cta,
+}: {
+  eyebrow?: string;
+  /**
+   * The photograph: a wide crop for laptops and up (it sits in the right of
+   * the frame), a taller one for phones (above the copy), and where the wide
+   * one centres. Defaults to The Model's panel.
+   */
+  image?: { wide: string; tall: string; alt: string; pos?: string };
+  title: React.ReactNode;
+  blurb: string;
+  cta: { href: string; label: string; note?: string };
+}) {
   return (
     <section className="relative isolate overflow-hidden bg-black text-white">
       {/* Hidden from lg, so its size hint says so: a 1px slot from 1024px
@@ -32,8 +57,8 @@ export function HomeThanksHero() {
       {/* Phone: the photo first, as its own block. */}
       <div className="relative aspect-[12/11] w-full lg:hidden">
         <Image
-          src="/home/thank-you-panel-tall.jpg"
-          alt="A panel on the Geekdom stage at The Rand, beside a screen reading San Antonio Startup + Tech Week, Plug in."
+          src={image.tall}
+          alt={image.alt}
           fill
           priority
           sizes="(min-width: 1024px) 1px, 100vw"
@@ -49,7 +74,7 @@ export function HomeThanksHero() {
           first panelist. */}
       <div aria-hidden="true" className="absolute inset-0 -z-20 hidden lg:block">
         <Image
-          src="/home/thank-you-panel.jpg"
+          src={image.wide}
           alt=""
           fill
           sizes="100vw"
@@ -68,12 +93,13 @@ export function HomeThanksHero() {
         style={{ maskImage: MASK, WebkitMaskImage: MASK, maskComposite: "intersect", WebkitMaskComposite: "source-in" }}
       >
         <Image
-          src="/home/thank-you-panel.jpg"
+          src={image.wide}
           alt=""
           fill
           priority
           sizes="70vw"
-          className="object-cover object-[78%_50%]"
+          className="object-cover"
+          style={{ objectPosition: image.pos ?? "50% 50%" }}
         />
         <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-black/30" />
       </div>
@@ -81,23 +107,20 @@ export function HomeThanksHero() {
       <div className="mx-auto flex w-full max-w-7xl px-6 lg:min-h-[calc(100svh-4rem)] lg:items-center">
         <div className="max-w-xl pb-16 pt-2 lg:py-24">
           <p className="font-mono text-xs uppercase tracking-widest text-magenta">
-            Year 11 &middot; Sept 28 &ndash; Oct 2, 2026
+            {eyebrow}
           </p>
           <h1 className="mt-4 font-display text-5xl font-bold uppercase leading-[0.92] tracking-tight text-balance sm:text-7xl lg:text-8xl">
-            Thank you, <span className="text-magenta">San Antonio.</span>
+            {title}
           </h1>
-          <p className="mt-6 text-pretty text-lg text-white/80">
-            Founders, builders, students and first-timers, sharing the same five blocks for five
-            days. You kept showing up, rain and all.
-          </p>
+          <p className="mt-6 text-pretty text-lg text-white/80 lg:max-w-md">{blurb}</p>
           <div className="mt-8">
             <Link
-              href="/get-involved"
+              href={cta.href}
               className="inline-flex h-13 items-center rounded-md bg-magenta px-7 text-lg font-medium text-white transition-colors hover:bg-magenta/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
-              Get involved.
+              {cta.label}
             </Link>
-            <p className="mt-3 text-sm text-white/60">Sponsor, host or partner on year 12.</p>
+            {cta.note && <p className="mt-3 text-sm text-white/60">{cta.note}</p>}
           </div>
         </div>
       </div>
