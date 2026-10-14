@@ -1,8 +1,9 @@
 // The year 11 photo recap the homepage hero scrolls — the same set, order
-// and captions as the "ultimate" thank-you social video. Spotlight columns
-// get a full-height card with a magenta frame; pairs stack two smaller
-// photos. Captions are only what the photo itself shows (a sign, a slide, a
-// banner); candid shots carry none. Files live in public/home/recap.
+// and captions as the "ultimate" thank-you social video, except the closing
+// spotlight: the video's was another frame of The Model, the opener here.
+// Spotlight columns get a full-height card with a magenta frame; pairs stack
+// two smaller photos. Captions are only what the photo itself shows (a sign,
+// a slide, a banner); candid shots carry none. Files live in public/home/recap.
 
 export interface RecapPhoto {
   src: string;
@@ -288,8 +289,8 @@ export const RECAP: RecapColumn[] = [
         src: "/home/recap/r26.jpg",
         w: 1067,
         h: 1600,
-        cap: "Startup + Tech Week",
-        pos: "50% 45%",
+        cap: "",
+        pos: "55% 40%",
       },
     ],
   },
