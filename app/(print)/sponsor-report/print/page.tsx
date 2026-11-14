@@ -328,7 +328,11 @@ export default async function SponsorReportPrint() {
           <ol className="mt-10 flex flex-1 flex-col gap-3">
             {CIRCUIT_PICKS.map((c, i) => (
               <li key={c.name} className={cn("flex flex-1 items-center gap-6 rounded-xl bg-black px-7", CHARGE[i])}>
-                <span className={cn("h-1.5 w-9 shrink-0 rounded-full bg-current", i === 0 && "shadow-[0_0_12px_currentColor]")} />
+                {/* No glow on the lead circuit, unlike the web: Chrome writes a
+                    blurred shadow into the PDF as a separate blended layer,
+                    and some viewers (Preview among them) draw it as a solid
+                    square. Charge alone carries the order here. */}
+                <span className="h-1.5 w-9 shrink-0 rounded-full bg-current" />
                 <span className="flex-1 font-display text-[20px] font-bold uppercase leading-tight text-white">{c.name}</span>
                 <span className="w-25 text-right font-display text-[48px] font-bold leading-none tabular-nums text-white">
                   {c.count}

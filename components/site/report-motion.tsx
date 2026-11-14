@@ -33,13 +33,15 @@ function parse(value: string) {
 /**
  * A figure that counts up from zero the first time it comes into view.
  *
- * The final figure holds the space. It is laid out invisibly, and the count
- * runs on top of it in the same grid cell, so the box is the width of
- * "~45,000" from the first frame. Without that, a count that starts as "~0"
- * and gains a digit and a comma on its way up pushed everything after it —
- * "unique touches" in the reach callout — sideways every frame, which read
- * as the line bouncing and blurring rather than counting. The invisible copy
- * is also the one a screen reader gets; the moving one is hidden from it.
+ * The final figure holds the space: it is laid out invisibly, and the count
+ * is drawn over it, taken out of the line's layout altogether. Nothing beside
+ * it can move. Reserving the final width was not enough on its own: Oswald's
+ * figures are proportional and its 1 is narrow, so on the way to "$110,000"
+ * the count passes numbers like "$98,765" that are wider than the finish,
+ * and those still pushed "in pitch funding" sideways. A count wider than the
+ * finish now just overhangs the space after it for a frame. The invisible
+ * copy is also the one a screen reader gets; the moving one is hidden from
+ * it.
  *
  * Reserved for headline figures. A table of small numbers all ticking at
  * once is noise, so those stay still.
@@ -81,9 +83,9 @@ export function CountUp({ value, className }: { value: string; className?: strin
 
   if (!parts) return <span className={className}>{value}</span>;
   return (
-    <span ref={ref} className={cn("inline-grid justify-items-start tabular-nums", className)}>
-      <span className="col-start-1 row-start-1 opacity-0">{value}</span>
-      <motion.span aria-hidden="true" className="col-start-1 row-start-1">
+    <span ref={ref} className={cn("relative inline-block tabular-nums", className)}>
+      <span className="opacity-0">{value}</span>
+      <motion.span aria-hidden="true" className="absolute left-0 top-0 whitespace-nowrap">
         {text}
       </motion.span>
     </span>
