@@ -44,7 +44,10 @@ import { cn } from "@/lib/utils";
 // verbatim from the signed-off report; this file is only how it reads here.
 //
 // Unlisted: it is a link Geekdom sends, so it stays out of search and out of
-// the sitemap. The logo marks come from the CMS like every other wall on the
+// the sitemap. A document rather than a page of the event site, so it lives
+// in its own route group, without the site's navbar or footer: those offered
+// a sponsor four ways off the report and a second ending after its own. The
+// cover opens with the logo and the sign-off line closes it. The logo marks come from the CMS like every other wall on the
 // site, so a replaced logo lands here without a deploy.
 //
 // Built to keep its reader: nothing here links off the report except the
@@ -132,8 +135,6 @@ function Section({
     <section
       id={id}
       className={cn(
-        // Clear of the sticky navbar when a #link lands on it.
-        "scroll-mt-16",
         tone === "dark" ? "border-t border-white/10 bg-black text-white" : "bg-white text-foreground",
         className,
       )}
@@ -286,7 +287,7 @@ export default async function SponsorReportPage() {
     // background and the black sections come out as white type on white.
     <main className="[-webkit-print-color-adjust:exact] [print-color-adjust:exact]">
       {/* ─── Cover ─── */}
-      <section data-report-cover className="relative isolate flex flex-col overflow-hidden bg-black text-white lg:min-h-[calc(100svh-4rem)] print:min-h-0">
+      <section data-report-cover className="relative isolate flex flex-col overflow-hidden bg-black text-white lg:min-h-svh print:min-h-0">
         <div aria-hidden="true" className="absolute inset-0 -z-10 opacity-60">
           <DriftingBolts />
         </div>
@@ -405,7 +406,7 @@ export default async function SponsorReportPage() {
       {/* On the brand pink, as the report has it. The cards are black, which
           is what lets the magenta charges read: on the pink itself they would
           vanish. */}
-      <section id="circuits" data-report-pink className="scroll-mt-16 bg-magenta text-black">
+      <section id="circuits" data-report-pink className="bg-magenta text-black">
         <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-28">
           <Eyebrow tone="dark" className="text-black/70">
             Five Circuits
@@ -796,7 +797,7 @@ export default async function SponsorReportPage() {
       </Section>
 
       {/* ─── See you in 2027 ─── */}
-      <section id="thank-you" data-report-pink className="scroll-mt-16 bg-magenta text-black break-inside-avoid">
+      <section id="thank-you" data-report-pink className="bg-magenta text-black break-inside-avoid">
         <div className="mx-auto w-full max-w-7xl px-6 py-24 text-center lg:py-32">
           <p className="font-mono text-xs uppercase tracking-widest text-black/70">See you in 2027</p>
           <h2 className="mt-6 font-display text-[2.5rem] font-bold uppercase leading-[0.88] tracking-tight sm:text-7xl lg:text-9xl">
