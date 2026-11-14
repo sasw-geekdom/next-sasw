@@ -22,7 +22,9 @@ import {
   FEATURED_QUOTES,
   PHOTO_QUOTES,
   PLAIN_QUOTES,
-  ROSTER,
+  ROSTER_MARKS,
+  ROSTER_ROWS,
+  ROSTER_SCALE,
   splitAccent,
   RESPONSE_STATS,
   SPOTLIGHTS,
@@ -267,14 +269,17 @@ export default async function SponsorReportPage() {
     const local = LOCAL_MARKS[name];
     return local && { id: name, name, ...local, createdAt: 0 };
   };
-  const roster = ROSTER.map(orgRow).filter((r): r is LogoEntityRow => Boolean(r?.imageUrl));
-  const isPartner = (r: LogoEntityRow) => partners.some((p) => p.id === r.id);
-  const rosterSponsors = roster.filter((r) => !isPartner(r));
-  const rosterPartners = roster.filter(isPartner);
-  const withMark = (r: LogoEntityRow): LogoEntityRow => {
-    const mark = sponsorMark(r.name, r.imageUrl);
-    return mark === r.imageUrl ? r : { ...r, imageUrl: mark, scale: undefined };
-  };
+  // One colour across the roster, as its source sets it: the one-colour cut
+  // where the CMS artwork needs one, the trimmed cut otherwise, and the
+  // roster's own sizes in place of the homepage's CMS multipliers.
+  const rosterMark = (r: LogoEntityRow): LogoEntityRow => ({
+    ...r,
+    imageUrl: ROSTER_MARKS[r.name] ?? sponsorMark(r.name, r.imageUrl),
+    scale: ROSTER_SCALE[r.name],
+  });
+  const rosterRows = ROSTER_ROWS.map((row) =>
+    row.map(orgRow).filter((r): r is LogoEntityRow => Boolean(r?.imageUrl)),
+  );
 
   return (
     // Print the colours as drawn: without this the browser drops every
@@ -741,10 +746,10 @@ export default async function SponsorReportPage() {
       </Section>
 
       {/* ─── Already plugged in ─── */}
-      {/* The organizations the report credits (ROSTER), not every row in the
-          CMS — the CMS supplies the marks. Sponsors on the larger row,
-          partners under them; PNC, which the CMS doesn't carry, sits with
-          the sponsors. */}
+      {/* The fourteen on the report's own roster graphic, in its rows
+          (ROSTER_ROWS), not every row in the CMS — the CMS supplies the
+          marks. Centred, so the two-mark row sits between its neighbours as
+          it does there. */}
       <Section id="roster" tone="dark" className="overflow-x-clip">
         <Eyebrow tone="dark">Already plugged in</Eyebrow>
         <Title>
@@ -755,25 +760,17 @@ export default async function SponsorReportPage() {
           A thank you to every organization that powered the current this year — financially, operationally, and in
           community.
         </Lede>
-        {rosterSponsors.length > 0 && (
-          <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
-            {rosterSponsors.map((s) => (
-              // The trimmed cuts where we have them — Webhead's colour lockup is
-              // half navy, which disappears on black. A trimmed cut drops the
-              // CMS size multiplier: that was tuned for the original artwork,
-              // and on Webhead's wide white cut it ran the mark into its
-              // neighbour.
-              <LogoCell key={s.id} row={withMark(s)} size="lg" />
-            ))}
-          </div>
-        )}
-        {rosterPartners.length > 0 && (
-          <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-8 border-t border-white/10 pt-14 sm:grid-cols-4">
-            {rosterPartners.map((p) => (
-              <LogoCell key={p.id} row={withMark(p)} size="sm" />
-            ))}
-          </div>
-        )}
+        <div className="mt-14 space-y-10 sm:space-y-12">
+          {rosterRows.map((row, r) => (
+            <div key={r} className="flex justify-center gap-x-6 sm:gap-x-10">
+              {row.map((org) => (
+                <div key={org.id} className="w-1/3 max-w-80">
+                  <LogoCell row={rosterMark(org)} size="fluid" mono />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </Section>
 
       {/* ─── What you enabled ─── */}

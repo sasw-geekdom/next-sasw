@@ -1,4 +1,3 @@
-import { CIRCUIT_SPONSORS } from "@/lib/circuit-sponsors";
 import type { TrackName } from "@/lib/tracks";
 
 // The 2026 sponsor report, as data. The words are the report's own — it was
@@ -423,15 +422,58 @@ export function splitAccent(quote: string, accent: string): [string, string, str
 }
 
 /**
- * Who "The full backing roster" shows: the organizations the report itself
- * credits — the three circuit sponsors, then everyone in the POWERING bands,
- * in that order — rather than every sponsor and partner row in the CMS. Built
- * from those two lists, so the roster can't credit someone the report doesn't
- * or miss someone it does. The CMS still supplies each mark.
+ * Who "The full backing roster" shows, row by row, as the report's own roster
+ * graphic ("All SASTW 2026 sponsors and partners") lays them out: fourteen
+ * organizations in five centred rows of three, two, three, three and three.
+ * The report carries that graphic as a single image; here the CMS supplies
+ * each mark, so they stay sharp and in the site's own walls' style.
+ *
+ * Not the same list as the POWERING bands: the media partners are credited
+ * there and are not on the roster graphic, and Trinity University is on the
+ * graphic without a band of its own.
  */
-export const ROSTER: string[] = [
-  ...new Set([
-    ...SPOTLIGHTS.map((s) => CIRCUIT_SPONSORS[s.circuit]).filter((n): n is string => Boolean(n)),
-    ...POWERING.flatMap((b) => b.orgs),
-  ]),
+export const ROSTER_ROWS: string[][] = [
+  ["80/20 Foundation", "Students + Startups", "H-E-B Supplier Diversity"],
+  ["Webhead", "Google for Startups"],
+  ["Nopalera", "Active Capital", "Downtown West"],
+  ["LISC San Antonio", "PNC Bank", "Trinity University"],
+  ["Accelerate South Texas", "Geekdom", "Launch SA"],
 ];
+
+/**
+ * Marks the roster draws in place of the CMS artwork, because the roster sets
+ * every mark in one colour and these need a one-colour cut to survive that.
+ *
+ * H-E-B Supplier Diversity's CMS mark is the full-colour round emblem, which
+ * as one colour is a solid disc. This is H-E-B's own Supplier Diversity
+ * lockup (supplier.heb.com) traced to one colour: the emblem's puzzle as line
+ * art, the H-E-B pill solid with its letters knocked out, and the type — the
+ * same one-colour lockup the report's roster graphic shows.
+ */
+export const ROSTER_MARKS: Readonly<Record<string, string>> = {
+  "H-E-B Supplier Diversity": "/brand/heb-supplier-diversity-mono.png",
+};
+
+/**
+ * Per-mark size in the roster, where 1 is the cell's own optical balancing.
+ * Set in white, every mark is compared on shape alone, and stacked or tall
+ * lockups read larger than wide wordmarks at the same box; these even that
+ * out. The CMS multipliers are tuned for the homepage's wall, not this one.
+ */
+export const ROSTER_SCALE: Readonly<Record<string, number>> = {
+  // Wide wordmarks fill their cell's width and read heaviest.
+  Nopalera: 0.8,
+  "Active Capital": 0.8,
+  "LISC San Antonio": 0.82,
+  "PNC Bank": 0.85,
+  "Launch SA": 0.85,
+  "Students + Startups": 0.88,
+  Geekdom: 0.9,
+  "80/20 Foundation": 0.92,
+  "Google for Startups": 0.92,
+  // Tall or stacked lockups read large at the cell's height.
+  "Trinity University": 0.82,
+  "H-E-B Supplier Diversity": 0.9,
+  // A small, dense mark that needs the room.
+  "Downtown West": 1.3,
+};

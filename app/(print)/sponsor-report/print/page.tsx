@@ -15,7 +15,9 @@ import {
   FEATURED_QUOTES,
   PHOTO_QUOTES,
   PLAIN_QUOTES,
-  ROSTER,
+  ROSTER_MARKS,
+  ROSTER_ROWS,
+  ROSTER_SCALE,
   splitAccent,
   RESPONSE_STATS,
   SPOTLIGHTS,
@@ -207,11 +209,10 @@ export default async function SponsorReportPrint() {
     const local = LOCAL_MARKS[name];
     return local && { id: name, name, ...local, createdAt: 0 };
   };
-  // The organizations the report credits, not every CMS row — see ROSTER.
-  const roster = ROSTER.map(orgRow).filter((r): r is LogoEntityRow => Boolean(r?.imageUrl));
-  const isPartner = (r: LogoEntityRow) => partners.some((p) => p.id === r.id);
-  const rosterSponsors = roster.filter((r) => !isPartner(r));
-  const rosterPartners = roster.filter(isPartner);
+  // The fourteen on the report's roster graphic, in its rows — see ROSTER_ROWS.
+  const rosterRows = ROSTER_ROWS.map((row) =>
+    row.map(orgRow).filter((r): r is LogoEntityRow => Boolean(r?.imageUrl)),
+  );
 
   // One designed photo page, not the web page's full wall: 36 photos in
   // print were three straight pages of identical grids — a contact sheet that
@@ -618,19 +619,32 @@ export default async function SponsorReportPrint() {
             A thank you to every organization that powered the current this year — financially, operationally, and
             in community.
           </Lede>
-          {/* Sixteen marks, centred in the page rather than stacked at the
+          {/* Fourteen marks, centred in the page rather than stacked at the
               top of it. */}
-          <div className="flex flex-1 flex-col justify-center">
-            <div className="grid grid-cols-4 gap-x-9 gap-y-12">
-              {rosterSponsors.map((s) => (
-                <Mark key={s.id} src={sponsorMark(s.name, s.imageUrl)} alt={s.name} className="h-20 w-full" />
-              ))}
-            </div>
-            <div className="mt-12 grid grid-cols-4 gap-x-9 gap-y-11 border-t border-white/10 pt-12">
-              {rosterPartners.map((p) => (
-                <Mark key={p.id} src={sponsorMark(p.name, p.imageUrl)} alt={p.name} className="h-16 w-full" />
-              ))}
-            </div>
+          <div className="flex flex-1 flex-col justify-center gap-12">
+            {rosterRows.map((row, r) => (
+              <div key={r} className="flex justify-center gap-x-12">
+                {row.map((org) => (
+                  // One colour, as on the web roster and its source — by
+                  // filter here rather than the web's mask: Chrome flattens
+                  // a CSS mask into the PDF with a hairline box round it.
+                  <span
+                    key={org.id}
+                    className="relative block h-16 w-50"
+                    style={ROSTER_SCALE[org.name] ? { transform: `scale(${ROSTER_SCALE[org.name]})` } : undefined}
+                  >
+                    <Image
+                      src={ROSTER_MARKS[org.name] ?? sponsorMark(org.name, org.imageUrl)}
+                      alt={org.name}
+                      fill
+                      unoptimized
+                      loading="eager"
+                      className="object-contain brightness-0 invert"
+                    />
+                  </span>
+                ))}
+              </div>
+            ))}
           </div>
         </>
       ),

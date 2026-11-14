@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { ButtonLink } from "@/components/ui/button";
 import { ProbeChip, useProbeChip } from "@/components/site/probe-chip";
+import { maskOf } from "@/lib/mask";
 import type { LogoEntityRow } from "@/lib/admin/cms-types";
 import { cn } from "@/lib/utils";
 
@@ -15,16 +16,63 @@ import { cn } from "@/lib/utils";
 
 const REF_ASPECT = 1.6; // a typical horizontal wordmark
 
-export function LogoCell({ row, size }: { row: LogoEntityRow; size: "lg" | "sm" }) {
+/**
+ * Mark heights. `fluid` is for a wall that keeps three across down to a
+ * phone — the sponsor report's roster — where the `lg` height spilled the
+ * marks past the screen's edges.
+ */
+const HEIGHT = {
+  lg: "h-16 sm:h-20",
+  sm: "h-10 sm:h-12",
+  fluid: "h-9 sm:h-16 lg:h-20",
+} as const;
+
+const balanceFor = (w: number, h: number) =>
+  Math.min(1.5, Math.max(1, Math.sqrt(REF_ASPECT / (w / h))));
+
+/**
+ * One org's mark on a wall.
+ *
+ * `mono` draws the mark in one colour instead of its own: white at rest,
+ * magenta under the cursor or focus. It's the mark's shape used as a mask
+ * over a flat fill, so it takes any artwork with a transparent ground and
+ * gives every org equal standing — the sponsor report's roster, which its
+ * source sets in one colour. Turning to magenta rather than back to the
+ * brand's colours keeps the hover legible: several of those (Launch SA's
+ * navy, the dark type in others) disappear on black.
+ */
+export function LogoCell({
+  row,
+  size,
+  mono = false,
+}: {
+  row: LogoEntityRow;
+  size: keyof typeof HEIGHT;
+  mono?: boolean;
+}) {
   const [balance, setBalance] = React.useState(1);
   const { chipRef, probeProps } = useProbeChip();
 
   function onLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const img = e.currentTarget;
     if (!img.naturalWidth || !img.naturalHeight) return;
-    const aspect = img.naturalWidth / img.naturalHeight;
-    setBalance(Math.min(1.5, Math.max(1, Math.sqrt(REF_ASPECT / aspect))));
+    setBalance(balanceFor(img.naturalWidth, img.naturalHeight));
   }
+
+  // A mask has no load event to read the artwork's proportions from, so the
+  // mono mark measures them from its own request — the browser's cache
+  // serves the mask the same file.
+  React.useEffect(() => {
+    if (!mono) return;
+    const img = new window.Image();
+    img.onload = () => {
+      if (img.naturalWidth && img.naturalHeight) setBalance(balanceFor(img.naturalWidth, img.naturalHeight));
+    };
+    img.src = row.imageUrl;
+    return () => {
+      img.onload = null;
+    };
+  }, [mono, row.imageUrl]);
 
   // Optical balance × the admin's per-logo override (1 = untouched).
   const effective = balance * (row.scale ?? 1);
@@ -41,7 +89,7 @@ export function LogoCell({ row, size }: { row: LogoEntityRow; size: "lg" | "sm" 
         className={cn(
           // Rest slightly dimmed; hover/focus feeds the node full current.
           "relative block w-full opacity-80 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100",
-          size === "lg" ? "h-16 sm:h-20" : "h-10 sm:h-12",
+          HEIGHT[size],
         )}
       >
         <span
@@ -50,14 +98,23 @@ export function LogoCell({ row, size }: { row: LogoEntityRow; size: "lg" | "sm" 
             effective !== 1 ? { transform: `scale(${effective})` } : undefined
           }
         >
-          <Image
-            src={row.imageUrl}
-            alt={row.name}
-            fill
-            sizes={size === "lg" ? "320px" : "200px"}
-            className="object-contain"
-            onLoad={onLoad}
-          />
+          {mono ? (
+            <span
+              role="img"
+              aria-label={row.name}
+              className="absolute inset-0 bg-current text-white transition-colors duration-300 group-hover:text-magenta group-focus-visible:text-magenta"
+              style={maskOf(row.imageUrl)}
+            />
+          ) : (
+            <Image
+              src={row.imageUrl}
+              alt={row.name}
+              fill
+              sizes={size === "sm" ? "200px" : "320px"}
+              className="object-contain"
+              onLoad={onLoad}
+            />
+          )}
         </span>
       </span>
 
