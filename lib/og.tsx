@@ -80,13 +80,15 @@ export async function boltOgImage(opts: {
             // Satori requires explicit flex on multi-child rows; no-shrink
             // spans keep long lines from collapsing onto each other.
             <div key={i} style={{ display: "flex" }}>
-              <span style={{ flexShrink: 0 }}>{line.text}</span>
+              {line.text && <span style={{ flexShrink: 0 }}>{line.text}</span>}
               {line.magenta && (
                 <span
                   style={{
                     color: "#ff32a0",
                     flexShrink: 0,
-                    marginLeft: titleSize * 0.2,
+                    // A line that is all magenta starts flush, with no gap
+                    // for a word that isn't there.
+                    marginLeft: line.text ? titleSize * 0.2 : 0,
                   }}
                 >
                   {line.magenta}

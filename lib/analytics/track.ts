@@ -38,9 +38,33 @@ export function trackConversion(
   event: (typeof CONVERSIONS)[keyof typeof CONVERSIONS],
   params?: Record<string, unknown>,
 ): void {
+  trackEvent(event, params);
+}
+
+/**
+ * Any other GA event, under the same guarantee: absent gtag, nothing happens.
+ * For measurement that is not a conversion — how far a reader got through
+ * the sponsor report, say — so CONVERSIONS stays the list of things that
+ * count as one.
+ */
+export function trackEvent(event: string, params?: Record<string, unknown>): void {
   if (typeof window === "undefined") return;
   try {
-    window.gtag?.("event", event, params);
+    if (window.gtag) {
+      window.gtag("event", event, params);
+      return;
+    }
+    // Sent before the GA tag has defined gtag — an event fired on load, say,
+    // which runs ahead of an afterInteractive script. Queue it the way gtag's
+    // own stub does, onto dataLayer as an `arguments` object (gtag.js reads
+    // only those, not plain arrays), and the tag picks it up when it loads.
+    const w = window as unknown as { dataLayer?: unknown[] };
+    w.dataLayer = w.dataLayer ?? [];
+    (function queue(...args: unknown[]) {
+      void args; // the parameters exist for the call's types; `arguments` is what is pushed
+      // eslint-disable-next-line prefer-rest-params
+      w.dataLayer!.push(arguments);
+    })("event", event, params);
   } catch {
     // Measurement is never worth an exception in a submit handler.
   }

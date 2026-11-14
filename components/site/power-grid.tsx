@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 const REF_ASPECT = 1.6; // a typical horizontal wordmark
 
-function LogoCell({ row, size }: { row: LogoEntityRow; size: "lg" | "sm" }) {
+export function LogoCell({ row, size }: { row: LogoEntityRow; size: "lg" | "sm" }) {
   const [balance, setBalance] = React.useState(1);
   const { chipRef, probeProps } = useProbeChip();
 
