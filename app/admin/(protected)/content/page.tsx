@@ -6,10 +6,12 @@ import {
   listSponsors,
   listSpeakers,
   listSessions,
+  listFaqs,
 } from "@/lib/admin/cms-queries";
 import { EMAIL_TEMPLATES } from "@/lib/email/templates";
 import { getGalleryManifest } from "@/lib/gallery";
 import { PageHeader } from "@/components/admin/page-header";
+import { FAQ } from "@/lib/faq";
 
 export const metadata: Metadata = { title: "Content" };
 export const dynamic = "force-dynamic";
@@ -45,16 +47,22 @@ const SECTIONS = [
     label: "Gallery",
     blurb: "15-years photo wall.",
   },
+  {
+    href: "/admin/content/faqs",
+    label: "FAQ",
+    blurb: "The Attending page.",
+  },
 ] as const;
 
 export default async function ContentHub() {
   await requireAdmin();
-  const [partners, sponsors, speakers, sessions, gallery] = await Promise.all([
+  const [partners, sponsors, speakers, sessions, gallery, faqs] = await Promise.all([
     listPartners(),
     listSponsors(),
     listSpeakers(),
     listSessions(),
     getGalleryManifest(),
+    listFaqs(),
   ]);
   const counts: Record<string, number> = {
     "/admin/content/partners": partners.length,
@@ -63,6 +71,8 @@ export default async function ContentHub() {
     "/admin/content/sessions": sessions.length,
     "/admin/content/emails": EMAIL_TEMPLATES.length,
     "/admin/content/gallery": gallery.length,
+    // Until the first import, the public page runs on the built-in answers.
+    "/admin/content/faqs": faqs.length || FAQ.reduce((n, s) => n + s.items.length, 0),
   };
 
   return (

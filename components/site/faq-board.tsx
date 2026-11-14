@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { FAQ, BADGE_DESKS, GARAGES } from "@/lib/faq";
+import { BADGE_DESKS, GARAGES, type FaqSection } from "@/lib/faq";
 import { ROOMS } from "@/lib/locations";
 import { allSessions, resolveSessions, whenShort } from "@/lib/schedule";
 import {
@@ -232,7 +232,8 @@ function Answer({
   );
 }
 
-export function FaqBoard() {
+/** `sections` from the CMS, or the built-in FAQ until one is saved — see getFaqSections. */
+export function FaqBoard({ sections }: { sections: FaqSection[] }) {
   const partners = partnerVenues();
   const desks = BADGE_DESKS.map((d) => {
     const room = ROOMS.find((r) => r.slug === d.room);
@@ -264,7 +265,7 @@ export function FaqBoard() {
         </div>
       </section>
 
-      {FAQ.map((section) => (
+      {sections.map((section) => (
         <section
           key={section.id}
           id={section.id}

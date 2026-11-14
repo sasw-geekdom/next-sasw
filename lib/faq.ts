@@ -1,3 +1,5 @@
+import type { FaqRow } from "@/lib/admin/cms-types";
+
 /**
  * The one-pager: badges, parking, rooms.
  *
@@ -256,3 +258,18 @@ export const FAQ: FaqSection[] = [
     ],
   },
 ];
+
+/**
+ * The FAQ as the CMS has it: each section's eyebrow, headline and lead from
+ * FAQ above — those stay in code, because two sections carry their own
+ * widgets (the badge desks, the parking map) — and its questions from the
+ * CMS rows, in their admin order.
+ */
+export function faqFromRows(rows: readonly FaqRow[]): FaqSection[] {
+  return FAQ.map((section) => ({
+    ...section,
+    items: rows
+      .filter((r) => r.section === section.id)
+      .map(({ q, a, link }) => ({ q, a, ...(link ? { link } : {}) })),
+  }));
+}

@@ -25,6 +25,9 @@ export const COLLECTIONS = {
   // Emails the team writes in the admin and sends to every registrant: one
   // doc per email, draft through sent. See lib/email/broadcasts.ts.
   broadcasts: "broadcasts",
+  // One doc per question on /faq. Empty means the page shows the answers
+  // built into lib/faq.ts.
+  faqs: "faqs",
 } as const;
 
 // Doc id within the `settings` collection holding admin-edited email copy.

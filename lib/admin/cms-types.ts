@@ -141,4 +141,19 @@ export interface LineupSpeaker extends SpeakerRow {
 }
 
 // The CMS entities, used for routing + labels.
-export type CmsEntity = "partners" | "sponsors" | "speakers" | "sessions";
+export type CmsEntity = "partners" | "sponsors" | "speakers" | "sessions" | "faqs";
+
+/** The sections a question can sit in — fixed, because two carry their own
+ *  widgets on /faq (the badge desks, the parking map). See lib/faq.ts. */
+export const FAQ_SECTION_IDS = ["badges", "parking", "week"] as const;
+export type FaqSectionId = (typeof FAQ_SECTION_IDS)[number];
+
+/** One question on /faq, as the CMS stores it. */
+export interface FaqRow {
+  id: string;
+  section: FaqSectionId;
+  q: string;
+  /** Paragraphs, in order. */
+  a: string[];
+  link?: { label: string; href: string };
+}

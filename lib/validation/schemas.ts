@@ -262,3 +262,38 @@ export const broadcastSchema = z.object({
   body: z.string().trim().min(1, "Body is required.").max(8000),
 });
 export type BroadcastInput = z.infer<typeof broadcastSchema>;
+
+// One question on /faq. The answer arrives as one textarea and is stored as
+// paragraphs — a blank line starts a new one, which is how the page renders
+// them. A link is optional, but takes both halves or neither: a label with
+// nowhere to go, or a bare address, is a half-finished edit.
+const faqHref = z
+  .string()
+  .trim()
+  .max(500)
+  .refine((v) => v === "" || v.startsWith("/") || /^https?:\/\//.test(v), {
+    message: "A page on this site (/schedule) or a full address (https://…).",
+  });
+export const faqSchema = z
+  .object({
+    section: z.enum(["badges", "parking", "week"], { message: "Pick a section." }),
+    q: z.string().trim().min(5, "Write the question.").max(300),
+    a: z
+      .string()
+      .trim()
+      .min(1, "Write the answer.")
+      .max(3000)
+      .transform((v) =>
+        v
+          .split(/\n\s*\n/)
+          .map((p) => p.replace(/\s*\n\s*/g, " ").trim())
+          .filter(Boolean),
+      ),
+    linkLabel: z.string().trim().max(60),
+    linkHref: faqHref,
+  })
+  .refine((v) => (v.linkLabel === "") === (v.linkHref === ""), {
+    message: "Give the link both a label and an address, or leave both empty.",
+    path: ["linkHref"],
+  });
+export type FaqInput = z.infer<typeof faqSchema>;

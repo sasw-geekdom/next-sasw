@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { FaqBoard } from "@/components/site/faq-board";
-import { FAQ } from "@/lib/faq";
+import { getFaqSections } from "@/lib/faq-content";
 import { faqGraph, jsonLd } from "@/lib/structured-data";
 
 const DESCRIPTION =
   "Badge pickup, parking and rooms for San Antonio Startup + Tech Week — Sept 28 – Oct 2, downtown San Antonio.";
+
+// The questions come from the CMS now (Admin → Content → FAQ). Saves bust this
+// path; the window is the ceiling if a bust is ever missed.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Attending",
@@ -29,14 +33,15 @@ export const metadata: Metadata = {
  * say; the title is what the tab and the search result say, and "FAQ · SASTW"
  * tells a reader nothing about which week or what is being asked.
  */
-export default function FaqPage() {
+export default async function FaqPage() {
+  const sections = await getFaqSections();
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(faqGraph(FAQ)) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(faqGraph(sections)) }}
       />
-      <FaqBoard />
+      <FaqBoard sections={sections} />
     </>
   );
 }

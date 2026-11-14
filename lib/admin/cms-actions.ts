@@ -8,11 +8,13 @@ import { requireAdmin } from "@/lib/auth/session";
 import { uploadImage, deleteImage, ImageError } from "@/lib/admin/blob";
 import { slugify, uniqueSlug } from "@/lib/slug";
 import {
+  faqSchema,
   logoEntitySchema,
   speakerSchema,
   sessionSchema,
 } from "@/lib/validation/schemas";
 import type { CmsEntity, SessionParticipant } from "@/lib/admin/cms-types";
+import { FAQ } from "@/lib/faq";
 
 export type SaveResult =
   | { ok: true; id: string }
@@ -37,6 +39,11 @@ function revalidate(entity: CmsEntity) {
     revalidateSpeakerPages();
     // Names, titles and photos on the TV loops' spotlights.
     revalidateTvPages();
+  }
+  if (entity === "faqs") {
+    // /faq is ISR'd at 300s; the page and its FAQPage structured data both
+    // read these rows.
+    revalidatePath("/faq");
   }
   if (entity === "sessions") {
     revalidatePath("/speakers");
@@ -158,7 +165,7 @@ async function saveLogoEntity(
 }
 
 // ─── Display order (drag-and-drop in the admin) ─────────────────────────────
-const REORDERABLE = ["partners", "sponsors", "speakers"] as const;
+const REORDERABLE = ["partners", "sponsors", "speakers", "faqs"] as const;
 type Reorderable = (typeof REORDERABLE)[number];
 
 async function reorderEntities(
@@ -187,7 +194,9 @@ async function reorderEntities(
     return { ok: false, error: "Reorder failed — refresh and try again." };
   }
   revalidate(entity);
-  revalidatePath("/"); // the homepage wall follows this order
+  // The homepage wall and lineup follow this order; /faq is busted by
+  // revalidate() itself.
+  if (entity !== "faqs") revalidatePath("/");
   return okResult("");
 }
 
@@ -199,6 +208,9 @@ export async function reorderSponsors(ids: string[]) {
 }
 export async function reorderSpeakers(ids: string[]) {
   return reorderEntities("speakers", ids);
+}
+export async function reorderFaqs(ids: string[]) {
+  return reorderEntities("faqs", ids);
 }
 
 export async function savePartner(form: FormData) {
@@ -458,4 +470,88 @@ export async function deleteSession(id: string): Promise<SaveResult> {
   await adminDb.collection(COLLECTIONS.sessions).doc(id).delete();
   revalidate("sessions");
   return okResult(id);
+}
+
+// ─── FAQ ────────────────────────────────────────────────────────────────────
+
+/** Save one /faq question — new without an id, an edit with one. */
+export async function saveFaq(form: FormData): Promise<SaveResult> {
+  await requireAdmin();
+  const parsed = faqSchema.safeParse({
+    section: form.get("section"),
+    q: form.get("q") ?? "",
+    a: form.get("a") ?? "",
+    linkLabel: form.get("linkLabel") ?? "",
+    linkHref: form.get("linkHref") ?? "",
+  });
+  if (!parsed.success) {
+    return { ok: false, error: "Check the form.", issues: parsed.error.flatten().fieldErrors };
+  }
+  const { section, q, a, linkLabel, linkHref } = parsed.data;
+  const fields = { section, q, a, linkLabel, linkHref, updatedAt: FieldValue.serverTimestamp() };
+
+  const id = String(form.get("id") ?? "").trim();
+  const col = adminDb.collection(COLLECTIONS.faqs);
+  try {
+    if (id) {
+      await col.doc(id).update(fields);
+    } else {
+      const ref = await col.add({ ...fields, order: Date.now(), createdAt: FieldValue.serverTimestamp() });
+      revalidate("faqs");
+      return okResult(ref.id);
+    }
+  } catch {
+    return { ok: false, error: "Save failed — refresh and try again." };
+  }
+  revalidate("faqs");
+  return okResult(id);
+}
+
+export async function deleteFaq(id: string): Promise<SaveResult> {
+  await requireAdmin();
+  if (typeof id !== "string" || !id) return { ok: false, error: "Nothing to delete." };
+  try {
+    await adminDb.collection(COLLECTIONS.faqs).doc(id).delete();
+  } catch {
+    return { ok: false, error: "Delete failed — refresh and try again." };
+  }
+  revalidate("faqs");
+  return okResult(id);
+}
+
+/**
+ * Copy the answers built into lib/faq.ts into the CMS, as the starting point
+ * for editing. Only into an empty collection: run twice, it would double
+ * every question, so a second run is refused rather than trusted.
+ */
+export async function importFaqs(): Promise<SaveResult> {
+  await requireAdmin();
+  const col = adminDb.collection(COLLECTIONS.faqs);
+  try {
+    const existing = await col.limit(1).get();
+    if (!existing.empty) {
+      return { ok: false, error: "The CMS already has questions — refresh the page." };
+    }
+    const batch = adminDb.batch();
+    let order = 0;
+    for (const section of FAQ) {
+      for (const item of section.items) {
+        batch.set(col.doc(), {
+          section: section.id,
+          q: item.q,
+          a: item.a,
+          linkLabel: item.link?.label ?? "",
+          linkHref: item.link?.href ?? "",
+          order: order++,
+          createdAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      }
+    }
+    await batch.commit();
+  } catch {
+    return { ok: false, error: "Import failed — refresh and try again." };
+  }
+  revalidate("faqs");
+  return okResult("");
 }

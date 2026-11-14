@@ -12,6 +12,7 @@ import {
   Layers,
   Mail,
   Images,
+  HelpCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -40,6 +41,7 @@ export const CONTENT_NAV: NavItem[] = [
   { href: "/admin/content/sessions", label: "Sessions", icon: Calendar },
   { href: "/admin/content/emails", label: "Emails", icon: Mail },
   { href: "/admin/content/gallery", label: "Gallery", icon: Images },
+  { href: "/admin/content/faqs", label: "FAQ", icon: HelpCircle },
 ];
 
 export const ALL_NAV: NavItem[] = [

@@ -4,7 +4,9 @@ import { Timestamp } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/admin";
 import { COLLECTIONS } from "@/lib/firebase/collections";
 import { slugify, uniqueSlug } from "@/lib/slug";
+import { FAQ_SECTION_IDS } from "@/lib/admin/cms-types";
 import type {
+  FaqRow,
   LogoEntityRow,
   SpeakerRow,
   SessionRow,
@@ -96,6 +98,26 @@ export async function listSpeakers(): Promise<SpeakerRow[]> {
       createdAt: toMillis(d.createdAt) ?? 0,
     };
   });
+}
+
+/** Every /faq question, in admin order. Grouping by section is the page's job. */
+export async function listFaqs(): Promise<FaqRow[]> {
+  const snap = await adminDb.collection(COLLECTIONS.faqs).get();
+  return snap.docs
+    .sort((a, b) => orderOf(a.data()) - orderOf(b.data()))
+    .map((doc): FaqRow => {
+      const d = doc.data();
+      const label = typeof d.linkLabel === "string" ? d.linkLabel : "";
+      const href = typeof d.linkHref === "string" ? d.linkHref : "";
+      return {
+        id: doc.id,
+        section: d.section,
+        q: d.q ?? "",
+        a: strings(d.a),
+        link: label && href ? { label, href } : undefined,
+      };
+    })
+    .filter((r) => (FAQ_SECTION_IDS as readonly string[]).includes(r.section) && r.q !== "");
 }
 
 export async function listSessions(): Promise<SessionRow[]> {

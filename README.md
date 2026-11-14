@@ -4,6 +4,8 @@ The event application for **San Antonio Startup + Tech Week** — Year 11, **Sep
 
 _"The current runs through SA. Plug in."_
 
+> **Taking over the site?** Start with [docs/HANDOFF.md](docs/HANDOFF.md) — accounts, hosting, environment variables and day-to-day running.
+
 ---
 
 ## Stack
@@ -31,7 +33,7 @@ _"The current runs through SA. Plug in."_
 - **Speaker submissions** — review, status workflow, one-click promote to the Speakers CMS, filtered CSV export.
 - **Registrations** — searchable list + CSV export.
 - **Check-in** — search-first, one-tap, transactional/idempotent, with an event-day breakdown.
-- **Content management** — partners, sponsors, speakers, and sessions (with speaker/moderator assignment per track).
+- **Content management** — partners, sponsors, speakers, sessions (with speaker/moderator assignment per track), the FAQ, email copy and broadcasts, and the gallery.
 - App shell with a collapsible sidebar, ⌘K command menu, and a mobile drawer.
 
 ## Getting started
