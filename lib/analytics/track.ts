@@ -1,3 +1,5 @@
+import { track as vercelTrack } from "@vercel/analytics";
+
 /**
  * Conversion events, sent to GA from the browser.
  *
@@ -67,5 +69,27 @@ export function trackEvent(event: string, params?: Record<string, unknown>): voi
     })("event", event, params);
   } catch {
     // Measurement is never worth an exception in a submit handler.
+  }
+}
+
+/**
+ * A sponsor-report reading event, sent to both GA and Vercel Analytics.
+ *
+ * GA is where the reports are built, but its tag is on most blocklists, and a
+ * sponsor reading on a locked-down work machine may never reach it. Vercel's
+ * collector is first-party (/_vercel/insights on the site's own origin), so
+ * it survives most blockers — a second count of the same events, for when
+ * the two disagree. Vercel only records custom events on plans that include
+ * them; on others the call is a no-op, never an error.
+ */
+export function trackReport(
+  event: "report_view" | "report_section" | "report_download",
+  params: Record<string, string | undefined>,
+): void {
+  trackEvent(event, params);
+  try {
+    vercelTrack(event, params);
+  } catch {
+    // As above: never worth an exception.
   }
 }

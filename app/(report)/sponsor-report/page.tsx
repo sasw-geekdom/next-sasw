@@ -3,6 +3,7 @@ import Image from "next/image";
 import { BoltShader } from "@/components/site/bolt-shader";
 import { DriftingBolts } from "@/components/site/drifting-bolts";
 import { LogoCell } from "@/components/site/power-grid";
+import { ReportFor } from "@/components/site/report-for";
 import { ReportGallery } from "@/components/site/report-gallery";
 import { CountUp, GrowBar } from "@/components/site/report-motion";
 import { ReportPdfButton } from "@/components/site/report-pdf-button";
@@ -14,7 +15,7 @@ import {
   CHANNELS,
   CIRCUIT_PICKS,
   IMPACT,
-  LOCAL_MARKS,
+  resolveOrg,
   POWERING,
   INDUSTRIES,
   NPS_SPLIT,
@@ -37,6 +38,7 @@ import {
   type ReportStat,
 } from "@/lib/sponsor-report";
 import { sponsorMark } from "@/lib/sponsor-marks";
+import { slugify } from "@/lib/slug";
 import { cn } from "@/lib/utils";
 
 // The 2026 sponsor report — the year in review, written for the sponsors and
@@ -57,11 +59,31 @@ import { cn } from "@/lib/utils";
 // `pnpm report:pdf`.
 export const revalidate = 300;
 
+const TITLE = "2026 Sponsor Report";
+const DESCRIPTION = "San Antonio Startup + Tech Week 2026 — the year in review for sponsors and partners.";
+
+// The share tags are spelled out, not inherited. Left to the root layout, a
+// pasted link unfurled with the report's card under the event's title and
+// promo line, pointed og:url at the homepage, and X showed the site's default
+// card — and a link is how this report gets read. The images come from
+// opengraph-image.tsx and twitter-image.tsx beside this page.
 export const metadata: Metadata = {
-  title: "2026 Sponsor Report",
-  description:
-    "San Antonio Startup + Tech Week 2026 — the year in review for sponsors and partners.",
+  title: TITLE,
+  description: DESCRIPTION,
   robots: { index: false, follow: false },
+  alternates: { canonical: "/sponsor-report" },
+  openGraph: {
+    type: "article",
+    url: "/sponsor-report",
+    siteName: "San Antonio Startup + Tech Week",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 const MAGENTA = "#ff32a0";
@@ -135,6 +157,8 @@ function Section({
     <section
       id={id}
       className={cn(
+        // Clear of the section bar that stands in for the rail below 1400px.
+        "scroll-mt-11 min-[1400px]:scroll-mt-0",
         tone === "dark" ? "border-t border-white/10 bg-black text-white" : "bg-white text-foreground",
         className,
       )}
@@ -264,12 +288,7 @@ export default async function SponsorReportPage() {
     safeList(listPartners()),
   ]);
   // Sponsors and partners in one lookup — the bands below credit both.
-  const orgRow = (name: string): LogoEntityRow | undefined => {
-    const row = [...sponsors, ...partners].find((r) => r.name.trim().toLowerCase() === name.toLowerCase());
-    if (row) return row;
-    const local = LOCAL_MARKS[name];
-    return local && { id: name, name, ...local, createdAt: 0 };
-  };
+  const orgRow = (name: string) => resolveOrg(name, [...sponsors, ...partners]);
   // One colour across the roster, as its source sets it: the one-colour cut
   // where the CMS artwork needs one, the trimmed cut otherwise, and the
   // roster's own sizes in place of the homepage's CMS multipliers.
@@ -278,9 +297,8 @@ export default async function SponsorReportPage() {
     imageUrl: ROSTER_MARKS[r.name] ?? sponsorMark(r.name, r.imageUrl),
     scale: ROSTER_SCALE[r.name],
   });
-  const rosterRows = ROSTER_ROWS.map((row) =>
-    row.map(orgRow).filter((r): r is LogoEntityRow => Boolean(r?.imageUrl)),
-  );
+  // Every name keeps its place; one the CMS can't supply is set in type.
+  const rosterRows = ROSTER_ROWS.map((row) => row.map((name) => ({ name, row: orgRow(name) })));
 
   return (
     // Print the colours as drawn: without this the browser drops every
@@ -406,7 +424,7 @@ export default async function SponsorReportPage() {
       {/* On the brand pink, as the report has it. The cards are black, which
           is what lets the magenta charges read: on the pink itself they would
           vanish. */}
-      <section id="circuits" data-report-pink className="bg-magenta text-black">
+      <section id="circuits" data-report-pink className="scroll-mt-11 bg-magenta text-black min-[1400px]:scroll-mt-0">
         <div className="mx-auto w-full max-w-7xl px-6 py-20 lg:py-28">
           <Eyebrow tone="dark" className="text-black/70">
             Five Circuits
@@ -660,7 +678,8 @@ export default async function SponsorReportPage() {
             return (
               <article
                 key={s.circuit}
-                className="grid items-center gap-8 break-inside-avoid lg:grid-cols-2 lg:gap-16"
+                data-org={sponsor ? slugify(sponsor.name) : undefined}
+                className="group/spot grid items-center gap-8 break-inside-avoid lg:grid-cols-2 lg:gap-16"
               >
                 <div className={cn(i % 2 === 1 && "lg:order-2")}>
                   <p className="font-display text-4xl font-bold uppercase leading-[0.95] tracking-tight sm:text-5xl">
@@ -693,7 +712,7 @@ export default async function SponsorReportPage() {
                 </div>
                 <figure
                   className={cn(
-                    "overflow-hidden rounded-2xl ring-1 ring-white/10",
+                    "overflow-hidden rounded-2xl ring-1 ring-white/10 transition-shadow duration-500 group-data-lit/spot:ring-2 group-data-lit/spot:ring-magenta",
                     portrait && "mx-auto w-full max-w-md",
                   )}
                 >
@@ -708,7 +727,8 @@ export default async function SponsorReportPage() {
           {POWERING.map((band, i) => (
             <div
               key={band.title}
-              className="relative isolate overflow-hidden rounded-2xl border border-white/10 bg-white/3 break-inside-avoid"
+              data-band
+              className="relative isolate overflow-hidden rounded-2xl border border-white/10 bg-white/3 transition-colors duration-500 break-inside-avoid data-lit:border-magenta/60 data-lit:bg-magenta/10"
             >
               {/* Startup Bash wears its own texture, the week's drifting bolts. */}
               {i === 0 && (
@@ -727,7 +747,7 @@ export default async function SponsorReportPage() {
                   {band.orgs.map((name) => {
                     const row = orgRow(name);
                     return (
-                      <li key={name} className="w-28 sm:w-36">
+                      <li key={name} data-org={slugify(name)} className="w-28 sm:w-36">
                         {row?.imageUrl ? (
                           <LogoCell row={{ ...row, imageUrl: sponsorMark(row.name, row.imageUrl) }} size="sm" />
                         ) : (
@@ -764,9 +784,15 @@ export default async function SponsorReportPage() {
         <div className="mt-14 space-y-10 sm:space-y-12">
           {rosterRows.map((row, r) => (
             <div key={r} className="flex justify-center gap-x-6 sm:gap-x-10">
-              {row.map((org) => (
-                <div key={org.id} className="w-1/3 max-w-80">
-                  <LogoCell row={rosterMark(org)} size="fluid" mono />
+              {row.map(({ name, row: org }) => (
+                <div key={name} data-org={slugify(name)} className="w-1/3 max-w-80">
+                  {org ? (
+                    <LogoCell row={rosterMark(org)} size="fluid" mono />
+                  ) : (
+                    <span className="block text-center font-display text-xl font-bold uppercase tracking-wide text-white/85">
+                      {name}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -797,7 +823,7 @@ export default async function SponsorReportPage() {
       </Section>
 
       {/* ─── See you in 2027 ─── */}
-      <section id="thank-you" data-report-pink className="bg-magenta text-black break-inside-avoid">
+      <section id="thank-you" data-report-pink className="scroll-mt-11 bg-magenta text-black break-inside-avoid min-[1400px]:scroll-mt-0">
         <div className="mx-auto w-full max-w-7xl px-6 py-24 text-center lg:py-32">
           <p className="font-mono text-xs uppercase tracking-widest text-black/70">See you in 2027</p>
           <h2 className="mt-6 font-display text-[2.5rem] font-bold uppercase leading-[0.88] tracking-tight sm:text-7xl lg:text-9xl">
@@ -827,6 +853,7 @@ export default async function SponsorReportPage() {
         San Antonio Startup + Tech Week · sasw.co · A Geekdom initiative
       </div>
 
+      <ReportFor />
       <ReportRail />
       <ReportPdfButton />
     </main>

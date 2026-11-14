@@ -8,7 +8,7 @@ import {
   CIRCUIT_PICKS,
   IMPACT,
   INDUSTRIES,
-  LOCAL_MARKS,
+  resolveOrg,
   NPS_SPLIT,
   POWERING,
   PRESS,
@@ -203,16 +203,10 @@ const CHARGE = ["text-magenta", "text-magenta/80", "text-magenta/65", "text-mage
 
 export default async function SponsorReportPrint() {
   const [sponsors, partners] = await Promise.all([safeList(listSponsors()), safeList(listPartners())]);
-  const orgRow = (name: string): LogoEntityRow | undefined => {
-    const row = [...sponsors, ...partners].find((r) => r.name.trim().toLowerCase() === name.toLowerCase());
-    if (row) return row;
-    const local = LOCAL_MARKS[name];
-    return local && { id: name, name, ...local, createdAt: 0 };
-  };
+  const orgRow = (name: string) => resolveOrg(name, [...sponsors, ...partners]);
   // The fourteen on the report's roster graphic, in its rows — see ROSTER_ROWS.
-  const rosterRows = ROSTER_ROWS.map((row) =>
-    row.map(orgRow).filter((r): r is LogoEntityRow => Boolean(r?.imageUrl)),
-  );
+  // Every name keeps its place; one the CMS can't supply is set in type.
+  const rosterRows = ROSTER_ROWS.map((row) => row.map((name) => ({ name, row: orgRow(name) })));
 
   // One designed photo page, not the web page's full wall: 36 photos in
   // print were three straight pages of identical grids — a contact sheet that
@@ -628,25 +622,31 @@ export default async function SponsorReportPrint() {
           <div className="flex flex-1 flex-col justify-center gap-12">
             {rosterRows.map((row, r) => (
               <div key={r} className="flex justify-center gap-x-12">
-                {row.map((org) => (
+                {row.map(({ name, row: org }) =>
                   // One colour, as on the web roster and its source — by
                   // filter here rather than the web's mask: Chrome flattens
                   // a CSS mask into the PDF with a hairline box round it.
-                  <span
-                    key={org.id}
-                    className="relative block h-16 w-50"
-                    style={ROSTER_SCALE[org.name] ? { transform: `scale(${ROSTER_SCALE[org.name]})` } : undefined}
-                  >
-                    <Image
-                      src={ROSTER_MARKS[org.name] ?? sponsorMark(org.name, org.imageUrl)}
-                      alt={org.name}
-                      fill
-                      unoptimized
-                      loading="eager"
-                      className="object-contain brightness-0 invert"
-                    />
-                  </span>
-                ))}
+                  org ? (
+                    <span
+                      key={name}
+                      className="relative block h-16 w-50"
+                      style={ROSTER_SCALE[name] ? { transform: `scale(${ROSTER_SCALE[name]})` } : undefined}
+                    >
+                      <Image
+                        src={ROSTER_MARKS[name] ?? sponsorMark(org.name, org.imageUrl)}
+                        alt={name}
+                        fill
+                        unoptimized
+                        loading="eager"
+                        className="object-contain brightness-0 invert"
+                      />
+                    </span>
+                  ) : (
+                    <span key={name} className="flex h-16 w-50 items-center justify-center font-display text-subheading font-bold uppercase text-white/85">
+                      {name}
+                    </span>
+                  ),
+                )}
               </div>
             ))}
           </div>

@@ -1,3 +1,5 @@
+import type { LogoEntityRow } from "@/lib/admin/cms-types";
+import { RECAP } from "@/lib/recap";
 import type { TrackName } from "@/lib/tracks";
 
 // The 2026 sponsor report, as data. The words are the report's own — it was
@@ -112,14 +114,20 @@ export interface ReportPhoto {
   w: number;
   h: number;
   alt: string;
+  /**
+   * The session or place, where the photo shows it — the homepage recap's
+   * caption for the same file, read from lib/recap.ts rather than retyped.
+   * The gallery and its viewer show it; candid shots carry none.
+   */
+  cap?: string;
 }
 
-const photo = (n: string, w: number, h: number, alt: string): ReportPhoto => ({
-  src: `/home/recap/r${n}.jpg`,
-  w,
-  h,
-  alt,
-});
+const RECAP_CAPTIONS = new Map(RECAP.flatMap((c) => c.items).map((p) => [p.src, p.cap]));
+
+const photo = (n: string, w: number, h: number, alt: string): ReportPhoto => {
+  const src = `/home/recap/r${n}.jpg`;
+  return { src, w, h, alt, cap: RECAP_CAPTIONS.get(src) || undefined };
+};
 
 export const LONG_HAUL = photo("13", 1600, 1069, "The Long Haul panel on the Texas Public Radio main stage, with Nopalera signage beside the stage");
 export const READINESS_GAP = photo("10", 1069, 1600, "Janie Martinez Gonzalez at the lectern for The Readiness Gap");
@@ -477,3 +485,51 @@ export const ROSTER_SCALE: Readonly<Record<string, number>> = {
   // A small, dense mark that needs the room.
   "Downtown West": 1.3,
 };
+
+/**
+ * The CMS document behind each organization the report credits, by id.
+ *
+ * Matched by id rather than name so a rename in the CMS changes nothing here
+ * — matched by name, renaming "PNC Bank" or "H-E-B Supplier Diversity" made
+ * that mark vanish from the report without a word. The name stays the key
+ * (it's what the report's lists say); the id is what's looked up.
+ */
+export const CMS_IDS: Readonly<Record<string, string>> = {
+  "80/20 Foundation": "ldMNCWdYXU0fvYVBFnhA",
+  "Students + Startups": "trXQEi0KmuQvSKGRU5TK",
+  "H-E-B Supplier Diversity": "xXDx8o52dNdLkCUdTkyT",
+  Webhead: "9KE5CcMANjyXHwODmvVn",
+  "Google for Startups": "vnm7sUE5HIsbUtfthrL3",
+  Nopalera: "zVaJmOAnDwYY2Ai4E3hS",
+  "Active Capital": "xid8Ap8zebFoaMpjz8MR",
+  "Downtown West": "JaHHsNFGk9tJubfLeL3R",
+  "LISC San Antonio": "pRJP0Q4Lt8L9lZMLwb4H",
+  "Trinity University": "zJOVjh9wndIp05KE8CvN",
+  "Accelerate South Texas": "MvQ5JVN9cwSXb28JeXxA",
+  Geekdom: "cABxv9UEEj8qfouSE2MG",
+  "Launch SA": "LSQ2Rkg2NFxFNIVeSGVi",
+  "San Antonio Report": "ucRZaxiTCSFQFGuI11HK",
+  "Texas Public Radio": "4WFvl0FqzbJa8cKE2smQ",
+  KSAT: "VRdZIeLI6gaMCtSDl7in",
+};
+
+/**
+ * Resolve an organization the report names to its row: the CMS row by id,
+ * then by name, then the report's own LOCAL_MARKS. A miss is never silent —
+ * it's logged, and the caller sets the name in type where the mark would be,
+ * so a missing logo shows up as a gap anyone reviewing the report can see.
+ */
+export function resolveOrg(
+  name: string,
+  rows: readonly LogoEntityRow[],
+): LogoEntityRow | undefined {
+  const id = CMS_IDS[name];
+  const row =
+    (id && rows.find((r) => r.id === id)) ||
+    rows.find((r) => r.name.trim().toLowerCase() === name.toLowerCase());
+  if (row?.imageUrl) return row;
+  const local = LOCAL_MARKS[name];
+  if (local) return { id: name, name, ...local, createdAt: 0 };
+  console.warn(`[sponsor report] no CMS mark for "${name}"${id ? ` (id ${id})` : ""} — showing the name instead`);
+  return undefined;
+}

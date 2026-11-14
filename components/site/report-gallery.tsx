@@ -72,6 +72,14 @@ export function ReportGallery({ photos }: { photos: ReportPhoto[] }) {
                 sizes="(min-width: 1024px) 420px, (min-width: 640px) 40vw, 60vw"
                 className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
               />
+              {/* The session, on hover or focus — a wall of 36 says nothing
+                  about which room is which until it's asked. On touch, the
+                  viewer carries it. */}
+              {p.cap && (
+                <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/85 to-transparent px-3 pb-2.5 pt-10 text-left font-mono text-[10px] uppercase tracking-widest text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+                  {p.cap}
+                </span>
+              )}
             </button>
           );
         })}
@@ -98,7 +106,7 @@ export function ReportGallery({ photos }: { photos: ReportPhoto[] }) {
       >
         {photo && open !== null && (
           <div className="relative flex h-full w-full touch-pan-y select-none items-center justify-center">
-            <div className="relative h-[82dvh] w-[88vw]">
+            <div className="relative h-[72dvh] sm:h-[76dvh] w-[88vw]">
               <Image
                 key={photo.src}
                 src={photo.src}
@@ -111,9 +119,17 @@ export function ReportGallery({ photos }: { photos: ReportPhoto[] }) {
               />
             </div>
 
-            <p className="absolute bottom-5 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-widest text-white/60">
-              {open + 1} / {photos.length}
-            </p>
+            {/* What's in the frame: the session where the photo shows one,
+                the description always, and where this photo sits in the 36. */}
+            <div className="absolute inset-x-0 bottom-4 mx-auto max-w-2xl px-16 text-center sm:bottom-6">
+              {photo.cap && (
+                <p className="font-mono text-[11px] uppercase tracking-widest text-magenta">{photo.cap}</p>
+              )}
+              <p className="mt-1.5 text-pretty text-sm text-white/75">{photo.alt}</p>
+              <p className="mt-2 font-mono text-[11px] uppercase tracking-widest text-white/45">
+                {open + 1} / {photos.length}
+              </p>
+            </div>
 
             {(
               [

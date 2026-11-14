@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Download } from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
-import { trackEvent } from "@/lib/analytics/track";
+import { trackReport } from "@/lib/analytics/track";
 import { REPORT_PDF } from "@/lib/sponsor-report";
 import { cn } from "@/lib/utils";
 
@@ -108,7 +108,7 @@ export function ReportPdfButton() {
       ref={ref}
       onClick={() => {
         const sponsor = new URLSearchParams(window.location.search).get("for") ?? undefined;
-        trackEvent("report_download", { sponsor });
+        trackReport("report_download", { sponsor });
       }}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}

@@ -26,6 +26,19 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "firebasestorage.googleapis.com" },
     ],
   },
+  async headers() {
+    return [
+      {
+        // The sponsor report's PDF is unlisted like the page it comes from,
+        // but a static file can't carry the page's noindex meta tag — once
+        // its link is shared, a crawler could index the survey and opt-in
+        // figures. The header does what the tag can't. Headers apply before
+        // /public, so this reaches the file.
+        source: "/SASTW-2026-Sponsor-Report.pdf",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
+  },
   async redirects() {
     // `permanent: true` is a 308, which Google treats as a 301 for ranking
     // but which also preserves the request method.

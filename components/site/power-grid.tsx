@@ -39,7 +39,9 @@ const balanceFor = (w: number, h: number) =>
  * gives every org equal standing — the sponsor report's roster, which its
  * source sets in one colour. Turning to magenta rather than back to the
  * brand's colours keeps the hover legible: several of those (Launch SA's
- * navy, the dark type in others) disappear on black.
+ * navy, the dark type in others) disappear on black. Inside a `data-lit`
+ * element it stays magenta: the sponsor report lights a tagged sponsor's
+ * own mark that way (see ReportFor).
  */
 export function LogoCell({
   row,
@@ -102,7 +104,7 @@ export function LogoCell({
             <span
               role="img"
               aria-label={row.name}
-              className="absolute inset-0 bg-current text-white transition-colors duration-300 group-hover:text-magenta group-focus-visible:text-magenta"
+              className="absolute inset-0 bg-current text-white transition-colors duration-300 group-hover:text-magenta group-focus-visible:text-magenta in-data-lit:text-magenta"
               style={maskOf(row.imageUrl)}
             />
           ) : (

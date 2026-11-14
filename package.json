@@ -8,10 +8,11 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node tools/sponsor-report/check.mjs && next build",
     "start": "next start",
     "lint": "eslint",
-    "report:pdf": "node tools/sponsor-report/pdf.mjs"
+    "report:pdf": "node tools/sponsor-report/pdf.mjs",
+    "report:check": "node tools/sponsor-report/check.mjs"
   },
   "dependencies": {
     "@google-analytics/data": "^6.1.0",

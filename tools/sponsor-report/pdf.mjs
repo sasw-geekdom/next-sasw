@@ -25,9 +25,10 @@
  * or point PLAYWRIGHT_MODULE at an install elsewhere (its index.mjs).
  */
 
-import { mkdir, stat } from "node:fs/promises";
+import { mkdir, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { RECORD, sourceHash } from "./source.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = join(HERE, "..", "..", "public", "SASTW-2026-Sponsor-Report.pdf");
@@ -87,6 +88,11 @@ try {
 
   const { size } = await stat(OUT);
   console.log(`saved ${OUT} (${(size / 1024 / 1024).toFixed(1)} MB)`);
+
+  // What this PDF was built from, so `pnpm report:check` (and the build) can
+  // tell when the report has moved on without it.
+  const source = await sourceHash();
+  await writeFile(RECORD, JSON.stringify({ ...source, savedAt: new Date().toISOString() }, null, 2) + "\n");
 } finally {
   await browser.close();
 }
